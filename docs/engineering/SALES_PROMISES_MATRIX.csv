@@ -1,0 +1,7 @@
+claim_id,claim_or_capability,source,implementation_status,permitted_wording_now,evidence_required_before_claiming_available,approval_dependency
+S-001,Mova is an app for independent hairstylists,Spec mission,Pre-build; P00 in progress,Mova is in development for independent hairstylists.,Working product and reviewed public copy,None recorded
+S-002,Public showcase and booking,Spec §§1-2,Not implemented,Planned capability only; do not imply available.,Passing staging journey and owner review,A-13 for public rendering
+S-003,Payments and pay links,"Spec §§1,7",Not implemented,Planned capability only; no live payment claims.,Sandbox and staging evidence; approved topology,"A-02, A-16"
+S-004,AI Revenue Center and AI Concierge,"Spec §§1,8",Not implemented,Planned capability only; no active-AI claims.,Eval and staging evidence; all hard rules pass,"A-04, A-21, A-25"
+S-005,Bilingual English/Spanish experience,"Spec §§1,9",Not implemented,Planned capability only; no availability claim.,Reviewed en-US/es-US critical flows,A-12
+S-006,Pricing or subscription plans,"Spec §§0.3,12",Proposed and not approved,Do not quote as final pricing.,Approved commercial matrix,"A-01, A-26"

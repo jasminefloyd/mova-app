@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Mova — Reports · reference</title>
+<!-- REFERENCE ONLY. Exported from the "Mova App Screens" canvas. Build with the app's components; never copy this markup or its sample data into the app. -->
+<style>@font-face{font-family:'Manrope';font-weight:600;font-display:block;src:url('../../fonts/manrope-latin-600-normal.woff2') format('woff2');}@font-face{font-family:'Manrope';font-weight:700;font-display:block;src:url('../../fonts/manrope-latin-700-normal.woff2') format('woff2');}@font-face{font-family:'Manrope';font-weight:800;font-display:block;src:url('../../fonts/manrope-latin-800-normal.woff2') format('woff2');}@font-face{font-family:'DM Sans';font-weight:400;font-display:block;src:url('../../fonts/dm-sans-latin-400-normal.woff2') format('woff2');}@font-face{font-family:'DM Sans';font-weight:500;font-display:block;src:url('../../fonts/dm-sans-latin-500-normal.woff2') format('woff2');}@font-face{font-family:'DM Sans';font-weight:600;font-display:block;src:url('../../fonts/dm-sans-latin-600-normal.woff2') format('woff2');}@font-face{font-family:'DM Sans';font-weight:700;font-display:block;src:url('../../fonts/dm-sans-latin-700-normal.woff2') format('woff2');}
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#18392F}a:hover{color:#264E3E}
+html,body{margin:0;background:#F7F5EF}</style>
+</head>
+<body>
+
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F7F5EF; color: #18392F; font-family: 'DM Sans', sans-serif;">
+  <header style="padding: 18px 20px 0; display: flex; flex-direction: column; gap: 12px;">
+    <h1 style="margin: 0; font-family: Manrope, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.4px;">Reports</h1>
+    <div role="group" aria-label="Time period" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; background: #EBEEE8; border-radius: 20px; padding: 4px;">
+      <button type="button" aria-pressed="false" style="height: 34px; border: 0; border-radius: 17px; background: transparent; color: #18392F; font: 600 13px 'DM Sans', sans-serif;">7 days</button>
+      <button type="button" aria-pressed="true" style="height: 34px; border: 0; border-radius: 17px; background: #18392F; color: #F7F5EF; font: 700 13px 'DM Sans', sans-serif;">30 days</button>
+      <button type="button" aria-pressed="false" style="height: 34px; border: 0; border-radius: 17px; background: transparent; color: #18392F; font: 600 13px 'DM Sans', sans-serif;">90 days</button>
+    </div>
+  </header>
+
+  <div style="padding: 12px 20px 0; display: flex; flex-direction: column; gap: 10px;">
+    <a href="17-money.html" style="display: flex; gap: 14px; align-items: flex-end; padding: 14px 16px; border-radius: 20px; background: #FFFFFF; border: 1px solid #DCE1D9; text-decoration: none; color: #18392F;">
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 3px;">
+        <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #4F5F57;">Revenue</span>
+        <span style="font-family: Manrope, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.4px;">$6,720</span>
+        <span style="font-size: 12px; color: #4F5F57;">Service value · <strong style="color: #264E3E;">↑ 8%</strong> vs previous 30 days</span>
+      </span>
+      <svg role="img" aria-label="Weekly revenue: $1,420, $1,780, $1,560, $1,960" width="112" height="64" viewBox="0 0 112 64">
+        <line x1="0" y1="63.5" x2="112" y2="63.5" stroke="#DCE1D9" stroke-width="1"></line>
+        <path d="M4 63V22a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v41Z" fill="#8BA990"></path>
+        <path d="M32 63V9a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v54Z" fill="#8BA990"></path>
+        <path d="M60 63V17a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v46Z" fill="#8BA990"></path>
+        <path d="M88 63V4a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v59Z" fill="#18392F"></path>
+      </svg>
+    </a>
+
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+      <section aria-label="Bookings" style="padding: 14px; border-radius: 20px; background: #FFFFFF; border: 1px solid #DCE1D9; display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #4F5F57;">Bookings</span>
+        <span style="font-family: Manrope, sans-serif; font-weight: 800; font-size: 24px;">43</span>
+        <span style="font-size: 12px; line-height: 1.5; color: #3F4D46;">64% rebooked<br>$156 avg. ticket<br>2 no-shows</span>
+      </section>
+      <a href="38-reputation.html" aria-label="Reputation: 4.9 stars from 38 reviews" style="padding: 14px; border-radius: 20px; background: #18392F; color: #F7F5EF; display: flex; flex-direction: column; gap: 6px; text-decoration: none;">
+        <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #C9E6D4;">Reputation</span>
+        <span style="font-family: Manrope, sans-serif; font-weight: 800; font-size: 24px;">4.9 <span style="color: #E7C3AA;">★</span></span>
+        <span style="font-size: 12px; line-height: 1.5; color: #C9E6D4;">38 reviews · 6 new<br>Mova 24 · Google 14<br>1 waiting for a reply</span>
+      </a>
+    </div>
+
+    <section aria-label="Profile traffic" style="padding: 14px 16px; border-radius: 20px; background: #FFFFFF; border: 1px solid #DCE1D9; display: flex; flex-direction: column; gap: 10px;">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #4F5F57;">Profile traffic</span>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+        <span style="display: flex; flex-direction: column;"><span style="font-family: Manrope, sans-serif; font-weight: 800; font-size: 20px;">1,240</span><span style="font-size: 12px; color: #4F5F57;">Page views</span></span>
+        <span style="display: flex; flex-direction: column;"><span style="font-family: Manrope, sans-serif; font-weight: 800; font-size: 20px;">186</span><span style="font-size: 12px; color: #4F5F57;">QR scans</span></span>
+        <span style="display: flex; flex-direction: column;"><span style="font-family: Manrope, sans-serif; font-weight: 800; font-size: 20px;">4.7%</span><span style="font-size: 12px; color: #4F5F57;">Views → booked</span></span>
+      </div>
+      <span style="font-size: 12px; color: #3F4D46;">Top sources: Instagram 52% · QR code 15% · Google 14%</span>
+    </section>
+
+    <section aria-label="Marketing" style="padding: 14px 16px; border-radius: 20px; background: #FFFFFF; border: 1px solid #DCE1D9; display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #4F5F57;">Marketing</span>
+      <a href="31-fill-open-slots.html" style="display: flex; justify-content: space-between; font-size: 14px; text-decoration: none;"><span>Seat filler · 3 slots filled</span><strong>$450</strong></a>
+      <a href="32-rebooking-pipeline.html" style="display: flex; justify-content: space-between; font-size: 14px; text-decoration: none;"><span>Rebooking reminders · 2 of 6 booked</span><strong>$215</strong></a>
+      <span style="display: flex; justify-content: space-between; font-size: 14px;"><span>Social posts shared</span><strong>3</strong></span>
+    </section>
+  </div>
+
+  <nav aria-label="Main" style="position: absolute; left: 0; right: 0; bottom: 0; height: 82px; background: #FFFFFF; border-top: 1px solid #E2E5DE; display: flex; padding: 8px 6px 22px;">
+    <a href="07-home.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: #55655D; font-size: 11px; font-weight: 500;"><span style="display: flex; align-items: center; justify-content: center; width: 52px; height: 30px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg></span>Home</a>
+    <a href="08-calendar.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: #55655D; font-size: 11px; font-weight: 500;"><span style="display: flex; align-items: center; justify-content: center; width: 52px; height: 30px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg></span>Calendar</a>
+    <a href="11-clients.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: #55655D; font-size: 11px; font-weight: 500;"><span style="display: flex; align-items: center; justify-content: center; width: 52px; height: 30px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.8-3.6 3.3-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.6 2.5 3 5.2"></path></svg></span>Clients</a>
+    <a href="14-ai-revenue-center.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: #55655D; font-size: 11px; font-weight: 500;"><span style="display: flex; align-items: center; justify-content: center; width: 52px; height: 30px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg></span>AI Revenue</a>
+    <a href="37-reports.html" aria-current="page" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: #18392F; font-size: 11px; font-weight: 700;"><span style="display: flex; align-items: center; justify-content: center; width: 52px; height: 30px; border-radius: 15px; background: #C9E6D4;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21h16M7 17v-6M12 17V7M17 17v-9"></path></svg></span>Reports</a>
+  </nav>
+</div>
+</body>
+</html>

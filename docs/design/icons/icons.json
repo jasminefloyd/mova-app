@@ -1,0 +1,286 @@
+[
+ {
+  "file": "icon-01.svg",
+  "used_on": [
+   "02-artist-profile",
+   "02b-profile-photo",
+   "03-services-deposits",
+   "04-work-location",
+   "05-payments",
+   "06-preview-publish",
+   "08-calendar",
+   "09-appointment-detail",
+   "10-booking-request",
+   "12-client-profile-notes",
+   "12b-client-visits",
+   "12c-visit-notes",
+   "17-money",
+   "19-locations-hours",
+   "20-calendar-sync",
+   "22-plan",
+   "25-choose-date-time",
+   "26-details-deposit",
+   "31-fill-open-slots",
+   "31b-review-slot-campaign",
+   "31c-live-campaign",
+   "32-rebooking-pipeline",
+   "33-win-back",
+   "34-autopilot-rules",
+   "35-autopilot-messages",
+   "36-autopilot-activity",
+   "38-reputation",
+   "40-concierge-inbox",
+   "41-conversation-thread",
+   "42-quote-request",
+   "43-concierge-setup"
+  ]
+ },
+ {
+  "file": "icon-02.svg",
+  "used_on": [
+   "09-appointment-detail"
+  ]
+ },
+ {
+  "file": "icon-03.svg",
+  "used_on": [
+   "02-artist-profile",
+   "02b-profile-photo",
+   "06-preview-publish",
+   "09-appointment-detail",
+   "20-calendar-sync",
+   "27-sign-in",
+   "28-booking-status",
+   "31c-live-campaign",
+   "35-autopilot-messages",
+   "36-autopilot-activity"
+  ]
+ },
+ {
+  "file": "icon-04.svg",
+  "used_on": [
+   "07-home",
+   "08-calendar",
+   "09-appointment-detail",
+   "14-ai-revenue-center",
+   "16-settings",
+   "26-details-deposit",
+   "29-client-profile-card",
+   "34-autopilot-rules",
+   "40-concierge-inbox"
+  ]
+ },
+ {
+  "file": "icon-05.svg",
+  "used_on": [
+   "36-autopilot-activity",
+   "41-conversation-thread"
+  ]
+ },
+ {
+  "file": "icon-06.svg",
+  "used_on": [
+   "13-client-import",
+   "16-settings",
+   "18-get-paid",
+   "21-show-my-qr",
+   "27-sign-in",
+   "36-autopilot-activity",
+   "44-running-late"
+  ]
+ },
+ {
+  "file": "icon-07.svg",
+  "used_on": [
+   "04-work-location",
+   "07-home",
+   "10-booking-request",
+   "28-booking-status",
+   "31d-claim-spot",
+   "36-autopilot-activity",
+   "41-conversation-thread"
+  ]
+ },
+ {
+  "file": "icon-08.svg",
+  "used_on": [
+   "36-autopilot-activity"
+  ]
+ },
+ {
+  "file": "icon-09.svg",
+  "used_on": [
+   "20-calendar-sync"
+  ]
+ },
+ {
+  "file": "icon-10.svg",
+  "used_on": [
+   "12-client-profile-notes",
+   "20-calendar-sync",
+   "33-win-back",
+   "43-concierge-setup"
+  ]
+ },
+ {
+  "file": "icon-11.svg",
+  "used_on": [
+   "05-payments",
+   "08-calendar",
+   "10-booking-request",
+   "13-client-import",
+   "44-running-late"
+  ]
+ },
+ {
+  "file": "icon-12.svg",
+  "used_on": [
+   "02-artist-profile",
+   "03-services-deposits",
+   "04-work-location",
+   "08-calendar",
+   "11-clients",
+   "12-client-profile-notes",
+   "12c-visit-notes",
+   "19-locations-hours"
+  ]
+ },
+ {
+  "file": "icon-13.svg",
+  "used_on": [
+   "07-home",
+   "08-calendar",
+   "11-clients",
+   "14-ai-revenue-center",
+   "37-reports"
+  ]
+ },
+ {
+  "file": "icon-14.svg",
+  "used_on": [
+   "07-home",
+   "08-calendar",
+   "11-clients",
+   "14-ai-revenue-center",
+   "37-reports"
+  ]
+ },
+ {
+  "file": "icon-15.svg",
+  "used_on": [
+   "07-home",
+   "08-calendar",
+   "11-clients",
+   "14-ai-revenue-center",
+   "37-reports"
+  ]
+ },
+ {
+  "file": "icon-16.svg",
+  "used_on": [
+   "07-home",
+   "08-calendar",
+   "11-clients",
+   "14-ai-revenue-center",
+   "37-reports",
+   "41-conversation-thread",
+   "42-quote-request"
+  ]
+ },
+ {
+  "file": "icon-17.svg",
+  "used_on": [
+   "07-home",
+   "08-calendar",
+   "11-clients",
+   "14-ai-revenue-center",
+   "37-reports"
+  ]
+ },
+ {
+  "file": "icon-18.svg",
+  "used_on": [
+   "12-client-profile-notes"
+  ]
+ },
+ {
+  "file": "icon-19.svg",
+  "used_on": [
+   "12b-client-visits"
+  ]
+ },
+ {
+  "file": "icon-20.svg",
+  "used_on": [
+   "11-clients"
+  ]
+ },
+ {
+  "file": "icon-21.svg",
+  "used_on": [
+   "07-home",
+   "40-concierge-inbox"
+  ]
+ },
+ {
+  "file": "icon-22.svg",
+  "used_on": [
+   "40-concierge-inbox"
+  ]
+ },
+ {
+  "file": "icon-23.svg",
+  "used_on": [
+   "14-ai-revenue-center"
+  ]
+ },
+ {
+  "file": "icon-24.svg",
+  "used_on": [
+   "17-money"
+  ]
+ },
+ {
+  "file": "icon-25.svg",
+  "used_on": [
+   "10-booking-request",
+   "25-choose-date-time"
+  ]
+ },
+ {
+  "file": "icon-26.svg",
+  "used_on": [
+   "21-show-my-qr",
+   "23-showcase-looks",
+   "24-showcase-services",
+   "31b-review-slot-campaign"
+  ]
+ },
+ {
+  "file": "icon-27.svg",
+  "used_on": [
+   "21-show-my-qr"
+  ]
+ },
+ {
+  "file": "icon-28.svg",
+  "used_on": [
+   "26-details-deposit",
+   "30-qr-scanned"
+  ]
+ },
+ {
+  "file": "icon-29.svg",
+  "used_on": [
+   "45-client-chat-spanish"
+  ]
+ },
+ {
+  "file": "icon-30.svg",
+  "used_on": [
+   "23-showcase-looks",
+   "24-showcase-services",
+   "30-qr-scanned"
+  ]
+ }
+]

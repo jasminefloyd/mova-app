@@ -1,0 +1,60 @@
+# AGENTS.md: operating rules for AI engineers (Codex and humans)
+
+You are implementing **Mova**, a mobile-first web app (PWA) that gives independent hairstylists a business that moves with them. Brand: `mova.`, *Your business moves with you.*
+
+## Read first, every session
+1. `docs/product/ENGINEERING_SPEC.md` (v2.0). **The single engineering source of truth.**
+2. `docs/engineering/IMPLEMENTATION_PLAN.md`: phases P00–P18 and checklists (extract of spec §13 and §16).
+3. `docs/design/README.md`, `docs/design/SCREEN_MAP.md` and `docs/design/COMPONENTS.md`: how the app must look.
+4. `docs/qa/TEST_STRATEGY.md` and `docs/qa/TEST_CASES.csv`: the tests each phase must pass.
+5. `docs/engineering/PHASE_STATUS.md`, `REQUIREMENTS_MATRIX.csv`, `DECISION_LOG.md` and open `CHANGE_REQUESTS.md` (created in P00). Confirm the current phase and approvals.
+
+## Stack
+- **apps/web:** React + TypeScript (strict) + Vite PWA on Vercel; React Router, TanStack Query, Zod, Tailwind mapped to design tokens, react-i18next (ADR-0002).
+- **Supabase:** Postgres with RLS, Auth (artist and client roles), Storage, Edge Functions (Deno), scheduled triggers, durable jobs.
+- **Database naming:** every project-created Supabase database/schema object must have a name beginning with `mova_`, including schemas, tables, database functions, views, indexes, triggers, types, sequences, policies and constraints. This owner requirement takes precedence over unprefixed object names in Engineering Spec v2.0; preserve specified behavior while applying the prefix. `docs/engineering/CHANGE_REQUESTS.md` CR-001 tracks the required versioned spec reconciliation.
+- **apps/mobile is reserved for V1.1** (Expo shell for Tap to Pay, approval A-17). Do not add code there in V1.
+- Pin Node/pnpm and all dependency versions in P00/P01.
+
+## Operating protocol (spec §13.1)
+1. Work one phase and one vertical slice at a time (UI → validated function → DB → events → tests). Never start a later phase to hide a missing dependency.
+2. Before edits: list the files you intend to touch, requirement IDs, tests, risks and blockers. After edits: list the actual files, commands and results, screenshots, deviations and next action.
+3. `DONE` requires all of: passing tests, staging proof, traceability and reviewer acceptance. `BLOCKED` is never `DONE`. No `test.skip` on critical paths.
+4. Mocks only in tests/sandbox, visibly labelled. No fake data in production UI. No simulated provider success.
+5. No secrets in Git. The service-role key never goes in the browser. RLS on every tenant table, with negative tests.
+6. No production deploy, live payments, live messaging, AI enablement or business-rule change without a recorded approval (§0.5). Approval-dependent features ship behind flags that default **OFF**.
+7. After a context reset, recover state from committed docs. End every session by updating `PHASE_STATUS.md`.
+8. Ambiguity → write a decision request with a recommended safe default. Do not invent behaviour, prices, provider capabilities or approvals.
+9. Re-run all previously accepted critical-path tests at every phase.
+10. **Match the design canvas.** If a screen needs a design listed in `docs/design/SCREEN_MAP.md` → "Screens with no artboard yet", stop and request it.
+
+## Design rules (from docs/design/README.md)
+- Build the components in `docs/design/COMPONENTS.md` first (P02). Screens are composed **only** from `apps/web/src/components/` and styled **only** with tokens from `packages/design-tokens` (source: `docs/design/tokens/tokens.json`). No raw hex values in feature code.
+- Use `docs/design/screens/png/*.png` as the visual target. `screens/html/` is a reference for spacing and copy and must **never be copied** into the app.
+- Canvas names, prices, times and the `[DOMAIN]` placeholder are **illustrative sample data**. Never hardcode them.
+- Every screen also needs loading, empty, error + retry, offline, permission-denied and validation states; 320–430 px; en-US + es-US; 44 px targets; status never shown by colour alone.
+- Screen 15 (Outreach) is **TABLED**. Do not build it.
+
+## Repository map
+```text
+apps/web/            the app (artist, onboarding, public/client, marketing)
+apps/mobile/         reserved for V1.1 native shell (empty)
+packages/contracts/  Zod DTOs, enums, errors, analytics schemas
+packages/domain/     pure business rules (money, availability, consent, …)
+packages/design-tokens/  tokens → CSS variables + Tailwind theme
+packages/config/     TS / lint presets
+supabase/            migrations, functions (one folder per function), pgTAP tests, seed
+tests/               unit, integration, db, contracts, e2e, security, a11y, visual, performance, ai-evals
+scripts/             phase gate, locale check, SEO, AI evals; design export tools
+docs/product/        ENGINEERING_SPEC.md (contract), MASTER_BLUEPRINT.md, archive/, reference/
+docs/engineering/    IMPLEMENTATION_PLAN.md, BASELINE_MANIFEST.md, + P00 control files
+docs/design/         screens, tokens, fonts, icons, components, screen map
+docs/qa/             TEST_STRATEGY.md, TEST_CASES.csv (539 cases)
+docs/{architecture,decisions,operations,security,runbooks}/
+```
+
+## First task
+Follow spec §16 "First instruction to Codex" (repeated at the end of `docs/engineering/IMPLEMENTATION_PLAN.md`):
+1. Do P00.
+2. Then do P01 and P02 only.
+3. Stop at gate G2a for the product owner's design approval.

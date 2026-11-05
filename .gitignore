@@ -1,0 +1,23 @@
+node_modules/
+dist/
+build/
+.vercel/
+.turbo/
+coverage/
+*.log
+.DS_Store
+
+# env and secrets
+.env
+.env.*
+!.env.example
+
+# supabase local state
+supabase/.temp/
+supabase/.branches/
+
+# test output
+playwright-report/
+test-results/
+tests/visual/**/__diff__/
+tests/ai-evals/**/runs/

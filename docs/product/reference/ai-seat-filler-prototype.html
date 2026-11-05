@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Seat Filler — Slick MVP Prototype</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sp:#6B2FD9;--sp-l:#EDE9FB;--sp-m:#9B6FE8;--sp-d:#3C3489;
+  --st:#1D9E75;--st-l:#E1F5EE;--st-m:#5DCAA5;
+  --sa:#BA7517;--sa-l:#FAEEDA;
+  --sr:#A32D2D;--sr-l:#FCEBEB;--sr-m:#F09595;
+  --sc:#D85A30;--sc-l:#FAECE7;
+  --bg:#F4F1F8;--card:#FFFFFF;
+  --border:rgba(0,0,0,0.08);--border-med:rgba(0,0,0,0.13);
+  --text:#1A1A2E;--text-sec:#6B6880;--text-ter:#A09DB5;
+  --r:14px;--rs:9px;
+  --font:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+html,body{height:100%;background:var(--bg);font-family:var(--font);color:var(--text);-webkit-font-smoothing:antialiased}
+
+/* ── LAYOUT ── */
+.app{display:flex;flex-direction:column;min-height:100vh;align-items:center;padding:16px 12px 40px;gap:12px}
+
+/* ── TOP CHROME ── */
+.chrome{width:100%;max-width:960px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border-radius:var(--r);border:.5px solid var(--border);padding:10px 14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--sp)}
+.logo-ic{width:28px;height:28px;border-radius:8px;background:var(--sp);display:flex;align-items:center;justify-content:center}
+.logo-ic svg{stroke:#fff}
+.platform-sw{display:flex;background:#F4F1F8;border-radius:8px;padding:2px;border:.5px solid var(--border)}
+.psw{border:none;background:none;font-size:11px;font-family:var(--font);padding:5px 14px;border-radius:6px;cursor:pointer;color:var(--text-sec);font-weight:400;transition:all .15s}
+.psw.on{background:var(--card);color:var(--text);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.nav-btns{display:flex;gap:6px;flex-wrap:wrap}
+.nb{font-size:11px;font-weight:500;padding:6px 12px;border-radius:20px;border:none;cursor:pointer;transition:all .15s;font-family:var(--font)}
+.nb.active{background:var(--sp);color:#fff}
+.nb:not(.active){background:var(--sp-l);color:var(--sp)}
+.nb:not(.active):hover{background:var(--sp-m);color:#fff}
+
+/* ── FRAME WRAP ── */
+.frame-wrap{display:flex;justify-content:center;width:100%;max-width:960px}
+
+/* ── MOBILE DEVICE ── */
+.dev-mobile{width:390px;border-radius:44px;border:9px solid #1A1A2E;overflow:hidden;display:flex;flex-direction:column;background:var(--card);box-shadow:0 24px 64px rgba(107,47,217,.18),0 4px 16px rgba(0,0,0,.12);min-height:780px}
+.status-bar{background:var(--sp);padding:12px 20px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.status-time{font-size:13px;font-weight:700;color:#fff}
+.status-icons{display:flex;align-items:center;gap:6px}
+.status-icons svg{stroke:#fff}
+.slk-hdr{background:var(--sp);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.slk-hdr h1{font-size:17px;font-weight:700;flex:1;letter-spacing:-.3px}
+.slk-back{background:rgba(255,255,255,.15);border:none;color:#fff;cursor:pointer;padding:6px 8px;border-radius:10px;display:flex;align-items:center;font-family:var(--font)}
+.slk-back:hover{background:rgba(255,255,255,.25)}
+.slk-pill{background:rgba(255,255,255,.2);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap}
+
+/* ── SCREEN SYSTEM ── */
+.scr{display:none;flex-direction:column;flex:1;overflow:hidden}
+.scr.on{display:flex}
+.scroll-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ── BOTTOM NAV ── */
+.mob-nav{display:flex;border-top:.5px solid var(--border);background:var(--card);flex-shrink:0;padding-bottom:8px}
+.mn-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 4px;gap:3px;cursor:pointer;font-size:10px;font-weight:500;color:var(--text-ter);transition:color .15s}
+.mn-item.on{color:var(--sp)}
+.mn-dot{width:5px;height:5px;border-radius:50%;background:var(--sr);margin-top:2px}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap}
+.b-ready{background:var(--sp-l);color:var(--sp-d)}
+.b-filled{background:var(--st-l);color:#085041}
+.b-exp{background:#F4F1F8;color:var(--text-sec)}
+.b-mvp{background:var(--st-l);color:#085041}
+.b-ff{background:var(--sa-l);color:#412402}
+.b-cancel{background:var(--sr-l);color:var(--sr)}
+.b-pending{background:#FFF3E0;color:#412402}
+
+/* ══════════════════════
+   HUB / OVERVIEW
+══════════════════════ */
+.hub-body{padding:16px;display:flex;flex-direction:column;gap:14px}
+.hub-label{font-size:11px;font-weight:700;color:var(--text-ter);text-transform:uppercase;letter-spacing:.07em}
+.hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hub-card{background:var(--card);border:.5px solid var(--border-med);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:8px}
+.hub-card:hover{border-color:var(--sp);transform:translateY(-2px);box-shadow:0 6px 20px rgba(107,47,217,.12)}
+.hc-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.hc-t{font-size:13px;font-weight:600;color:var(--text)}
+.hc-s{font-size:11px;color:var(--text-sec);line-height:1.4}
+.scenario-card{background:var(--sp);color:#fff;border-radius:var(--r);padding:16px;cursor:pointer;transition:opacity .15s}
+.scenario-card:hover{opacity:.88}
+.sc-label{font-size:11px;font-weight:700;opacity:.7;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.sc-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.sc-sub{font-size:12px;opacity:.75}
+
+/* ══════════════════════
+   DIARY
+══════════════════════ */
+.diary-date-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--sp);border-top:.5px solid rgba(255,255,255,.12);flex-shrink:0}
+.diary-date-bar button{background:rgba(255,255,255,.15);border:none;color:#fff;padding:5px 10px;border-radius:8px;cursor:pointer;font-size:16px;line-height:1}
+.diary-date-str{font-size:15px;font-weight:700;color:#fff}
+.diary-staff-row{display:flex;flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border)}
+.diary-time-gutter{width:48px;flex-shrink:0;border-right:1px solid var(--border)}
+.diary-staff-cols{display:flex;flex:1}
+.staff-col-hdr{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px;border-right:1px solid var(--border);min-width:0}
+.staff-col-hdr:last-child{border-right:none}
+.staff-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;margin-bottom:5px;flex-shrink:0}
+.staff-name{font-size:11px;font-weight:600;color:var(--text);text-align:center}
+.staff-role{font-size:9px;color:var(--text-ter);text-align:center;margin-top:1px}
+.diary-grid-wrap{display:flex;flex:1;overflow-y:auto}
+.time-col{width:48px;flex-shrink:0;border-right:1px solid var(--border)}
+.time-slot{height:64px;display:flex;align-items:flex-start;justify-content:flex-end;padding:5px 8px 0 0;font-size:10px;font-weight:500;color:var(--text-ter);border-bottom:1px solid var(--border)}
+.appt-cols{display:flex;flex:1;position:relative}
+.appt-col{flex:1;border-right:1px solid var(--border);position:relative;min-width:0}
+.appt-col:last-child{border-right:none}
+.col-line{height:64px;border-bottom:1px solid var(--border)}
+.appt-block{position:absolute;left:3px;right:3px;border-radius:8px;padding:5px 7px;cursor:pointer;overflow:hidden;transition:opacity .2s,transform .15s;border-left:3.5px solid}
+.appt-block:hover{opacity:.88;transform:scale(1.01)}
+.appt-block.pink{background:#FBEAF0;border-color:#D4457A}
+.appt-block.purple{background:#EEEEFF;border-color:#7B61E8}
+.appt-block.teal{background:var(--st-l);border-color:var(--st)}
+.appt-block.blue{background:#EBF1FD;border-color:#5B8DEF}
+.appt-block.amber{background:var(--sa-l);border-color:var(--sa)}
+.appt-block.gap{background:#FFEDE8;border-color:var(--sc);border-style:dashed;cursor:pointer}
+.appt-t{font-size:11px;font-weight:700;color:var(--text);line-height:1.3}
+.appt-s{font-size:10px;color:var(--text-sec);line-height:1.3;margin-top:1px}
+.gap-label{font-size:10px;font-weight:700;color:var(--sc)}
+.now-line{position:absolute;left:0;right:0;height:2px;background:#E24B4A;z-index:10;pointer-events:none}
+.now-dot{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:#E24B4A}
+
+/* ══════════════════════
+   APPOINTMENT SHEET
+══════════════════════ */
+.appt-sheet-body{padding:20px 16px;display:flex;flex-direction:column;gap:14px}
+.appt-card{background:#FAF8FF;border:1px solid var(--sp-l);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px}
+.appt-card-name{font-size:18px;font-weight:700;color:var(--text)}
+.appt-card-svc{font-size:14px;color:var(--text-sec)}
+.appt-meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.appt-meta-chip{display:flex;align-items:center;gap:5px;background:var(--card);border:.5px solid var(--border-med);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:500;color:var(--text-sec)}
+.sheet-section-label{font-size:11px;font-weight:700;color:var(--text-ter);text-transform:uppercase;letter-spacing:.07em}
+.sheet-actions{display:flex;flex-direction:column;gap:10px}
+.sa-row{display:flex;gap:10px}
+.sa-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 10px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font);transition:opacity .15s,transform .1s}
+.sa-btn:hover{opacity:.88}
+.sa-btn:active{transform:scale(.98)}
+.sa-cancel{background:var(--sr-l);color:var(--sr)}
+.sa-checkout{background:var(--sp);color:#fff}
+.sa-edit{background:#F4F1F8;color:var(--text)}
+.sa-close{background:var(--card);color:var(--text-sec);border:1px solid var(--border-med)!important;width:100%}
+.inline-alert{background:var(--sp-l);border:1px solid var(--sp-m);border-radius:var(--rs);padding:12px 14px;font-size:13px;color:var(--sp-d);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+
+/* ══════════════════════
+   TRIGGER / PIPELINE
+══════════════════════ */
+.trigger-wrap{flex:1;display:flex;flex-direction:column;align-items:center;padding:24px 20px 20px;gap:16px;background:var(--card)}
+.trig-icon-ring{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--sp-l);font-size:32px;transition:background .3s}
+.trig-icon-ring.done{background:var(--st-l)}
+.trig-heading{font-size:19px;font-weight:700;color:var(--text);text-align:center;line-height:1.3}
+.trig-sub{font-size:13px;color:var(--text-sec);text-align:center;line-height:1.5}
+.trig-prog-wrap{width:100%;background:#EEE;border-radius:20px;height:5px;overflow:hidden}
+.trig-prog-bar{height:100%;border-radius:20px;background:var(--sp);transition:width .12s linear}
+.trig-steps{width:100%;display:flex;flex-direction:column;gap:8px}
+.trig-step{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--rs);border:1px solid var(--border);background:var(--card);transition:all .25s}
+.trig-step.done-step{border-color:var(--st);background:var(--st-l)}
+.trig-step.active-step{border-color:var(--sp);background:var(--sp-l)}
+.trig-step-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;background:#EEE;color:var(--text-ter)}
+.done-step .trig-step-ico{background:var(--st);color:#fff}
+.active-step .trig-step-ico{background:var(--sp);color:#fff}
+.trig-step-text{font-size:12px;font-weight:500;color:var(--text-sec)}
+.done-step .trig-step-text{color:#085041}
+.active-step .trig-step-text{color:var(--sp-d);font-weight:600}
+.trig-cta{background:var(--sp);color:#fff;border:none;border-radius:var(--rs);padding:14px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s}
+.trig-cta:hover{opacity:.88}
+.trig-cta:disabled{background:#C8C2D8;cursor:not-allowed;opacity:1}
+
+/* ══════════════════════
+   ACTIVITY FEED
+══════════════════════ */
+.feed-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+.feed-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:border-color .15s;position:relative;overflow:hidden}
+.feed-card.urgent{border-color:var(--sp);border-width:1.5px}
+.feed-card.urgent::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--sp)}
+.feed-card.urgent .fc-content{padding-left:8px}
+.feed-card.success{border-color:var(--st)}
+.feed-card.success::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--st)}
+.feed-card.success .fc-content{padding-left:8px}
+.fc-content{}
+.fc-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5px;gap:8px}
+.fc-meta{display:flex;align-items:center;gap:7px}
+.fc-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.fc-title{font-size:13px;font-weight:600;color:var(--text);line-height:1.35}
+.fc-time{font-size:10px;color:var(--text-ter);flex-shrink:0;margin-top:2px}
+.fc-sub{font-size:12px;color:var(--text-sec);margin-bottom:10px;line-height:1.5}
+.fc-batch{background:var(--sp-l);border:1px solid rgba(107,47,217,.15);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--sp-d);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.batch-timer{font-size:13px;font-weight:700;color:var(--sp);font-variant-numeric:tabular-nums}
+.fc-cta{background:var(--sp);color:#fff;border:none;border-radius:var(--rs);padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);width:100%;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s}
+.fc-cta:hover{opacity:.88}
+.fc-cta.sent{background:var(--st)}
+
+/* ══════════════════════
+   CAMPAIGN REVIEW
+══════════════════════ */
+.review-body{padding:14px;display:flex;flex-direction:column;gap:12px}
+.rev-header{background:var(--sp);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.rev-h-title{font-size:16px;font-weight:700;color:#fff}
+.rev-h-sub{font-size:12px;color:rgba(255,255,255,.7)}
+.rev-h-row{display:flex;align-items:center;justify-content:space-between}
+.sms-preview{background:#FAF8FF;border:1px solid var(--sp-l);border-radius:var(--r);padding:14px}
+.sp-label{font-size:10px;font-weight:700;color:var(--text-ter);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.sms-bubble-wrap{display:flex;justify-content:flex-end;margin-bottom:6px}
+.sms-bubble{background:var(--sp);color:#fff;border-radius:16px 16px 4px 16px;padding:10px 13px;font-size:13px;line-height:1.5;max-width:90%}
+.sms-char{font-size:10px;color:var(--text-ter);text-align:right}
+.rev-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.rev-sec-hdr{padding:10px 14px;background:#FAFAFA;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-ter);text-transform:uppercase;letter-spacing:.07em}
+.rev-sec-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.rev-row{display:flex;align-items:center;justify-content:space-between;font-size:13px}
+.rev-row-label{color:var(--text-sec)}
+.rev-row-val{font-weight:600;color:var(--text)}
+.tog{position:relative;display:inline-flex;cursor:pointer;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tog-sl{display:block;width:40px;height:22px;border-radius:11px;background:#D0CBDC;position:relative;transition:background .2s}
+.tog input:checked+.tog-sl{background:var(--st)}
+.tog-sl::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tog input:checked+.tog-sl::after{transform:translateX(18px)}
+.rev-textarea{width:100%;border:1px solid var(--border-med);border-radius:var(--rs);padding:10px 12px;font-size:13px;line-height:1.6;resize:none;font-family:var(--font);color:var(--text);background:var(--card);min-height:80px;transition:border-color .15s}
+.rev-textarea:focus{outline:none;border-color:var(--sp)}
+.rev-actions{display:flex;flex-direction:column;gap:8px}
+.btn-approve{background:var(--st);color:#fff;border:none;border-radius:var(--rs);padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);width:100%;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .15s}
+.btn-approve:hover{opacity:.88}
+.btn-row{display:flex;gap:8px}
+.btn-edit{flex:1;background:#F4F1F8;color:var(--text);border:none;border-radius:var(--rs);padding:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)}
+.btn-reject{flex:1;background:none;border:1.5px solid var(--sr);color:var(--sr);border-radius:var(--rs);padding:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)}
+.btn-reject:hover{background:var(--sr-l)}
+
+/* ══════════════════════
+   SEND ANIMATION
+══════════════════════ */
+.send-body{flex:1;display:flex;flex-direction:column;align-items:center;padding:24px 20px;gap:14px;background:var(--card)}
+.send-status-ring{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;background:var(--sp-l);transition:background .4s}
+.send-status-ring.success{background:var(--st-l)}
+.send-step{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--rs);border:1px solid var(--border);background:var(--card);width:100%;transition:all .25s}
+.send-step.done{border-color:var(--st);background:var(--st-l)}
+.send-step.active{border-color:var(--sp);background:var(--sp-l)}
+.send-step.big-win{border-color:var(--st);background:var(--st-l);padding:14px}
+.ss-ico{width:28px;height:28px;border-radius:50%;background:#EEE;color:var(--text-ter);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.send-step.done .ss-ico{background:var(--st);color:#fff}
+.send-step.active .ss-ico{background:var(--sp);color:#fff}
+.send-step.big-win .ss-ico{background:var(--st);color:#fff;width:36px;height:36px;font-size:16px}
+.ss-text{font-size:12px;font-weight:500;color:var(--text-sec)}
+.send-step.done .ss-text{color:#085041}
+.send-step.active .ss-text{color:var(--sp-d);font-weight:600}
+.send-step.big-win .ss-text{color:#085041;font-weight:700;font-size:13px}
+.pills-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.pill{background:rgba(107,47,217,.12);color:var(--sp-d);font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600}
+.result-card{background:var(--st-l);border:1.5px solid var(--st);border-radius:var(--r);padding:16px;width:100%}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.rg-item{background:rgba(255,255,255,.6);border-radius:8px;padding:10px 12px}
+.rg-label{font-size:10px;font-weight:700;color:#0F6E56;letter-spacing:.04em;text-transform:uppercase;margin-bottom:3px}
+.rg-val{font-size:15px;font-weight:700;color:#04342C}
+
+/* ══════════════════════
+   LANDING PAGE (client)
+══════════════════════ */
+.url-bar{background:#F4F1F8;padding:8px 14px;font-size:11px;color:var(--text-sec);font-weight:500;flex-shrink:0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px}
+.landing-body{padding:24px 18px;display:flex;flex-direction:column;gap:16px;align-items:center}
+.stylist-hero{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.sty-av{width:76px;height:76px;border-radius:50%;border:3px solid var(--sp);background:var(--sp);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff}
+.sty-name{font-size:22px;font-weight:700;color:var(--text)}
+.svc-chip{background:var(--sp-l);color:var(--sp-d);font-size:13px;padding:5px 14px;border-radius:20px;font-weight:600}
+.slot-card{background:var(--card);border:1px solid var(--border-med);border-radius:var(--r);padding:16px 18px;width:100%;display:flex;flex-direction:column;gap:11px}
+.slot-row{display:flex;align-items:center;justify-content:space-between}
+.slot-k{font-size:13px;color:var(--text-sec);display:flex;align-items:center;gap:7px}
+.slot-v{font-size:15px;font-weight:600;color:var(--text)}
+.price-row{border-top:1px solid var(--border);padding-top:11px;display:flex;align-items:center;justify-content:space-between}
+.price-big{font-size:22px;font-weight:800;color:var(--sp)}
+.price-was{font-size:13px;color:var(--text-ter);text-decoration:line-through;margin-left:6px}
+.discount-pill{background:var(--st-l);color:#085041;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.svc-selector{width:100%;display:flex;flex-direction:column;gap:8px}
+.svc-opt{background:var(--card);border:1.5px solid var(--border-med);border-radius:var(--rs);padding:12px 14px;cursor:pointer;transition:all .15s}
+.svc-opt.sel{border-color:var(--sp);background:var(--sp-l)}
+.svc-opt-name{font-size:14px;font-weight:600;color:var(--text)}
+.svc-opt-sub{font-size:12px;color:var(--text-sec);margin-top:2px}
+.book-btn{background:var(--sp);color:#fff;border:none;border-radius:var(--rs);padding:16px;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--font);width:100%;display:flex;align-items:center;justify-content:center;gap:9px;transition:opacity .15s}
+.book-btn:hover{opacity:.88}
+.auth-note{font-size:12px;color:var(--text-ter);text-align:center}
+.conf-box{background:var(--st-l);border:1px solid var(--st-m);border-radius:var(--r);padding:24px 18px;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.conf-t{font-size:20px;font-weight:700;color:#04342C}
+.conf-s{font-size:13px;color:#0F6E56}
+.hold-box{background:#FFF3E0;border:1px solid #FAC775;border-radius:var(--r);padding:20px 16px;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.hold-t{font-size:15px;font-weight:600;color:#412402}
+.hold-s{font-size:12px;color:#633806}
+
+/* ══════════════════════
+   STYLIST — SMS BALANCE
+══════════════════════ */
+.balance-body{padding:16px;display:flex;flex-direction:column;gap:14px}
+.balance-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.bal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.bal-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff}
+.bal-number{font-size:40px;font-weight:800;font-variant-numeric:tabular-nums;margin-bottom:2px}
+.bal-label{font-size:12px;color:var(--text-sec)}
+.bal-bar{height:8px;border-radius:99px;background:#E8E4F0;overflow:hidden;margin:10px 0 6px}
+.bal-bar-inner{height:100%;border-radius:99px;transition:width .5s}
+.bal-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--text-ter)}
+.warn-box{background:var(--sa-l);border:1px solid rgba(186,117,23,.25);border-radius:var(--rs);padding:12px 14px;font-size:13px;color:#412402;display:flex;align-items:center;gap:8px}
+.crit-box{background:var(--sr-l);border:1px solid rgba(163,45,45,.2);border-radius:var(--rs);padding:12px 14px;font-size:13px;color:var(--sr);display:flex;align-items:center;gap:8px}
+.pkg-card{background:var(--card);border:1.5px solid var(--border-med);border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:all .15s;position:relative}
+.pkg-card.sel{border-color:var(--sp);background:var(--sp-l)}
+.pkg-card:hover:not(.sel){border-color:var(--sp-m)}
+.pkg-popular{position:absolute;top:-9px;right:12px;background:var(--sp);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
+.pkg-row{display:flex;align-items:center;justify-content:space-between}
+.pkg-credits{font-size:18px;font-weight:700;color:var(--text)}
+.pkg-price{font-size:16px;font-weight:700;color:var(--sp)}
+.pkg-sub{font-size:12px;color:var(--text-sec);margin-top:3px}
+
+/* ══════════════════════
+   SETTINGS
+══════════════════════ */
+.sett-body{padding:16px;display:flex;flex-direction:column;gap:14px}
+.sett-sec{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.sett-sec-hdr{padding:10px 16px;background:#FAFAFA;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-ter);text-transform:uppercase;letter-spacing:.07em}
+.sett-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border);gap:14px}
+.sett-row:last-child{border-bottom:none}
+.sr-l{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.sr-d{font-size:11px;color:var(--text-sec)}
+.num-in{width:62px;border:1px solid var(--border-med);border-radius:7px;padding:5px 8px;font-size:13px;text-align:center;background:var(--card);color:var(--text);font-family:var(--font)}
+.save-btn{background:var(--sp);color:#fff;border:none;border-radius:var(--rs);padding:12px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s,background .2s;width:100%}
+.save-btn:hover{opacity:.88}
+
+/* ══════════════════════
+   REPORTING (desktop)
+══════════════════════ */
+.dev-desktop{width:100%;border-radius:12px;border:.5px solid var(--border-med);overflow:hidden;display:flex;flex-direction:column;background:var(--card);box-shadow:0 8px 32px rgba(0,0,0,.08);min-height:600px}
+.desk-header{background:var(--sp);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.desk-header h1{font-size:16px;font-weight:700;color:#fff;flex:1}
+.desk-body{flex:1;overflow-y:auto;padding:24px;background:var(--bg)}
+.desk-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.kpi-label{font-size:11px;font-weight:700;color:var(--text-ter);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.kpi-val{font-size:26px;font-weight:800;color:var(--text);margin-bottom:4px}
+.kpi-delta{font-size:12px;font-weight:500}
+.kpi-delta.pos{color:var(--st)}
+.kpi-delta.neu{color:var(--text-sec)}
+.desk-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
+.desk-sec-hdr{padding:14px 18px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;justify-content:space-between}
+.desk-sec-body{padding:16px 18px}
+.chart-bars{display:flex;gap:10px;align-items:flex-end;height:100px}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.chart-bar{width:100%;border-radius:6px 6px 0 0;transition:height .5s}
+.chart-bar-label{font-size:11px;color:var(--text-sec);text-align:center;font-weight:500}
+.chart-bar-val{font-size:12px;font-weight:700;color:var(--text)}
+.hbar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.hbar-label{font-size:12px;font-weight:500;color:var(--text);width:80px;flex-shrink:0}
+.hbar-track{flex:1;background:#EEE;border-radius:99px;height:22px;overflow:hidden;position:relative}
+.hbar-fill{height:100%;border-radius:99px;display:flex;align-items:center;padding:0 10px;transition:width .6s}
+.hbar-fill-text{font-size:11px;font-weight:700;color:#fff;white-space:nowrap}
+.hbar-pct{font-size:12px;font-weight:700;width:42px;text-align:right}
+.campaign-table{width:100%;border-collapse:collapse;font-size:12px}
+.campaign-table th{padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text-ter);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);background:#FAFAFA}
+.campaign-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+.campaign-table tr:last-child td{border-bottom:none}
+.campaign-table tr:hover td{background:#FAF8FF}
+.outcome-filled{color:#085041;font-weight:600}
+.outcome-expired{color:var(--text-sec)}
+.period-tabs{display:flex;background:#F4F1F8;border-radius:8px;padding:2px}
+.ptab{border:none;background:none;font-size:11px;font-family:var(--font);padding:5px 14px;border-radius:6px;cursor:pointer;color:var(--text-sec);font-weight:500;transition:all .15s}
+.ptab.on{background:var(--card);color:var(--text);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+/* ══════════════════════
+   SPINNER
+══════════════════════ */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.spinner{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+.pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--sr);animation:pulse 1.2s ease-in-out infinite}
+
+/* ══════════════════════
+   TOAST
+══════════════════════ */
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast-item{background:var(--text);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;animation:slideUp .2s ease}
+.toast-item.t-green{background:var(--st)}
+.toast-item.t-red{background:var(--sr)}
+
+/* ══════════════════════
+   OVERVIEW SCREEN (mobile)
+══════════════════════ */
+.overview-body{padding:16px;display:flex;flex-direction:column;gap:14px}
+.ov-kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ov-kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.ov-kpi-label{font-size:10px;font-weight:700;color:var(--text-ter);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.ov-kpi-val{font-size:22px;font-weight:800;color:var(--text)}
+.ov-kpi-delta{font-size:11px;font-weight:500;color:var(--st);margin-top:2px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOP CHROME -->
+<div class="chrome">
+  <div class="logo">
+    <div class="logo-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l12 9-12 9"/></svg></div>
+    Slick
+  </div>
+  <div class="platform-sw">
+    <button class="psw on" onclick="setPlatform('mobile',this)">📱 Mobile</button>
+    <button class="psw" onclick="setPlatform('desktop',this)">🖥 Desktop</button>
+  </div>
+  <div class="nav-btns" id="mobile-nav-btns">
+    <button class="nb active" onclick="mobileGo('hub',this)">Overview</button>
+    <button class="nb" onclick="mobileGo('diary',this)">Diary</button>
+    <button class="nb" onclick="mobileGo('feed',this)">Activity</button>
+    <button class="nb" onclick="mobileGo('review',this)">Approve</button>
+    <button class="nb" onclick="mobileGo('landing',this)">Client view</button>
+    <button class="nb" onclick="mobileGo('balance',this)">SMS credits</button>
+    <button class="nb" onclick="mobileGo('settings',this)">Settings</button>
+  </div>
+  <div class="nav-btns" id="desktop-nav-btns" style="display:none">
+    <button class="nb active" onclick="deskGo('reporting',this)">Reporting</button>
+    <button class="nb" onclick="deskGo('desk-settings',this)">Settings</button>
+  </div>
+</div>
+
+<!-- MOBILE FRAME -->
+<div class="frame-wrap" id="mobile-frame">
+<div class="dev-mobile">
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M1 6l5.5 5.5L12 6l5.5 5.5L23 6"/></svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="7" width="20" height="11" rx="2"/><path d="M22 11h1v2h-1"/></svg>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: HUB / OVERVIEW ── -->
+  <div class="scr on" id="s-hub">
+    <div class="slk-hdr">
+      <h1>AI Seat Filler</h1>
+      <span class="slk-pill">Luxe Hair Studio</span>
+    </div>
+    <div class="scroll-body">
+      <div class="overview-body">
+        <div class="ov-kpi-row">
+          <div class="ov-kpi"><div class="ov-kpi-label">Revenue recovered</div><div class="ov-kpi-val">£1,847</div><div class="ov-kpi-delta">↑ £340 this period</div></div>
+          <div class="ov-kpi"><div class="ov-kpi-label">Slots filled</div><div class="ov-kpi-val">14</div><div class="ov-kpi-delta">↑ 3 vs last period</div></div>
+          <div class="ov-kpi"><div class="ov-kpi-label">Conversion rate</div><div class="ov-kpi-val">6.2%</div><div class="ov-kpi-delta">Target 3–8% ✓</div></div>
+          <div class="ov-kpi"><div class="ov-kpi-label">Avg. time to fill</div><div class="ov-kpi-val">8m</div><div class="ov-kpi-delta">Batch 1: 71% of slots</div></div>
+        </div>
+        <div class="hub-label">Demo scenarios</div>
+        <div class="scenario-card" onclick="loadScenario('cancellation')">
+          <div class="sc-label">Cancellation scenario</div>
+          <div class="sc-title">Sarah cancels her 2pm with Pia</div>
+          <div class="sc-sub">Full Head Highlights · £165 · Today 2:00–3:15pm</div>
+        </div>
+        <div class="scenario-card" style="background:#0F6E56" onclick="loadScenario('gap')">
+          <div class="sc-label">Calendar gap scenario</div>
+          <div class="sc-title">Gap detected in Marcus's diary</div>
+          <div class="sc-sub">Tuesday 10:45am–12:00pm · 75 min unbooked</div>
+        </div>
+        <div class="hub-label">Quick access</div>
+        <div class="hub-grid">
+          <div class="hub-card" onclick="goScreen('s-diary')">
+            <div class="hc-ico" style="background:var(--sp-l)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--sp)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div class="hc-t">Diary</div><div class="hc-s">View today's schedule and gaps</div>
+          </div>
+          <div class="hub-card" onclick="goScreen('s-feed')">
+            <div class="hc-ico" style="background:var(--sc-l)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--sc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            <div class="hc-t">Activity</div><div class="hc-s">Campaigns pending approval <div class="pulse-dot" style="display:inline-block;margin-left:4px"></div></div>
+          </div>
+          <div class="hub-card" onclick="goScreen('s-review')">
+            <div class="hc-ico" style="background:var(--st-l)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--st)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <div class="hc-t">Approve</div><div class="hc-s">Review and send campaigns</div>
+          </div>
+          <div class="hub-card" onclick="goScreen('s-settings')">
+            <div class="hc-ico" style="background:#F4F1F8"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-sec)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+            <div class="hc-t">Settings</div><div class="hc-s">Detection modes, filters, SMS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mob-nav">
+      <div class="mn-item on" onclick="goScreen('s-hub')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Home</div>
+      <div class="mn-item" onclick="goScreen('s-diary')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Diary</div>
+      <div class="mn-item" onclick="goScreen('s-feed')" style="position:relative"><div class="mn-dot" style="position:absolute;top:8px;right:14px"></div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Feed</div>
+      <div class="mn-item" onclick="goScreen('s-settings')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Settings</div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: DIARY ── -->
+  <div class="scr" id="s-diary">
+    <div class="slk-hdr">
+      <button class="slk-back" onclick="goScreen('s-hub')">←</button>
+      <h1>Diary</h1>
+      <span class="slk-pill" id="diary-pill">Tue 20 May</span>
+    </div>
+    <div class="diary-date-bar">
+      <button onclick="shiftDay(-1)">‹</button>
+      <span class="diary-date-str" id="diary-date-str">Tuesday 20 May</span>
+      <button onclick="shiftDay(1)">›</button>
+    </div>
+    <!-- Staff headers -->
+    <div class="diary-staff-row">
+      <div class="diary-time-gutter"></div>
+      <div class="diary-staff-cols">
+        <div class="staff-col-hdr">
+          <div class="staff-av" style="background:var(--sc)">P</div>
+          <div class="staff-name">Pia</div>
+          <div class="staff-role">Employee</div>
+        </div>
+        <div class="staff-col-hdr">
+          <div class="staff-av" style="background:var(--sp)">M</div>
+          <div class="staff-name">Marcus</div>
+          <div class="staff-role">Employee</div>
+        </div>
+        <div class="staff-col-hdr">
+          <div class="staff-av" style="background:var(--st)">Z</div>
+          <div class="staff-name">Zara</div>
+          <div class="staff-role">Booth renter</div>
+        </div>
+      </div>
+    </div>
+    <div class="diary-grid-wrap">
+      <div class="time-col" id="time-col"></div>
+      <div class="appt-cols" id="appt-cols"></div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: APPOINTMENT SHEET ── -->
+  <div class="scr" id="s-appt">
+    <div class="slk-hdr">
+      <button class="slk-back" onclick="goScreen('s-diary')">←</button>
+      <h1 id="appt-hdr-title">Appointment</h1>
+    </div>
+    <div class="scroll-body">
+      <div class="appt-sheet-body" id="appt-sheet-body"></div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: TRIGGER PIPELINE ── -->
+  <div class="scr" id="s-trigger">
+    <div class="slk-hdr">
+      <button class="slk-back" onclick="goScreen('s-appt')">←</button>
+      <h1>AI Seat Filler</h1>
+      <span class="slk-pill" id="trig-mode-pill">Cancellation</span>
+    </div>
+    <div class="trigger-wrap" id="trigger-wrap"></div>
+  </div>
+
+  <!-- ── SCREEN: ACTIVITY FEED ── -->
+  <div class="scr" id="s-feed">
+    <div class="slk-hdr">
+      <button class="slk-back" onclick="goScreen('s-hub')">←</button>
+      <h1>Activity Feed</h1>
+      <span class="slk-pill">1 pending</span>
+    </div>
+    <div class="scroll-body">
+      <div class="feed-body" id="feed-body"></div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: CAMPAIGN REVIEW ── -->
+  <div class="scr" id="s-review">
+    <div class="slk-hdr">
+      <button class="slk-back" onclick="goScreen('s-feed')">←</button>
+      <h1>Review Campaign</h1>
+    </div>
+    <div class="scroll-body">
+      <div class="review-body" id="review-body"></div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: SENDING ── -->
+  <div class="scr" id="s-sending">
+    <div class="slk-hdr">
+      <h1>Sending</h1>
+      <span class="slk-pill" id="send-pill">Batch 1 of 4</span>
+    </div>
+    <div class="send-body" id="send-body"></div>
+  </div>
+
+  <!-- ── SCREEN: LANDING PAGE (client view) ── -->
+  <div class="scr" id="s-landing">
+    <div class="url-bar">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--st)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      slick.app/book/pia-highlights-2pm
+    </div>
+    <div class="scroll-body">
+      <div class="landing-body" id="landing-body"></div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: SMS BALANCE (stylist) ── -->
+  <div class="scr" id="s-balance">
+    <div class="slk-hdr">
+      <button class="slk-back" onclick="goScreen('s-hub')">←</button>
+      <h1>SMS Credits</h1>
+    </div>
+    <div class="scroll-body">
+      <div class="balance-body" id="balance-body"></div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: SETTINGS ── -->
+  <div class="scr" id="s-settings">
+    <div class="slk-hdr">
+      <button class="slk-back" onclick="goScreen('s-hub')">←</button>
+      <h1>Settings</h1>
+    </div>
+    <div class="scroll-body">
+      <div class="sett-body" id="sett-body"></div>
+    </div>
+  </div>
+
+</div><!-- /dev-mobile -->
+</div><!-- /frame-wrap mobile -->
+
+<!-- DESKTOP FRAME -->
+<div class="frame-wrap" id="desktop-frame" style="display:none">
+<div class="dev-desktop">
+  <div class="desk-header">
+    <div class="logo-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l12 9-12 9"/></svg></div>
+    <h1>Slick — AI Seat Filler</h1>
+    <div class="period-tabs" id="period-tabs">
+      <button class="ptab on" onclick="setPeriod('7d',this)">Last 7 days</button>
+      <button class="ptab" onclick="setPeriod('30d',this)">Last 30 days</button>
+      <button class="ptab" onclick="setPeriod('90d',this)">Last 90 days</button>
+    </div>
+    <span style="background:rgba(255,255,255,.15);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;color:#fff">Luxe Hair Studio</span>
+  </div>
+  <div class="desk-body" id="desk-body"></div>
+</div>
+</div>
+
+</div><!-- /app -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+var currentScreen = 's-hub';
+var currentDayOffset = 0;
+var batchCountdown = 272;
+var batchTimer = null;
+var activeScenario = 'cancellation';
+var smsBalance = { pia: 342, marcus: 78, zara: 6 };
+var activeStylist = 'pia';
+var selectedSvc = 0;
+var landingState = 'ready'; // ready | booked
+var reviewDiscountOn = true;
+var sendInProgress = false;
+var currentPeriod = '30d';
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function toast(msg, type) {
+  var el = document.createElement('div');
+  el.className = 'toast-item' + (type === 'green' ? ' t-green' : type === 'red' ? ' t-red' : '');
+  el.textContent = msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(function(){ el.remove(); }, 3000);
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+function goScreen(id) {
+  document.querySelectorAll('.scr').forEach(function(s){ s.classList.remove('on'); });
+  var el = document.getElementById(id);
+  if (el) el.classList.add('on');
+  currentScreen = id;
+  // update bottom nav active
+  var nav = document.querySelectorAll('.mn-item');
+  nav.forEach(function(n){ n.classList.remove('on'); });
+  var map = {'s-hub':0,'s-diary':1,'s-feed':2,'s-settings':3};
+  if (map[id] !== undefined) nav[map[id]].classList.add('on');
+  // render on-demand
+  if (id === 's-feed') renderFeed();
+  if (id === 's-review') renderReview();
+  if (id === 's-landing') renderLanding();
+  if (id === 's-balance') renderBalance();
+  if (id === 's-settings') renderSettings();
+  if (id === 's-diary') renderDiary();
+}
+
+function mobileGo(key, btn) {
+  document.querySelectorAll('#mobile-nav-btns .nb').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  var map = {hub:'s-hub',diary:'s-diary',feed:'s-feed',review:'s-review',landing:'s-landing',balance:'s-balance',settings:'s-settings'};
+  goScreen(map[key]);
+}
+
+function deskGo(key, btn) {
+  document.querySelectorAll('#desktop-nav-btns .nb').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  if (key === 'reporting') renderReporting();
+  if (key === 'desk-settings') renderDeskSettings();
+}
+
+function setPlatform(p, btn) {
+  document.querySelectorAll('.psw').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  var mf = document.getElementById('mobile-frame');
+  var df = document.getElementById('desktop-frame');
+  var mn = document.getElementById('mobile-nav-btns');
+  var dn = document.getElementById('desktop-nav-btns');
+  if (p === 'mobile') {
+    mf.style.display = 'flex'; df.style.display = 'none';
+    mn.style.display = 'flex'; dn.style.display = 'none';
+  } else {
+    mf.style.display = 'none'; df.style.display = 'flex';
+    mn.style.display = 'none'; dn.style.display = 'flex';
+    renderReporting();
+  }
+}
+
+// ─── SCENARIO LOADER ─────────────────────────────────────────────────────────
+function loadScenario(type) {
+  activeScenario = type;
+  if (type === 'cancellation') {
+    activeStylist = 'pia';
+    toast('Cancellation scenario loaded — go to Diary to see Pia\'s schedule', 'green');
+    setTimeout(function(){ goScreen('s-diary'); }, 800);
+  } else {
+    activeStylist = 'marcus';
+    toast('Gap scenario loaded — go to Diary to see Marcus\'s schedule', 'green');
+    setTimeout(function(){ goScreen('s-diary'); }, 800);
+  }
+}
+
+// ─── DIARY ────────────────────────────────────────────────────────────────────
+var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var HOURS = ['8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm'];
+
+// Appointments: [stylistIndex, hour, durationHours, label, clientName, color, isGap]
+var APPTS_BASE = [
+  // Pia
+  [0, 9.5, 1.5, 'Full Head Highlights', 'Emma W.', 'pink', false],
+  [0, 13, 1.0, 'Cut & Blow Dry', 'Jade K.', 'teal', false],
+  [0, 16, 1.25, 'Half Head', 'Nadia H.', 'blue', false],
+  // Marcus
+  [1, 9.5, 1.25, 'Balayage', 'Sofia R.', 'amber', false],
+  [1, 12, 1.0, 'Cut & Style', 'James T.', 'purple', false],
+  [1, 14, 1.5, 'Full Colour', 'Priya M.', 'teal', false],
+  // Zara
+  [2, 10, 2.0, 'Colour + Cut', 'Chloe B.', 'pink', false],
+  [2, 13.5, 1.25, 'Highlights', 'Isla F.', 'amber', false],
+  [2, 15.5, 1.5, 'Balayage', 'Aisha T.', 'purple', false],
+];
+
+// Gap/cancellation slots added by scenario
+function getAppts() {
+  var appts = APPTS_BASE.slice();
+  if (activeScenario === 'cancellation') {
+    // Pia: 2pm slot cancelled → show as gap
+    appts.push([0, 14, 1.25, 'GAP — tap to fill', 'Cancellation', 'gap', true]);
+  } else {
+    // Marcus: 10:45am gap (between 9:30+1.25h=10:45 and 12pm)
+    appts.push([1, 10.75, 1.25, 'GAP — tap to fill', '', 'gap', true]);
+    // Marcus: 3:30pm gap
+    appts.push([1, 15.5, 2.5, 'GAP — tap to fill', '', 'gap', true]);
+  }
+  return appts;
+}
+
+function hourToY(h) { return (h - 8) * 64; }
+
+function renderDiary() {
+  var offset = currentDayOffset;
+  var base = new Date(2026, 4, 20); // Tue 20 May
+  base.setDate(base.getDate() + offset);
+  var dayStr = DAYS[base.getDay()] + ' ' + base.getDate() + ' ' + MONTHS[base.getMonth()];
+  document.getElementById('diary-date-str').textContent = dayStr;
+  document.getElementById('diary-pill').textContent = DAYS[base.getDay()].slice(0,3) + ' ' + base.getDate() + ' ' + MONTHS[base.getMonth()];
+
+  // Time col
+  var tc = document.getElementById('time-col');
+  tc.innerHTML = '';
+  HOURS.forEach(function(h){ var d = document.createElement('div'); d.className = 'time-slot'; d.textContent = h; tc.appendChild(d); });
+
+  // Appt cols
+  var ac = document.getElementById('appt-cols');
+  ac.innerHTML = '';
+  var cols = [0,1,2].map(function(){
+    var col = document.createElement('div'); col.className = 'appt-col';
+    var lines = document.createElement('div'); lines.className = 'appt-col-lines';
+    HOURS.forEach(function(){ var l = document.createElement('div'); l.className = 'col-line'; lines.appendChild(l); });
+    col.appendChild(lines);
+    return col;
+  });
+  cols.forEach(function(c){ ac.appendChild(c); });
+
+  // Total height
+  var totalH = HOURS.length * 64;
+
+  // Now line (on base day only)
+  if (offset === 0) {
+    var nowH = 11 + 45/60; // 11:45am
+    var nowY = hourToY(nowH);
+    var nowLine = document.createElement('div'); nowLine.className = 'now-line'; nowLine.style.top = nowY + 'px';
+    var nowDot = document.createElement('div'); nowDot.className = 'now-dot';
+    nowLine.appendChild(nowDot);
+    ac.style.position = 'relative';
+    ac.appendChild(nowLine);
+  }
+
+  // Appointments
+  var appts = (offset === 0) ? getAppts() : APPTS_BASE;
+  appts.forEach(function(a, idx) {
+    var colIdx = a[0], startH = a[1], durH = a[2], svc = a[3], client = a[4], color = a[5], isGap = a[6];
+    var col = cols[colIdx];
+    var block = document.createElement('div');
+    block.className = 'appt-block ' + color;
+    var topPx = hourToY(startH);
+    var htPx = Math.max(durH * 64 - 5, 22);
+    block.style.top = topPx + 'px';
+    block.style.height = htPx + 'px';
+    if (isGap) {
+      block.innerHTML = '<div class="gap-label">⚡ ' + svc + '</div>';
+      block.onclick = function(){ openGapSheet(colIdx, startH, durH, svc); };
+    } else {
+      block.innerHTML = '<div class="appt-t">' + client + '</div><div class="appt-s">' + svc + '</div>';
+      block.onclick = function(){ openApptSheet(colIdx, startH, durH, svc, client, color); };
+    }
+    col.appendChild(block);
+  });
+}
+
+function shiftDay(d) { currentDayOffset += d; renderDiary(); }
+
+function openApptSheet(col, startH, durH, svc, client, color) {
+  var stylists = ['Pia Andersen','Marcus Reid','Zara Baptiste'];
+  var stylistColors = ['var(--sc)','var(--sp)','var(--st)'];
+  var name = stylists[col];
+  var endH = startH + durH;
+  function fmtT(h){ var hh = Math.floor(h); var mm = Math.round((h-hh)*60); return hh+':'+(mm<10?'0':'')+mm+(hh<12?'am':'pm'); }
+  document.getElementById('appt-hdr-title').textContent = client;
+  var body = document.getElementById('appt-sheet-body');
+  body.innerHTML = '';
+
+  var card = document.createElement('div'); card.className = 'appt-card';
+  card.innerHTML = '<div class="appt-card-name">' + client + '</div><div class="appt-card-svc">' + svc + '</div>'
+    + '<div class="appt-meta-row">'
+    + '<div class="appt-meta-chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--sp)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>' + fmtT(startH) + '–' + fmtT(endH) + '</div>'
+    + '<div class="appt-meta-chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--sp)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + name + '</div>'
+    + '</div>';
+  body.appendChild(card);
+
+  var sec = document.createElement('div');
+  sec.innerHTML = '<div class="sheet-section-label" style="margin-bottom:10px">Actions</div>'
+    + '<div class="sheet-actions"><div class="sa-row">'
+    + '<button class="sa-btn sa-checkout" onclick="toast(\'Checkout flow would open here\',\'green\')">Check out</button>'
+    + '<button class="sa-btn sa-edit" onclick="toast(\'Edit appointment opened\')">Edit</button>'
+    + '</div>'
+    + '<button class="sa-btn sa-cancel" style="display:flex;align-items:center;justify-content:center;gap:7px" onclick="triggerCancellation('+col+','+startH+','+durH+',\''+svc+'\',\''+client+'\')">Cancel appointment</button>'
+    + '<button class="sa-btn sa-close" onclick="goScreen(\'s-diary\')">← Back to diary</button>'
+    + '</div>';
+  body.appendChild(sec);
+  goScreen('s-appt');
+}
+
+function openGapSheet(col, startH, durH, svc) {
+  var stylists = ['Pia Andersen','Marcus Reid','Zara Baptiste'];
+  var name = stylists[col];
+  function fmtT(h){ var hh=Math.floor(h),mm=Math.round((h-hh)*60); return hh+':'+(mm<10?'0':'')+mm+(hh<12?'am':'pm'); }
+  var endH = startH + durH, minDur = Math.round(durH * 60);
+  document.getElementById('appt-hdr-title').textContent = 'Unbooked Gap';
+  var body = document.getElementById('appt-sheet-body'); body.innerHTML = '';
+
+  var card = document.createElement('div'); card.className = 'appt-card';
+  card.style.background = '#FFEDE8'; card.style.borderColor = 'rgba(216,90,48,.3)';
+  card.innerHTML = '<div class="appt-card-name" style="color:var(--sc)">⚡ Calendar Gap</div>'
+    + '<div class="appt-card-svc">' + fmtT(startH) + ' – ' + fmtT(endH) + ' · ' + minDur + ' min</div>'
+    + '<div class="appt-meta-row"><div class="appt-meta-chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--sp)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + name + '</div></div>';
+  body.appendChild(card);
+
+  var alert = document.createElement('div'); alert.className = 'inline-alert';
+  alert.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--sp)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+    + 'AI Seat Filler detected this gap. It exceeds the 45 min minimum and is within the 7-day lookahead window.';
+  body.appendChild(alert);
+
+  var sec = document.createElement('div');
+  sec.innerHTML = '<div class="sheet-section-label" style="margin:14px 0 10px">Actions</div>'
+    + '<div class="sheet-actions">'
+    + '<button class="sa-btn sa-checkout" style="display:flex;align-items:center;justify-content:center;gap:7px;background:var(--sp)" onclick="triggerGap('+col+','+startH+','+durH+')">'
+    + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
+    + 'Generate campaign for this gap</button>'
+    + '<button class="sa-btn sa-close" onclick="goScreen(\'s-diary\')">← Back to diary</button>'
+    + '</div>';
+  body.appendChild(sec);
+  goScreen('s-appt');
+}
+
+function triggerCancellation(col, startH, durH, svc, client) {
+  document.getElementById('trig-mode-pill').textContent = 'Cancellation';
+  runPipeline('cancellation', col, startH, durH, svc, client);
+}
+function triggerGap(col, startH, durH) {
+  document.getElementById('trig-mode-pill').textContent = 'Calendar Gap';
+  runPipeline('gap', col, startH, durH, 'Gap', '');
+}
+
+// ─── PIPELINE ────────────────────────────────────────────────────────────────
+function runPipeline(mode, col, startH, durH, svc, client) {
+  goScreen('s-trigger');
+  var stylists = ['Pia','Marcus','Zara'];
+  var name = stylists[col];
+  function fmtT(h){ var hh=Math.floor(h),mm=Math.round((h-hh)*60); return hh+':'+(mm<10?'0':'')+mm+(hh<12?'am':'pm'); }
+  var slotStr = fmtT(startH) + ' – ' + fmtT(startH+durH);
+
+  var steps = mode === 'cancellation' ? [
+    client + ' cancellation received from Slick',
+    'Gap detected: ' + slotStr + ' (' + Math.round(durH*60) + ' min)',
+    'Checking campaign window: 2h 15m — ✓ within window',
+    'Running client selection…',
+    'Scoring 847 clients against eligibility filters',
+    'Applying stylist-history filter: 23 clients seen ' + name,
+    'AI ranking by booking confidence…',
+    'Top 12 clients selected',
+    'Generating personalised SMS copy…',
+    'Campaign ready — routing for approval'
+  ] : [
+    'Calendar gap detected: ' + slotStr,
+    'Checking minimum duration: ' + Math.round(durH*60) + ' min — ✓ exceeds 45 min',
+    'Gap within 7-day lookahead window ✓',
+    'Running client selection…',
+    'Scoring 847 clients against eligibility filters',
+    'Applying stylist-history filter: 18 clients seen ' + name,
+    'AI ranking by booking confidence…',
+    'Top 10 clients selected',
+    'Generating personalised SMS copy…',
+    'Campaign ready — routing for approval'
+  ];
+
+  var wrap = document.getElementById('trigger-wrap');
+  wrap.innerHTML = '';
+
+  var ring = document.createElement('div'); ring.className = 'trig-icon-ring'; ring.textContent = '⚡'; wrap.appendChild(ring);
+  var heading = document.createElement('div'); heading.className = 'trig-heading'; heading.textContent = mode === 'cancellation' ? 'Cancellation detected' : 'Gap detected'; wrap.appendChild(heading);
+  var sub = document.createElement('div'); sub.className = 'trig-sub'; sub.textContent = name + ' · ' + slotStr; wrap.appendChild(sub);
+
+  var progWrap = document.createElement('div'); progWrap.className = 'trig-prog-wrap';
+  var progBar = document.createElement('div'); progBar.className = 'trig-prog-bar'; progBar.style.width = '0%';
+  progWrap.appendChild(progBar); wrap.appendChild(progWrap);
+
+  var stepsWrap = document.createElement('div'); stepsWrap.className = 'trig-steps'; wrap.appendChild(stepsWrap);
+
+  steps.forEach(function(s, i){
+    var row = document.createElement('div'); row.className = 'trig-step'; row.id = 'ts-' + i;
+    row.innerHTML = '<div class="trig-step-ico">' + (i+1) + '</div><div class="trig-step-text">' + s + '</div>';
+    stepsWrap.appendChild(row);
+  });
+
+  var i = 0;
+  function tick() {
+    if (i >= steps.length) {
+      ring.classList.add('done'); ring.textContent = '✓';
+      heading.textContent = 'Campaign ready';
+      sub.textContent = '10 clients selected · awaiting approval';
+      var cta = document.createElement('button'); cta.className = 'trig-cta'; cta.textContent = 'Review campaign →';
+      cta.onclick = function(){ goScreen('s-review'); renderReview(); };
+      wrap.appendChild(cta);
+      // Also add to feed
+      addFeedItem(name, slotStr, svc, mode);
+      return;
+    }
+    if (i > 0) document.getElementById('ts-' + (i-1)).classList.replace('active-step','done-step');
+    var el = document.getElementById('ts-' + i);
+    el.classList.add('active-step');
+    el.querySelector('.trig-step-ico').innerHTML = '<div class="spinner"></div>';
+    progBar.style.width = ((i+1)/steps.length*100) + '%';
+    i++;
+    setTimeout(tick, 700);
+  }
+  tick();
+}
+
+// ─── ACTIVITY FEED ────────────────────────────────────────────────────────────
+var feedItems = [
+  { id: 'f1', stylist: 'P', stylistColor: 'var(--sc)', name: 'Pia', slot: '2:00–3:15pm', svc: 'Full Head Highlights', mode: 'Cancellation', time: 'Just now', urgent: true, status: 'pending' },
+  { id: 'f2', stylist: 'M', stylistColor: 'var(--sp)', name: 'Marcus', slot: '10:45am–12pm', svc: 'Calendar gap', mode: 'Gap', time: '1 hr ago', urgent: false, status: 'sent' },
+  { id: 'f3', stylist: 'Z', stylistColor: 'var(--st)', name: 'Zara', slot: '3:00–4pm', svc: 'Colour + Cut', mode: 'Cancellation', time: '3 hrs ago', urgent: false, status: 'filled' },
+  { id: 'f4', stylist: 'P', stylistColor: 'var(--sc)', name: 'Pia', slot: '11:00am–12pm', svc: 'Half Head', mode: 'Gap', time: 'Yesterday', urgent: false, status: 'expired' },
+];
+
+function addFeedItem(name, slot, svc, mode) {
+  var initial = name[0];
+  var colors = {Pia:'var(--sc)',Marcus:'var(--sp)',Zara:'var(--st)'};
+  feedItems.unshift({ id: 'f-new-'+Date.now(), stylist: initial, stylistColor: colors[name]||'var(--sp)', name: name, slot: slot, svc: svc, mode: mode, time: 'Just now', urgent: true, status: 'pending' });
+}
+
+function renderFeed() {
+  var body = document.getElementById('feed-body'); body.innerHTML = '';
+
+  // Start batch countdown if needed
+  if (batchTimer) clearInterval(batchTimer);
+  batchCountdown = 272;
+  batchTimer = setInterval(function(){
+    batchCountdown = Math.max(0, batchCountdown - 1);
+    var el = document.getElementById('batch-countdown');
+    if (el) { var m=Math.floor(batchCountdown/60),s=batchCountdown%60; el.textContent = m+':'+(s<10?'0':'')+s; }
+  }, 1000);
+
+  feedItems.forEach(function(item){
+    var card = document.createElement('div');
+    card.className = 'feed-card' + (item.urgent ? ' urgent' : item.status === 'filled' ? ' success' : '');
+    var statusLabel = {pending:'Awaiting approval',sent:'Sent to 12 clients',filled:'Slot filled — £95 recovered',expired:'Expired'};
+    var m=Math.floor(batchCountdown/60),s=batchCountdown%60;
+    var batchHtml = item.urgent ? '<div class="fc-batch"><span>Batch 2 sends in <strong>if no booking</strong></span><span class="batch-timer" id="batch-countdown">'+m+':'+(s<10?'0':'')+s+'</span></div>' : '';
+    var badgeCls = {pending:'b-ready',sent:'b-exp',filled:'b-filled',expired:'b-exp'}[item.status];
+    var ctaLabel = {pending:'Review campaign →',sent:'View results →',filled:'View details →',expired:'View →'}[item.status];
+    var ctaClass = item.status === 'filled' || item.status === 'sent' ? ' sent' : '';
+    card.innerHTML = '<div class="fc-content"><div class="fc-hdr"><div class="fc-meta">'
+      + '<div class="fc-av" style="background:'+item.stylistColor+'20;color:'+item.stylistColor+'">'+item.stylist+'</div>'
+      + '<div><div class="fc-title">AI Seat Filler — '+item.name+'\'s '+item.slot+'</div></div></div>'
+      + '<span class="fc-time">'+item.time+'</span></div>'
+      + '<div class="fc-sub">'+item.svc+' · <span class="badge '+badgeCls+'">'+statusLabel[item.status]+'</span></div>'
+      + batchHtml
+      + '<button class="fc-cta'+ctaClass+'" onclick="feedAction(\''+item.id+'\',\''+item.status+'\')">'+ctaLabel+'</button>'
+      + '</div>';
+    body.appendChild(card);
+  });
+}
+
+function feedAction(id, status) {
+  if (status === 'pending') { goScreen('s-review'); renderReview(); }
+  else toast('Results view would open here');
+}
+
+// ─── CAMPAIGN REVIEW ──────────────────────────────────────────────────────────
+function renderReview() {
+  var body = document.getElementById('review-body'); body.innerHTML = '';
+
+  var hdr = document.createElement('div'); hdr.className = 'rev-header';
+  hdr.innerHTML = '<div class="rev-h-row"><div class="rev-h-title">Pia · 2:00pm today</div><span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:10px">📱 342 SMS</span></div>'
+    + '<div class="rev-h-sub">Full Head Highlights · 75 min · Cancellation trigger</div>'
+    + '<div class="rev-h-row" style="margin-top:4px"><span class="badge b-pending">Awaiting approval</span></div>';
+  body.appendChild(hdr);
+
+  // SMS preview
+  var prev = document.createElement('div'); prev.className = 'sms-preview';
+  var smsText = 'Hi Emma 👋 Pia has a Full Head Highlights slot free at 2pm TODAY — usually £165, yours for £140 if you can make it. Tap: slick.app/s/abc123';
+  prev.innerHTML = '<div class="sp-label">SMS preview — Emma W. (rank #1)</div>'
+    + '<div class="sms-bubble-wrap"><div class="sms-bubble" id="sms-bubble-text">'+smsText+'</div></div>'
+    + '<div class="sms-char"><span id="sms-char-count">'+smsText.length+'</span>/160 chars</div>';
+  body.appendChild(prev);
+
+  // Edit copy
+  var editSec = document.createElement('div'); editSec.className = 'rev-section';
+  editSec.innerHTML = '<div class="rev-sec-hdr">Edit SMS copy</div>'
+    + '<div class="rev-sec-body"><textarea class="rev-textarea" id="sms-copy-ta" oninput="updateSMSPreview(this.value)">Hi [Name] 👋 Pia has a Full Head Highlights slot free at 2pm TODAY — usually £165, yours for £140 if you can make it. Tap to claim: [link]</textarea>'
+    + '<div style="font-size:11px;color:var(--text-ter)">Edits apply to all 12 personalised variants</div></div>';
+  body.appendChild(editSec);
+
+  // Discount toggle
+  var discSec = document.createElement('div'); discSec.className = 'rev-section';
+  discSec.innerHTML = '<div class="rev-sec-hdr">Discount</div>'
+    + '<div class="rev-sec-body">'
+    + '<div class="rev-row"><span class="rev-row-label">Apply discount</span><label class="tog"><input type="checkbox" '+(reviewDiscountOn?'checked':'')+' onchange="reviewDiscountOn=this.checked"><span class="tog-sl"></span></label></div>'
+    + '<div class="rev-row"><span class="rev-row-label">Amount</span><span class="rev-row-val">£25 off</span></div>'
+    + '<div class="rev-row"><span class="rev-row-label">Sending to</span><span class="rev-row-val">12 clients</span></div>'
+    + '<div style="font-size:11px;color:var(--text-sec);background:#FAF8FF;border-radius:7px;padding:8px 10px">Batch 1: 3 → Batch 2: 3 → Batch 3: 3 → Batch 4: 3</div>'
+    + '</div>';
+  body.appendChild(discSec);
+
+  // Actions
+  var acts = document.createElement('div'); acts.className = 'rev-actions';
+  acts.innerHTML = '<button class="btn-approve" onclick="approveCampaign()">✓ Approve & Send</button>'
+    + '<div class="btn-row">'
+    + '<button class="btn-edit" onclick="toast(\'Copy editing mode on\')">Edit copy</button>'
+    + '<button class="btn-reject" onclick="rejectCampaign()">Reject</button>'
+    + '</div>';
+  body.appendChild(acts);
+}
+
+function updateSMSPreview(val) {
+  var resolved = val.replace('[Name]','Emma').replace('[link]','slick.app/s/abc123');
+  var b = document.getElementById('sms-bubble-text');
+  var c = document.getElementById('sms-char-count');
+  if (b) b.textContent = resolved;
+  if (c) c.textContent = resolved.length;
+}
+
+function approveCampaign() { goScreen('s-sending'); runSendSequence(); }
+function rejectCampaign() {
+  if (confirm('Reject this campaign? No SMS will be sent.')) {
+    goScreen('s-feed'); renderFeed();
+    toast('Campaign rejected', 'red');
+  }
+}
+
+// ─── SEND SEQUENCE ────────────────────────────────────────────────────────────
+function runSendSequence() {
+  var body = document.getElementById('send-body'); body.innerHTML = '';
+  var ring = document.createElement('div'); ring.className = 'send-status-ring'; ring.textContent = '📤'; body.appendChild(ring);
+  var heading = document.createElement('div'); heading.className = 'trig-heading'; heading.textContent = 'Sending batch 1'; body.appendChild(heading);
+  var sub = document.createElement('div'); sub.className = 'trig-sub'; sub.textContent = 'Pia · Full Head Highlights · 2:00pm today'; body.appendChild(sub);
+
+  var steps = [
+    {text:'Campaign approved', ico:'✓', delay:0},
+    {text:'Preparing batch 1 of 4 (3 clients)…', ico:'📦', delay:800},
+    {text:'Sending to Emma W., Sofia R., Aisha T.', ico:'📨', delay:1800, pills:['Emma W.','Sofia R.','Aisha T.']},
+    {text:'Batch 1 sent — monitoring for bookings…', ico:'👀', delay:2800},
+    {text:'Waiting for response…', ico:'⏳', delay:3800, waiting:true},
+    {text:'🎉 Emma W. booked Full Head Highlights at 2:00pm!', ico:'🎉', delay:5300, win:true},
+    {text:'Cancelling batches 2, 3, 4…', ico:'✕', delay:6100},
+    {text:'Slot filled — campaign complete', ico:'✓', delay:6900, final:true},
+  ];
+
+  var stepEls = [];
+  steps.forEach(function(s){
+    var row = document.createElement('div'); row.className = 'send-step' + (s.win?' big-win':''); row.style.opacity = '0.3';
+    row.innerHTML = '<div class="ss-ico">'+s.ico+'</div><div>'
+      + '<div class="ss-text">'+s.text+'</div>'
+      + (s.pills ? '<div class="pills-row">'+s.pills.map(function(p){return '<span class="pill">'+p+'</span>';}).join('')+'</div>' : '')
+      + '</div>';
+    body.appendChild(row);
+    stepEls.push(row);
+  });
+
+  steps.forEach(function(s, i){
+    setTimeout(function(){
+      stepEls[i].style.opacity = '1';
+      if (i > 0) { stepEls[i-1].classList.remove('active'); stepEls[i-1].classList.add('done'); }
+      stepEls[i].classList.add(s.win ? 'big-win' : 'active');
+      if (s.win) { ring.classList.add('success'); ring.textContent = '🎉'; heading.textContent = 'Slot filled!'; }
+      if (s.final) {
+        setTimeout(function(){
+          var rc = document.createElement('div'); rc.className = 'result-card';
+          rc.innerHTML = '<div style="font-size:14px;font-weight:700;color:#085041">Campaign complete</div>'
+            + '<div class="result-grid">'
+            + '<div class="rg-item"><div class="rg-label">Revenue</div><div class="rg-val">£140</div></div>'
+            + '<div class="rg-item"><div class="rg-label">Messaged</div><div class="rg-val">3 of 12</div></div>'
+            + '<div class="rg-item"><div class="rg-label">Batch filled</div><div class="rg-val">1 of 4</div></div>'
+            + '<div class="rg-item"><div class="rg-label">Time to book</div><div class="rg-val">1m 47s</div></div>'
+            + '</div>'
+            + '<button class="btn-approve" style="margin-top:12px;font-size:13px" onclick="goScreen(\'s-hub\')">← Back to overview</button>';
+          body.appendChild(rc);
+          toast('Slot filled — £140 recovered!', 'green');
+          document.getElementById('send-pill').textContent = 'Filled ✓';
+        }, 600);
+      }
+    }, s.delay + 200);
+  });
+}
+
+// ─── LANDING PAGE (client) ────────────────────────────────────────────────────
+var SVCS = [
+  {name:'Full Head Highlights', dur:'75 min', price:'£140', was:'£165'},
+  {name:'Half Head Highlights', dur:'60 min', price:'£105', was:'£130'},
+  {name:'Toner & Glossing',     dur:'45 min', price:'£55',  was:'£80'},
+];
+var selectedSvc = 0;
+
+function renderLanding() {
+  var body = document.getElementById('landing-body'); body.innerHTML = '';
+  if (landingState === 'booked') {
+    var conf = document.createElement('div'); conf.className = 'conf-box';
+    conf.innerHTML = '<div style="font-size:40px">🎉</div>'
+      + '<div class="conf-t">You\'re booked in!</div>'
+      + '<div class="conf-s">Pia · ' + SVCS[selectedSvc].name + '<br>2:00pm today · Luxe Hair Studio</div>'
+      + '<div style="font-size:12px;color:#0F6E56">A confirmation has been sent to your phone</div>'
+      + '<button class="btn-edit" style="margin-top:6px;font-size:13px;padding:10px 20px;border-radius:var(--rs)" onclick="landingState=\'ready\';renderLanding()">← Reset demo</button>';
+    body.appendChild(conf);
+    return;
+  }
+
+  // Hero
+  var hero = document.createElement('div'); hero.className = 'stylist-hero';
+  hero.innerHTML = '<div class="sty-av" style="background:var(--sc);border-color:var(--sc)">P</div>'
+    + '<div class="sty-name">Pia</div><div style="font-size:13px;color:var(--text-sec)">Luxe Hair Studio</div>';
+  body.appendChild(hero);
+
+  // Slot card
+  var saving = parseInt(SVCS[selectedSvc].was.replace('£','')) - parseInt(SVCS[selectedSvc].price.replace('£',''));
+  var slot = document.createElement('div'); slot.className = 'slot-card';
+  slot.innerHTML = '<div class="slot-row"><span class="slot-k"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sp)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Date</span><span class="slot-v">Today, Tue 20 May</span></div>'
+    + '<div class="slot-row"><span class="slot-k"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sp)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> Time</span><span class="slot-v">2:00 – 3:15 pm</span></div>'
+    + '<div class="price-row"><div style="display:flex;align-items:baseline;gap:6px"><span class="price-big">'+SVCS[selectedSvc].price+'</span><span class="price-was">'+SVCS[selectedSvc].was+'</span></div>'
+    + '<span class="discount-pill">£'+saving+' off</span></div>';
+  body.appendChild(slot);
+
+  // Service selector
+  var selLabel = document.createElement('div');
+  selLabel.style.cssText = 'font-size:11px;font-weight:700;color:var(--text-ter);text-transform:uppercase;letter-spacing:.07em;align-self:flex-start';
+  selLabel.textContent = 'Choose your service';
+  body.appendChild(selLabel);
+
+  var selWrap = document.createElement('div'); selWrap.className = 'svc-selector';
+  SVCS.forEach(function(svc, i){
+    var opt = document.createElement('div'); opt.className = 'svc-opt' + (i===selectedSvc?' sel':'');
+    var s2 = parseInt(svc.was.replace('£','')) - parseInt(svc.price.replace('£',''));
+    opt.innerHTML = '<div class="svc-opt-name">'+svc.name+'</div>'
+      + '<div class="svc-opt-sub">'+svc.dur+' · <strong>'+svc.price+'</strong> <span style="text-decoration:line-through;color:var(--text-ter)">'+svc.was+'</span> <span class="discount-pill" style="font-size:10px;padding:1px 7px">£'+s2+' off</span></div>';
+    opt.onclick = function(){ selectedSvc=i; renderLanding(); };
+    selWrap.appendChild(opt);
+  });
+  body.appendChild(selWrap);
+
+  // Book CTA
+  var btn = document.createElement('button'); btn.className = 'book-btn';
+  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg> Book this slot';
+  btn.onclick = function(){
+    btn.innerHTML = '<div class="spinner"></div> Booking…'; btn.disabled = true;
+    setTimeout(function(){ landingState='booked'; renderLanding(); }, 1200);
+  };
+  body.appendChild(btn);
+  var note = document.createElement('p'); note.className = 'auth-note'; note.textContent = 'Signed in as Emma W. — no login needed.'; body.appendChild(note);
+}
+
+// ─── SMS BALANCE ──────────────────────────────────────────────────────────────
+function renderBalance() {
+  var body = document.getElementById('balance-body'); body.innerHTML = '';
+  var isPia = (activeStylist === 'pia');
+  var isBooth = (activeStylist === 'zara');
+  var bal = smsBalance[activeStylist];
+  var names = {pia:'Pia Andersen',marcus:'Marcus Reid',zara:'Zara Baptiste'};
+  var inits = {pia:'P',marcus:'M',zara:'Z'};
+  var colors = {pia:'var(--sc)',marcus:'var(--sp)',zara:'var(--st)'};
+  var cap = isBooth ? null : (activeStylist==='pia'?500:300);
+
+  // Stylist selector
+  var sel = document.createElement('div');
+  sel.style.cssText = 'display:flex;gap:6px;margin-bottom:4px';
+  ['pia','marcus','zara'].forEach(function(id){
+    var btn = document.createElement('button');
+    btn.style.cssText = 'flex:1;padding:8px;border-radius:var(--rs);border:1px solid var(--border-med);background:'+(activeStylist===id?'var(--sp)':'var(--card)')+';color:'+(activeStylist===id?'#fff':'var(--text-sec)')+';font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer';
+    btn.textContent = {pia:'Pia',marcus:'Marcus',zara:'Zara'}[id];
+    btn.onclick = function(){ activeStylist=id; renderBalance(); };
+    sel.appendChild(btn);
+  });
+  body.appendChild(sel);
+
+  // Balance card
+  var card = document.createElement('div'); card.className = 'balance-card';
+  var pct = cap ? Math.round(bal/cap*100) : 0;
+  var barColor = bal < 30 ? 'var(--sr)' : bal < 80 ? 'var(--sa)' : 'var(--st)';
+  card.innerHTML = '<div class="bal-header">'
+    + '<div><div class="bal-number" style="color:'+barColor+'">'+bal+'</div><div class="bal-label">SMS remaining'+(isBooth?' · self-managed':''+(cap?' of '+cap:''))+'</div></div>'
+    + '<div class="bal-av" style="background:'+colors[activeStylist]+'">'+inits[activeStylist]+'</div>'
+    + '</div>'
+    + (cap ? '<div class="bal-bar"><div class="bal-bar-inner" style="width:'+Math.min(100,pct)+'%;background:'+barColor+'"></div></div>'
+           + '<div class="bal-meta"><span>'+bal+' remaining</span><span>'+cap+' cap</span></div>' : '');
+  body.appendChild(card);
+
+  // Warning
+  if (bal < 30 && !isBooth) {
+    var w = document.createElement('div'); w.className = bal < 15 ? 'crit-box' : 'warn-box';
+    w.innerHTML = (bal<15?'🚨 Very low':'⚠') + ' Running low — ' + (isBooth ? 'buy more to continue campaigns' : 'request more from the salon owner');
+    body.appendChild(w);
+  }
+
+  if (isBooth) {
+    // Buy credits
+    var lbl = document.createElement('div'); lbl.className = 'hub-label'; lbl.style.marginBottom='10px'; lbl.textContent = 'Buy SMS credits'; body.appendChild(lbl);
+    var pkgs = [{credits:100,price:'£4.99'},{credits:250,price:'£9.99',popular:true},{credits:500,price:'£17.99'}];
+    var selPkg = 1;
+    pkgs.forEach(function(pkg, i){
+      var pc = document.createElement('div'); pc.className = 'pkg-card'+(i===selPkg?' sel':''); pc.id='pkg-'+i;
+      if (pkg.popular) pc.innerHTML = '<div class="pkg-popular">Most popular</div>';
+      pc.innerHTML += '<div class="pkg-row"><div><div class="pkg-credits">'+pkg.credits+' credits</div><div class="pkg-sub">~'+Math.round(pkg.credits*.03)+' potential bookings</div></div><div class="pkg-price">'+pkg.price+'</div></div>';
+      pc.onclick = function(){
+        document.querySelectorAll('.pkg-card').forEach(function(p){p.classList.remove('sel')});
+        pc.classList.add('sel'); selPkg = i;
+      };
+      body.appendChild(pc);
+    });
+    var payBtn = document.createElement('button'); payBtn.className = 'save-btn'; payBtn.style.marginTop='12px';
+    payBtn.innerHTML = '💳 Pay ' + pkgs[1].price;
+    payBtn.onclick = function(){
+      payBtn.innerHTML = '<div class="spinner"></div> Processing…'; payBtn.disabled=true;
+      setTimeout(function(){
+        smsBalance.zara += pkgs[selPkg].credits;
+        toast(pkgs[selPkg].credits+' credits added ✓', 'green');
+        renderBalance();
+      }, 1600);
+    };
+    body.appendChild(payBtn);
+  } else {
+    // Request top-up
+    var reqBtn = document.createElement('button'); reqBtn.className = 'save-btn'; reqBtn.style.marginTop='4px';
+    reqBtn.textContent = 'Request top-up from owner';
+    reqBtn.onclick = function(){
+      reqBtn.textContent = '✓ Request sent to salon owner';
+      reqBtn.style.background = 'var(--st)'; reqBtn.disabled = true;
+      toast('Top-up request sent', 'green');
+    };
+    body.appendChild(reqBtn);
+  }
+}
+
+// ─── SETTINGS ────────────────────────────────────────────────────────────────
+function renderSettings() {
+  var body = document.getElementById('sett-body'); body.innerHTML = '';
+
+  // Master toggle
+  var master = document.createElement('div'); master.className = 'sett-sec';
+  master.innerHTML = '<div class="sett-sec-hdr">AI Seat Filler — Master</div>'
+    + '<div class="sett-row"><div><div class="sr-l">AI Seat Filler enabled</div><div class="sr-d">Controls all detection and campaigns</div></div>'
+    + '<label class="tog"><input type="checkbox" checked onchange="if(!this.checked)toast(\'AI Seat Filler disabled for this salon\',\'red\')"><span class="tog-sl"></span></label></div>';
+  body.appendChild(master);
+
+  // Stylist selector
+  var stSel = document.createElement('div');
+  stSel.style.cssText = 'display:flex;gap:6px';
+  ['pia','marcus','zara'].forEach(function(id){
+    var btn = document.createElement('button');
+    btn.style.cssText = 'flex:1;padding:8px;border-radius:var(--rs);border:1px solid var(--border-med);background:'+(activeStylist===id?'var(--sp)':'var(--card)')+';color:'+(activeStylist===id?'#fff':'var(--text-sec)')+';font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer';
+    btn.textContent = {pia:'Pia',marcus:'Marcus',zara:'Zara'}[id];
+    btn.onclick = function(){ activeStylist=id; renderSettings(); };
+    stSel.appendChild(btn);
+  });
+  body.appendChild(stSel);
+
+  var sec = document.createElement('div'); sec.className = 'sett-sec';
+  var names = {pia:'Pia',marcus:'Marcus',zara:'Zara'};
+  sec.innerHTML = '<div class="sett-sec-hdr">'+names[activeStylist]+' — Detection modes</div>'
+    + '<div class="sett-row"><div><div class="sr-l">Cancellation detection</div><div class="sr-d">Fires on booking cancellation</div></div><label class="tog"><input type="checkbox" checked><span class="tog-sl"></span></label></div>'
+    + '<div class="sett-row"><div><div class="sr-l">Calendar gap detection</div><div class="sr-d">Min gap: <input type="number" value="45" class="num-in" style="margin-left:6px"> min</div></div><label class="tog"><input type="checkbox" checked><span class="tog-sl"></span></label></div>';
+  body.appendChild(sec);
+
+  var sec2 = document.createElement('div'); sec2.className = 'sett-sec';
+  sec2.innerHTML = '<div class="sett-sec-hdr">Client filters</div>'
+    + [['Lookahead window','7','days'],['Last visit filter','28','days'],['Last contacted','7','days'],['Upcoming booking excl.','14','days'],['SMS list cap','12','clients']].map(function(r){
+      return '<div class="sett-row"><div class="sr-l">'+r[0]+'</div><div style="display:flex;align-items:center;gap:7px"><input class="num-in" type="number" value="'+r[1]+'"><span style="font-size:12px;color:var(--text-sec)">'+r[2]+'</span></div></div>';
+    }).join('');
+  body.appendChild(sec2);
+
+  var sec3 = document.createElement('div'); sec3.className = 'sett-sec';
+  sec3.innerHTML = '<div class="sett-sec-hdr">Discounts</div>'
+    + '<div class="sett-row"><div><div class="sr-l">Cancellation discount</div><div class="sr-d">£25 off when same-day cancellation</div></div><label class="tog"><input type="checkbox" checked><span class="tog-sl"></span></label></div>'
+    + '<div class="sett-row"><div><div class="sr-l">Calendar gap discount</div><div class="sr-d">No discount currently set</div></div><label class="tog"><input type="checkbox"><span class="tog-sl"></span></label></div>';
+  body.appendChild(sec3);
+
+  var saveBtn = document.createElement('button'); saveBtn.className = 'save-btn';
+  saveBtn.textContent = 'Save settings';
+  saveBtn.onclick = function(){
+    saveBtn.innerHTML = '✓ Saved'; saveBtn.style.background='var(--st)';
+    setTimeout(function(){ saveBtn.textContent='Save settings'; saveBtn.style.background='var(--sp)'; saveBtn.disabled=false; }, 2000);
+    toast('Settings saved', 'green');
+  };
+  body.appendChild(saveBtn);
+}
+
+// ─── DESKTOP REPORTING ───────────────────────────────────────────────────────
+var PERIOD_DATA = {
+  '7d':  {slots:4,  rev:'£520',  conv:'5.8%', time:'9m 12s', cancBar:[3,1], batches:[68,22,10,0]},
+  '30d': {slots:14, rev:'£1,847',conv:'6.2%', time:'8m 32s', cancBar:[9,5], batches:[71,21,8,0]},
+  '90d': {slots:38, rev:'£5,210',conv:'6.8%', time:'7m 55s', cancBar:[23,15],batches:[74,18,7,1]},
+};
+var REPORT_ROWS = [
+  ['20 May','Pia','Cancellation','2:00pm',3,1,'£25','Filled','£140'],
+  ['19 May','Marcus','Calendar Gap','10:45am',6,2,'None','Filled','£95'],
+  ['19 May','Zara','Cancellation','3:00pm',3,1,'15%','Filled','£80'],
+  ['18 May','Pia','Calendar Gap','11:00am',12,4,'£20','Expired','—'],
+  ['17 May','Marcus','Cancellation','1:30pm',6,2,'None','Filled','£120'],
+  ['16 May','Pia','Calendar Gap','9:30am',3,1,'£30','Filled','£135'],
+  ['15 May','Zara','Cancellation','4:00pm',9,3,'None','Filled','£65'],
+  ['14 May','Marcus','Calendar Gap','2:30pm',12,4,'£15','Expired','—'],
+];
+
+function setPeriod(p, btn) {
+  currentPeriod = p;
+  document.querySelectorAll('.ptab').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  renderReporting();
+}
+
+function renderReporting() {
+  var db = document.getElementById('desk-body'); db.innerHTML = '';
+  var d = PERIOD_DATA[currentPeriod];
+
+  // KPIs
+  var kpiRow = document.createElement('div'); kpiRow.className = 'desk-kpi-row';
+  [{label:'Slots recovered',val:d.slots,delta:'↑ 3 vs last period',pos:true},
+   {label:'Revenue recovered',val:d.rev,delta:'↑ £340 vs last',pos:true},
+   {label:'SMS conversion rate',val:d.conv,delta:'Target 3–8% ✓',pos:true},
+   {label:'Avg. time to fill',val:d.time,delta:'Batch 1: '+d.batches[0]+'% of slots',pos:false}
+  ].forEach(function(k){
+    var card = document.createElement('div'); card.className = 'kpi-card';
+    card.innerHTML = '<div class="kpi-label">'+k.label+'</div><div class="kpi-val">'+k.val+'</div><div class="kpi-delta '+(k.pos?'pos':'neu')+'">'+k.delta+'</div>';
+    kpiRow.appendChild(card);
+  });
+  db.appendChild(kpiRow);
+
+  // Charts row
+  var chartsRow = document.createElement('div'); chartsRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px';
+
+  // Chart 1: Detection mode
+  var c1 = document.createElement('div'); c1.className = 'desk-section';
+  var maxB = Math.max(d.cancBar[0], d.cancBar[1]);
+  c1.innerHTML = '<div class="desk-sec-hdr">Slots by detection mode</div><div class="desk-sec-body">'
+    + '<div class="chart-bars" style="height:80px;align-items:flex-end;gap:20px;padding:0 10px">'
+    + '<div class="chart-bar-wrap"><div class="chart-bar-val">'+d.cancBar[0]+'</div><div class="chart-bar" style="background:var(--sp);height:'+Math.round(d.cancBar[0]/maxB*70)+'px"></div><div class="chart-bar-label">Cancellation</div></div>'
+    + '<div class="chart-bar-wrap"><div class="chart-bar-val">'+d.cancBar[1]+'</div><div class="chart-bar" style="background:var(--sc);height:'+Math.round(d.cancBar[1]/maxB*70)+'px"></div><div class="chart-bar-label">Calendar Gap</div></div>'
+    + '</div></div>';
+  chartsRow.appendChild(c1);
+
+  // Chart 2: Batch efficiency
+  var c2 = document.createElement('div'); c2.className = 'desk-section';
+  var bColors = ['var(--st)','var(--sa)','var(--sc)','var(--text-ter)'];
+  c2.innerHTML = '<div class="desk-sec-hdr">Batch efficiency</div><div class="desk-sec-body">'
+    + d.batches.map(function(pct,i){
+      return '<div class="hbar-row"><div class="hbar-label">Batch '+(i+1)+'</div><div class="hbar-track"><div class="hbar-fill" style="width:'+pct+'%;background:'+bColors[i]+'">'+(pct>5?'<span class="hbar-fill-text">'+pct+'%</span>':'')+'</div></div><div class="hbar-pct" style="color:'+bColors[i]+'">'+pct+'%</div></div>';
+    }).join('')+'</div>';
+  chartsRow.appendChild(c2);
+
+  // Chart 3: Discount vs fill rate
+  var c3 = document.createElement('div'); c3.className = 'desk-section';
+  c3.innerHTML = '<div class="desk-sec-hdr">Discount vs fill rate</div><div class="desk-sec-body">'
+    + '<div class="hbar-row"><div class="hbar-label" style="width:100px">With discount</div><div class="hbar-track"><div class="hbar-fill" style="width:87.5%;background:var(--st)"><span class="hbar-fill-text">7/8 filled</span></div></div><div class="hbar-pct" style="color:var(--st)">87.5%</div></div>'
+    + '<div class="hbar-row"><div class="hbar-label" style="width:100px">No discount</div><div class="hbar-track"><div class="hbar-fill" style="width:77.8%;background:var(--sa)"><span class="hbar-fill-text">7/9 filled</span></div></div><div class="hbar-pct" style="color:var(--sa)">77.8%</div></div>'
+    + '</div>';
+  chartsRow.appendChild(c3);
+  db.appendChild(chartsRow);
+
+  // Campaign table
+  var tSec = document.createElement('div'); tSec.className = 'desk-section';
+  tSec.innerHTML = '<div class="desk-sec-hdr">Recent campaigns <span style="font-size:12px;font-weight:400;color:var(--text-sec)">'+REPORT_ROWS.length+' campaigns</span></div>';
+  var tWrap = document.createElement('div'); tWrap.style.overflowX = 'auto';
+  var tbl = document.createElement('table'); tbl.className = 'campaign-table';
+  tbl.innerHTML = '<thead><tr>'+['Date','Stylist','Mode','Slot','Messaged','Batches','Discount','Outcome','Revenue'].map(function(h){return '<th>'+h+'</th>';}).join('')+'</tr></thead>'
+    + '<tbody>'+REPORT_ROWS.map(function(r){
+      var modeBadge = r[2]==='Cancellation'?'<span class="badge b-ready" style="font-size:10px">'+r[2]+'</span>':'<span class="badge" style="background:var(--sc-l);color:var(--sc);font-size:10px">'+r[2]+'</span>';
+      var outBadge = r[7]==='Filled'?'<span class="badge b-filled" style="font-size:10px">Filled</span>':'<span class="badge b-exp" style="font-size:10px">Expired</span>';
+      return '<tr><td>'+r[0]+'</td><td style="font-weight:500">'+r[1]+'</td><td>'+modeBadge+'</td><td>'+r[3]+'</td><td>'+r[4]+'</td><td>'+r[5]+'</td><td>'+r[6]+'</td><td>'+outBadge+'</td><td style="font-weight:700;color:'+(r[8]==='—'?'var(--text-ter)':'var(--st)')+'">'+r[8]+'</td></tr>';
+    }).join('')+'</tbody>';
+  tWrap.appendChild(tbl); tSec.appendChild(tWrap);
+  db.appendChild(tSec);
+
+  // Stylist breakdown
+  var stSec = document.createElement('div'); stSec.className = 'desk-section';
+  stSec.innerHTML = '<div class="desk-sec-hdr">Stylist breakdown</div>';
+  var stTbl = document.createElement('table'); stTbl.className = 'campaign-table';
+  stTbl.innerHTML = '<thead><tr>'+['Stylist','Slots recovered','Revenue','SMS used','Conversion rate'].map(function(h){return '<th>'+h+'</th>';}).join('')+'</tr></thead>'
+    + '<tbody>'
+    + '<tr><td><span style="display:inline-flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:var(--sc-l);color:var(--sc);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center">P</span>Pia</span></td><td>7</td><td style="font-weight:700;color:var(--st)">£1,012</td><td>42</td><td><span class="badge b-ready">7.1%</span></td></tr>'
+    + '<tr><td><span style="display:inline-flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:var(--sp-l);color:var(--sp);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center">M</span>Marcus</span></td><td>5</td><td style="font-weight:700;color:var(--st)">£620</td><td>38</td><td><span class="badge b-ready">5.8%</span></td></tr>'
+    + '<tr><td><span style="display:inline-flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:var(--st-l);color:var(--st);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center">Z</span>Zara</span></td><td>2</td><td style="font-weight:700;color:var(--st)">£215</td><td>18</td><td><span class="badge b-ready">4.2%</span></td></tr>'
+    + '</tbody>';
+  stSec.appendChild(stTbl);
+  db.appendChild(stSec);
+}
+
+function renderDeskSettings() {
+  var db = document.getElementById('desk-body'); db.innerHTML = '';
+  var wrap = document.createElement('div'); wrap.style.maxWidth = '540px';
+  wrap.innerHTML = '<h2 style="font-size:18px;font-weight:700;margin-bottom:20px;color:var(--text)">AI Seat Filler settings</h2>'
+    + '<div class="sett-sec" style="margin-bottom:14px"><div class="sett-sec-hdr">Detection modes</div>'
+    + '<div class="sett-row"><div><div class="sr-l">Cancellation</div><div class="sr-d">Fires when a booking is cancelled</div></div><label class="tog"><input type="checkbox" checked><span class="tog-sl"></span></label></div>'
+    + '<div class="sett-row"><div><div class="sr-l">Calendar gap</div><div class="sr-d">Min gap: <input type="number" value="45" class="num-in" style="margin-left:6px"> min</div></div><label class="tog"><input type="checkbox" checked><span class="tog-sl"></span></label></div>'
+    + '</div>'
+    + '<div class="sett-sec" style="margin-bottom:14px"><div class="sett-sec-hdr">Client filters</div>'
+    + [['Lookahead window','7','days'],['Last visit filter','28','days'],['Last contacted','7','days'],['Upcoming excl.','14','days'],['SMS list cap','12','clients']].map(function(r){
+      return '<div class="sett-row"><div class="sr-l">'+r[0]+'</div><div style="display:flex;align-items:center;gap:7px"><input class="num-in" type="number" value="'+r[1]+'"><span style="font-size:12px;color:var(--text-sec)">'+r[2]+'</span></div></div>';
+    }).join('')+'</div>'
+    + '<div class="sett-sec" style="margin-bottom:20px"><div class="sett-sec-hdr">SMS pool — Luxe Hair Studio</div>'
+    + '<div class="sett-row"><div class="sr-l">Total credits</div><div style="font-size:15px;font-weight:700;color:var(--text)">5,000</div></div>'
+    + '<div class="sett-row"><div class="sr-l">Allocated to stylists</div><div style="font-size:15px;font-weight:700;color:var(--text)">3,200</div></div>'
+    + '<div class="sett-row"><div class="sr-l">Salon overflow</div><div style="font-size:15px;font-weight:700;color:var(--st)">1,800</div></div>'
+    + '</div>'
+    + '<button class="save-btn" style="max-width:180px" onclick="var b=this;b.innerHTML=\'✓ Saved\';b.style.background=\'var(--st)\';setTimeout(function(){b.innerHTML=\'Save settings\';b.style.background=\'var(--sp)\'},2000);toast(\'Settings saved\',\'green\')">Save settings</button>';
+  db.appendChild(wrap);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function(){
+  renderDiary();
+  renderFeed();
+  renderReview();
+  renderLanding();
+  renderBalance();
+  renderSettings();
+  renderReporting();
+  goScreen('s-hub');
+});
+</script>
+</body>
+</html>

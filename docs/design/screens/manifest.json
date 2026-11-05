@@ -1,0 +1,582 @@
+[
+ {
+  "id": "01-account",
+  "number": "01",
+  "title": "01 Account",
+  "state": null,
+  "canvas_file": "Main.dc.html",
+  "tabled": false,
+  "html": "screens/html/01-account.html",
+  "png": "screens/png/01-account.png"
+ },
+ {
+  "id": "02-artist-profile",
+  "number": "02",
+  "title": "02 Artist profile",
+  "state": null,
+  "canvas_file": "Onb-Profile.dc.html",
+  "tabled": false,
+  "html": "screens/html/02-artist-profile.html",
+  "png": "screens/png/02-artist-profile.png"
+ },
+ {
+  "id": "02b-profile-photo--empty",
+  "number": "02b",
+  "title": "02b Profile photo",
+  "state": "empty",
+  "canvas_file": "Onb-Photo.dc.html",
+  "tabled": false,
+  "html": "screens/html/02b-profile-photo--empty.html",
+  "png": "screens/png/02b-profile-photo--empty.png"
+ },
+ {
+  "id": "02b-profile-photo--preview",
+  "number": "02b",
+  "title": "02b Profile photo",
+  "state": "preview",
+  "canvas_file": "Onb-Photo.dc.html",
+  "tabled": false,
+  "html": "screens/html/02b-profile-photo--preview.html",
+  "png": "screens/png/02b-profile-photo--preview.png"
+ },
+ {
+  "id": "03-services-deposits",
+  "number": "03",
+  "title": "03 Services & deposits",
+  "state": null,
+  "canvas_file": "Onb-Services.dc.html",
+  "tabled": false,
+  "html": "screens/html/03-services-deposits.html",
+  "png": "screens/png/03-services-deposits.png"
+ },
+ {
+  "id": "04-work-location",
+  "number": "04",
+  "title": "04 Work location",
+  "state": null,
+  "canvas_file": "Onb-Location.dc.html",
+  "tabled": false,
+  "html": "screens/html/04-work-location.html",
+  "png": "screens/png/04-work-location.png"
+ },
+ {
+  "id": "05-payments",
+  "number": "05",
+  "title": "05 Payments",
+  "state": null,
+  "canvas_file": "Onb-Payments.dc.html",
+  "tabled": false,
+  "html": "screens/html/05-payments.html",
+  "png": "screens/png/05-payments.png"
+ },
+ {
+  "id": "06-preview-publish",
+  "number": "06",
+  "title": "06 Preview & publish",
+  "state": null,
+  "canvas_file": "Onb-Publish.dc.html",
+  "tabled": false,
+  "html": "screens/html/06-preview-publish.html",
+  "png": "screens/png/06-preview-publish.png"
+ },
+ {
+  "id": "07-home",
+  "number": "07",
+  "title": "07 Home",
+  "state": null,
+  "canvas_file": "App-Home.dc.html",
+  "tabled": false,
+  "html": "screens/html/07-home.html",
+  "png": "screens/png/07-home.png"
+ },
+ {
+  "id": "08-calendar",
+  "number": "08",
+  "title": "08 Calendar",
+  "state": null,
+  "canvas_file": "App-Calendar.dc.html",
+  "tabled": false,
+  "html": "screens/html/08-calendar.html",
+  "png": "screens/png/08-calendar.png"
+ },
+ {
+  "id": "09-appointment-detail",
+  "number": "09",
+  "title": "09 Appointment detail",
+  "state": null,
+  "canvas_file": "App-Appointment.dc.html",
+  "tabled": false,
+  "html": "screens/html/09-appointment-detail.html",
+  "png": "screens/png/09-appointment-detail.png"
+ },
+ {
+  "id": "10-booking-request",
+  "number": "10",
+  "title": "10 Booking request",
+  "state": null,
+  "canvas_file": "App-Request.dc.html",
+  "tabled": false,
+  "html": "screens/html/10-booking-request.html",
+  "png": "screens/png/10-booking-request.png"
+ },
+ {
+  "id": "11-clients",
+  "number": "11",
+  "title": "11 Clients",
+  "state": null,
+  "canvas_file": "App-Clients.dc.html",
+  "tabled": false,
+  "html": "screens/html/11-clients.html",
+  "png": "screens/png/11-clients.png"
+ },
+ {
+  "id": "12-client-profile-notes",
+  "number": "12",
+  "title": "12 Client profile · notes",
+  "state": null,
+  "canvas_file": "App-Client.dc.html",
+  "tabled": false,
+  "html": "screens/html/12-client-profile-notes.html",
+  "png": "screens/png/12-client-profile-notes.png"
+ },
+ {
+  "id": "12b-client-visits",
+  "number": "12b",
+  "title": "12b Client visits",
+  "state": null,
+  "canvas_file": "App-ClientVisits.dc.html",
+  "tabled": false,
+  "html": "screens/html/12b-client-visits.html",
+  "png": "screens/png/12b-client-visits.png"
+ },
+ {
+  "id": "12c-visit-notes",
+  "number": "12c",
+  "title": "12c Visit notes",
+  "state": null,
+  "canvas_file": "App-VisitNote.dc.html",
+  "tabled": false,
+  "html": "screens/html/12c-visit-notes.html",
+  "png": "screens/png/12c-visit-notes.png"
+ },
+ {
+  "id": "13-client-import",
+  "number": "13",
+  "title": "13 Client import",
+  "state": null,
+  "canvas_file": "App-Import.dc.html",
+  "tabled": false,
+  "html": "screens/html/13-client-import.html",
+  "png": "screens/png/13-client-import.png"
+ },
+ {
+  "id": "14-ai-revenue-center",
+  "number": "14",
+  "title": "14 AI Revenue Center (tab)",
+  "state": null,
+  "canvas_file": "App-Growth.dc.html",
+  "tabled": false,
+  "html": "screens/html/14-ai-revenue-center.html",
+  "png": "screens/png/14-ai-revenue-center.png"
+ },
+ {
+  "id": "15-outreach-TABLED",
+  "number": "15",
+  "title": "15 Outreach approval · TABLED",
+  "state": null,
+  "canvas_file": "App-Outreach.dc.html",
+  "tabled": true,
+  "html": "screens/html/15-outreach-TABLED.html",
+  "png": "screens/png/15-outreach-TABLED.png"
+ },
+ {
+  "id": "16-settings",
+  "number": "16",
+  "title": "16 Settings · from Home photo",
+  "state": null,
+  "canvas_file": "App-Business.dc.html",
+  "tabled": false,
+  "html": "screens/html/16-settings.html",
+  "png": "screens/png/16-settings.png"
+ },
+ {
+  "id": "17-money",
+  "number": "17",
+  "title": "17 Money",
+  "state": null,
+  "canvas_file": "App-Money.dc.html",
+  "tabled": false,
+  "html": "screens/html/17-money.html",
+  "png": "screens/png/17-money.png"
+ },
+ {
+  "id": "18-get-paid--card",
+  "number": "18",
+  "title": "18 Get paid · card, Zelle, cash, other",
+  "state": "card",
+  "canvas_file": "App-RecordPayment.dc.html",
+  "tabled": false,
+  "html": "screens/html/18-get-paid--card.html",
+  "png": "screens/png/18-get-paid--card.png"
+ },
+ {
+  "id": "18-get-paid--zelle",
+  "number": "18",
+  "title": "18 Get paid · card, Zelle, cash, other",
+  "state": "zelle",
+  "canvas_file": "App-RecordPayment.dc.html",
+  "tabled": false,
+  "html": "screens/html/18-get-paid--zelle.html",
+  "png": "screens/png/18-get-paid--zelle.png"
+ },
+ {
+  "id": "18-get-paid--cash",
+  "number": "18",
+  "title": "18 Get paid · card, Zelle, cash, other",
+  "state": "cash",
+  "canvas_file": "App-RecordPayment.dc.html",
+  "tabled": false,
+  "html": "screens/html/18-get-paid--cash.html",
+  "png": "screens/png/18-get-paid--cash.png"
+ },
+ {
+  "id": "18-get-paid--other",
+  "number": "18",
+  "title": "18 Get paid · card, Zelle, cash, other",
+  "state": "other",
+  "canvas_file": "App-RecordPayment.dc.html",
+  "tabled": false,
+  "html": "screens/html/18-get-paid--other.html",
+  "png": "screens/png/18-get-paid--other.png"
+ },
+ {
+  "id": "19-locations-hours",
+  "number": "19",
+  "title": "19 Locations & hours",
+  "state": null,
+  "canvas_file": "App-Locations.dc.html",
+  "tabled": false,
+  "html": "screens/html/19-locations-hours.html",
+  "png": "screens/png/19-locations-hours.png"
+ },
+ {
+  "id": "20-calendar-sync",
+  "number": "20",
+  "title": "20 Calendar sync",
+  "state": null,
+  "canvas_file": "App-CalSync.dc.html",
+  "tabled": false,
+  "html": "screens/html/20-calendar-sync.html",
+  "png": "screens/png/20-calendar-sync.png"
+ },
+ {
+  "id": "21-show-my-qr",
+  "number": "21",
+  "title": "21 Show my QR · artist",
+  "state": null,
+  "canvas_file": "App-ShareCard.dc.html",
+  "tabled": false,
+  "html": "screens/html/21-show-my-qr.html",
+  "png": "screens/png/21-show-my-qr.png"
+ },
+ {
+  "id": "22-plan",
+  "number": "22",
+  "title": "22 Plan",
+  "state": null,
+  "canvas_file": "App-Plan.dc.html",
+  "tabled": false,
+  "html": "screens/html/22-plan.html",
+  "png": "screens/png/22-plan.png"
+ },
+ {
+  "id": "23-showcase-looks",
+  "number": "23",
+  "title": "23 Showcase · Looks",
+  "state": null,
+  "canvas_file": "Pub-Showcase.dc.html",
+  "tabled": false,
+  "html": "screens/html/23-showcase-looks.html",
+  "png": "screens/png/23-showcase-looks.png"
+ },
+ {
+  "id": "24-showcase-services",
+  "number": "24",
+  "title": "24 Showcase · Services",
+  "state": null,
+  "canvas_file": "Pub-Services.dc.html",
+  "tabled": false,
+  "html": "screens/html/24-showcase-services.html",
+  "png": "screens/png/24-showcase-services.png"
+ },
+ {
+  "id": "25-choose-date-time",
+  "number": "25",
+  "title": "25 Choose date & time",
+  "state": null,
+  "canvas_file": "Pub-Book.dc.html",
+  "tabled": false,
+  "html": "screens/html/25-choose-date-time.html",
+  "png": "screens/png/25-choose-date-time.png"
+ },
+ {
+  "id": "26-details-deposit",
+  "number": "26",
+  "title": "26 Details & deposit",
+  "state": null,
+  "canvas_file": "Pub-Checkout.dc.html",
+  "tabled": false,
+  "html": "screens/html/26-details-deposit.html",
+  "png": "screens/png/26-details-deposit.png"
+ },
+ {
+  "id": "27-sign-in",
+  "number": "27",
+  "title": "27 Sign in or create profile",
+  "state": null,
+  "canvas_file": "Pub-SignIn.dc.html",
+  "tabled": false,
+  "html": "screens/html/27-sign-in.html",
+  "png": "screens/png/27-sign-in.png"
+ },
+ {
+  "id": "28-booking-status--confirmed",
+  "number": "28",
+  "title": "28 Booking status + wallet",
+  "state": "confirmed",
+  "canvas_file": "Pub-Status.dc.html",
+  "tabled": false,
+  "html": "screens/html/28-booking-status--confirmed.html",
+  "png": "screens/png/28-booking-status--confirmed.png"
+ },
+ {
+  "id": "28-booking-status--request",
+  "number": "28",
+  "title": "28 Booking status + wallet",
+  "state": "request",
+  "canvas_file": "Pub-Status.dc.html",
+  "tabled": false,
+  "html": "screens/html/28-booking-status--request.html",
+  "png": "screens/png/28-booking-status--request.png"
+ },
+ {
+  "id": "29-client-profile-card",
+  "number": "29",
+  "title": "29 Client profile & card",
+  "state": null,
+  "canvas_file": "Pub-Profile.dc.html",
+  "tabled": false,
+  "html": "screens/html/29-client-profile-card.html",
+  "png": "screens/png/29-client-profile-card.png"
+ },
+ {
+  "id": "30-qr-scanned",
+  "number": "30",
+  "title": "30 QR scanned · client view",
+  "state": null,
+  "canvas_file": "Pub-Scan.dc.html",
+  "tabled": false,
+  "html": "screens/html/30-qr-scanned.html",
+  "png": "screens/png/30-qr-scanned.png"
+ },
+ {
+  "id": "31-fill-open-slots",
+  "number": "31",
+  "title": "31 Fill open slots · seat filler",
+  "state": null,
+  "canvas_file": "App-FillSlots.dc.html",
+  "tabled": false,
+  "html": "screens/html/31-fill-open-slots.html",
+  "png": "screens/png/31-fill-open-slots.png"
+ },
+ {
+  "id": "31b-review-slot-campaign",
+  "number": "31b",
+  "title": "31b Review slot campaign",
+  "state": null,
+  "canvas_file": "App-SlotCampaign.dc.html",
+  "tabled": false,
+  "html": "screens/html/31b-review-slot-campaign.html",
+  "png": "screens/png/31b-review-slot-campaign.png"
+ },
+ {
+  "id": "31c-live-campaign--live",
+  "number": "31c",
+  "title": "31c Live campaign · filled",
+  "state": "live",
+  "canvas_file": "App-SlotLive.dc.html",
+  "tabled": false,
+  "html": "screens/html/31c-live-campaign--live.html",
+  "png": "screens/png/31c-live-campaign--live.png"
+ },
+ {
+  "id": "31c-live-campaign--filled",
+  "number": "31c",
+  "title": "31c Live campaign · filled",
+  "state": "filled",
+  "canvas_file": "App-SlotLive.dc.html",
+  "tabled": false,
+  "html": "screens/html/31c-live-campaign--filled.html",
+  "png": "screens/png/31c-live-campaign--filled.png"
+ },
+ {
+  "id": "31d-claim-spot--open",
+  "number": "31d",
+  "title": "31d Claim this spot · client view",
+  "state": "open",
+  "canvas_file": "Pub-ClaimSlot.dc.html",
+  "tabled": false,
+  "html": "screens/html/31d-claim-spot--open.html",
+  "png": "screens/png/31d-claim-spot--open.png"
+ },
+ {
+  "id": "31d-claim-spot--just-taken",
+  "number": "31d",
+  "title": "31d Claim this spot · client view",
+  "state": "just-taken",
+  "canvas_file": "Pub-ClaimSlot.dc.html",
+  "tabled": false,
+  "html": "screens/html/31d-claim-spot--just-taken.html",
+  "png": "screens/png/31d-claim-spot--just-taken.png"
+ },
+ {
+  "id": "32-rebooking-pipeline",
+  "number": "32",
+  "title": "32 Rebooking pipeline",
+  "state": null,
+  "canvas_file": "App-Pipeline.dc.html",
+  "tabled": false,
+  "html": "screens/html/32-rebooking-pipeline.html",
+  "png": "screens/png/32-rebooking-pipeline.png"
+ },
+ {
+  "id": "33-win-back",
+  "number": "33",
+  "title": "33 Win back",
+  "state": null,
+  "canvas_file": "App-WinBack.dc.html",
+  "tabled": false,
+  "html": "screens/html/33-win-back.html",
+  "png": "screens/png/33-win-back.png"
+ },
+ {
+  "id": "34-autopilot-rules",
+  "number": "34",
+  "title": "34 Autopilot rules",
+  "state": null,
+  "canvas_file": "App-Autopilot.dc.html",
+  "tabled": false,
+  "html": "screens/html/34-autopilot-rules.html",
+  "png": "screens/png/34-autopilot-rules.png"
+ },
+ {
+  "id": "35-autopilot-messages",
+  "number": "35",
+  "title": "35 Autopilot messages",
+  "state": null,
+  "canvas_file": "App-Templates.dc.html",
+  "tabled": false,
+  "html": "screens/html/35-autopilot-messages.html",
+  "png": "screens/png/35-autopilot-messages.png"
+ },
+ {
+  "id": "36-autopilot-activity",
+  "number": "36",
+  "title": "36 Autopilot activity",
+  "state": null,
+  "canvas_file": "App-AutopilotLog.dc.html",
+  "tabled": false,
+  "html": "screens/html/36-autopilot-activity.html",
+  "png": "screens/png/36-autopilot-activity.png"
+ },
+ {
+  "id": "37-reports",
+  "number": "37",
+  "title": "37 Reports (tab)",
+  "state": null,
+  "canvas_file": "App-Reports.dc.html",
+  "tabled": false,
+  "html": "screens/html/37-reports.html",
+  "png": "screens/png/37-reports.png"
+ },
+ {
+  "id": "38-reputation",
+  "number": "38",
+  "title": "38 Reputation",
+  "state": null,
+  "canvas_file": "App-Reputation.dc.html",
+  "tabled": false,
+  "html": "screens/html/38-reputation.html",
+  "png": "screens/png/38-reputation.png"
+ },
+ {
+  "id": "39-leave-review",
+  "number": "39",
+  "title": "39 Leave a review · client view",
+  "state": null,
+  "canvas_file": "Pub-Review.dc.html",
+  "tabled": false,
+  "html": "screens/html/39-leave-review.html",
+  "png": "screens/png/39-leave-review.png"
+ },
+ {
+  "id": "40-concierge-inbox",
+  "number": "40",
+  "title": "40 Concierge inbox",
+  "state": null,
+  "canvas_file": "App-Concierge.dc.html",
+  "tabled": false,
+  "html": "screens/html/40-concierge-inbox.html",
+  "png": "screens/png/40-concierge-inbox.png"
+ },
+ {
+  "id": "41-conversation-thread",
+  "number": "41",
+  "title": "41 Handled conversation",
+  "state": null,
+  "canvas_file": "App-ConvoThread.dc.html",
+  "tabled": false,
+  "html": "screens/html/41-conversation-thread.html",
+  "png": "screens/png/41-conversation-thread.png"
+ },
+ {
+  "id": "42-quote-request",
+  "number": "42",
+  "title": "42 Quote request · needs you",
+  "state": null,
+  "canvas_file": "App-QuoteRequest.dc.html",
+  "tabled": false,
+  "html": "screens/html/42-quote-request.html",
+  "png": "screens/png/42-quote-request.png"
+ },
+ {
+  "id": "43-concierge-setup",
+  "number": "43",
+  "title": "43 Teach your concierge",
+  "state": null,
+  "canvas_file": "App-ConciergeSetup.dc.html",
+  "tabled": false,
+  "html": "screens/html/43-concierge-setup.html",
+  "png": "screens/png/43-concierge-setup.png"
+ },
+ {
+  "id": "44-running-late",
+  "number": "44",
+  "title": "44 Running late",
+  "state": null,
+  "canvas_file": "App-RunningLate.dc.html",
+  "tabled": false,
+  "html": "screens/html/44-running-late.html",
+  "png": "screens/png/44-running-late.png"
+ },
+ {
+  "id": "45-client-chat-spanish",
+  "number": "45",
+  "title": "45 Client view · text in Spanish",
+  "state": null,
+  "canvas_file": "Pub-ConciergeChat.dc.html",
+  "tabled": false,
+  "html": "screens/html/45-client-chat-spanish.html",
+  "png": "screens/png/45-client-chat-spanish.png"
+ }
+]

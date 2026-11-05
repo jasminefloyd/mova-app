@@ -1,0 +1,73 @@
+# Decision log
+
+Normative source: `docs/product/ENGINEERING_SPEC.md` v2.0. Locked decisions are transcribed without resolving approval items.
+
+## Locked decisions
+
+| ID | Decision | Status | Owner / date | Source |
+|---|---|---|---|---|
+| D-01 | Primary ICP: independent hairstylists (booth/chair renters, suite renters, commission stylists who control some client relationships, multi-location stylists, stylists changing salons). Secondary: comparable independent beauty pros. Schemas must not hardcode hair as the only profession. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-02 | One mobile-first web app / PWA: React + TypeScript + Vite on Vercel. **Amended:** a thin native shell is permitted in **V1.1 only** for Tap to Pay (A-17). No other native code in V1. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-03 | Supabase: Postgres, RLS, Auth, Storage, Edge Functions, scheduled triggers, durable jobs. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-04 | **Amended by D-15.** Public showcase and booking work without an account. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-05 | V1 pillars: showcase; multi-location calendar; booking and payment orchestration; client relationships and notes; AI Revenue Center (rebooking, seat filler, win-back, forecast); AI Concierge; reports and reputation; Google presence; wallet cards; bilingual acquisition. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-06 | Instant booking only where Mova controls the inventory; request-to-book where a salon must verify. A request is never shown as confirmed. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-07 | **Amended.** V1 payments: Stripe-processed card / Apple Pay / Google Pay / other Stripe-supported wallets via online checkout and **pay links** (sent by text or shown as a QR code); manually recorded **cash** and **other**; **Zelle** conditional (A-16); salon-collected tracked only. No Mova fee on non-Mova-processed money. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-08 | Proposed plans unchanged (Free $0 + 1.5%, Pro $19 + 1.0%, AI Growth $39 + 0.5%, Stripe processing extra) and **not approved**. Pricing competitiveness review is open (A-26). | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-09 | Google Calendar outbound sync and Apple private subscribed `.ics` feed. No inbound availability blocking in V1. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-10 | Locked visual identity: forest `#18392F`, botanical `#264E3E`, sage `#8BA990`, mint `#C9E6D4`, peach `#E7C3AA`, ivory `#F7F5EF`; Manrope (display) + DM Sans (UI). | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-11 | No production launch without the product owner's written GO. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-12 | US bilingual: `en-US` default, `es-US` full V1; artist and client locales independent. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-13 | Bilingual acquisition surfaces (marketing site, calculator, waitlist, attribution). Paid ad test is a proposal, not spend. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-14 | Logo is a concept until vector, trademark and domain clearance (A-07, A-15). | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-15 | **New.** Artist bottom tabs: **Home, Calendar, Clients, AI Revenue, Reports.** "AI Revenue" is a working label (screen title "AI Revenue Center"); the name lives in one i18n key so it can change. **Settings** (former Business tab) opens from the artist's photo on Home. Money is reached from Reports and Settings. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-16 | **New.** One **Mova-wide client profile** per person, usable across every stylist they book with ("My stylists"). Optional, passwordless (one-time code by text or email). Guest booking stays available everywhere. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-17 | **New.** Stylist **client notes are private to the stylist** (tenant data). Neither the client nor any other stylist can read them, including through the Mova-wide profile. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-18 | **New.** Deposits are configured **per service** (none / fixed amount / percent). They are charged only when the booking's location has `payment_collector = artist`. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-19 | **New.** Card payments in V1: Stripe online checkout, pay links by text, and pay-link QR shown at the chair. Tap to Pay is V1.1. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-20 | **New.** Win-back messages are always **manual** (stylist taps Send). | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-21 | **New.** Seat filler: stylist **approves each slot text by default**; per-artist autopilot for slot texts is an optional setting (default OFF). Social posts are always shared manually through the device share sheet. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-22 | **New.** Rebooking **autopilot** sends approved templates under stylist-approved rules to consenting clients only (subject to A-21). | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-23 | **New.** Reviews come from two sources shown together: **Mova verified-visit reviews** and **Google reviews** (Google ingest conditional on A-05/A-20). | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-24 | **New.** AI Concierge acts as the **stylist's** assistant (not a salon receptionist): answers on Instagram, a Mova business text number, missed-call text-back and page chat; always discloses it is AI; quotes, exceptions and complaints always go to the stylist. Voice answering is out of V1. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-25 | **New.** Marketing campaigns beyond rebooking/slot offers (canvas screen 15) are **tabled**. Do not build screen 15. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+| D-26 | **New.** Home is the stylist's at-a-glance view: KPI strip (this week's revenue, % of hours booked, rating), "Needs you", today, coming up. | LOCKED | Not recorded in source / spec v2.0 | §0.3 |
+
+## Approval register
+
+| ID | Decision needed | Blocks | Safe default | Status | Owner | Decision date / rationale |
+|---|---|---|---|---|---|---|
+| A-01 | Plan entitlements, quotas (incl. message credits, concierge volume) | F12, F18, F22 | Configurable entitlement matrix; all features available in staging; no live paywall. | OPEN | Product owner approval required | — |
+| A-02 | Stripe Connect account type, charge topology, merchant of record, refunds, disputes, negative balances, tax | F06, F23 | Adapter + sandbox only; live processing flag OFF. | OPEN | Product owner approval required | — |
+| A-03 | Email and SMS providers, sending limits, cost caps | F11, F08, F18, F22 | Provider adapter with sandbox transport; no live sends. | OPEN | Product owner approval required | — |
+| A-04 | AI model vendor(s), evaluation thresholds, spend caps | F08, F18, F22 | Provider-agnostic interface; deterministic baselines; LLM features OFF until eval passes. | OPEN | Product owner approval required | — |
+| A-05 | Google Business Profile eligibility and permitted API operations | F09, F21 | Manual booking-link guidance; Google reviews ingest OFF. | OPEN | Product owner approval required | — |
+| A-06 | Apple/Google Wallet issuer, certificates, refresh | F10, F16 | QR/share card and "save as image" fallback. | OPEN | Product owner approval required | — |
+| A-07 | Domain, trademark, artist URL shape | F02, F14, F16 | Configurable `PUBLIC_BASE_URL`; `/artists/:handle`; never assume ownership. | OPEN | Product owner approval required | — |
+| A-08 | Consent purposes, retention schedule, salon data rights, marketing compliance (TCPA/CAN-SPAM/state law) | F05, F08, F15, F17, F18, F22 | Minimal collection; explicit opt-in per channel and purpose; legal review before live messaging. | OPEN | Product owner approval required | — |
+| A-09 | Push notification coverage and channels | F11 | In-app + email; web push where supported. | OPEN | Product owner approval required | — |
+| A-10 | Calendar event detail visible to external providers | F07 | Service name only; no client contact data. | OPEN | Product owner approval required | — |
+| A-11 | Earnings estimate semantics | F06, F20 | Label as estimate; no payroll/tax claims. | OPEN | Product owner approval required | — |
+| A-12 | Human review of Spanish legal/financial/consent copy and AI templates | F13 | Block release of unreviewed critical strings. | OPEN | Product owner approval required | — |
+| A-13 | Public rendering (SSR/prerender), canonical, hreflang | F02, F14 | ADR-0003 before P04 acceptance. | OPEN | Product owner approval required | — |
+| A-14 | Waitlist privacy, anti-bot, production domain | F14 | No production submissions until verified. | OPEN | Product owner approval required | — |
+| A-15 | Final logo vector and usage | Brand | Concept asset only. | OPEN | Product owner approval required | — |
+| A-16 | **Zelle integration feasibility** (bank/processor partner, verification method, cost) | F23 | Zelle = recorded-only, labelled. If not approved by P17, remove Zelle from UI and copy. | OPEN | Product owner approval required | — |
+| A-17 | **Tap to Pay (V1.1)**: native shell approach, Stripe Terminal, Apple Tap to Pay entitlement | F23 (V1.1) | Not built in V1. Pay-link QR is the in-person path. | OPEN | Product owner approval required | — |
+| A-18 | **Mova-wide client identity**: legal model for a platform-level customer account alongside each stylist's client list; data-sharing boundaries | F15, F16 | Build per §5.3 with strict separation; launch flag OFF until approved. | OPEN | Product owner approval required | — |
+| A-19 | **Client wallet card** pass design and issuance (extends A-06) | F16 | Save-as-image + QR fallback. | OPEN | Product owner approval required | — |
+| A-20 | **Reviews policy**: verified-visit rules, moderation, fake-review policy, display rules (incl. FTC rules on reviews), Google reviews display rights | F21 | Mova reviews collected but hidden from public until approved; Google ingest OFF. | OPEN | Product owner approval required | — |
+| A-21 | **Rebooking autopilot** (sending approved templates without per-message approval) | F08 | Autopilot master switch hidden; per-message approval mode only. | OPEN | Product owner approval required | — |
+| A-22 | **Seat-filler messaging volume and cost** (waves, credits per plan) | F18 | Waves capped by config; sandbox only. | OPEN | Product owner approval required | — |
+| A-23 | **Instagram messaging**: Meta app review, permissions, messaging-window policy | F22 | Instagram channel OFF; other channels work. | OPEN | Product owner approval required | — |
+| A-24 | **US business texting registration** (A2P 10DLC or toll-free verification), per-artist vs shared numbers, number porting | F11, F18, F22 | Sandbox numbers only; no live texting. | OPEN | Product owner approval required | — |
+| A-25 | **AI Concierge** safety review, evaluation set, escalation rules, disclosure copy | F22 | Concierge OFF in production; staging with test numbers only. | OPEN | Product owner approval required | — |
+| A-26 | **Pricing competitiveness** vs incumbents (e.g., flat all-in processing offers) | F12 | Plan prices remain configurable PROPOSED values. | OPEN | Product owner approval required | — |
+| A-27 | **Sensitive client notes** (allergies, sensitivities, photos): retention, export, deletion, encryption | F17 | Encrypt sensitive note fields; default retention TBD; exportable/deletable. | OPEN | Product owner approval required | — |
+| A-28 | **Social posting**: V1 = device share sheet only; any direct platform posting later | F18 | Share sheet + image download only. | OPEN | Product owner approval required | — |
+| A-29 | **Review request messaging** (purpose classification and frequency) | F21 | Email only, one request per completed visit, opt-out honoured. | OPEN | Product owner approval required | — |
+| A-30 | **Concierge business hours / response promises** shown to clients | F22 | No response-time promises in client copy. | OPEN | Product owner approval required | — |
+
+## Owner constraint: database identifier prefix
+
+The product owner instructed that every project-created Supabase database/schema object use the `mova_` prefix. This is a binding owner requirement for implementation. The v2.0 spec currently gives unprefixed examples; see CR-001. No approval is self-resolved here.
