@@ -16,12 +16,12 @@
 
 | Task | Description | Status | Notes / evidence |
 |---|---|---|---|
-| P00-T01 | Repo, protected `main`, PR policy, pinned Node/pnpm | BLOCKED | Local Git initialized on `main` with `origin` set to `https://github.com/jasminefloyd/mova-app.git`; PR policy documented; Node 20.13.1 and pnpm 9.15.0 pinned. Remote is empty (size 0); rulesets endpoint returned `[]`; branch-protection endpoint returned 403, so branch protection is unknown and cannot be configured with available GitHub operations (CR-006). |
+| P00-T01 | Repo, protected `main`, PR policy, pinned Node/pnpm | BLOCKED | Local Git initialized on `main` with `origin` set to `https://github.com/jasminefloyd/mova-app.git`; PR policy documented; Node 20.13.1 and pnpm 9.15.0 pinned. P00 was pushed to remote `main` as `2fc4d6d`; rulesets endpoint returned `[]`; branch-protection endpoint returned 403, so branch protection remains unknown and cannot be configured with available GitHub operations (CR-006). |
 | P00-T02 | Copy spec; record SHA-256 | DONE – AWAITING REVIEW | Spec unchanged; SHA-256 `d9a9650c06e64cd4aa8b6d70ec8cb606866775cbd13aa3e2442452e6a2058f59` matches `BASELINE_MANIFEST.md` and verifier output. |
 | P00-T03 | Transcribe D-01–D-26 and A-01–A-30 with status in `DECISION_LOG.md` | DONE – AWAITING REVIEW | 26 locked decisions and 30 OPEN approvals transcribed; no approvals self-resolved. |
 | P00-T04 | `REQUIREMENTS_MATRIX.csv`: rows for every F01-AC…F23-AC, Fnn-V1 items, D-xx, A-xx, T01–T60, NFRs | DONE – AWAITING REVIEW | 264 unique rows; all 90 feature ACs, 38 inherited criteria, 26 D items, 30 A items, 60 tests and 20 NFRs have QA case IDs. |
 | P00-T05 | `SCREEN_INVENTORY.md`: canvas 01–45 → routes → components → ACs | DONE – AWAITING REVIEW | 51 artboards copied from `SCREEN_MAP.md`; 15 is TABLED; implementation paths are blank pending their phases. |
-| P00-T06 | `scripts/verify-phase.mjs` rejects missing evidence/approvals; CI wired | DONE – AWAITING REVIEW | CI workflow and verifier added; structural run passed; negative fixture checks reject missing completion evidence and an unrecorded approval resolution. Remote CI run is pending repository setup. |
+| P00-T06 | `scripts/verify-phase.mjs` rejects missing evidence/approvals; CI wired | IN PROGRESS | Local structural run and negative fixture checks passed. First remote run failed at `setup-node` because pnpm caching was attempted before `corepack enable`; workflow ordering/cache configuration corrected and awaiting rerun. |
 | — | Other P00 files: `CHANGE_REQUESTS.md`, `TEST_EVIDENCE.md`, `RELEASE_ACCEPTANCE.md`, `SALES_PROMISES_MATRIX.md`, ADR-0001…0003, `.env.example`, workspace config | DONE – AWAITING REVIEW | P00 deliverables created; external branch protection and owner review remain open. |
 
 P00 acceptance:
@@ -83,5 +83,5 @@ Gates: G1 Architecture · G2a Design (after P02) · G2 UX · G3 Feature complete
 
 | Date (UTC) | Who | Phase | What changed | Next action |
 |---|---|---|---|---|
-| 2026-11-05 | Codex | P00 | Initialized local Git on `main` with GitHub `origin`; pinned Node/pnpm; added workspace, lockfile, CI, P00 verifier, 264-row traceability matrix, 51-artboard inventory, decision/change/evidence/release/sales docs, ADRs 0001–0003; verified structural gate and negative checks; committed locally (not pushed). P00 remains blocked on remote branch protection and awaiting review. | Repository owner verifies/enables `main` protection and required check; review P00 evidence; do not proceed past P00 until gate closes. |
+| 2026-11-05 | Codex | P00 | Initialized local Git on `main` with GitHub `origin`; pinned Node/pnpm; added workspace, lockfile, CI, P00 verifier, 264-row traceability matrix, 51-artboard inventory, decision/change/evidence/release/sales docs, ADRs 0001–0003; verified structural gate and negative checks; pushed P00 to remote `main`; diagnosed and corrected the first CI run's pnpm setup ordering. | Verify the corrected remote CI run; repository owner verifies/enables `main` protection and required check; review P00 evidence before closing the phase. |
 | 2026-11-05 | Claude (setup) | P00 | Added folder structure (§3.2), `AGENTS.md`, spec v2.0, implementation plan, QA strategy + 539 cases, design handoff (`docs/design`), `BASELINE_MANIFEST.md`, this file | Codex: finish P00-T01, T03–T06 and the remaining P00 files; then P01 |
