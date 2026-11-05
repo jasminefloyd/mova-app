@@ -10,18 +10,18 @@
 | **Phase status** | BLOCKED |
 | **Spec baseline** | `docs/product/ENGINEERING_SPEC.md` v2.0 (SHA-256 in `BASELINE_MANIFEST.md`) |
 | **Last updated** | 2026-11-05 · P00 local workspace, traceability, ADRs, verifier and CI scaffold completed; GitHub branch protection remains unverified |
-| **Next gate** | Verify GitHub `main` protection and required check, run CI after initial repository setup, and obtain review of P00 evidence; then P01 → P02 → **G2a design approval** (stop there per spec §16) |
+| **Next gate** | Verify GitHub `main` protection and required check, and obtain review of P00 evidence; then P01 → P02 → **G2a design approval** (stop there per spec §16) |
 
 ## P00 tasks
 
 | Task | Description | Status | Notes / evidence |
 |---|---|---|---|
-| P00-T01 | Repo, protected `main`, PR policy, pinned Node/pnpm | BLOCKED | Local Git initialized on `main` with `origin` set to `https://github.com/jasminefloyd/mova-app.git`; PR policy documented; Node 20.13.1 and pnpm 9.15.0 pinned. P00 was pushed to remote `main` as `2fc4d6d`; rulesets endpoint returned `[]`; branch-protection endpoint returned 403, so branch protection remains unknown and cannot be configured with available GitHub operations (CR-006). |
+| P00-T01 | Repo, protected `main`, PR policy, pinned Node/pnpm | BLOCKED | Local Git initialized on `main` with `origin` set to `https://github.com/jasminefloyd/mova-app.git`; PR policy documented; Node 20.13.1 and pnpm 9.15.0 pinned. P00 is on remote `main` as `7a2abe8`; rulesets endpoint returned `[]`; branch-protection endpoint returned 403, so branch protection remains unknown and cannot be configured with available GitHub operations (CR-006). |
 | P00-T02 | Copy spec; record SHA-256 | DONE – AWAITING REVIEW | Spec unchanged; SHA-256 `d9a9650c06e64cd4aa8b6d70ec8cb606866775cbd13aa3e2442452e6a2058f59` matches `BASELINE_MANIFEST.md` and verifier output. |
 | P00-T03 | Transcribe D-01–D-26 and A-01–A-30 with status in `DECISION_LOG.md` | DONE – AWAITING REVIEW | 26 locked decisions and 30 OPEN approvals transcribed; no approvals self-resolved. |
 | P00-T04 | `REQUIREMENTS_MATRIX.csv`: rows for every F01-AC…F23-AC, Fnn-V1 items, D-xx, A-xx, T01–T60, NFRs | DONE – AWAITING REVIEW | 264 unique rows; all 90 feature ACs, 38 inherited criteria, 26 D items, 30 A items, 60 tests and 20 NFRs have QA case IDs. |
 | P00-T05 | `SCREEN_INVENTORY.md`: canvas 01–45 → routes → components → ACs | DONE – AWAITING REVIEW | 51 artboards copied from `SCREEN_MAP.md`; 15 is TABLED; implementation paths are blank pending their phases. |
-| P00-T06 | `scripts/verify-phase.mjs` rejects missing evidence/approvals; CI wired | IN PROGRESS | Local structural run and negative fixture checks passed. Remote runs exposed setup-node's pre-Corepack pnpm-cache lookup, then a Corepack 0.28 registry-signature key mismatch. CI now installs the pinned pnpm version with `pnpm/action-setup`; awaiting rerun. |
+| P00-T06 | `scripts/verify-phase.mjs` rejects missing evidence/approvals; CI wired | DONE – AWAITING REVIEW | Local structural run and negative fixture checks passed. Remote CI run 3 for `7a2abe8` passed frozen install and P00 verification after pinning `pnpm/action-setup` to pnpm 9.15.0. The first two failed runs and their verified causes are recorded in `TEST_EVIDENCE.md`. |
 | — | Other P00 files: `CHANGE_REQUESTS.md`, `TEST_EVIDENCE.md`, `RELEASE_ACCEPTANCE.md`, `SALES_PROMISES_MATRIX.md`, ADR-0001…0003, `.env.example`, workspace config | DONE – AWAITING REVIEW | P00 deliverables created; external branch protection and owner review remain open. |
 
 P00 acceptance:
@@ -83,5 +83,5 @@ Gates: G1 Architecture · G2a Design (after P02) · G2 UX · G3 Feature complete
 
 | Date (UTC) | Who | Phase | What changed | Next action |
 |---|---|---|---|---|
-| 2026-11-05 | Codex | P00 | Initialized local Git on `main` with GitHub `origin`; pinned Node/pnpm; added workspace, lockfile, CI, P00 verifier, 264-row traceability matrix, 51-artboard inventory, decision/change/evidence/release/sales docs, ADRs 0001–0003; verified structural gate and negative checks; pushed P00 to remote `main`; inspected two failed workflow runs and adjusted pnpm setup. | Verify the updated remote CI run; repository owner verifies/enables `main` protection and required check; review P00 evidence before closing the phase. |
+| 2026-11-05 | Codex | P00 | Initialized local Git on `main` with GitHub `origin`; pinned Node/pnpm; added workspace, lockfile, CI, P00 verifier, 264-row traceability matrix, 51-artboard inventory, decision/change/evidence/release/sales docs, ADRs 0001–0003; verified structural gate and negative checks; pushed P00 to remote `main`; diagnosed two CI failures from logs, corrected pnpm setup, and verified CI run 3 passed on `7a2abe8`. | Repository owner verifies/enables `main` protection and required check; review P00 evidence before closing the phase. |
 | 2026-11-05 | Claude (setup) | P00 | Added folder structure (§3.2), `AGENTS.md`, spec v2.0, implementation plan, QA strategy + 539 cases, design handoff (`docs/design`), `BASELINE_MANIFEST.md`, this file | Codex: finish P00-T01, T03–T06 and the remaining P00 files; then P01 |
