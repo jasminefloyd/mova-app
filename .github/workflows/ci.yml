@@ -18,6 +18,9 @@ jobs:
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
-      - run: corepack enable
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 9.15.0
+          run_install: false
       - run: pnpm install --frozen-lockfile
       - run: pnpm phase:verify
