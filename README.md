@@ -34,9 +34,7 @@ After installing the pinned Node version, use Corepack to run `pnpm install --fr
 The checked-in `.env.example` lists blank placeholders; copy it to `.env.local` and fill only the values
 needed for the environment. Never commit local env files or expose server-only keys through `VITE_` variables.
 
-## Pull request policy
+## Git workflow
 
-Changes to `main` must arrive through a pull request. The required check is `P00 contract gate`; reviewers
-must inspect the diff and evidence before merge. The GitHub `main` branch must have branch protection enabled
-with direct pushes blocked and the required check enforced. The remote repository settings are not controlled
-by this local scaffold; confirm them in GitHub before treating P00-T01 as complete.
+The product owner directs committing directly to `main` by default. Branch protection is not required. Use a
+different branch or workflow only when the product owner says otherwise.

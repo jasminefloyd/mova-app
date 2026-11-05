@@ -13,6 +13,7 @@ You are implementing **Mova**, a mobile-first web app (PWA) that gives independe
 - **apps/web:** React + TypeScript (strict) + Vite PWA on Vercel; React Router, TanStack Query, Zod, Tailwind mapped to design tokens, react-i18next (ADR-0002).
 - **Supabase:** Postgres with RLS, Auth (artist and client roles), Storage, Edge Functions (Deno), scheduled triggers, durable jobs.
 - **Database naming:** every project-created Supabase database/schema object must have a name beginning with `mova_`, including schemas, tables, database functions, views, indexes, triggers, types, sequences, policies and constraints. This owner requirement takes precedence over unprefixed object names in Engineering Spec v2.0; preserve specified behavior while applying the prefix. `docs/engineering/CHANGE_REQUESTS.md` CR-001 tracks the required versioned spec reconciliation.
+- **Git workflow:** commit directly to `main` by default. Branch protection is not required. Follow a different branch or workflow only when the product owner says otherwise.
 - **apps/mobile is reserved for V1.1** (Expo shell for Tap to Pay, approval A-17). Do not add code there in V1.
 - Pin Node/pnpm and all dependency versions in P00/P01.
 

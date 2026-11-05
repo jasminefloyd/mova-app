@@ -7,16 +7,16 @@
 | | |
 |---|---|
 | **Current phase** | **P00 — Contract lock & bootstrap** |
-| **Phase status** | BLOCKED |
+| **Phase status** | IN PROGRESS |
 | **Spec baseline** | `docs/product/ENGINEERING_SPEC.md` v2.0 (SHA-256 in `BASELINE_MANIFEST.md`) |
-| **Last updated** | 2026-11-05 · P00 local workspace, traceability, ADRs, verifier and CI scaffold completed; GitHub branch protection remains unverified |
-| **Next gate** | Verify GitHub `main` protection and required check, and obtain review of P00 evidence; then P01 → P02 → **G2a design approval** (stop there per spec §16) |
+| **Last updated** | 2026-11-05 · owner waived branch protection; direct commits to `main` are the default; P00 deliverables and CI are awaiting review |
+| **Next gate** | Obtain review of P00 evidence and close the phase; then P01 → P02 → **G2a design approval** (stop there per spec §16) |
 
 ## P00 tasks
 
 | Task | Description | Status | Notes / evidence |
 |---|---|---|---|
-| P00-T01 | Repo, protected `main`, PR policy, pinned Node/pnpm | BLOCKED | Local Git initialized on `main` with `origin` set to `https://github.com/jasminefloyd/mova-app.git`; PR policy documented; Node 20.13.1 and pnpm 9.15.0 pinned. P00 is on remote `main` as `7a2abe8`; rulesets endpoint returned `[]`; branch-protection endpoint returned 403, so branch protection remains unknown and cannot be configured with available GitHub operations (CR-006). |
+| P00-T01 | Repo, protected `main`, PR policy, pinned Node/pnpm | DONE – AWAITING REVIEW | Product owner waived branch protection and directs commits to `main` by default. Local `main` tracks `origin/main`; Node 20.13.1 and pnpm 9.15.0 are pinned. See CR-006 for the owner override. |
 | P00-T02 | Copy spec; record SHA-256 | DONE – AWAITING REVIEW | Spec unchanged; SHA-256 `d9a9650c06e64cd4aa8b6d70ec8cb606866775cbd13aa3e2442452e6a2058f59` matches `BASELINE_MANIFEST.md` and verifier output. |
 | P00-T03 | Transcribe D-01–D-26 and A-01–A-30 with status in `DECISION_LOG.md` | DONE – AWAITING REVIEW | 26 locked decisions and 30 OPEN approvals transcribed; no approvals self-resolved. |
 | P00-T04 | `REQUIREMENTS_MATRIX.csv`: rows for every F01-AC…F23-AC, Fnn-V1 items, D-xx, A-xx, T01–T60, NFRs | DONE – AWAITING REVIEW | 264 unique rows; all 90 feature ACs, 38 inherited criteria, 26 D items, 30 A items, 60 tests and 20 NFRs have QA case IDs. |
@@ -37,7 +37,7 @@ P00 acceptance:
 
 | Phase | Name | Status | Depends on | Approvals needed to finish (build may proceed behind flags) |
 |---|---|---|---|---|
-| P00 | Contract lock & bootstrap | BLOCKED | — | — |
+| P00 | Contract lock & bootstrap | IN PROGRESS | — | — |
 | P01 | App shell, environments, Supabase infra, i18n runtime | NOT STARTED | P00 | — |
 | P02 | Design system & navigation | NOT STARTED | P01 | Design sign-off (G2a) |
 | P03 | Identity, tenancy, onboarding, profile photo | NOT STARTED | P02 | — |
@@ -77,11 +77,10 @@ Gates: G1 Architecture · G2a Design (after P02) · G2 UX · G3 Feature complete
 | F04-AC08 wording (running-late texts during quiet hours) needs confirmation | P06 | Product owner |
 | v1-inherited ACs (`Fnn-V1-nn`, 38 items) should be added to spec §1; currently traced to QA source pending spec revision | Contract consistency | Product owner |
 | Owner-required `mova_` prefix conflicts with unprefixed database examples in spec v2.0; prefix itself is confirmed by owner, but a versioned spec update is needed before DB implementation | P03+ database work | Product owner / engineering |
-| GitHub branch-protection status cannot be inspected (403) or changed with available connector operations; rulesets endpoint returned an empty list | P00-T01 | Repository owner |
 
 ## Session log
 
 | Date (UTC) | Who | Phase | What changed | Next action |
 |---|---|---|---|---|
-| 2026-11-05 | Codex | P00 | Initialized local Git on `main` with GitHub `origin`; pinned Node/pnpm; added workspace, lockfile, CI, P00 verifier, 264-row traceability matrix, 51-artboard inventory, decision/change/evidence/release/sales docs, ADRs 0001–0003; verified structural gate and negative checks; pushed P00 to remote `main`; diagnosed two CI failures from logs, corrected pnpm setup, and verified CI run 3 passed on `7a2abe8`. | Repository owner verifies/enables `main` protection and required check; review P00 evidence before closing the phase. |
+| 2026-11-05 | Codex | P00 | Initialized local Git on `main` with GitHub `origin`; pinned Node/pnpm; added workspace, lockfile, CI, P00 verifier, 264-row traceability matrix, 51-artboard inventory, decision/change/evidence/release/sales docs, ADRs 0001–0003; verified structural gate and negative checks; pushed P00 to remote `main`; diagnosed two CI failures from logs, corrected pnpm setup, and verified CI run 3 passed; recorded owner instruction that direct commits to `main` are the default and branch protection is not required. | Obtain owner review of P00 evidence; do not start P01 until P00 review closes. |
 | 2026-11-05 | Claude (setup) | P00 | Added folder structure (§3.2), `AGENTS.md`, spec v2.0, implementation plan, QA strategy + 539 cases, design handoff (`docs/design`), `BASELINE_MANIFEST.md`, this file | Codex: finish P00-T01, T03–T06 and the remaining P00 files; then P01 |
