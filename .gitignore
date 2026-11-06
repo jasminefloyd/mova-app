@@ -23,3 +23,5 @@ test-results/
 tests/visual/**/__diff__/
 tests/ai-evals/**/runs/
 docs/
+.vercel
+.env*
