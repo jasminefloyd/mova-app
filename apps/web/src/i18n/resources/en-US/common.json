@@ -814,7 +814,7 @@
     "workBooth": "Booth renter", "workSuite": "Suite renter", "workCommission": "Commission stylist", "workOther": "Other beauty professional",
     "marketingOptIn": "Email me about early access and Mova news. Unsubscribe anytime.", "join": "Join the waitlist",
     "privacyNote": "We only use your email to contact you about Mova.", "privacy": "Privacy policy", "terms": "Terms", "legal": "Legal links",
-    "watchWalkthrough": "Watch the 90-second walkthrough", "walkthrough": "Mova product walkthrough video",
+    "watchWalkthrough": "Watch the 40-second video", "walkthrough": "Mova product video",
     "benefitsTitle": "What you'll get", "benefitScanTitle": "Booked from one scan",
     "benefitScanBody": "Your page, services and QR code in one place. Clients scan, pick a time and book, with no back-and-forth in your DMs.",
     "benefitGapsTitle": "Fill last-minute gaps", "benefitGapsBody": "When someone cancels, Mova finds the clients who fit the open slot and drafts the text. Nothing goes out until you approve it.",

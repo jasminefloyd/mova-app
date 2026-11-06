@@ -60,7 +60,7 @@ export default function MarketingHome() {
         </div>
         <figure className="mova-marketing-home__walkthrough">
           <video ref={videoRef} controls preload="metadata" playsInline poster="/media/Mova_Walkthrough_poster.jpg" aria-label={t('marketing.walkthrough')}>
-            <source src="/media/Mova_Walkthrough_v2.mp4" type="video/mp4" />
+            <source src="/media/Mova_Loop_40s.mp4" type="video/mp4" />
           </video>
           <button type="button" className="mova-marketing-home__video-link" onClick={playWalkthrough}>
             <span aria-hidden="true" />{t('marketing.watchWalkthrough')}

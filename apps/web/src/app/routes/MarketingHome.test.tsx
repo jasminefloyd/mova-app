@@ -11,7 +11,7 @@ describe('temporary public landing page', () => {
     const html = renderToStaticMarkup(<MemoryRouter><MarketingHome /></MemoryRouter>);
     expect(html.match(/href="\/auth"/g)).toHaveLength(2);
     expect(html).toContain('Your business moves with you.');
-    expect(html).toContain('/media/Mova_Walkthrough_v2.mp4');
+    expect(html).toContain('/media/Mova_Loop_40s.mp4');
     expect(html).toContain('Join the waitlist');
   });
 
