@@ -1,6 +1,6 @@
 # Decision log
 
-Normative source: `docs/product/ENGINEERING_SPEC.md` v2.0. Locked decisions are transcribed without resolving approval items.
+Normative source: `docs/product/ENGINEERING_SPEC.md` v2.2. Locked decisions are transcribed without resolving unrelated approval items.
 
 ## Locked decisions
 
@@ -37,22 +37,22 @@ Normative source: `docs/product/ENGINEERING_SPEC.md` v2.0. Locked decisions are 
 
 | ID | Decision needed | Blocks | Safe default | Status | Owner | Decision date / rationale |
 |---|---|---|---|---|---|---|
-| A-01 | Plan entitlements, quotas (incl. message credits, concierge volume) | F12, F18, F22 | Configurable entitlement matrix; all features available in staging; no live paywall. | OPEN | Product owner approval required | — |
-| A-02 | Stripe Connect account type, charge topology, merchant of record, refunds, disputes, negative balances, tax | F06, F23 | Adapter + sandbox only; live processing flag OFF. | OPEN | Product owner approval required | — |
+| A-01 | Plan entitlements, quotas (incl. message credits, concierge volume) | F12, F18, F22 | Configurable entitlement matrix; available in local integration fixtures; no live paywall. | OPEN | Product owner approval required | — |
+| A-02 | Stripe Connect account type, charge topology, merchant of record, refunds, disputes, negative balances, tax | F06, F23 | Owner selected direct charges to stylist accounts and 1.5% (150 bps) on successful direct card transactions. Account type, merchant-of-record/risk, refund/fee-reversal, processor-fee and tax details remain open; live processing OFF. | OPEN — PARTIAL DECISION | Product owner approval required | 2026-11-06; ADR-0007 |
 | A-03 | Email and SMS providers, sending limits, cost caps | F11, F08, F18, F22 | Provider adapter with sandbox transport; no live sends. | OPEN | Product owner approval required | — |
 | A-04 | AI model vendor(s), evaluation thresholds, spend caps | F08, F18, F22 | Provider-agnostic interface; deterministic baselines; LLM features OFF until eval passes. | OPEN | Product owner approval required | — |
 | A-05 | Google Business Profile eligibility and permitted API operations | F09, F21 | Manual booking-link guidance; Google reviews ingest OFF. | OPEN | Product owner approval required | — |
 | A-06 | Apple/Google Wallet issuer, certificates, refresh | F10, F16 | QR/share card and "save as image" fallback. | OPEN | Product owner approval required | — |
-| A-07 | Domain, trademark, artist URL shape | F02, F14, F16 | Configurable `PUBLIC_BASE_URL`; `/artists/:handle`; never assume ownership. | OPEN | Product owner approval required | — |
+| A-07 | Domain and trademark ownership; artist URL shape | F02, F14, F16 | Owner specified parent `mova-beauty.co`, public `/a/:handle`, operator `ops.mova-beauty.co/:clientID`, reserved admin host `admin.mova-beauty.co`, and custom client domains later. DNS/trademark ownership and clearance remain unverified. | OPEN | Product owner approval required | — |
 | A-08 | Consent purposes, retention schedule, salon data rights, marketing compliance (TCPA/CAN-SPAM/state law) | F05, F08, F15, F17, F18, F22 | Minimal collection; explicit opt-in per channel and purpose; legal review before live messaging. | OPEN | Product owner approval required | — |
 | A-09 | Push notification coverage and channels | F11 | In-app + email; web push where supported. | OPEN | Product owner approval required | — |
 | A-10 | Calendar event detail visible to external providers | F07 | Service name only; no client contact data. | OPEN | Product owner approval required | — |
 | A-11 | Earnings estimate semantics | F06, F20 | Label as estimate; no payroll/tax claims. | OPEN | Product owner approval required | — |
 | A-12 | Human review of Spanish legal/financial/consent copy and AI templates | F13 | Block release of unreviewed critical strings. | OPEN | Product owner approval required | — |
-| A-13 | Public rendering (SSR/prerender), canonical, hreflang | F02, F14 | ADR-0003 before P04 acceptance. | OPEN | Product owner approval required | — |
+| A-13 | Public rendering (SSR/prerender), canonical, hreflang | F02, F14 | Owner selected SSR on Vercel; artist alternates are `/a/:handle?locale=en-US` and `/a/:handle?locale=es-US`, both canonicalizing to `/a/:handle`; marketing routes emit reciprocal language alternates. | APPROVED | Product owner | 2026-11-05 |
 | A-14 | Waitlist privacy, anti-bot, production domain | F14 | No production submissions until verified. | OPEN | Product owner approval required | — |
 | A-15 | Final logo vector and usage | Brand | Concept asset only. | OPEN | Product owner approval required | — |
-| A-16 | **Zelle integration feasibility** (bank/processor partner, verification method, cost) | F23 | Zelle = recorded-only, labelled. If not approved by P17, remove Zelle from UI and copy. | OPEN | Product owner approval required | — |
+| A-16 | **Zelle integration feasibility** (bank/processor partner, verification method, cost) | F23 | Owner-directed safe default: Zelle is recorded-only and labelled; no transfer processing or verification. Remove Zelle if feasibility is not approved by P17. | OPEN — SAFE DEFAULT IN USE | Product owner approval required | 2026-11-06; ADR-0007 |
 | A-17 | **Tap to Pay (V1.1)**: native shell approach, Stripe Terminal, Apple Tap to Pay entitlement | F23 (V1.1) | Not built in V1. Pay-link QR is the in-person path. | OPEN | Product owner approval required | — |
 | A-18 | **Mova-wide client identity**: legal model for a platform-level customer account alongside each stylist's client list; data-sharing boundaries | F15, F16 | Build per §5.3 with strict separation; launch flag OFF until approved. | OPEN | Product owner approval required | — |
 | A-19 | **Client wallet card** pass design and issuance (extends A-06) | F16 | Save-as-image + QR fallback. | OPEN | Product owner approval required | — |
@@ -61,13 +61,20 @@ Normative source: `docs/product/ENGINEERING_SPEC.md` v2.0. Locked decisions are 
 | A-22 | **Seat-filler messaging volume and cost** (waves, credits per plan) | F18 | Waves capped by config; sandbox only. | OPEN | Product owner approval required | — |
 | A-23 | **Instagram messaging**: Meta app review, permissions, messaging-window policy | F22 | Instagram channel OFF; other channels work. | OPEN | Product owner approval required | — |
 | A-24 | **US business texting registration** (A2P 10DLC or toll-free verification), per-artist vs shared numbers, number porting | F11, F18, F22 | Sandbox numbers only; no live texting. | OPEN | Product owner approval required | — |
-| A-25 | **AI Concierge** safety review, evaluation set, escalation rules, disclosure copy | F22 | Concierge OFF in production; staging with test numbers only. | OPEN | Product owner approval required | — |
+| A-25 | **AI Concierge** safety review, evaluation set, escalation rules, disclosure copy | F22 | Concierge OFF in production; local integration with provider test numbers only. | OPEN | Product owner approval required | — |
 | A-26 | **Pricing competitiveness** vs incumbents (e.g., flat all-in processing offers) | F12 | Plan prices remain configurable PROPOSED values. | OPEN | Product owner approval required | — |
-| A-27 | **Sensitive client notes** (allergies, sensitivities, photos): retention, export, deletion, encryption | F17 | Encrypt sensitive note fields; default retention TBD; exportable/deletable. | OPEN | Product owner approval required | — |
+| A-27 | **Sensitive client notes** (allergies, sensitivities, photos): retention, export, deletion, encryption | F17 | Application-level AES-256-GCM envelope encryption for sensitive note text using a 32-byte deployment KEK; artist-initiated export includes decrypted notes; deleting the client cascades notes and note media records; no automatic retention deletion until a retention period is defined. Private visit media remains in private storage and requires signed URLs. | APPROVED (engineering lead under owner delegation) | Engineering lead | 2026-11-05; owner delegated phase decisions to engineering lead until manual review is requested. |
 | A-28 | **Social posting**: V1 = device share sheet only; any direct platform posting later | F18 | Share sheet + image download only. | OPEN | Product owner approval required | — |
 | A-29 | **Review request messaging** (purpose classification and frequency) | F21 | Email only, one request per completed visit, opt-out honoured. | OPEN | Product owner approval required | — |
 | A-30 | **Concierge business hours / response promises** shown to clients | F22 | No response-time promises in client copy. | OPEN | Product owner approval required | — |
 
 ## Owner constraint: database identifier prefix
 
-The product owner instructed that every project-created Supabase database/schema object use the `mova_` prefix. This is a binding owner requirement for implementation. The v2.0 spec currently gives unprefixed examples; see CR-001. No approval is self-resolved here.
+The product owner instructed that every project-created Supabase database/schema object use the `mova_` prefix. CR-001 was approved on 2026-11-05 and is normative in Engineering Spec v2.2 §§4.1 and 4.6. Owner additionally directed that no unprefixed PostgreSQL extensions be installed; see v2.2 §4.5. No database objects have been created.
+
+## Approved change requests
+
+| Change request | Owner decision | Normative effect |
+|---|---|---|
+| CR-001 | APPROVED, 2026-11-05 | All project-created database objects and Storage buckets use the `mova_` prefix; see spec v2.2 §§4.1 and 4.6. |
+| CR-007 | APPROVED, 2026-11-05 | No hosted staging environment; local integration evidence satisfies phase evidence; production deployment remains blocked until written GO. See spec v2.2 §13.1 and §15. |

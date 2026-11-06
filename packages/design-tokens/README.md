@@ -1,4 +1,6 @@
-# packages/design-tokens
+# @mova/design-tokens
 
-Built in P01-T01 / P02-T01 from **`docs/design/tokens/tokens.json`** (source of truth; `tokens.css` mirrors it). Exports CSS variables and the
-Tailwind theme. Fonts: self-host the woff2 files in `docs/design/fonts/` (SIL OFL 1.1).
+CSS variables and self-hosted font assets for the approved Mova design system.
+`docs/design/tokens/tokens.json` is the source of truth; `src/tokens.css` is its
+runtime CSS representation. The font files and SIL Open Font Licenses are
+copied from `docs/design/fonts/`.

@@ -1,0 +1,17 @@
+{
+  "name": "@mova/domain",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./deposit": "./src/deposit.ts",
+    "./availability": "./src/availability.ts",
+    "./booking": "./src/booking.ts",
+    "./money": "./src/money.ts",
+    "./urls": "./src/urls.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

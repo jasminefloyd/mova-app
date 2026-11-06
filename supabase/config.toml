@@ -1,0 +1,106 @@
+project_id = "mova-app"
+
+[functions.public-artist]
+verify_jwt = false
+
+[functions.waitlist-signup]
+verify_jwt = false
+
+[functions.availability-search]
+verify_jwt = false
+
+[functions.location-save]
+verify_jwt = false
+
+[functions.booking-create]
+verify_jwt = false
+
+[functions.booking-status]
+verify_jwt = false
+
+[functions.booking-transition]
+verify_jwt = false
+
+[functions.booking-reschedule]
+verify_jwt = false
+
+[functions.client-crud]
+verify_jwt = false
+
+[functions.client-consents]
+verify_jwt = false
+
+[functions.client-import]
+verify_jwt = false
+
+[functions.client-notes]
+verify_jwt = false
+
+[functions.manual-payment-record]
+verify_jwt = false
+
+[functions.money-summary]
+verify_jwt = false
+
+[functions.payment-settings]
+verify_jwt = false
+
+[functions.visit-notes]
+verify_jwt = false
+
+[functions.before-you-start]
+verify_jwt = false
+
+[functions.calendar-google-connect]
+verify_jwt = false
+
+[functions.calendar-google-callback]
+verify_jwt = false
+
+[functions.calendar-sync-run]
+verify_jwt = false
+
+[functions.calendar-ics-feed]
+verify_jwt = false
+
+[functions.customer-profile]
+verify_jwt = false
+
+[functions.client-card-token]
+verify_jwt = false
+
+[functions.client-card-landing]
+verify_jwt = false
+
+[functions.scan-landing]
+verify_jwt = false
+
+[functions.messaging-settings]
+verify_jwt = false
+
+[functions.notification-inbox]
+verify_jwt = false
+
+[functions.messaging-dispatch]
+verify_jwt = false
+
+[functions.messaging-events]
+verify_jwt = false
+
+[functions.notification-dispatch]
+verify_jwt = false
+
+[functions.revenue-center]
+verify_jwt = false
+
+[functions.slot-campaign]
+verify_jwt = false
+
+[functions.forecast-summary]
+verify_jwt = false
+
+[functions.concierge-artist]
+verify_jwt = false
+
+[functions.concierge-web-chat]
+verify_jwt = false

@@ -1,5 +1,5 @@
 # MOVA — Engineering Handoff & End-to-End Implementation Specification
-**Version:** 2.0 · **Date:** 2026-11-05 · **Status:** Normative implementation contract. Product-owner approvals listed in §0.5 remain mandatory before any affected capability goes live. · **Starting state:** empty repository
+**Version:** 2.3 · **Date:** 2026-11-05 · **Status:** Normative implementation contract. Product-owner approvals listed in §0.5 remain mandatory before any affected capability goes live. · **Starting state:** empty repository
 
 > **Mission.** Build a production-quality, mobile-first Progressive Web App that gives independent hairstylists a business that moves with them: a portable public showcase, location-aware booking, client relationships, honest money tracking, an AI Revenue Center, an AI Concierge, and reporting — in US English and US Spanish. **Brand:** `mova.` — *Your business moves with you.*
 >
@@ -80,19 +80,19 @@ No agent may resolve these. Each lives in `docs/engineering/DECISION_LOG.md` wit
 
 | ID | Decision needed | Blocks | Safe default until approved |
 |---|---|---|---|
-| A-01 | Plan entitlements, quotas (incl. message credits, concierge volume) | F12, F18, F22 | Configurable entitlement matrix; all features available in staging; no live paywall. |
+| A-01 | Plan entitlements, quotas (incl. message credits, concierge volume) | F12, F18, F22 | Configurable entitlement matrix; available in local integration fixtures; no live paywall. |
 | A-02 | Stripe Connect account type, charge topology, merchant of record, refunds, disputes, negative balances, tax | F06, F23 | Adapter + sandbox only; live processing flag OFF. |
 | A-03 | Email and SMS providers, sending limits, cost caps | F11, F08, F18, F22 | Provider adapter with sandbox transport; no live sends. |
 | A-04 | AI model vendor(s), evaluation thresholds, spend caps | F08, F18, F22 | Provider-agnostic interface; deterministic baselines; LLM features OFF until eval passes. |
 | A-05 | Google Business Profile eligibility and permitted API operations | F09, F21 | Manual booking-link guidance; Google reviews ingest OFF. |
 | A-06 | Apple/Google Wallet issuer, certificates, refresh | F10, F16 | QR/share card and "save as image" fallback. |
-| A-07 | Domain, trademark, artist URL shape | F02, F14, F16 | Configurable `PUBLIC_BASE_URL`; `/artists/:handle`; never assume ownership. |
+| A-07 | Domain and trademark ownership remain unverified; owner specified URL shape | F02, F14, F16 | Public `https://mova-beauty.co/a/:handle`; operator `https://ops.mova-beauty.co/:clientID`; admin `https://admin.mova-beauty.co` (no client-facing admin view); clients use the parent domain until custom domains are added. Do not assume ownership or clearance. |
 | A-08 | Consent purposes, retention schedule, salon data rights, marketing compliance (TCPA/CAN-SPAM/state law) | F05, F08, F15, F17, F18, F22 | Minimal collection; explicit opt-in per channel and purpose; legal review before live messaging. |
 | A-09 | Push notification coverage and channels | F11 | In-app + email; web push where supported. |
 | A-10 | Calendar event detail visible to external providers | F07 | Service name only; no client contact data. |
 | A-11 | Earnings estimate semantics | F06, F20 | Label as estimate; no payroll/tax claims. |
 | A-12 | Human review of Spanish legal/financial/consent copy and AI templates | F13 | Block release of unreviewed critical strings. |
-| A-13 | Public rendering (SSR/prerender), canonical, hreflang | F02, F14 | ADR-0003 before P04 acceptance. |
+| A-13 | Public rendering (SSR/prerender), canonical, hreflang | F02, F14 | Resolved by owner approval and ADR-0003, 2026-11-05. |
 | A-14 | Waitlist privacy, anti-bot, production domain | F14 | No production submissions until verified. |
 | A-15 | Final logo vector and usage | Brand | Concept asset only. |
 | A-16 | **Zelle integration feasibility** (bank/processor partner, verification method, cost) | F23 | Zelle = recorded-only, labelled. If not approved by P17, remove Zelle from UI and copy. |
@@ -104,7 +104,7 @@ No agent may resolve these. Each lives in `docs/engineering/DECISION_LOG.md` wit
 | A-22 | **Seat-filler messaging volume and cost** (waves, credits per plan) | F18 | Waves capped by config; sandbox only. |
 | A-23 | **Instagram messaging**: Meta app review, permissions, messaging-window policy | F22 | Instagram channel OFF; other channels work. |
 | A-24 | **US business texting registration** (A2P 10DLC or toll-free verification), per-artist vs shared numbers, number porting | F11, F18, F22 | Sandbox numbers only; no live texting. |
-| A-25 | **AI Concierge** safety review, evaluation set, escalation rules, disclosure copy | F22 | Concierge OFF in production; staging with test numbers only. |
+| A-25 | **AI Concierge** safety review, evaluation set, escalation rules, disclosure copy | F22 | Concierge OFF in production; local integration with provider test numbers only. |
 | A-26 | **Pricing competitiveness** vs incumbents (e.g., flat all-in processing offers) | F12 | Plan prices remain configurable PROPOSED values. |
 | A-27 | **Sensitive client notes** (allergies, sensitivities, photos): retention, export, deletion, encryption | F17 | Encrypt sensitive note fields; default retention TBD; exportable/deletable. |
 | A-28 | **Social posting**: V1 = device share sheet only; any direct platform posting later | F18 | Share sheet + image download only. |
@@ -124,10 +124,20 @@ No agent may resolve these. Each lives in `docs/engineering/DECISION_LOG.md` wit
 | ADR-0007 | Payments topology: Stripe Connect + pay links + QR; Zelle option analysis — **before P08** |
 | ADR-0008 | Wallet passes (Apple PassKit web service, Google Wallet) — **before P10** |
 | ADR-0009 | Reporting data model (daily rollups vs materialized views) and traffic analytics — **before P14** |
-| ADR-0010 | Background jobs, scheduling cadence, leasing — **before P06** |
+| ADR-0010 | P06 request expiry schedule and outbox handoff — **before P06** |
+| ADR-0012 | Extension-free booking concurrency and idempotency — **before P06** |
 
 ### 0.7 Change summary v1.1 → v2.0
 Navigation changed (D-15); Mova-wide client profile, sign-in, client card and wallet added (F15, F16); client general and per-visit notes added (F17); deposits per service (D-18); date-first booking picker; Looks and Services showcase tabs; QR scan landing; seat filler adapted from the AI Seat Filler brief (F18); AI Revenue Center forecast (F19); Reports tab (F20); reviews and reputation (F21); AI Concierge (F22); Get-paid flows with pay links/QR and conditional Zelle (F23); rebooking autopilot under rules (F08); marketing campaigns tabled; Tap to Pay to V1.1; profile photo step; running-late action.
+
+### 0.8 Approved amendment history
+- **v2.1 (2026-11-05):** Owner-approved CR-001 defines the `mova_` prefix for project-created database objects and records the P03/P04 identifier mapping in §4.6. Owner-approved CR-007 replaces hosted staging with local integration evidence for phase completion; production deployment remains prohibited until written GO under §15. Original v2.0 source hash remains recorded in `docs/engineering/BASELINE_MANIFEST.md`.
+- **v2.2 (2026-11-05):** Owner selected SSR on Vercel for public rendering and artist hreflang alternates at `?locale=en-US` / `?locale=es-US`, both canonicalizing to `/artists/:handle` under F02, and approved deriving the Settings › Services and Settings › Portfolio references from the approved design system. No unprefixed PostgreSQL extensions may be installed; handle comparison uses a prefixed normalized-value index, sensitive notes use application-level envelope encryption (A-27), and the booking-overlap concurrency mechanism remains for a P06 ADR. A-07 domain/trademark ownership remains open. See ADR-0003 and CR-002.
+- **v2.3 (2026-11-05):** Owner specified `mova-beauty.co` as the parent host, public artist paths at `/a/:handle`, operator paths at `ops.mova-beauty.co/:clientID`, and `admin.mova-beauty.co` as a reserved admin-only host whose product view is not yet defined; no client-facing admin view is exposed. Artist locale alternates use `/a/:handle?locale=en-US` and `?locale=es-US`, both canonicalizing to `/a/:handle`. Custom client domains are deferred; public client-facing routes remain on the parent host. Domain/trademark ownership and DNS control remain unverified under A-07.
+- **v2.4 (2026-11-05):** Owner clarified the company homepage is `/`, account creation/sign-in is `/auth`, and the operator URL segment is the client/business ID. The authenticated operator home is `https://ops.mova-beauty.co/{clientID}/`; all operator routes are nested beneath that tenant path. The old `/app/` prefix is removed. Unauthenticated operator access redirects to the parent-domain `/auth` and returns to the requested tenant after authentication.
+- **v2.5 (2026-11-06):** Owner requested sequential operator-facing IDs: BID for businesses, CID for clients, and AID for appointments. Rooted Beauty is assigned BID 1 by the backfill ordering. UUIDs remain internal relational and authorization keys. Local migration 0023 and the pending application changes are tracked as CR-008; database behavior is not verified until the migration is applied and tested.
+
+- **v2.6 (2026-11-06):** Owner directed that the temporary coming-soon landing page live at app route `/`, replacing the former “separate site” route assumption for this temporary surface. Its Sign-up and Sign-in actions go to `/auth`; waitlist entries are persisted, no email is sent on submission, and the page displays a saved confirmation. The full company website will replace this temporary page later. A-14 remains open; do not accept production submissions until privacy, anti-bot, and production-domain checks are verified. See CR-009.
 
 ---
 
@@ -164,7 +174,7 @@ Independent stylists build a clientele across rented chairs, suites and commissi
 | F11 | PWA, notifications, messaging foundation | LOCKED / A-03, A-09, A-24 | all |
 | F12 | Plans, subscriptions, entitlements | PROPOSED / A-01, A-26 | 22 |
 | F13 | Internationalization: en-US + es-US | LOCKED | all |
-| F14 | Acquisition: bilingual marketing, calculator, waitlist | LOCKED | (separate site) |
+| F14 | Acquisition: bilingual marketing, calculator, waitlist | PARTIAL — owner-directed temporary root page; full acquisition remains P17 | `/` |
 | F15 | Mova-wide client profile and sign-in | LOCKED / A-18 | 26, 27, 29 |
 | F16 | Client card, wallet pass, QR scan landing | LOCKED / A-19 | 28, 29, 30 |
 | F17 | Client notes: general, "Before you start", per-visit notes and photos | LOCKED / A-27 | 09, 12, 12b, 12c |
@@ -184,7 +194,7 @@ Acceptance criteria use IDs `Fnn-ACnn`. Each AC becomes at least one row in `REQ
 **Flow:** sign up (email + password; verify email) → choose app language → artist profile (display name, handle, specialties ≤ 5, bio) → **profile photo step (02b)** → services and deposits → work location(s) → payments (optional, skippable) → preview → publish.
 
 **Rules**
-- Handle: case-insensitive unique, `^[a-z0-9-]{3,30}$`, reserved-word list, transactional claim; availability shown inline.
+- Handle: normalized to lowercase, pattern `^[a-z0-9-]{3,30}$`, reserved-word list, transactional claim; availability shown inline. Enforce normalized uniqueness with the explicitly named `mova_artist_profiles_handle_lower_uq` unique index on `lower(handle)`; do not install `citext`.
 - Onboarding progress persists server-side (`onboarding_progress`) and resumes on any device.
 - Photo step: camera or library; client-side crop to circle with zoom; server validates MIME (`image/jpeg|png|webp|heic`→converted), max 10 MB, strips EXIF location, generates 96/256/512 px variants. "Later" skips without blocking publish; Home and Settings keep a nudge until a photo exists.
 - Showcase may publish without Stripe, without a bookable location, and without a photo. Booking turns on **per location** only when that location has hours, ≥1 active service and policies.
@@ -199,13 +209,13 @@ Acceptance criteria use IDs `Fnn-ACnn`. Each AC becomes at least one row in `REQ
 - F01-AC06 Every onboarding screen passes 320/360/390 px layout, keyboard and screen-reader checks in both locales.
 
 ### F02. Public showcase (Looks and Services)
-**Screens 23, 24.** One canonical artist URL (`/artists/:handle`) with a **Looks | Services** toggle (`?tab=services` or `/artists/:handle/services`; the canonical stays the base URL).
+**Screens 23, 24.** One canonical artist URL (`/a/:handle`) with a **Looks | Services** toggle (`?tab=services` or `/a/:handle/services`; the canonical stays the base URL).
 
 **Rules**
 - Header: cover photo, profile photo (104 px), name, specialties, rating summary (from F21; hidden if fewer than the approved minimum reviews, default 3, or if A-20 not approved), locations, bio, language switch (UI locale only; artist-authored text stays in its original language and is labelled), share.
 - **Looks:** published portfolio items with alt text; items mapped to services show **Book this look**, which preselects the service in F04.
 - **Services:** active services with duration, price ("from" when location overrides differ), deposit text derived from F03 ("$40 deposit at Studio 9" / "no deposit"), and where it is offered. Each row has **Book**.
-- Crawlable server-visible HTML, OpenGraph image, canonical, hreflang strategy per ADR-0003.
+- Crawlable server-rendered HTML on Vercel, OpenGraph image, canonical, and hreflang per ADR-0003. Artist locale alternates use `/a/:handle?locale=en-US` and `/a/:handle?locale=es-US`; both have `/a/:handle` as canonical per the single-canonical-artist-URL rule. The Services tab remains a non-canonical view. Artist-authored text remains in its source language when UI locale changes. Marketing pages use the existing `/en/*` and `/es/*` route pairs with reciprocal hreflang. Set the origin from `PUBLIC_BASE_URL`; domain/trademark ownership remains open under A-07.
 
 **Acceptance**
 - F02-AC01 Crawler without JS receives name, specialties, services, locations, metadata.
@@ -344,7 +354,7 @@ v1 F14 unchanged.
 
 **Acceptance**
 - F16-AC01 Wallet buttons hidden when flag OFF; image fallback always works.
-- F16-AC02 Pass updates within 15 minutes of a reschedule (staging measurement) when enabled.
+- F16-AC02 Pass updates within 15 minutes of a reschedule when enabled; measure in local integration and verify production behavior only after GO.
 - F16-AC03 `/c/:token` is unguessable (≥128-bit), revocable, and scoped to one client × artist.
 - F16-AC04 `/s/:handle` for unpublished handle → friendly not-available page, no data.
 - F16-AC05 QR scan event counted once per scan session; no IP or device ID stored in reports.
@@ -356,7 +366,7 @@ v1 F14 unchanged.
 - **Before you start** (12, 09): pinned items flagged by the artist (sensitivities, heat limits) plus the latest "For next time" note with "Show at next visit" ON. Shown on Appointment detail and in the day view.
 - **Visits** (12b): every appointment newest first with date, location, value, note summary, photo count; today's visit flagged "Add notes".
 - **Visit notes** (12c): before/after photos (private storage), what was done, products and settings (chips), for next time, toggle "Show at her next visit".
-- **Privacy:** notes are tenant data; never in public DTOs, client profile, concierge replies, analytics or AI prompts except the artist's own drafting features explicitly scoped (none in V1). Sensitive fields (`is_sensitive=true`, e.g., allergies) encrypted at rest (pgcrypto or application-level envelope encryption per A-27).
+- **Privacy:** notes are tenant data; never in public DTOs, client profile, concierge replies, analytics or AI prompts except the artist's own drafting features explicitly scoped (none in V1). Sensitive fields (`is_sensitive=true`, e.g., allergies) use application-level envelope encryption per A-27; do not install `pgcrypto`.
 
 **Acceptance**
 - F17-AC01 Notes never appear in any client-facing endpoint or export to the client.
@@ -469,33 +479,35 @@ Charts: single-hue, thin marks, accessible labels, tap/hover values, and a table
 
 ### 2.1 Routes
 
-**Artist app (authenticated, role `artist`, PWA standalone start URL `/app/home`)**
+**Company/account:** `https://mova-beauty.co/` is the company home and `https://mova-beauty.co/auth` is account creation/sign-in. **Artist app:** authenticated operator routes use `https://ops.mova-beauty.co/{clientID}/`, where `{clientID}` is the artist business ID. The `/app/` prefix is not used.
 
 | Route | Screen(s) | Notes |
 |---|---|---|
-| `/app/home` | 07 | Tab 1 |
-| `/app/calendar`, `/app/calendar/:date` | 08 | Tab 2 |
-| `/app/appointments/:id` | 09 | Before you start, running late (44 as sheet) |
-| `/app/requests/:id` | 10 | |
-| `/app/clients` | 11 | Tab 3 |
-| `/app/clients/:id` · `/visits` · `/visits/:appointmentId` | 12, 12b, 12c | |
-| `/app/clients/import` | 13 | |
-| `/app/revenue` | 14 | Tab 4 "AI Revenue" |
-| `/app/revenue/slots` · `/slots/:slotEventId` · `/slots/:slotEventId/live` | 31, 31b, 31c | |
-| `/app/revenue/pipeline` · `/winback` · `/autopilot` · `/autopilot/messages` · `/autopilot/activity` | 32–36 | |
-| `/app/revenue/concierge` · `/concierge/:conversationId` · `/concierge/quotes/:id` · `/concierge/setup` | 40–43 | |
-| `/app/reports` · `/app/reports/reputation` | 37, 38 | Tab 5 |
-| `/app/settings` | 16 | From Home avatar |
-| `/app/settings/money` · `/money/get-paid/:appointmentId` | 17, 18 (sheet) | |
-| `/app/settings/locations` · `/calendar-sync` · `/qr` · `/plan` · `/profile` · `/services` · `/reviews` · `/language` · `/privacy` | 19, 20, 21, 22, 02/02b, 03, 38 settings, — , — | |
+| `https://ops.mova-beauty.co/{clientID}/` | 07 | Tab 1 |
+| `https://ops.mova-beauty.co/{clientID}/calendar` · `/calendar/:date` | 08 | Tab 2 |
+| `https://ops.mova-beauty.co/{clientID}/appointments/:id` | 09 | Before you start, running late (44 as sheet) |
+| `https://ops.mova-beauty.co/{clientID}/requests/:id` | 10 | |
+| `https://ops.mova-beauty.co/{clientID}/clients` | 11 | Tab 3 |
+| `https://ops.mova-beauty.co/{clientID}/clients/:id` · `/visits` · `/visits/:appointmentId` | 12, 12b, 12c | |
+| `https://ops.mova-beauty.co/{clientID}/clients/import` | 13 | |
+| `https://ops.mova-beauty.co/{clientID}/revenue` | 14 | Tab 4 "AI Revenue" |
+| `https://ops.mova-beauty.co/{clientID}/revenue/slots` · `/slots/:slotEventId` · `/slots/:slotEventId/live` | 31, 31b, 31c | |
+| `https://ops.mova-beauty.co/{clientID}/revenue/pipeline` · `/winback` · `/autopilot` · `/autopilot/messages` · `/autopilot/activity` | 32–36 | |
+| `https://ops.mova-beauty.co/{clientID}/revenue/concierge` · `/concierge/:conversationId` · `/concierge/quotes/:id` · `/concierge/setup` | 40–43 | |
+| `https://ops.mova-beauty.co/{clientID}/reports` · `/reports/reputation` | 37, 38 | Tab 5 |
+| `https://ops.mova-beauty.co/{clientID}/settings` | 16 | From Home avatar |
+| `https://ops.mova-beauty.co/{clientID}/settings/money` · `/money/get-paid/:appointmentId` | 17, 18 (sheet) | |
+| `https://ops.mova-beauty.co/{clientID}/settings/locations` · `/calendar-sync` · `/qr` · `/plan` · `/profile` · `/services` · `/reviews` · `/language` · `/privacy` | 19, 20, 21, 22, 02/02b, 03, 38 settings, — , — | |
 | `/onboarding/:step` | 01–06 | `account, profile, photo, services, location, payments, publish` |
 
 **Public / client**
 
 | Route | Screen | Notes |
 |---|---|---|
-| `/artists/:handle` (`?tab=services`) | 23, 24 | Canonical showcase; SSR/prerender (ADR-0003) |
-| `/artists/:handle/book` | 25 → 26 | Date-first picker → details |
+| `/a/:handle` (`?tab=services`, `?locale=en-US|es-US`) | 23, 24 | Canonical showcase; SSR on Vercel (ADR-0003); locale alternates use the `locale` query while canonical remains the base artist URL |
+| `/a/:handle/book` | 25 → 26 | Date-first picker → details |
+| `https://ops.mova-beauty.co/:clientID` | Operator portal entry | Resolves the supplied client/artist business ID through active membership before showing the operator shell. |
+| `https://admin.mova-beauty.co` | — | Reserved for Mova administration; product view not defined. Return not-found and expose no client-facing admin view. |
 | `/b/:token` | 28 | Booking status + manage + client card |
 | `/me` | 29 | Signed-in client profile |
 | `/signin` (sheet over checkout or standalone) | 27 | OTP |
@@ -522,7 +534,7 @@ Every screen must implement: loading (skeleton), empty, error with retry, offlin
 | # | Canvas file | Screen | Features | Key elements and rules |
 |---|---|---|---|---|
 | 01 | Main | Account | F01, F13 | Language toggle EN/ES before login; email, password; app language radio; verify-email notice. |
-| 02 | Onb-Profile | Artist profile | F01 | Photo circle → 02b; display name; handle with `[DOMAIN]/artists/` prefix and availability; specialties (≤5); bio "shown in the language you write it in". |
+| 02 | Onb-Profile | Artist profile | F01 | Photo circle → 02b; display name; handle with `[DOMAIN]/a/` prefix and availability; specialties (≤5); bio "shown in the language you write it in". |
 | 02b | Onb-Photo | Profile photo | F01 | States: empty (face guide, 3 tips, Take/Choose) and preview (crop, zoom slider, small-size preview, Use/Retake). "Later" skip. |
 | 03 | Onb-Services | Services & deposits | F03 | Edit card: name, duration, buffer, price, deposit toggle, $/% and amount; helper text; list; add service. |
 | 04 | Onb-Location | Work location | F03 | Name, timezone, booking mode radio cards, payment collector, days, hours link, add another location. |
@@ -540,6 +552,8 @@ Every screen must implement: loading (skeleton), empty, error with retry, offlin
 | 14 | App-Growth | AI Revenue Center | F19 | Forecast card; autopilot status; tiles: Concierge, Fill open slots, Rebooking pipeline, Win back; estimate link. |
 | 15 | App-Outreach | Outreach approval | — | **TABLED. Do not build.** |
 | 16 | App-Business | Settings | D-15 | Profile card; View my page; Show my QR; rows: profile/photo/portfolio, services, locations, payments & payouts, calendar sync, reviews & Google, plan, language & notifications, privacy & data; Sign out. |
+| 16a | Settings-Services | Settings › Services | F03 | Manage service names, durations, buffers, prices, deposits, active state, and location-specific overrides. Owner-approved derived reference; not a source-canvas artboard. |
+| 16b | Settings-Portfolio | Settings › Portfolio | F02, F03 | Upload and order portfolio items; manage alt text, service links, and published/draft state. Owner-approved derived reference; not a source-canvas artboard. |
 | 17 | App-Money | Money | F06 | Month picker; breakdown bar + legend (with text labels); fees & refunds; estimated money to you; recent activity. |
 | 18 | App-RecordPayment | Get paid (sheet) | F23 | Amount; method radiogroup Card/Zelle/Cash/Other with per-method panel; CTA text changes per method. |
 | 19 | App-Locations | Locations & hours | F03 | Location cards with mode, collector ("deposits set per service"), hours, buffer/notice/horizon tiles, edit. |
@@ -587,7 +601,6 @@ These are required for V1 and have no canvas artboard yet. The phase that needs 
 | P13 | Concierge exception "Decide" sheet; web chat widget on showcase |
 | All | Loading / empty / error / offline states for each screen (pattern library acceptable) |
 | P10 | `/c/:token` rebook/check-in page; delete-profile confirmation |
-| P02 | Service list and portfolio management in Settings (editing outside onboarding) |
 
 ### 2.5 Design system
 Tokens: the D-10 palette as CSS variables plus derived text tokens `--ink-primary #18392F`, `--ink-secondary #3F4D46`, `--ink-muted #4F5F57` (≥4.5:1 on ivory), `--line #DCE1D9`, `--line-subtle #EBEEE8`, `--surface #FFFFFF`, `--surface-alt #EEF3EC`, `--accent-warm #F3E3D6`, `--accent-warm-strong #C98F66` (decorative / large text only), `--danger #9A3B2E`. Location identity colours: first location botanical, second warm peach-dark, further from an approved extension list — **always paired with the location name**. Status: confirmed = mint chip + check icon + text; pending/request = warm chip + dashed border + clock icon + text; never colour alone. Type: Manrope 800/700 headings (28/25/20/17), DM Sans 400–700 body (16 input, 15/14/13/12/11 UI). Radii 12–28. Spacing 4-pt scale, 20 px gutters. Components to build (P02): Button (primary/secondary/destructive/ghost), Chip, StatusChip, Card, ListRow, TabBar, Sheet, Toggle (real checkbox), Segmented, Stepper progress, Avatar/Photo (placeholder silhouette), KPI tile, MiniBarChart (+ table), Timeline, Toast, Empty/Error states, QR display, Message bubble (client / AI-labelled / artist / system).
@@ -601,7 +614,7 @@ Tokens: the D-10 palette as CSS variables plus derived text tokens `--ink-primar
 ```mermaid
 flowchart TD
   subgraph Vercel
-    APP[Artist PWA /app/*]
+    APP[Artist PWA ops.mova-beauty.co/{clientID}/*]
     PUB[Public + client pages SSR/prerender]
   end
   subgraph Supabase
@@ -637,7 +650,7 @@ flowchart TD
 ```text
 mova/
   AGENTS.md  README.md  package.json  pnpm-workspace.yaml  pnpm-lock.yaml  .nvmrc  .env.example  vercel.json
-  .github/workflows/{ci.yml,staging.yml}
+  .github/workflows/{ci.yml}
   apps/web/
     index.html  vite.config.ts  tsconfig.json
     public/{manifest.webmanifest,icons/}
@@ -684,7 +697,7 @@ mova/
 6. AI providers receive only the minimum data for the task (§8.6); never notes, never payment data, never other clients' data.
 
 ### 3.4 Jobs, outbox and scheduling (ADR-0010)
-Transactional outbox for every domain event; durable `background_jobs` with `queued|running|succeeded|failed|dead`, lease (`FOR UPDATE SKIP LOCKED`), exponential backoff with jitter, dead-letter alerting, idempotency keys passed to providers. Scheduled triggers: job dispatch (every minute), slot gap scan (15 min), autopilot planner (hourly; sends respect quiet hours), request expiry (5 min), forecast + report rollups (nightly 03:00 artist local, plus on-demand refresh), wallet pass refresh (on event), Google reviews sync (6 h, flag), review requests (on `appointment.completed` + 2 h delay).
+Transactional outbox for every domain event; later durable `background_jobs` with `queued|running|succeeded|failed|dead`, lease (`FOR UPDATE SKIP LOCKED`), exponential backoff with jitter, dead-letter alerting, idempotency keys passed to providers. For P06, Vercel Cron invokes the authenticated request-expiry endpoint every five minutes; `mova_expire_booking_requests` atomically expires the booking, releases holds and writes locale-bearing outbox events. Provider delivery and the general durable job dispatcher are later-phase work. Other scheduled triggers remain as specified for their owning phases: slot gap scan (15 min), autopilot planner (hourly; sends respect quiet hours), forecast + report rollups (nightly 03:00 artist local, plus on-demand refresh), wallet pass refresh (on event), Google reviews sync (6 h, flag), review requests (on `appointment.completed` + 2 h delay).
 
 **Domain events (outbox `event_type`):** `appointment.created|confirmed|declined|expired|rescheduled|cancelled|no_show|completed`, `slot.opened`, `slot.filled`, `payment.succeeded|failed|refunded`, `paylink.created|paid|expired`, `client.consent_changed`, `client.linked`, `template.approved|paused`, `autopilot.decision`, `message.inbound|delivered|failed`, `conversation.handoff`, `review.submitted|replied`, `wallet.pass_update_needed`, `profile.published`.
 
@@ -692,8 +705,12 @@ Transactional outbox for every domain event; durable `background_jobs` with `que
 
 ## 4. Data model
 
-### 4.1 Conventions (unchanged from v1)
+### 4.1 Conventions
 UUID PKs; `timestamptz` UTC; IANA timezones; `artist_business_id` on every tenant row with FK; money `bigint` minor units + ISO currency; basis points for rates; immutable ledger; `created_at`/`updated_at` with trigger; soft delete where retention requires; tenant-scoped uniqueness; enums as `text` + `CHECK` (or Postgres enums via migration) mirrored in `packages/contracts/src/enums.ts`.
+
+**Project database identifier rule (CR-001, owner-approved):** every database object created or owned by this project must have a database identifier beginning with `mova_`. This includes tables, views and materialized views, sequences, SQL functions and procedures, triggers, indexes, constraints, RLS policies, custom types/domains, and project-created schemas. Names of Supabase-managed objects, PostgreSQL built-ins, and referenced objects the project does not create (for example `auth.users` and `auth.uid()`) are not renamed. Use Supabase's existing `public` schema; do not create a new schema unless a later approved decision requires one. Any project-created Storage bucket must also use a `mova_` name. API/Edge Function slugs are not database identifiers and retain their separately specified names.
+
+Use logical entity names in product and API prose where helpful, but every migration must create the mapped `mova_` identifier. SQL references to managed objects remain unchanged. Explicitly name constraints, policies, triggers, and indexes with the prefix rather than relying on PostgreSQL-generated names.
 
 ### 4.2 Tables retained from v1
 `artist_businesses, artist_memberships, artist_profiles, onboarding_progress, locations, location_hours, location_exceptions, location_policies, compensation_agreements, services, service_locations, portfolio_items, portfolio_service_links, clients, client_consents, client_import_batches, availability_blocks, appointments, appointment_events, booking_holds, payment_accounts, payments, refunds, financial_ledger, plans, subscriptions, entitlements, integration_connections, calendar_sync_settings, external_calendar_events, calendar_feed_tokens, growth_opportunities, rebooking_predictions, wallet_cards, outbox_events, background_jobs, audit_events, platform_events`.
@@ -803,11 +820,49 @@ UUID PKs; `timestamptz` UTC; IANA timezones; `artist_business_id` on every tenan
 Negative tests required for every row: other artist, client of same artist, client of another artist, anonymous, expired token.
 
 ### 4.5 Migration order
-`0001_extensions_and_helpers` (citext, btree_gist, pgcrypto, membership helper) → `0002_tenancy_identity` → `0003_artist_profiles_onboarding` → `0004_services_deposits_portfolio` → `0005_locations_policies_availability` → `0006_clients_consents_import` → `0007_appointments_holds_events` (overlap exclusion incl. buffers) → `0008_notes_visits_media` → `0009_payments_ledger_paylinks_webhooks` → `0010_calendar_integrations` → `0011_customer_identity_links_otp` → `0012_wallet_passes_card_tokens` → `0013_messaging_identities_templates_messages_suppressions` → `0014_rebooking_predictions_opportunities_autopilot` → `0015_slot_events_candidates_copy` → `0016_concierge` → `0017_reviews_requests` → `0018_metrics_forecasts_traffic` → `0019_plans_entitlements` → `0020_outbox_jobs_audit_platform_events` → `0021_acquisition_waitlist` → `0022_rls_policies_all` (or per-migration policies; either way the full matrix test runs at `0022`). Each migration ships with pgTAP tests and seed updates.
+`0001_mova_helpers` (membership helper only; no extension installation) → `0002_tenancy_identity` → `0003_artist_profiles_onboarding` (including normalized-handle uniqueness index `mova_artist_profiles_handle_lower_uq`) → `0004_services_deposits_portfolio` → `0005_locations_policies_availability` → `0006_clients_consents_import` → `0007_appointments_holds_events` (booking-overlap concurrency mechanism selected by a P06 ADR; preserve the buffer-inclusive overlap invariant without installing an unprefixed extension) → `0008_notes_visits_media` (sensitive notes use application-level envelope encryption per A-27) → `0009_payments_ledger_paylinks_webhooks` → `0010_calendar_integrations` → `0011_customer_identity_links_otp` → `0012_wallet_passes_card_tokens` → `0013_messaging_identities_templates_messages_suppressions` → `0014_rebooking_predictions_opportunities_autopilot` → `0015_slot_events_candidates_copy` → `0016_concierge` → `0017_reviews_requests` → `0018_metrics_forecasts_traffic` → `0019_plans_entitlements` → `0020_outbox_jobs_audit_platform_events` → `0021_acquisition_waitlist` → `0022_rls_policies_all` (or per-migration policies; either way the full matrix test runs at `0022`). Each migration ships with pgTAP tests and seed updates. No PostgreSQL extensions are installed by this project unless a later owner-approved change specifies a `mova_`-prefixed extension name and that name is supported by the target platform.
 
 **Seed fixture (`supabase/seed.sql`):** two artists in separate tenants; artist 1 with two locations (suite/instant/artist-collects; salon/request/salon-collects), three services (one fixed deposit, one percent, one none), five clients with varied consent and visit histories (0, 1, 2, 4+ intervals), one linked customer account linked to both artists, appointments across states, one slot event per state, templates in both locales, one conversation per channel type, reviews from both sources, metrics for 90 days. No real PII.
 
 ---
+
+### 4.6 Physical identifier mapping (CR-001)
+The v2.0 logical table names below map to these physical database identifiers for P03–P06. This mapping adds no columns or business rules. Migration-specific constraints, indexes, triggers, and RLS policies must be listed in migration documentation and use the same `mova_` prefix.
+
+| Logical object | Physical identifier | Phase use |
+|---|---|---|
+| `artist_businesses` | `mova_artist_businesses` | P03 tenant root |
+| `artist_memberships` | `mova_artist_memberships` | P03 tenant membership |
+| `artist_profiles` | `mova_artist_profiles` | P03 profile/photo/publish; P04 public profile |
+| normalized handle unique index | `mova_artist_profiles_handle_lower_uq` | P03 case-insensitive handle uniqueness, without `citext` |
+| `onboarding_progress` | `mova_onboarding_progress` | P03 resumable onboarding |
+| reserved handle list (F01) | `mova_reserved_handles` | P03 handle claim guard |
+| `services` | `mova_services` | P04 services and deposits |
+| `service_locations` | `mova_service_locations` | P04 per-location overrides |
+| `portfolio_items` | `mova_portfolio_items` | P04 portfolio items |
+| `portfolio_service_links` | `mova_portfolio_service_links` | P04 service links |
+| `locations` | `mova_locations` | P05 location ownership and booking mode |
+| `location_hours` | `mova_location_hours` | P05 weekly hours |
+| `location_exceptions` | `mova_location_exceptions` | P05 date-specific hours and closures |
+| `location_policies` | `mova_location_policies` | P05 lead, horizon, buffers, cancellation, request expiry, client details, encrypted door code |
+| `availability_blocks` | `mova_availability_blocks` | P05 artist-blocked periods |
+| `appointments` | `mova_appointments` | P06 booking state and snapshots |
+| `booking_holds` | `mova_booking_holds` | P06 expiring checkout holds |
+| `appointment_events` | `mova_appointment_events` | P06 immutable transition history |
+| `outbox_events` | `mova_outbox_events` | P06 transactional event delivery handoff |
+| handle-claim SQL routine, if implemented in SQL | `mova_claim_artist_handle` | P03 transactional claim |
+| tenant-resolution SQL helper | `mova_current_artist_business_id` and any additional `mova_`-prefixed helpers | P03; exact set recorded with migration |
+| location-save routine | `mova_save_location` | P05 owner-authorized location settings transaction |
+| location-hours validation routine | `mova_location_window_is_open` | P06 server-side booking validation |
+| booking-create routine | `mova_booking_create` | P06 transactional booking, overlap and idempotency checks |
+| booking-transition routine | `mova_booking_transition` | P06 state machine and events |
+| booking-reschedule routines | `mova_booking_reschedule`, `mova_booking_reschedule_review` | P06 client rescheduling and artist review |
+| request-time suggestion routines | `mova_booking_suggest_time`, `mova_booking_suggestion_response` | P06 artist suggests an available slot; client accepts or declines it |
+| request-expiry routine | `mova_expire_booking_requests` | P06 scheduled expiration and outbox handoff |
+| profile-photo Storage bucket | `mova_profile_photos` | P03 profile/cover photos |
+| portfolio-media Storage bucket | `mova_portfolio_media` | P04 portfolio uploads |
+
+Do not create a separate showcase projection table unless separately approved. Public data may be exposed only through the allowlisted projection required by §3.3, using a prefixed SQL view/function or the specified server-side Edge Function.
 
 ## 5. Domain rules and state machines
 All rules live in `packages/domain` as pure, unit-tested functions shared by Edge Functions (Deno imports the package build) and UI previews. The server is always authoritative.
@@ -819,7 +874,7 @@ All rules live in `packages/domain` as pure, unit-tested functions shared by Edg
 - Ledger postings per payment: `service_value` (once per appointment at confirmation), `processed`/`recorded_artist`/`collected_salon`, `platform_fee` (negative), `processor_fee` (from webhook balance transaction), `refund` (negative). `estimated_to_artist = processed − platform_fee − processor_fee − refunds + recorded_artist`.
 
 ### 5.2 Booking
-State machine per F04. Additional transitions: `pending_artist` created by concierge or seat-filler claim at request locations; `confirmed` created by claim at instant locations after deposit. Holds: `booking_holds` 10 min during checkout; expiry job releases. Overlap constraint covers `[starts_at − buffer_before, ends_at + buffer_after)` for `confirmed|completed` plus active holds (implemented as a reservations table with GiST exclusion, ADR required if the v1 single-table constraint is insufficient).
+State machine per F04. Additional transitions: `pending_artist` created by concierge or seat-filler claim at request locations; `confirmed` created by claim at instant locations after deposit. Holds: `booking_holds` 10 min during checkout; expiry job releases. Booking integrity must prevent overlap across `[starts_at − buffer_before, ends_at + buffer_after)` for `confirmed|completed` appointments plus active holds. ADR-0012 uses a transaction-scoped advisory lock for tenant-scoped idempotency and locks the location row before checking and reserving its interval. All reservation and reschedule operations for one location serialize on that row; no unprefixed extension is installed, and the overlap invariant is preserved.
 
 ### 5.3 Client identity linking (ADR-0004)
 1. Signed-in client books with artist A → if no link for (A, account): find A's `clients` row by verified phone/email **exact normalized match**; if exactly one, link; if none, create client row and link; if several, create a new client row and raise an artist-side duplicate suggestion (never auto-merge).
@@ -1056,7 +1111,7 @@ v1 targets retained. Add: concierge first reply p95 ≤ 20 s from inbound webhoo
 1. At session start read `docs/product/ENGINEERING_SPEC.md` (this file), `docs/product/MASTER_BLUEPRINT.md`, `docs/engineering/PHASE_STATUS.md`, `REQUIREMENTS_MATRIX.csv`, `DECISION_LOG.md`, and open `CHANGE_REQUESTS.md`. Confirm the current phase and approvals.
 2. Work one phase and one vertical slice at a time (UI → validated function → DB → events → tests). Never start a later phase to hide a missing dependency.
 3. Before edits: list intended files, requirement IDs, tests, risks, blockers. After edits: actual files, commands and results, screenshots, deviations, next action.
-4. `DONE` requires passing tests, staging proof, traceability and reviewer acceptance. `BLOCKED` is never `DONE`. No `test.skip` on critical paths.
+4. `DONE` requires passing tests, local phase integration evidence, traceability and reviewer acceptance. `BLOCKED` is never `DONE`. No `test.skip` on critical paths. Production-host verification remains a P18 activity after written GO.
 5. Mocks only in tests/sandbox, visibly labelled. No fake data in production UI. No simulated provider success.
 6. No secrets in Git; service-role never in browser; RLS on every tenant table with negative tests.
 7. No production deploy, live payments, live messaging, AI enablement, or business-rule change without recorded approval.
@@ -1065,9 +1120,9 @@ v1 targets retained. Add: concierge first reply p95 ≤ 20 s from inbound webhoo
 10. Re-run all previously accepted critical-path tests at every phase.
 11. Match the design canvas. If a screen in §2.4 lacks an approved design, stop and request it.
 
-**Traceability CSV columns:** `requirement_id,spec_section,acceptance_criterion,phase_id,screen_ids,implementation_files,migration_or_function,test_files,staging_evidence,status,reviewer,approval_date` — one row per AC (`Fnn-ACnn`), per D-xx, per A-xx, per T-xx, and per nonfunctional target.
+**Traceability CSV columns:** `requirement_id,spec_section,acceptance_criterion,phase_id,screen_ids,implementation_files,migration_or_function,test_files,phase_evidence,status,reviewer,approval_date` — one row per AC (`Fnn-ACnn`), per D-xx, per A-xx, per T-xx, and per nonfunctional target.
 
-**Standard phase gate:** all checklist items done; `pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm test && pnpm build` green; `supabase db reset` + DB tests green; staging E2E of real persisted flow incl. negative path; tenant/privacy/idempotency/money invariants tested; new endpoints documented with schemas, auth class, errors, rate limits; matrix updated; security scan, a11y smoke, visual regression; reviewer sign-off.
+**Standard phase gate:** all checklist items done; `pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm test && pnpm build` green; `supabase db reset` + DB tests green; browser E2E against the local app and local Supabase instance proves real persisted success and failure paths; tenant/privacy/idempotency/money invariants tested; new endpoints documented with schemas, auth class, errors, rate limits; matrix updated; security scan, a11y smoke, visual regression; reviewer sign-off. No hosted staging environment is used. Production-host verification occurs at P18 after written GO and is not a prerequisite for earlier phase completion.
 
 ### 13.2 Phase map (supersedes v1 numbering)
 
@@ -1077,7 +1132,7 @@ v1 targets retained. Add: concierge first reply p95 ≤ 20 s from inbound webhoo
 | P01 | App shell, environments, Supabase infra, i18n runtime | F11, F13 | P00 | — |
 | P02 | Design system & navigation | D-15, F13 | P01 | Design sign-off (G2a) |
 | P03 | Identity, tenancy, onboarding, profile photo | F01 | P02 | — |
-| P04 | Showcase (Looks/Services), services & deposits, portfolio, SEO | F02, F03 | P03 | A-13 (ADR-0003) |
+| P04 | Showcase (Looks/Services), services & deposits, portfolio, SEO | F02, F03 | P03 | — |
 | P05 | Locations, hours, availability engine | F03 | P04 | — |
 | P06 | Booking lifecycle, calendar UI, requests, manage links, running late | F04 | P05 | §2.4 cancel/reschedule designs |
 | P07 | Clients, consent, import, client notes & visits | F05, F17 | P06 | A-27 (sensitive notes) |
@@ -1113,7 +1168,7 @@ Files: `apps/web/*` base, `src/app/{ArtistShell,PublicShell,ClientShell,Onboardi
 - P01-T01 Strict TS, Router, TanStack Query, Zod, Tailwind with tokens.
 - P01-T02 Separate shells and query caches for artist vs client.
 - P01-T03 PWA with asset-only caching; private APIs never cached.
-- P01-T04 Dev/staging/prod Supabase + Vercel; isolated secrets.
+- P01-T04 Local development + production Supabase/Vercel configuration; isolated secrets; no hosted staging environment. Production-host verification is deferred to P18 after written GO.
 - P01-T05 Envelope, request IDs, error boundary, redacted logging.
 - P01-T06 i18n runtime en-US/es-US; locale persistence artist vs guest; `check-locales` in CI.
 - P01-AC01 build/test/smoke green; AC02 PWA installs (Android/desktop) and iOS guidance; AC03 no private API in SW cache; AC04 locale switch before login persists.
@@ -1321,13 +1376,14 @@ Environments, controls, evidence package and gates from v1 §10 are retained, wi
 - Feature flags at minimum: `stripe_live`, `paylinks`, `zelle`, `client_profiles`, `wallet_client_card`, `wallet_artist_card`, `messaging_live_sms`, `messaging_live_email`, `push`, `autopilot`, `seat_filler`, `seat_filler_autopilot`, `concierge`, `concierge_instagram`, `concierge_missed_call`, `concierge_web_chat`, `reviews_public`, `google_reviews`, `google_business_api`, `ai_copy`, `forecast`.
 - Evidence package adds: AI evaluation report; messaging compliance evidence (registration status, consent records sample, STOP handling); wallet pass test evidence; RLS proof for client identity; reports reconciliation report; Spanish review sign-off.
 - Gates G1–G6 unchanged; **G2 UX** now includes the approved canvas plus the §2.4 designs.
-- **Hard NO-GO additions:** any cross-artist data leak through client profiles; any note exposure; any AI hard-rule violation in evals or staging; any send without valid consent; any review editable by the artist; any feature with an unapproved dependency shown as live.
+- **Hard NO-GO additions:** any cross-artist data leak through client profiles; any note exposure; any AI hard-rule violation in evals; any send without valid consent; any review editable by the artist; any feature with an unapproved dependency shown as live.
 
 ### 15.1 Final sign-off record
 ```text
-MOVA RELEASE SIGNOFF (spec v2.0)
+MOVA RELEASE SIGNOFF (spec v2.2)
 Release version / commit:
-Staging URL and test date:
+Local integration evidence package and test date:
+Production URL and post-GO verification date:
 F01–F23 coverage: ___ / ___ ACs (100% or explicitly waived)
 T01–T60: PASS / FAIL      UAT-A–M: APPROVED / REJECTED
 Approvals A-01–A-30: each APPROVED or feature flag OFF (attach list)
@@ -1342,7 +1398,7 @@ Signature / timestamp (UTC):
 ## 16. First instruction to Codex
 
 ```text
-You are implementing Mova from docs/product/ENGINEERING_SPEC.md (v2.0).
+You are implementing Mova from docs/product/ENGINEERING_SPEC.md (v2.2).
 Do not generate features in bulk. First:
 1. Create the repository scaffold and all P00 files listed in §13.3.
 2. Write docs/engineering/SCREEN_INVENTORY.md mapping the 51 canvas artboards to

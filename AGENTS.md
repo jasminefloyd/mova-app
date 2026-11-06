@@ -3,7 +3,7 @@
 You are implementing **Mova**, a mobile-first web app (PWA) that gives independent hairstylists a business that moves with them. Brand: `mova.`, *Your business moves with you.*
 
 ## Read first, every session
-1. `docs/product/ENGINEERING_SPEC.md` (v2.0). **The single engineering source of truth.**
+1. `docs/product/ENGINEERING_SPEC.md` (v2.1). **The single engineering source of truth.**
 2. `docs/engineering/IMPLEMENTATION_PLAN.md`: phases P00–P18 and checklists (extract of spec §13 and §16).
 3. `docs/design/README.md`, `docs/design/SCREEN_MAP.md` and `docs/design/COMPONENTS.md`: how the app must look.
 4. `docs/qa/TEST_STRATEGY.md` and `docs/qa/TEST_CASES.csv`: the tests each phase must pass.
@@ -12,7 +12,7 @@ You are implementing **Mova**, a mobile-first web app (PWA) that gives independe
 ## Stack
 - **apps/web:** React + TypeScript (strict) + Vite PWA on Vercel; React Router, TanStack Query, Zod, Tailwind mapped to design tokens, react-i18next (ADR-0002).
 - **Supabase:** Postgres with RLS, Auth (artist and client roles), Storage, Edge Functions (Deno), scheduled triggers, durable jobs.
-- **Database naming:** every project-created Supabase database/schema object must have a name beginning with `mova_`, including schemas, tables, database functions, views, indexes, triggers, types, sequences, policies and constraints. This owner requirement takes precedence over unprefixed object names in Engineering Spec v2.0; preserve specified behavior while applying the prefix. `docs/engineering/CHANGE_REQUESTS.md` CR-001 tracks the required versioned spec reconciliation.
+- **Database naming:** every project-created Supabase database object and Storage bucket uses the `mova_` prefix, as specified in Engineering Spec v2.1 §§4.1 and 4.6. CR-001 is closed. Preserve specified behavior while applying the prefix; Supabase-managed objects and PostgreSQL built-ins retain their existing names.
 - **Git workflow:** commit directly to `main` by default. Branch protection is not required. Follow a different branch or workflow only when the product owner says otherwise.
 - **apps/mobile is reserved for V1.1** (Expo shell for Tap to Pay, approval A-17). Do not add code there in V1.
 - Pin Node/pnpm and all dependency versions in P00/P01.
@@ -20,7 +20,7 @@ You are implementing **Mova**, a mobile-first web app (PWA) that gives independe
 ## Operating protocol (spec §13.1)
 1. Work one phase and one vertical slice at a time (UI → validated function → DB → events → tests). Never start a later phase to hide a missing dependency.
 2. Before edits: list the files you intend to touch, requirement IDs, tests, risks and blockers. After edits: list the actual files, commands and results, screenshots, deviations and next action.
-3. `DONE` requires all of: passing tests, staging proof, traceability and reviewer acceptance. `BLOCKED` is never `DONE`. No `test.skip` on critical paths.
+3. `DONE` requires all of: passing tests, local phase integration evidence, traceability and reviewer acceptance. `BLOCKED` is never `DONE`. No `test.skip` on critical paths. Production-host verification is part of P18 after written GO.
 4. Mocks only in tests/sandbox, visibly labelled. No fake data in production UI. No simulated provider success.
 5. No secrets in Git. The service-role key never goes in the browser. RLS on every tenant table, with negative tests.
 6. No production deploy, live payments, live messaging, AI enablement or business-rule change without a recorded approval (§0.5). Approval-dependent features ship behind flags that default **OFF**.

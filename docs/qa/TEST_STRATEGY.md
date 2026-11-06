@@ -1,5 +1,5 @@
 # MOVA — QA & Automated Test Strategy v2
-**Version:** 2.0 · **Date:** 2026-11-05 · **Status:** Replaces `MOVA_QA_Automated_Test_Strategy_v1.md` and `MOVA_QA_TEST_CASES.csv` · **Built against:** `MOVA_Engineering_Handoff_v2.md` (spec v2.0), §14.4
+**Version:** 2.1 · **Date:** 2026-11-05 · **Status:** Replaces `MOVA_QA_Automated_Test_Strategy_v1.md` and `MOVA_QA_TEST_CASES.csv` · **Built against:** `docs/product/ENGINEERING_SPEC.md` v2.1, §14.4
 **Companion file:** `docs/qa/TEST_CASES.csv` (delivered as `MOVA_QA_TEST_CASES_v2.csv`) (539 cases)
 
 > **Repository placement:** `docs/qa/TEST_STRATEGY.md` and `docs/qa/TEST_CASES.csv`. Each case's `requirement_ids` feed the `test_files` column of `docs/engineering/REQUIREMENTS_MATRIX.csv`. The old 179-case figure is retired and must not be quoted.
@@ -80,11 +80,11 @@ P0 is about half the inventory. That is expected: the RLS matrix, function contr
 
 ## 4. Environments, flags and data
 
-**Environments.** Local and CI (sandbox adapters only), preview per PR, staging (sandbox providers, test numbers, Stripe test mode), production (never a test target).
+**Environments.** Local and CI (sandbox adapters only), provider sandboxes, and production (never a test target). PR preview builds may be used for code review only; there is no hosted staging environment or production-like preview target.
 
 **Two flag profiles run on every nightly:**
 1. **Launch-default profile.** Every flag from §15 is OFF and every approval is OPEN. The `TC-APR-*` cases and the fallback paths run here, because this is what ships if an approval does not land.
-2. **Full-feature profile.** Flags are ON in staging with sandbox providers. Feature cases run here.
+2. **Full-feature profile.** Flags are ON in local integration with provider sandbox services. Feature cases run here; this does not represent production-provider verification.
 
 A case whose `flags_approvals` names a flag must pass in the profile it belongs to. Cases for approvals that are not yet granted still run in sandbox. "Ready" means it can be automated now, not that the feature is live.
 
@@ -222,7 +222,7 @@ Phase-specific emphasis:
 | Stage | Contents | Blocks |
 |---|---|---|
 | PR | lint, typecheck, Unit, Component, Static (incl. `check-locales.mjs`, no-skip lint), pgTAP for changed migrations, Function/Contract for changed functions, secret/dependency scan | Merge |
-| Main | Everything automated except Load and full AI evals; E2E smoke (both locales, WebKit + Chromium) | Deploy to staging |
+| Main | Everything automated except Load and full AI evals; E2E smoke (both locales, WebKit + Chromium) | Phase evidence; no automatic production deployment |
 | Nightly | Full E2E, Visual, A11y-auto, authz fuzz, both flag profiles, AI evals if prompts/models changed in the last 24 h | Next phase gate if red |
 | Phase gate | All cases with `phase` ≤ current; Load for the phase; manual cases for the phase | Phase acceptance |
 | Release (P17/P18) | Everything, incl. UAT, real devices, eval report, evidence package | GO / NO-GO |

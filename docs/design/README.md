@@ -2,14 +2,14 @@
 
 This folder is everything an engineer or coding agent needs to make the app **look and behave like the approved canvas**, built from **this repo's own components and tokens**.
 
-- **Source:** the "Mova App Screens" design canvas (51 artboards), exported 2026-11-05. `design-manifest.json` records the canvas version and file hashes.
+- **Source:** the "Mova App Screens" design canvas (51 artboards), exported 2026-11-05. Two Settings management references (Services and Portfolio) were derived from the approved design system with owner approval on 2026-11-05; they are not canvas artboards. `design-manifest.json` records the canvas version and file hashes.
 - **Status:** normative UI reference (spec §0.1). The engineering spec (`docs/product/ENGINEERING_SPEC.md`) wins on behaviour; this folder wins on layout, hierarchy and visual style.
 
 ## What's here
 
 | Path | What it is | How to use it |
 |---|---|---|
-| `screens/png/` | 58 renders at 390 × 844 @2x: every artboard, plus state variants (photo empty/preview, Get paid × 4 methods, booking confirmed/request, campaign live/filled, claim open/just taken) | The **visual target**. Visual regression baselines and `TC-SCR-*` QA cases compare against these. |
+| `screens/png/` | 60 renders at 390 × 844 @2x: every canvas artboard, two owner-approved derived Settings references, plus state variants (photo empty/preview, Get paid × 4 methods, booking confirmed/request, campaign live/filled, claim open/just taken) | The **visual target**. Visual regression baselines and `TC-SCR-*` QA cases compare against these. |
 | `screens/html/` | Static reference HTML of the same screens, offline, with self-hosted fonts and links between screens | Read for exact spacing, sizes, copy and semantics (aria labels, roles). **Never copy this markup into the app.** |
 | `screens/index.html` | Gallery of all screens | Open in a browser to browse. |
 | `screens/manifest.json` | Machine-readable list: id, number, title, state, canvas file | Use to generate baselines or inventories. |

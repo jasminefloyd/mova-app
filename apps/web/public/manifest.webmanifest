@@ -1,0 +1,15 @@
+{
+  "id": "/",
+  "name": "mova.",
+  "short_name": "mova.",
+  "description": "Your business moves with you.",
+  "start_url": "/auth",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F7F5EF",
+  "theme_color": "#18392F",
+  "icons": [
+    { "src": "/icons/mova-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/mova-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

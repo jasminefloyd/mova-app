@@ -27,14 +27,16 @@ S = {
  '14': ('/app/revenue', 'Artist (tab 4 "AI Revenue")', 'F19 · F19-AC01…04', 'P12', 'Card inverse (forecast, Estimate label), ListRow tiles with counts, Link, TabBar'),
  '15': ('— TABLED, do not build (D-25)', '—', '—', '—', '—'),
  '16': ('/app/settings', 'Artist (modal from Home avatar)', 'D-15', 'P02 / P03', 'Card inverse (profile), Button secondary ×2, ListRow nav, Button ghost (Sign out)'),
+ '16a': ('/app/settings/services', 'Artist (Settings)', 'F03', 'P04', 'ScreenHeader, ServiceCard, DepositSummary, LocationOverrideRow, StatusChip, Button'),
+ '16b': ('/app/settings/portfolio', 'Artist (Settings)', 'F02 · F02-AC04, F03', 'P04', 'ScreenHeader, PortfolioItem, Thumbnail, AltTextStatus, ServiceLink, ReorderControl, StatusChip, Button'),
  '17': ('/app/settings/money', 'Artist', 'F06 · F06-AC01, F06-AC03', 'P08', 'month picker, MiniBarChart breakdown + legend + table view, DefinitionList, ListRow activity'),
  '18': ('/app/settings/money/get-paid/:appointmentId', 'Artist (sheet)', 'F23 · F23-AC01…04', 'P08', 'Sheet, TextField amount, RadioCard method group, per-method panel, Button primary (label per method)'),
  '19': ('/app/settings/locations', 'Artist', 'F03', 'P05', 'Card per location, LocationTag, StatusChip mode, KPITile small (buffer/notice/horizon), Button'),
  '20': ('/app/settings/calendar-sync', 'Artist', 'F07', 'P09', 'HonestyBanner (one-way), Card (Google), RadioCard privacy, masked URL + Button copy/reset'),
  '21': ('/app/settings/qr', 'Artist', 'F10 · F10-AC01, F10-AC02', 'P10', 'full-bleed inverse screen, ProfilePhoto, QRDisplay, Button ghost (Share link / Share image)'),
  '22': ('/app/settings/plan', 'Artist', 'F12 · A-01, A-26', 'P15', 'StatusChip "Proposed pricing · not final", Card ×3 (plans), Button'),
- '23': ('/artists/:handle', 'Public (SSR/prerender)', 'F02, F21 · F02-AC01, F02-AC02, F02-AC05, F21-AC04', 'P04', 'cover, ProfilePhoto 104, rating (hidden until A-20), LocationTag, Segmented Looks/Services, look tiles + Button, sticky Button'),
- '24': ('/artists/:handle?tab=services', 'Public', 'F02, F03 · F02-AC03', 'P04', 'same header as 23, ListRow service rows with deposit text + Button compact'),
+ '23': ('/artists/:handle?locale={en-US,es-US}', 'Public (SSR on Vercel)', 'F02, F21 · F02-AC01, F02-AC02, F02-AC05, F21-AC04', 'P04', 'cover, ProfilePhoto 104, rating (hidden until A-20), LocationTag, Segmented Looks/Services, look tiles + Button, sticky Button'),
+ '24': ('/artists/:handle?tab=services&locale={en-US,es-US}', 'Public', 'F02, F03 · F02-AC03', 'P04', 'same header as 23, ListRow service rows with deposit text + Button compact'),
  '25': ('/artists/:handle/book', 'Public', 'F04 · F04-AC04, F03-AC05', 'P06', 'Card summary, DayStrip, TimeSlot groups by LocationTag + StatusChip mode, summary line, sticky Button'),
  '26': ('/artists/:handle/book (details)', 'Public', 'F04, F15 · F04-AC05, F15-AC01', 'P06 / P08 / P10', 'Card summary, Link (Sign in), TextField ×3, Checkbox consents, Stripe Payment Element, policy text, Button primary'),
  '27': ('/signin (sheet or page)', 'Client', 'F15 · F15-AC02', 'P10', 'Sheet, benefits list, TextField contact, Checkbox marketing opt-in, Button, Link (guest)'),
@@ -65,7 +67,7 @@ assert set(S) == set(by), set(S) ^ set(by)
 L = ['# Mova screen map', '',
      'Every canvas artboard mapped to its route, app shell, features and acceptance criteria, build phase, and the components it is built from. '
      'This is the starting point for `docs/engineering/SCREEN_INVENTORY.md` (P00-T05): copy it there and add implementation files as they land.', '',
-     f'**{len(by)} artboards** ({sum(1 for k in by if k != "15")} to build, screen 15 TABLED) → **{len(man)} reference renders** including state variants.', '',
+     f'**{len(by)} mapped screens** ({sum(1 for m in man if m.get("canvas_file") != "Owner-approved derived reference")} original canvas renders plus {sum(1 for m in man if m.get("canvas_file") == "Owner-approved derived reference")} owner-approved derived references; screen 15 TABLED) → **{len(man)} reference renders** including state variants.', '',
      'Every screen must also implement the states the canvas does not draw: **loading (skeleton), empty, error + retry, offline, permission denied, validation** (§2.3), '
      'at 320–430 px, in en-US and es-US, with 44 px targets, keyboard order, screen-reader labels and reduced motion. Visual acceptance: QA case `TC-SCR-<number>-01`.', '',
      '| # | Screen | Reference render(s) | Route | Shell | Features · key ACs | Phase | Built from |', '|---|---|---|---|---|---|---|---|']
@@ -86,6 +88,6 @@ L += ['', '## Screens with no artboard yet (spec §2.4)', '',
       '| P13 | Concierge exception "Decide" sheet; web chat widget on showcase |',
       '| All | Loading / empty / error / offline states (pattern library acceptable) |',
       '| P10 | `/c/:token` rebook/check-in page; delete-profile confirmation |',
-      '| P02 | Service list and portfolio management in Settings (editing outside onboarding) |', '']
+      '']
 open(f'{d}/SCREEN_MAP.md', 'w').write('\n'.join(L))
 print('screen map rows', len(by))

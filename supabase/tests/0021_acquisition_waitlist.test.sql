@@ -1,0 +1,14 @@
+begin;
+select plan(10);
+select has_table('public','mova_waitlist_signups');
+select has_function('public','mova_waitlist_register',array['text','text','text','boolean']);
+select has_trigger('public','mova_waitlist_signups','mova_waitlist_signups_touch_updated_at');
+select ok((select relrowsecurity from pg_class where oid='public.mova_waitlist_signups'::regclass),'waitlist table has RLS enabled');
+select ok(exists(select 1 from pg_constraint where conrelid='public.mova_waitlist_signups'::regclass and conname='mova_waitlist_signups_email_normalized_uq'),'normalized email is unique');
+select ok(has_function_privilege('service_role','public.mova_waitlist_register(text,text,text,boolean)','EXECUTE'),'waitlist registration is available to service role');
+select ok(not has_function_privilege('anon','public.mova_waitlist_register(text,text,text,boolean)','EXECUTE'),'anonymous users cannot call the table function directly');
+select ok(not has_function_privilege('authenticated','public.mova_waitlist_register(text,text,text,boolean)','EXECUTE'),'authenticated users cannot call the table function directly');
+select ok(not has_table_privilege('anon','public.mova_waitlist_signups','SELECT'),'anonymous users cannot read waitlist submissions');
+select ok(not has_table_privilege('authenticated','public.mova_waitlist_signups','SELECT'),'authenticated users cannot read waitlist submissions');
+select * from finish();
+rollback;

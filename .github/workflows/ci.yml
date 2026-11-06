@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   p00-contract-gate:
-    name: P00 contract gate
+    name: Contract and app checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -23,4 +23,16 @@ jobs:
           version: 9.15.0
           run_install: false
       - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm check-locales
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - run: pnpm test:visual
       - run: pnpm phase:verify
+      - run: pnpm phase:p01:verify
+      - run: pnpm phase:p02:verify
+    env:
+      CI: true

@@ -83,10 +83,13 @@ const matrixRows = parseCsv(matrix);
 const qaRows = parseCsv(await read('docs/qa/TEST_CASES.csv'));
 const qaCaseIds = new Set(qaRows.map((row) => row.case_id));
 
-const expectedHash = baseline.match(/ENGINEERING_SPEC\.md[^\n]*?`([a-f0-9]{64})`/)?.[1];
+const currentSpecRevision = baseline.split('## Current normative specification revision')[1]?.split('\n## ')[0] ?? '';
+const expectedHash = currentSpecRevision.match(/ENGINEERING_SPEC\.md[^\n]*?`([a-f0-9]{64})`/)?.[1];
 const actualHash = createHash('sha256').update(spec).digest('hex');
-if (!expectedHash || expectedHash !== actualHash) {
-  problems.push(`Spec SHA-256 mismatch (manifest=${expectedHash ?? 'missing'}, actual=${actualHash})`);
+const currentHashMatch = currentSpecRevision.match(/^\| `docs\/product\/ENGINEERING_SPEC\.md` \| Current normative[^\n]*?`([a-f0-9]{64})` \|$/m);
+const effectiveExpectedHash = currentHashMatch?.[1] ?? expectedHash;
+if (!effectiveExpectedHash || effectiveExpectedHash !== actualHash) {
+  problems.push(`Current normative spec SHA-256 mismatch (manifest=${effectiveExpectedHash ?? 'missing'}, actual=${actualHash})`);
 }
 
 for (let id = 1; id <= 26; id += 1) {
@@ -150,7 +153,10 @@ if (!/pnpm install --frozen-lockfile/.test(await read('.github/workflows/ci.yml'
 }
 
 const screens = Array.from(inventory.matchAll(/^\|\s*(\d{2}[a-z]?)\s*\|/gim), ([, id]) => id.toLowerCase());
-if (screens.length !== 51) problems.push(`Screen inventory has ${screens.length} artboards; expected 51`);
+const sourceScreens = screens.filter((id) => !['16a', '16b'].includes(id));
+if (sourceScreens.length !== 51 || !screens.includes('16a') || !screens.includes('16b')) {
+  problems.push(`Screen inventory has ${sourceScreens.length} original artboards plus ${screens.length - sourceScreens.length} derived references; expected 51 originals and both approved derived references`);
+}
 if (!/^\|\s*15\s*\|.*TABLED/im.test(inventory)) problems.push('Screen 15 must be marked TABLED');
 
 const p00Done = /^\|\s*P00\s*\|\s*[^|]+\|\s*DONE(?:\s|$)/im.test(status);
@@ -172,5 +178,5 @@ if (problems.length) {
   for (const problem of problems) console.error(`- ${problem}`);
   process.exitCode = 1;
 } else {
-  console.log(`P00 structural verification passed: ${requiredIds.size} requirement IDs, ${screens.length} artboards, spec SHA-256 ${actualHash}`);
+  console.log(`P00 structural verification passed: ${requiredIds.size} requirement IDs, ${sourceScreens.length} source artboards + ${screens.length - sourceScreens.length} approved derived references, spec SHA-256 ${actualHash}`);
 }

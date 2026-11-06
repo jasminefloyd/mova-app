@@ -2,7 +2,7 @@
 
 Every canvas artboard mapped to its route, app shell, features and acceptance criteria, build phase, and the components it is built from. This is the starting point for `docs/engineering/SCREEN_INVENTORY.md` (P00-T05): copy it there and add implementation files as they land.
 
-**51 artboards** (50 to build, screen 15 TABLED) → **58 reference renders** including state variants.
+**53 mapped screens** (58 original canvas renders plus 2 owner-approved derived references; screen 15 TABLED) → **60 reference renders** including state variants.
 
 Every screen must also implement the states the canvas does not draw: **loading (skeleton), empty, error + retry, offline, permission denied, validation** (§2.3), at 320–430 px, in en-US and es-US, with 44 px targets, keyboard order, screen-reader labels and reduced motion. Visual acceptance: QA case `TC-SCR-<number>-01`.
 
@@ -27,16 +27,18 @@ Every screen must also implement the states the canvas does not draw: **loading 
 | 14 | AI Revenue Center (tab) | [default](screens/png/14-ai-revenue-center.png) · [html](screens/html/14-ai-revenue-center.html) | `/app/revenue` | Artist (tab 4 "AI Revenue") | F19 · F19-AC01…04 | P12 | Card inverse (forecast, Estimate label), ListRow tiles with counts, Link, TabBar |
 | 15 | Outreach approval · TABLED | [default](screens/png/15-outreach-TABLED.png) · [html](screens/html/15-outreach-TABLED.html) | `— TABLED, do not build (D-25)` | — | — | — | — |
 | 16 | Settings · from Home photo | [default](screens/png/16-settings.png) · [html](screens/html/16-settings.html) | `/app/settings` | Artist (modal from Home avatar) | D-15 | P02 / P03 | Card inverse (profile), Button secondary ×2, ListRow nav, Button ghost (Sign out) |
+| 16a | Settings · Services | [default](screens/png/16a-settings-services.png) · [html](screens/html/16a-settings-services.html) | `/app/settings/services` | Artist (Settings) | F03 | P04 | ScreenHeader, ServiceCard, DepositSummary, LocationOverrideRow, StatusChip, Button |
+| 16b | Settings · Portfolio | [default](screens/png/16b-settings-portfolio.png) · [html](screens/html/16b-settings-portfolio.html) | `/app/settings/portfolio` | Artist (Settings) | F02 · F02-AC04, F03 | P04 | ScreenHeader, PortfolioItem, Thumbnail, AltTextStatus, ServiceLink, ReorderControl, StatusChip, Button |
 | 17 | Money | [default](screens/png/17-money.png) · [html](screens/html/17-money.html) | `/app/settings/money` | Artist | F06 · F06-AC01, F06-AC03 | P08 | month picker, MiniBarChart breakdown + legend + table view, DefinitionList, ListRow activity |
 | 18 | Get paid · card, Zelle, cash, other | [card](screens/png/18-get-paid--card.png) · [html](screens/html/18-get-paid--card.html)<br>[zelle](screens/png/18-get-paid--zelle.png) · [html](screens/html/18-get-paid--zelle.html)<br>[cash](screens/png/18-get-paid--cash.png) · [html](screens/html/18-get-paid--cash.html)<br>[other](screens/png/18-get-paid--other.png) · [html](screens/html/18-get-paid--other.html) | `/app/settings/money/get-paid/:appointmentId` | Artist (sheet) | F23 · F23-AC01…04 | P08 | Sheet, TextField amount, RadioCard method group, per-method panel, Button primary (label per method) |
 | 19 | Locations & hours | [default](screens/png/19-locations-hours.png) · [html](screens/html/19-locations-hours.html) | `/app/settings/locations` | Artist | F03 | P05 | Card per location, LocationTag, StatusChip mode, KPITile small (buffer/notice/horizon), Button |
 | 20 | Calendar sync | [default](screens/png/20-calendar-sync.png) · [html](screens/html/20-calendar-sync.html) | `/app/settings/calendar-sync` | Artist | F07 | P09 | HonestyBanner (one-way), Card (Google), RadioCard privacy, masked URL + Button copy/reset |
 | 21 | Show my QR · artist | [default](screens/png/21-show-my-qr.png) · [html](screens/html/21-show-my-qr.html) | `/app/settings/qr` | Artist | F10 · F10-AC01, F10-AC02 | P10 | full-bleed inverse screen, ProfilePhoto, QRDisplay, Button ghost (Share link / Share image) |
 | 22 | Plan | [default](screens/png/22-plan.png) · [html](screens/html/22-plan.html) | `/app/settings/plan` | Artist | F12 · A-01, A-26 | P15 | StatusChip "Proposed pricing · not final", Card ×3 (plans), Button |
-| 23 | Showcase · Looks | [default](screens/png/23-showcase-looks.png) · [html](screens/html/23-showcase-looks.html) | `/artists/:handle` | Public (SSR/prerender) | F02, F21 · F02-AC01, F02-AC02, F02-AC05, F21-AC04 | P04 | cover, ProfilePhoto 104, rating (hidden until A-20), LocationTag, Segmented Looks/Services, look tiles + Button, sticky Button |
-| 24 | Showcase · Services | [default](screens/png/24-showcase-services.png) · [html](screens/html/24-showcase-services.html) | `/artists/:handle?tab=services` | Public | F02, F03 · F02-AC03 | P04 | same header as 23, ListRow service rows with deposit text + Button compact |
-| 25 | Choose date & time | [default](screens/png/25-choose-date-time.png) · [html](screens/html/25-choose-date-time.html) | `/artists/:handle/book` | Public | F04 · F04-AC04, F03-AC05 | P06 | Card summary, DayStrip, TimeSlot groups by LocationTag + StatusChip mode, summary line, sticky Button |
-| 26 | Details & deposit | [default](screens/png/26-details-deposit.png) · [html](screens/html/26-details-deposit.html) | `/artists/:handle/book (details)` | Public | F04, F15 · F04-AC05, F15-AC01 | P06 / P08 / P10 | Card summary, Link (Sign in), TextField ×3, Checkbox consents, Stripe Payment Element, policy text, Button primary |
+| 23 | Showcase · Looks | [default](screens/png/23-showcase-looks.png) · [html](screens/html/23-showcase-looks.html) | `/a/:handle?locale={en-US,es-US}` | Public (SSR on Vercel) | F02, F21 · F02-AC01, F02-AC02, F02-AC05, F21-AC04 | P04 | cover, ProfilePhoto 104, rating (hidden until A-20), LocationTag, Segmented Looks/Services, look tiles + Button, sticky Button |
+| 24 | Showcase · Services | [default](screens/png/24-showcase-services.png) · [html](screens/html/24-showcase-services.html) | `/a/:handle?tab=services&locale={en-US,es-US}` | Public | F02, F03 · F02-AC03 | P04 | same header as 23, ListRow service rows with deposit text + Button compact |
+| 25 | Choose date & time | [default](screens/png/25-choose-date-time.png) · [html](screens/html/25-choose-date-time.html) | `/a/:handle/book` | Public | F04 · F04-AC04, F03-AC05 | P06 | Card summary, DayStrip, TimeSlot groups by LocationTag + StatusChip mode, summary line, sticky Button |
+| 26 | Details & deposit | [default](screens/png/26-details-deposit.png) · [html](screens/html/26-details-deposit.html) | `/a/:handle/book (details)` | Public | F04, F15 · F04-AC05, F15-AC01 | P06 / P08 / P10 | Card summary, Link (Sign in), TextField ×3, Checkbox consents, Stripe Payment Element, policy text, Button primary |
 | 27 | Sign in or create profile | [default](screens/png/27-sign-in.png) · [html](screens/html/27-sign-in.html) | `/signin (sheet or page)` | Client | F15 · F15-AC02 | P10 | Sheet, benefits list, TextField contact, Checkbox marketing opt-in, Button, Link (guest) |
 | 28 | Booking status + wallet | [confirmed](screens/png/28-booking-status--confirmed.png) · [html](screens/html/28-booking-status--confirmed.html)<br>[request](screens/png/28-booking-status--request.png) · [html](screens/html/28-booking-status--request.html) | `/b/:token` | Public / Client | F04, F16 · F04-AC01, F16-AC01 | P06 / P10 | StatusChip confirmed/request, DefinitionList, ClientCard + wallet badges, Link save image, Button (calendar, manage) |
 | 29 | Client profile & card | [default](screens/png/29-client-profile-card.png) · [html](screens/html/29-client-profile-card.html) | `/me` | Client | F15, F16 · F15-AC05, F15-AC06 | P10 | ClientCard, ListRow upcoming, ListRow My stylists, Toggle per stylist, Link edit/sign out/delete |
@@ -64,15 +66,35 @@ Every screen must also implement the states the canvas does not draw: **loading 
 
 These are required for V1. The phase that needs them cannot be accepted until the product owner approves a design (QA cases `TC-SCR-TBD-01…10`).
 
+**P06 derived interaction flows (engineering lead approval, 2026-11-05):** the owner authorized the engineering lead to resolve phase gates while implementation proceeds. The following small interactions use the already approved Sheet, Card, Button, DayStrip, and TimeSlot components; they do not introduce new visual components or business rules:
+
+| Flow | Existing screen | Derived layout |
+|---|---|---|
+| Artist request review and time suggestion | 10 | Request details and expiry, with Accept, Suggest a time, and Decline. Suggest opens available slots grouped by date; sending a slot keeps the booking pending until the client accepts. |
+| Client cancellation confirmation | 28 | The manage card opens the standard confirmation Sheet before the cancellation request. The cancellation cutoff is shown from the location policy. |
+| Client reschedule picker | 28 | The manage card opens available location slots grouped by date; request locations retain artist review before the existing time changes. |
+
+**P10 derived screens (owner approval, 2026-11-06):** the owner approved deriving `/c/:token` and delete-profile confirmation from the approved design system and screens 28–29. Preserve the existing forest/ivory palette, Manrope/DM Sans typography, spacing, rounded Card/Sheet surfaces, status chips, and 44 px actions. Do not add new component styles or cross-artist data.
+
+| Flow | Existing screens | Derived layout |
+|---|---|---|
+| Client card rebook/check-in | 28, 29 | Ivory PublicShell page; forest client-card hero; upcoming appointment in the approved Card and StatusChip pattern; primary booking action for that card's stylist; profile link. Only the token's client × stylist relationship is shown. |
+| Delete client profile confirmation | 29 | Existing bottom Sheet pattern with a concise deletion/retention explanation, destructive confirm action, and secondary Cancel. |
+
+**P11/P13 derived layouts (engineering lead under the owner's 2026-11-05 phase-decision delegation; 2026-11-06):** notification preferences and inbox use Settings screen 16, ListRow, Toggle, EmptyState and Card. The concierge exception/quote decision uses the existing Sheet/Card/Button patterns on screens 40–43. The public chat uses the MessageBubble and field/button patterns from screen 45 and the approved public artist page. Spanish variants reuse screen 45's bubble hierarchy and must be visually checked at 320–430 px; this derivation does not approve Spanish legal or safety copy (A-12 remains open). Keep notifications and AI replies gated until their provider, consent, review and safety approvals are complete.
+
+| Flow | Existing screens | Derived layout |
+|---|---|---|
+| Notification preferences and inbox | 16, 41 | Settings list row opens channel preferences; inbox uses a chronological list, unread indicator, empty/error/loading states, and token-based typography/colors. |
+| Concierge exception/quote decision | 40–43 | Existing Sheet with handoff type, quote details and risk indicators; artist action is explicit and cannot enable AI or send a message. |
+| Showcase web chat | 23–24, 45 | Collapsible public chat panel, client/AI MessageBubble styles, disclosure, and 44 px message controls. Hidden while the web-chat feature flag is off. |
+
 | Needed by | Screen / state |
 |---|---|
-| P06 | Cancel / reschedule flows (artist and client), refund confirmation, policy display |
-| P06 | Client manage-appointment page variants (reschedule picker, cancel confirm) |
+| P08 | Refund confirmation and payment-specific cancellation states |
 | P11 | Notification & language settings; in-app notification inbox |
 | P16 | Privacy & data: export, delete account, delete client, retention notices |
 | P13 | Spanish variants of guest flows 23–31d (layout check with long strings) |
 | P14 | Review reply composer; report review |
 | P13 | Concierge exception "Decide" sheet; web chat widget on showcase |
 | All | Loading / empty / error / offline states (pattern library acceptable) |
-| P10 | `/c/:token` rebook/check-in page; delete-profile confirmation |
-| P02 | Service list and portfolio management in Settings (editing outside onboarding) |

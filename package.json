@@ -4,10 +4,34 @@
   "version": "0.0.0",
   "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c",
   "engines": {
-    "node": "20.13.1",
+    "node": "24.22.2",
     "pnpm": "9.15.0"
   },
   "scripts": {
-    "phase:verify": "node scripts/verify-phase.mjs"
-  }
+    "dev": "corepack pnpm --filter @mova/web dev",
+    "build": "corepack pnpm --filter @mova/contracts build && corepack pnpm --filter @mova/web build",
+    "lint": "eslint apps/web packages/contracts/src scripts/check-locales.mjs scripts/verify-p01.mjs scripts/verify-p02.mjs tests playwright.config.ts playwright.visual.config.ts",
+    "typecheck": "corepack pnpm --filter @mova/contracts build && tsc -p apps/web/tsconfig.json && corepack pnpm --filter @mova/contracts typecheck",
+    "test": "corepack pnpm --filter @mova/contracts build && vitest run --config apps/web/vitest.config.ts",
+    "test:e2e": "playwright test",
+    "test:visual": "playwright test --config playwright.visual.config.ts",
+    "check-locales": "node scripts/check-locales.mjs",
+    "phase:verify": "node scripts/verify-phase.mjs",
+    "phase:p01:verify": "node scripts/verify-p01.mjs",
+    "phase:p02:verify": "node scripts/verify-p02.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.1",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "10.14.0",
+    "globals": "17.14.0",
+    "jsdom": "31.0.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.1.0"
+  },
+  "workspaces": ["apps/*", "packages/*"]
 }

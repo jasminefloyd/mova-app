@@ -12,7 +12,7 @@
 1. At session start read `docs/product/ENGINEERING_SPEC.md` (this file), `docs/product/MASTER_BLUEPRINT.md`, `docs/engineering/PHASE_STATUS.md`, `REQUIREMENTS_MATRIX.csv`, `DECISION_LOG.md`, and open `CHANGE_REQUESTS.md`. Confirm the current phase and approvals.
 2. Work one phase and one vertical slice at a time (UI → validated function → DB → events → tests). Never start a later phase to hide a missing dependency.
 3. Before edits: list intended files, requirement IDs, tests, risks, blockers. After edits: actual files, commands and results, screenshots, deviations, next action.
-4. `DONE` requires passing tests, staging proof, traceability and reviewer acceptance. `BLOCKED` is never `DONE`. No `test.skip` on critical paths.
+4. `DONE` requires passing tests, local phase integration evidence, traceability and reviewer acceptance. `BLOCKED` is never `DONE`. No `test.skip` on critical paths. Production-host verification remains a P18 activity after written GO.
 5. Mocks only in tests/sandbox, visibly labelled. No fake data in production UI. No simulated provider success.
 6. No secrets in Git; service-role never in browser; RLS on every tenant table with negative tests.
 7. No production deploy, live payments, live messaging, AI enablement, or business-rule change without recorded approval.
@@ -21,9 +21,9 @@
 10. Re-run all previously accepted critical-path tests at every phase.
 11. Match the design canvas. If a screen in §2.4 lacks an approved design, stop and request it.
 
-**Traceability CSV columns:** `requirement_id,spec_section,acceptance_criterion,phase_id,screen_ids,implementation_files,migration_or_function,test_files,staging_evidence,status,reviewer,approval_date` — one row per AC (`Fnn-ACnn`), per D-xx, per A-xx, per T-xx, and per nonfunctional target.
+**Traceability CSV columns:** `requirement_id,spec_section,acceptance_criterion,phase_id,screen_ids,implementation_files,migration_or_function,test_files,phase_evidence,status,reviewer,approval_date` — one row per AC (`Fnn-ACnn`), per D-xx, per A-xx, per T-xx, and per nonfunctional target.
 
-**Standard phase gate:** all checklist items done; `pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm test && pnpm build` green; `supabase db reset` + DB tests green; staging E2E of real persisted flow incl. negative path; tenant/privacy/idempotency/money invariants tested; new endpoints documented with schemas, auth class, errors, rate limits; matrix updated; security scan, a11y smoke, visual regression; reviewer sign-off.
+**Standard phase gate:** all checklist items done; `pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm test && pnpm build` green; `supabase db reset` + DB tests green; browser E2E against the local app and local Supabase instance proves real persisted success and failure paths; tenant/privacy/idempotency/money invariants tested; new endpoints documented with schemas, auth class, errors, rate limits; matrix updated; security scan, a11y smoke, visual regression; reviewer sign-off. No hosted staging environment is used. Production-host verification occurs at P18 after written GO and is not a prerequisite for earlier phase completion.
 
 ### 13.2 Phase map (supersedes v1 numbering)
 
@@ -33,7 +33,7 @@
 | P01 | App shell, environments, Supabase infra, i18n runtime | F11, F13 | P00 | — |
 | P02 | Design system & navigation | D-15, F13 | P01 | Design sign-off (G2a) |
 | P03 | Identity, tenancy, onboarding, profile photo | F01 | P02 | — |
-| P04 | Showcase (Looks/Services), services & deposits, portfolio, SEO | F02, F03 | P03 | A-13 (ADR-0003) |
+| P04 | Showcase (Looks/Services), services & deposits, portfolio, SEO | F02, F03 | P03 | — |
 | P05 | Locations, hours, availability engine | F03 | P04 | — |
 | P06 | Booking lifecycle, calendar UI, requests, manage links, running late | F04 | P05 | §2.4 cancel/reschedule designs |
 | P07 | Clients, consent, import, client notes & visits | F05, F17 | P06 | A-27 (sensitive notes) |
@@ -69,7 +69,7 @@ Files: `apps/web/*` base, `src/app/{ArtistShell,PublicShell,ClientShell,Onboardi
 - P01-T01 Strict TS, Router, TanStack Query, Zod, Tailwind with tokens.
 - P01-T02 Separate shells and query caches for artist vs client.
 - P01-T03 PWA with asset-only caching; private APIs never cached.
-- P01-T04 Dev/staging/prod Supabase + Vercel; isolated secrets.
+- P01-T04 Local development + production Supabase/Vercel configuration; isolated secrets; no hosted staging environment. Production-host verification is deferred to P18 after written GO.
 - P01-T05 Envelope, request IDs, error boundary, redacted logging.
 - P01-T06 i18n runtime en-US/es-US; locale persistence artist vs guest; `check-locales` in CI.
 - P01-AC01 build/test/smoke green; AC02 PWA installs (Android/desktop) and iOS guidance; AC03 no private API in SW cache; AC04 locale switch before login persists.
@@ -94,12 +94,12 @@ Migrations 0001–0003. Functions `publish-showcase`, `photo-upload-url`, `photo
 - ACs: F01-AC01…AC06.
 
 **P04 — Showcase, services & deposits, portfolio, SEO**
-Migration 0004. Functions `public-artist` (tabs), portfolio CRUD. Screens 03, 23, 24, Settings › Services/Portfolio (design per §2.4).
+Migration 0004. Functions `public-artist` (tabs), portfolio CRUD. Screens 03, 23, 24, Settings › Services/Portfolio (owner-approved derived references in `docs/design/screens/`).
 - P04-T01 Services with deposit fields + location overrides.
 - P04-T02 `packages/domain/deposit.ts` + table tests.
 - P04-T03 Portfolio uploads, alt text, ordering, publish, service links.
 - P04-T04 Looks/Services tabs; Book this look; deposit text from server.
-- P04-T05 SSR/prerender per ADR-0003; OG/canonical/hreflang; sitemap; robots.
+- P04-T05 SSR on Vercel per ADR-0003; OG/canonical/hreflang, sitemap and robots. Emit reciprocal `en-US`/`es-US` alternates at `?locale=en-US` / `?locale=es-US`; both canonicalize to `/a/:handle` per F02.
 - P04-T06 Rating slot wired to F21 projection (hidden until available).
 - ACs: F02-AC01…AC05, F03-AC01.
 
@@ -207,7 +207,7 @@ v1 P15 tasks unchanged. Feature flags at launch reflect approval status in §0.5
 ## 16. First instruction to Codex
 
 ```text
-You are implementing Mova from docs/product/ENGINEERING_SPEC.md (v2.0).
+You are implementing Mova from docs/product/ENGINEERING_SPEC.md (v2.2).
 Do not generate features in bulk. First:
 1. Create the repository scaffold and all P00 files listed in §13.3.
 2. Write docs/engineering/SCREEN_INVENTORY.md mapping the 51 canvas artboards to

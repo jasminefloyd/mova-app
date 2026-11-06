@@ -1,4 +1,5 @@
 node_modules/
+.react-router/
 dist/
 build/
 .vercel/
@@ -21,3 +22,4 @@ playwright-report/
 test-results/
 tests/visual/**/__diff__/
 tests/ai-evals/**/runs/
+docs/

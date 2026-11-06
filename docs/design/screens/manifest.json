@@ -200,6 +200,26 @@
   "png": "screens/png/16-settings.png"
  },
  {
+  "id": "16a-settings-services",
+  "number": "16a",
+  "title": "16a Settings · Services",
+  "state": null,
+  "canvas_file": "Owner-approved derived reference",
+  "tabled": false,
+  "html": "screens/html/16a-settings-services.html",
+  "png": "screens/png/16a-settings-services.png"
+ },
+ {
+  "id": "16b-settings-portfolio",
+  "number": "16b",
+  "title": "16b Settings · Portfolio",
+  "state": null,
+  "canvas_file": "Owner-approved derived reference",
+  "tabled": false,
+  "html": "screens/html/16b-settings-portfolio.html",
+  "png": "screens/png/16b-settings-portfolio.png"
+ },
+ {
   "id": "17-money",
   "number": "17",
   "title": "17 Money",

@@ -1,0 +1,22 @@
+import { QueryClient } from '@tanstack/react-query';
+
+function createQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 30_000,
+        retry: 1,
+        refetchOnWindowFocus: true,
+      },
+      mutations: { retry: false },
+    },
+  });
+}
+
+export const createArtistQueryClient = createQueryClient;
+export const createClientQueryClient = createQueryClient;
+export const createPublicQueryClient = createQueryClient;
+
+export function clearSessionQueryCache(client: QueryClient): void {
+  client.clear();
+}

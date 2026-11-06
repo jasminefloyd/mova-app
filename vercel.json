@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "react-router",
+  "installCommand": "corepack pnpm install --frozen-lockfile",
+  "buildCommand": "corepack pnpm build",
+  "rewrites": [
+    { "source": "/:path*", "has": [{ "type": "host", "value": "admin.mova-beauty.co" }], "destination": "/__admin" }
+  ],
+  "crons": [
+    { "path": "/api/booking-expiry", "schedule": "*/5 * * * *" },
+    { "path": "/api/calendar-sync", "schedule": "*/5 * * * *" }
+  ]
+}

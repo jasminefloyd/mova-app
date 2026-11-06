@@ -2,7 +2,7 @@
 
 | File | Status |
 |---|---|
-| `ENGINEERING_SPEC.md` | **Normative.** Engineering Handoff & End-to-End Implementation Specification v2.0, copied unchanged (hash in `docs/engineering/BASELINE_MANIFEST.md`). |
+| `ENGINEERING_SPEC.md` | **Normative.** Engineering Handoff & End-to-End Implementation Specification v2.1 (original v2.0 baseline and current hash in `docs/engineering/BASELINE_MANIFEST.md`). |
 | `MASTER_BLUEPRINT.md` | Business-intent source (v1). Its sections on navigation, AI autonomy, client accounts, reviews, concierge and payments are **out of date**. Decisions in spec §0.3 override them until the blueprint is reissued as v2. |
 | `archive/MOVA_PRD_Technical_Architecture_Engineering_Handoff_v1.md` | **Superseded** by the v2 spec. History only. |
 | `archive/MOVA_Codex_File_by_File_Implementation_Plan_v1.md` | **Partially superseded.** Operating protocol, PR/handoff templates and anti-drift rules still apply (restated in spec §13). Phase numbering and file manifests are replaced. |

@@ -1,0 +1,4 @@
+import {describe,it,expect} from 'vitest';
+import {calculateForecast} from './forecast';
+const inputs={bookedMinor:10000,remainingHours:[10,5],fillRates:[.5,.4],avgTicketPerHourMinor:[3000,4000],openLowMinor:12000,openHighMinor:24000,dueClients:4,rebookConversion:.25,averageTicketMinor:8000,rebookLowMinor:4000,rebookHighMinor:12000,usualMonthsMinor:[12000,14000,16000]};
+describe('forecast',()=>{it('is reproducible from saved deterministic inputs',()=>expect(calculateForecast(inputs)).toEqual(calculateForecast(inputs)));it('uses supplied P10/P90 projections and keeps booked exact',()=>expect(calculateForecast(inputs)).toMatchObject({bookedMinor:10000,likelyMinor:41000,likelyLowMinor:26000,likelyHighMinor:46000}));it('hides usual baseline until three complete months exist',()=>expect(calculateForecast({...inputs,usualMonthsMinor:[12000,14000]})).toMatchObject({usualMinor:null,historySufficient:false}));});

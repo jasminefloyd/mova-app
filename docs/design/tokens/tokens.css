@@ -24,6 +24,7 @@
   --status-pending-bg: #F3E3D6; --status-pending-border: #C98F66; --status-pending-fg: #18392F;
   /* locations (always paired with the location name) */
   --location-1: #264E3E; --location-2: #C98F66;
+  --wallet-button: #111111; /* placeholder for official provider artwork */
 
   /* type */
   --font-display: Manrope, sans-serif; --font-ui: 'DM Sans', sans-serif;

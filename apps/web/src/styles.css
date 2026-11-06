@@ -1,0 +1,762 @@
+@import "tailwindcss";
+@import "@mova/design-tokens/tokens.css";
+
+@theme inline {
+  --color-brand-forest: var(--forest);
+  --color-brand-botanical: var(--botanical);
+  --color-brand-sage: var(--sage);
+  --color-brand-mint: var(--mint);
+  --color-brand-peach: var(--peach);
+  --color-brand-ivory: var(--ivory);
+  --color-ink-primary: var(--ink-primary);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-danger: var(--danger);
+  --color-accent-warm: var(--accent-warm);
+  --color-accent-warm-strong: var(--accent-warm-strong);
+  --color-status-confirmed-bg: var(--status-confirmed-bg);
+  --color-status-confirmed-fg: var(--status-confirmed-fg);
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-pending-fg: var(--status-pending-fg);
+  --color-status-pending-border: var(--status-pending-border);
+  --color-location-1: var(--location-1);
+  --color-location-2: var(--location-2);
+  --color-surface-page: var(--surface-page);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-surface-warm: var(--surface-warm);
+  --color-line: var(--line);
+  --color-line-subtle: var(--line-subtle);
+  --color-line-control: var(--line-control);
+  --font-display: Manrope, sans-serif;
+  --font-ui: "DM Sans", sans-serif;
+  --text-display-xl: var(--fs-display-xl);
+  --text-display-l: var(--fs-display-l);
+  --text-display-m: var(--fs-display-m);
+  --text-display-s: var(--fs-display-s);
+  --text-body-l: var(--fs-body-l);
+  --text-body: var(--fs-body);
+  --text-body-s: var(--fs-body-s);
+  --text-caption: var(--fs-caption);
+  --text-micro: var(--fs-micro);
+  --text-tab: var(--fs-tab);
+  --radius-xs: var(--radius-xs);
+  --radius-s: var(--radius-s);
+  --radius-m: var(--radius-m);
+  --radius-l: var(--radius-l);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-3xl: var(--radius-3xl);
+  --radius-pill: var(--radius-pill);
+  --spacing-1: var(--space-1);
+  --spacing-2: var(--space-2);
+  --spacing-3: var(--space-3);
+  --spacing-4: var(--space-4);
+  --spacing-5: var(--space-5);
+  --spacing-6: var(--space-6);
+  --spacing-8: var(--space-8);
+  --shadow-raised: var(--shadow-raised);
+  --shadow-sheet: var(--shadow-sheet);
+}
+
+.mova-onboarding-page { min-height: 100dvh; background: var(--surface-page); }
+.mova-onboarding-header { padding: var(--space-6) var(--space-5) var(--space-5); color: var(--surface-inverse); background: var(--forest); }
+.mova-onboarding-header .mova-wordmark { display: block; font-family: var(--font-display); font-size: var(--fs-display-m); font-weight: 800; }
+.mova-onboarding-header p { max-width: 34rem; margin: var(--space-2) 0 0; color: var(--mint); }
+.mova-onboarding-content { width: min(100%, 34rem); margin-inline: auto; padding: var(--space-5); }
+.mova-form-stack { display: flex; flex-direction: column; gap: var(--space-4); }
+.mova-form-stack h1 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-s); line-height: 1.15; }
+.mova-form-stack h2 { margin: 0; }
+.mova-form-stack > p { margin: 0; color: var(--ink-secondary); }
+.mova-language-options { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); border: 0; padding: 0; margin: 0; }
+.mova-language-options legend { grid-column: 1 / -1; margin-bottom: var(--space-2); font-weight: 600; }
+.mova-form-note { text-align: center; font-size: var(--fs-body-s); }
+.mova-specialty-fieldset { display: grid; gap: var(--space-3); border: 0; padding: 0; margin: 0; }
+.mova-specialty-fieldset legend { margin-bottom: var(--space-2); font-weight: 600; }
+.mova-chip-list, .mova-photo-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.mova-inline-field { display: flex; align-items: end; gap: var(--space-2); }
+.mova-inline-field .mova-field { flex: 1; min-width: 0; }
+.mova-photo-placeholder { display: grid; min-height: 13rem; place-content: center; justify-items: center; gap: var(--space-2); border: 1px dashed var(--sage); background: var(--surface-alt); color: var(--botanical); text-align: center; }
+.mova-photo-placeholder > span { font-size: var(--fs-display-l); }
+.mova-photo-placeholder small { color: var(--ink-secondary); }
+.mova-photo-preview { position: relative; display: grid; place-items: center; aspect-ratio: 1; max-width: 24rem; margin-inline: auto; overflow: hidden; border-radius: var(--radius-2xl); background: var(--surface-alt); }
+.mova-photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+.mova-photo-preview > span { position: absolute; inset-inline: var(--space-2); bottom: var(--space-2); padding: var(--space-2); border-radius: var(--radius-s); background: var(--surface); text-align: center; font-size: var(--fs-caption); }
+.mova-zoom-control { display: grid; gap: var(--space-2); font-weight: 600; }
+.mova-zoom-control input { min-height: 2.75rem; width: 100%; accent-color: var(--forest); }
+.mova-setup-checklist { margin: 0; padding: var(--space-4) var(--space-5); border: 1px solid var(--line-subtle); border-radius: var(--radius-xl); background: var(--surface); }
+.mova-setup-checklist li { padding-block: var(--space-2); }
+.mova-service-list { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.mova-service-list li { display: grid; gap: var(--space-1); padding: var(--space-4); border: 1px solid var(--line-subtle); border-radius: var(--radius-l); background: var(--surface); }
+.mova-service-list li span, .mova-service-list li small { color: var(--ink-secondary); }
+.mova-service-form { padding: var(--space-4); border: 1px solid var(--line-subtle); border-radius: var(--radius-xl); background: var(--surface); }
+.mova-service-numbers { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.mova-public-artist { padding-bottom: var(--space-8); }
+.mova-public-artist__header { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-5); border-radius: var(--radius-2xl); background: var(--forest); color: var(--surface-inverse); }
+.mova-public-artist__header h1 { margin: var(--space-1) 0; color: var(--surface-inverse); font-size: var(--fs-display-m); }
+.mova-public-artist__header p { margin: 0; color: var(--mint); }
+.mova-public-artist__avatar { width: 5rem; height: 5rem; flex: none; border-radius: 50%; object-fit: cover; }
+.mova-public-artist__bio { margin-block: var(--space-5); white-space: pre-wrap; }
+.mova-public-tabs { display: flex; gap: var(--space-2); margin-block: var(--space-5); border-bottom: 1px solid var(--line-subtle); }
+.mova-public-tabs button { min-height: var(--tap-min); padding-inline: var(--space-4); border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--ink-secondary); }
+.mova-public-tabs button[aria-selected="true"] { border-bottom-color: var(--forest); color: var(--forest); font-weight: 700; }
+.mova-looks-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.mova-look-card { overflow: hidden; padding: 0; }
+.mova-look-card img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+.mova-look-card p { margin: var(--space-3); }
+.mova-public-services { display: grid; margin: 0; padding: 0; list-style: none; }
+.mova-public-services li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-4) 0; border-bottom: 1px solid var(--line-subtle); }
+.mova-public-services li > div { display: grid; gap: var(--space-1); }
+.mova-public-services li > div:last-child { text-align: end; }
+.mova-public-services small { color: var(--ink-secondary); }
+.mova-chip--static { display: inline-flex; align-items: center; min-height: 2.25rem; border-radius: var(--radius-pill); padding-inline: var(--space-4); background: var(--mint); font-size: var(--fs-body-s); font-weight: 600; }
+.mova-settings-page { width: min(100% - 2 * var(--gutter), 680px); gap: var(--space-3); padding-top: var(--space-4); padding-bottom: var(--space-8); }
+.mova-portfolio-list { display: grid; gap: var(--space-4); margin: 0 0 var(--space-5); padding: 0; list-style: none; }
+.mova-portfolio-card { display: grid; gap: var(--space-3); }
+.mova-portfolio-card > img { width: 100%; max-height: 22rem; aspect-ratio: 4 / 3; border-radius: var(--radius-l); object-fit: cover; }
+.mova-portfolio-card select[multiple], .mova-form-stack select[multiple] { min-height: 7rem; padding: var(--space-2); }
+
+@media (min-width: 48rem) {
+  .mova-onboarding-header { padding-inline: max(var(--space-5), calc((100vw - 48rem) / 2)); }
+  .mova-onboarding-content { padding-top: var(--space-8); }
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--surface-page);
+  color: var(--ink-primary);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.mova-artist-view { min-height: 100dvh; }
+
+/* Artist screens follow the approved mobile canvases and keep content above the tab bar. */
+.mova-home, .mova-calendar, .mova-clients, .mova-settings-page, .mova-services-page, .mova-location-settings { display: grid; align-content: start; gap: var(--space-5); padding-bottom: var(--space-8); }
+.mova-home__header, .mova-calendar__month-header, .mova-clients__header, .mova-services-page__header, .mova-location-settings__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.mova-home { gap: 14px; padding-top: 18px; padding-bottom: calc(var(--tab-bar-h) + var(--space-8) + env(safe-area-inset-bottom)); }
+.mova-home__header { padding-top: 0; }
+.mova-home__header > div { display: grid; gap: 2px; }
+.mova-home__header p { margin: 0; color: var(--ink-muted); font-size: var(--fs-caption); font-weight: 600; }
+.mova-services-page__header p, .mova-location-settings__header p { margin: 0; color: var(--ink-secondary); font-size: var(--fs-body-s); }
+.mova-home__header h1, .mova-calendar__month-header h1, .mova-clients__header h1, .mova-services-page__header h1, .mova-location-settings__header h1 { margin: 0; font-size: var(--fs-display-xl); line-height: 1.1; }
+.mova-home__settings { display: inline-flex; min-width: var(--tap-min); min-height: var(--tap-min); align-items: center; justify-content: center; border: 0; border-radius: 50%; padding: 0; background: transparent; }
+.mova-home__settings .mova-avatar { width: 44px; height: 44px; border: 1px solid var(--line-control); outline: 2px solid var(--surface-page); outline-offset: 1px; }
+.mova-home__metrics { display: grid; min-height: 83px; grid-template-columns: 1.3fr 1fr 1fr; gap: 1px; overflow: hidden; border-radius: var(--radius-xl); background: var(--botanical); color: var(--ink-inverse); text-decoration: none; }
+.mova-home__metrics .mova-kpi { min-height: 83px; align-content: center; gap: 2px; border-radius: 0; padding: var(--space-3); }
+.mova-home__metrics .mova-kpi__label { color: var(--mint); font-size: var(--fs-tab); text-transform: none; }
+.mova-home__metrics .mova-kpi > strong { font-size: var(--fs-display-m); line-height: 1.2; }
+.mova-home__metrics .mova-kpi__delta { color: var(--mint); font-size: var(--fs-tab); }
+.mova-home__section { display: grid; gap: var(--space-2); }
+.mova-home__section-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.mova-home__section-heading > a { min-height: var(--tap-min); display: inline-flex; align-items: center; color: var(--ink-primary); font-size: var(--fs-caption); font-weight: 700; }
+.mova-card.mova-home__needs-list { display: grid; gap: 0; padding: 0; border-radius: var(--radius-xl); }
+.mova-home__need, .mova-home__appointment, .mova-home__coming-row { display: flex; min-width: 0; align-items: center; gap: var(--space-3); color: inherit; text-decoration: none; }
+.mova-home__need { min-height: 56px; padding: var(--space-2) 14px; }
+.mova-home__need + .mova-home__need { border-top: 1px solid var(--line-subtle); }
+.mova-home__need > .mova-icon:first-child { flex: none; }
+.mova-home__need > .mova-icon:last-child { flex: none; }
+.mova-home__need > span, .mova-home__appointment-copy { display: grid; min-width: 0; flex: 1; gap: 2px; }
+.mova-home__need strong { font-size: var(--fs-body-s); font-weight: 700; }
+.mova-home__need small, .mova-home__appointment small, .mova-home__coming-row > span { color: var(--ink-secondary); overflow-wrap: anywhere; }
+.mova-home__need small { font-size: var(--fs-micro); }
+.mova-card.mova-home__today-list, .mova-card.mova-home__coming-list { display: grid; padding-block: 0; }
+.mova-card.mova-home__today-list { padding-inline: 14px; }
+.mova-card.mova-home__coming-list { padding-inline: 14px; border-radius: var(--radius-xl); }
+.mova-home__appointment { min-height: 54px; border-bottom: 1px solid var(--line-subtle); }
+.mova-home__appointment:last-child, .mova-home__coming-row:last-child { border-bottom: 0; }
+.mova-home__appointment time { width: 64px; flex: none; font-size: var(--fs-caption); font-weight: 700; font-variant-numeric: tabular-nums; }
+.mova-home__appointment-bar { width: 3px; min-height: 34px; flex: none; align-self: center; border-radius: var(--radius-pill); background: var(--location-1); }
+.mova-home__appointment-bar[data-location="1"] { background: var(--location-2); }
+.mova-home__appointment-copy strong { font-size: var(--fs-body-s); font-weight: 700; }
+.mova-home__appointment small { font-size: var(--fs-micro); }
+.mova-home__coming-row { min-height: 50px; border-bottom: 1px solid var(--line-subtle); }
+.mova-home__coming-row > strong { min-width: 60px; }
+.mova-home__coming-row > strong, .mova-home__coming-row > span { font-size: var(--fs-caption); }
+.mova-home__coming-row > span { flex: 1; }
+.mova-home__coming-row .mova-status { min-height: 24px; flex: none; padding: 2px 7px; font-size: var(--fs-tab); }
+.mova-calendar__header { display: grid; gap: 14px; }
+.mova-calendar__month-header { min-height: 44px; }
+.mova-calendar__month-header h1 { margin: 0; font-size: var(--fs-display-xl); line-height: 1.1; }
+.mova-calendar__month-actions { display: flex; gap: var(--space-1); }
+.mova-calendar__month-actions .mova-icon-button { border: 1px solid var(--line); background: var(--surface); }
+.mova-calendar__month-actions .mova-icon { width: 20px; height: 20px; }
+.mova-calendar .mova-day-strip--calendar { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: var(--space-1); overflow: visible; padding: 0; }
+.mova-calendar .mova-day-strip--calendar button { width: auto; min-width: 0; height: 58px; min-height: 58px; gap: 2px; border: 0; border-radius: 16px; background: transparent; color: var(--ink-primary); }
+.mova-calendar .mova-day-strip--calendar button > span { color: var(--ink-muted); font-size: var(--fs-micro); }
+.mova-calendar .mova-day-strip--calendar button > strong { font-size: var(--fs-body); font-weight: 700; }
+.mova-calendar .mova-day-strip--calendar button.is-selected { background: var(--forest); color: var(--ivory); }
+.mova-calendar .mova-day-strip--calendar button.is-selected > span { color: var(--mint); }
+.mova-calendar .mova-day-strip--calendar button .mova-day-strip__indicator { width: 5px; height: 5px; }
+.mova-calendar__filters { display: flex; gap: var(--space-2); overflow-x: auto; padding-block: 2px; }
+.mova-calendar__filters .mova-chip { min-height: 38px; flex: none; gap: 6px; border-radius: 19px; padding-inline: 14px; font-size: var(--fs-micro); }
+.mova-calendar__location-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--location-1); }
+.mova-calendar__location-chip--two .mova-calendar__location-dot { background: var(--location-2); }
+.mova-calendar > .mova-honesty { min-height: 54px; margin: 12px 0 0; border-radius: var(--radius-l); padding: 10px 12px; align-items: center; gap: 10px; }
+.mova-calendar > .mova-honesty .mova-icon { width: 18px; height: 18px; }
+.mova-calendar > .mova-honesty p { font-size: var(--fs-micro); line-height: 1.4; }
+.mova-calendar__timeline { position: relative; height: 450px; margin: 12px 0 0; }
+.mova-calendar__hour { position: absolute; right: 0; left: 0; height: 50px; border-top: 1px solid var(--line-subtle); }
+.mova-calendar__hour time { position: absolute; top: 2px; left: 0; color: var(--ink-muted); font-size: var(--fs-tab); font-weight: 600; }
+.mova-calendar__event { position: absolute; right: 0; left: 48px; z-index: 1; display: grid; align-content: start; gap: 2px; overflow: hidden; border-radius: var(--radius-l); padding: var(--space-2) var(--space-3); background: var(--botanical); color: var(--ink-inverse); text-decoration: none; }
+.mova-calendar__event.mova-calendar__location-chip--two { background: var(--surface-warm); color: var(--ink-primary); }
+.mova-calendar__event strong { font-size: var(--fs-body-s); font-weight: 700; }
+.mova-calendar__event span, .mova-calendar__event small { color: var(--mint); font-size: var(--fs-caption); }
+.mova-calendar__event.mova-calendar__location-chip--two span, .mova-calendar__event.mova-calendar__location-chip--two small { color: var(--ink-secondary); }
+.mova-calendar__event--compact { gap: 0; padding-block: 6px; }
+.mova-calendar__event--compact strong, .mova-calendar__event--compact span { font-size: var(--fs-micro); line-height: 1.2; }
+.mova-calendar__block { position: absolute; right: 0; left: 48px; z-index: 1; display: flex; align-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-m); padding-inline: var(--space-3); background: repeating-linear-gradient(135deg, var(--line-subtle) 0 6px, var(--surface-page) 6px 12px); color: var(--ink-muted); font-size: var(--fs-micro); font-weight: 600; }
+.mova-calendar .mova-calendar__fab { position: fixed; z-index: 3; right: max(var(--gutter), calc((100vw - 680px) / 2 + var(--gutter))); bottom: calc(var(--tab-bar-h) + 18px + env(safe-area-inset-bottom)); width: 58px; height: 58px; border: 0; background: var(--forest); color: var(--ivory); box-shadow: var(--shadow-raised); }
+.mova-calendar .mova-calendar__fab .mova-icon { width: 24px; height: 24px; filter: brightness(0) invert(1); }
+.mova-calendar .mova-calendar__header { gap: 14px; }
+.mova-calendar .mova-calendar__filters { padding-block: 0; }
+.mova-calendar__location-dot.mova-calendar__location-chip--two { background: var(--location-2); }
+.mova-clients { gap: 14px; padding-top: 18px; }
+.mova-clients__header { margin-bottom: 0; }
+.mova-clients__header h1 { margin: 0; }
+.mova-clients__actions { display: flex; align-items: center; gap: var(--space-2); }
+.mova-clients__actions .mova-button { min-height: var(--tap-min); height: var(--tap-min); border-radius: var(--radius-pill); padding-inline: var(--space-4); }
+.mova-clients__actions > .mova-icon-button, .mova-location-settings .mova-screen-header__trailing .mova-icon-button { border-radius: 50%; background: var(--forest); }
+.mova-clients__actions > .mova-icon-button .mova-icon, .mova-location-settings .mova-screen-header__trailing .mova-icon-button .mova-icon, .mova-services-page__header .mova-button .mova-icon { filter: brightness(0) invert(1); }
+.mova-clients__search-wrap { display: flex; min-height: 48px; align-items: center; gap: 10px; border: 1px solid var(--line-control); border-radius: var(--radius-pill); padding-inline: 14px; background: var(--surface); color: var(--ink-secondary); }
+.mova-clients__search-wrap > .mova-icon { width: 20px; height: 20px; flex: none; }
+.mova-clients__search-wrap .mova-field { display: block; min-width: 0; flex: 1; }
+.mova-clients__search-wrap .mova-field__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+.mova-clients input.mova-clients__search { width: 100%; min-height: 46px; height: 46px; border: 0; border-radius: 0; padding: 0; background: transparent; font-size: var(--fs-body-l); box-shadow: none; }
+.mova-clients input.mova-clients__search:focus-visible { outline: 0; box-shadow: none; }
+.mova-clients__filters { display: flex; gap: var(--space-2); overflow-x: auto; scrollbar-width: none; }
+.mova-clients__filters .mova-chip { min-height: 38px; flex: none; border-radius: 19px; padding-inline: 14px; font-size: var(--fs-caption); }
+.mova-card.mova-clients__list { margin-top: 0; border-radius: var(--radius-2xl); padding: 0 var(--space-4); }
+.mova-clients__list ul { margin: 0; padding: 0; list-style: none; }
+.mova-clients__list li + li { border-top: 1px solid var(--line-subtle); }
+.mova-client-row { display: flex; min-height: 70px; align-items: center; gap: var(--space-3); color: inherit; text-decoration: none; }
+.mova-client-row .mova-avatar { width: 44px; height: 44px; border-radius: 50%; font-size: var(--fs-body-s); font-weight: 700; }
+.mova-clients__list li:nth-child(odd) .mova-avatar { background: var(--mint); }
+.mova-clients__list li:nth-child(even) .mova-avatar { background: var(--peach); }
+.mova-clients__list .mova-client-row--opted-out .mova-avatar { background: var(--line-subtle); }
+.mova-client-row__copy { display: grid; min-width: 0; flex: 1; gap: var(--space-1); }
+.mova-client-row__copy strong { overflow: hidden; font-size: var(--fs-body); font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.mova-client-row__copy small { display: -webkit-box; overflow: hidden; color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.4; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.mova-client-row__badge { flex: none; border-radius: 10px; padding: 3px 8px; background: var(--surface-warm); font-size: var(--fs-micro); font-weight: 700; }
+.mova-client-row__badge--new { border: 1px solid var(--line-control); background: var(--surface); }
+.mova-client-row__trailing { flex: none; padding-inline: 2px; color: var(--ink-secondary); font-size: var(--fs-caption); font-weight: 500; }
+.mova-settings-page h1 { margin: 0; }
+.mova-settings-profile { display: grid; min-height: 84px; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 14px; padding: 14px 16px; }
+.mova-settings-profile > span:nth-child(2) { display: grid; min-width: 0; gap: 2px; }
+.mova-settings-profile > span:nth-child(2) strong { font-family: var(--font-display); font-size: var(--fs-display-s); font-weight: 800; }
+.mova-settings-profile small { color: var(--mint); font-size: var(--fs-body-s); overflow-wrap: anywhere; }
+.mova-settings-profile__state { width: fit-content; border-radius: var(--radius-pill); padding: var(--space-1) var(--space-3); background: var(--surface-page); color: var(--forest); font-size: var(--fs-caption); }
+.mova-settings-profile__preview { color: var(--mint); opacity: .78; }
+.mova-settings-profile__preview .mova-icon { filter: brightness(0) invert(1); }
+.mova-settings-profile__preview:disabled { opacity: .3; }
+.mova-settings-language > label { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+.mova-settings-language > label > span { color: var(--ink-secondary); }
+.mova-settings-language select { min-height: var(--tap-min); max-width: 55%; border: 1px solid var(--line-control); border-radius: var(--radius-m); padding-inline: var(--space-3); background: var(--surface); color: var(--ink-primary); }
+.mova-profile-preview { padding-bottom: var(--space-8); }
+.mova-profile-preview .mova-honesty { width: min(100% - 2 * var(--gutter), 680px); margin: 0 auto var(--space-4); }
+.mova-settings-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.mova-settings-actions .mova-button { min-height: var(--tap-min); padding-inline: var(--space-2); }
+.mova-settings-menu { padding: 0 var(--space-4); }
+.mova-settings-menu .mova-list-row__copy strong { font-size: var(--fs-body); }
+.mova-settings-menu .mova-list-row__trailing { color: var(--ink-muted); font-size: var(--fs-body-s); font-weight: 400; white-space: nowrap; }
+.mova-settings-menu .mova-settings-language-row { width: 100%; border: 0; border-bottom: 1px solid var(--line-subtle); padding: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.mova-settings-signout { justify-self: center; color: var(--danger); }
+.mova-messaging-page, .mova-inbox-page, .mova-revenue-page, .mova-concierge-page { display: grid; align-content: start; gap: var(--space-4); padding-bottom: var(--space-8); }
+.mova-messaging-page h1, .mova-inbox-page h1, .mova-revenue-page h1, .mova-concierge-page h1 { margin: 0; }
+.mova-messaging-page__intro { color: var(--ink-secondary); line-height: 1.55; }
+.mova-messaging-settings { display: grid; gap: var(--space-3); padding: var(--space-4); }
+.mova-messaging-settings h2 { margin: 0; font: 700 var(--fs-display-s)/1.25 var(--font-display); }
+.mova-messaging-settings p { margin: 0; color: var(--ink-secondary); line-height: 1.5; }
+.mova-inbox-list { padding: 0 var(--space-4); }
+.mova-inbox-list ul { margin: 0; padding: 0; list-style: none; }
+.mova-inbox-list li+li { border-top: 1px solid var(--line-subtle); }
+.mova-inbox-list li button { display: flex; width: 100%; min-height: var(--tap-min); align-items: center; justify-content: space-between; gap: var(--space-3); border: 0; padding: var(--space-3) 0; background: transparent; color: var(--ink-primary); text-align: left; }
+.mova-inbox-list li button>span:first-child { display: grid; gap: var(--space-1); }
+.mova-inbox-list small, .mova-inbox-list time { color: var(--ink-muted); }
+.mova-inbox-dot { width: 9px; height: 9px; flex: 0 0 auto; border-radius: var(--radius-pill); background: var(--forest); }
+.mova-inbox-list .is-read { opacity: .7; }
+.mova-revenue-cards { display: grid; grid-template-columns: 1fr; gap: var(--space-3); }
+.mova-revenue-card { display: grid; align-content: start; gap: var(--space-2); min-height: 112px; padding: var(--space-4); color: var(--ink-primary); text-decoration: none; }
+.mova-revenue-card strong { font: 800 var(--fs-display-m)/1.1 var(--font-display); }
+.mova-revenue-card small { color: var(--ink-muted); }
+.mova-revenue-forecast { display: grid; gap: var(--space-3); padding: var(--space-4); }
+.mova-revenue-forecast--hero { min-height: 240px; align-content: space-between; padding: var(--space-5); background: var(--forest); }
+.mova-revenue-forecast--hero h2 { color: var(--ink-inverse); }
+.mova-revenue-forecast--hero dt, .mova-revenue-forecast--hero a, .mova-revenue-forecast--hero p { color: var(--ink-inverse); }
+.mova-revenue-forecast--hero dd { color: var(--ink-inverse); font: 800 var(--fs-display-m)/1.1 var(--font-display); }
+.mova-revenue-forecast h2 { margin: 0; font: 700 var(--fs-display-s)/1.25 var(--font-display); }
+.mova-revenue-forecast dl { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: var(--space-2); margin: 0; }
+.mova-revenue-forecast dl div { display: grid; gap: var(--space-1); }
+.mova-revenue-forecast dt { color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-revenue-forecast dd { margin: 0; font: 700 var(--fs-body)/1.3 var(--font-display); }
+.mova-revenue-list, .mova-concierge-list { display: grid; gap: var(--space-3); }
+.mova-revenue-list>li, .mova-concierge-list>li { list-style: none; }
+.mova-revenue-list__item { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: var(--space-2); padding: var(--space-3) 0; border-bottom: 1px solid var(--line-subtle); }
+.mova-revenue-list__item>span { display: grid; gap: var(--space-1); }
+.mova-revenue-list__item small { color: var(--ink-muted); }
+.mova-revenue-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.mova-concierge-bubble { display: grid; gap: var(--space-1); max-width: 84%; padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-l); background: var(--surface); }
+.mova-concierge-bubble--artist { justify-self: end; border-color: var(--botanical); background: var(--botanical); }
+.mova-concierge-bubble--ai { justify-self: end; border-color: var(--forest); background: var(--forest); color: var(--ink-inverse); }
+.mova-concierge-bubble--system { justify-self: center; border: 0; background: transparent; color: var(--ink-muted); font-size: var(--fs-caption); text-align: center; }
+.mova-concierge-bubble small { font-size: var(--fs-caption); }
+.mova-concierge-form { display: grid; gap: var(--space-3); }
+.mova-concierge-form label { display: grid; gap: var(--space-1); color: var(--ink-secondary); }
+.mova-concierge-form input, .mova-concierge-form textarea, .mova-concierge-form select { width: 100%; min-height: var(--tap-min); border: 1px solid var(--line-control); border-radius: var(--radius-m); padding: var(--space-3); background: var(--surface); color: var(--ink-primary); font: inherit; }
+.mova-concierge-form textarea { min-height: 100px; resize: vertical; }
+@media (max-width: 360px) { .mova-revenue-forecast dl { grid-template-columns: 1fr; } }
+.mova-settings-page .mova-screen-header { margin-bottom: calc(var(--space-1) * -1); }
+.mova-settings-page .mova-screen-header, .mova-services-page .mova-screen-header { margin-bottom: calc(var(--space-3) * -1); }
+.mova-money-page { display: grid; align-content: start; gap: var(--space-3); padding-top: var(--space-1); padding-bottom: var(--space-8); }
+.mova-money-page__period { display: flex; justify-content: flex-end; }
+.mova-money-page__period input { width: min(100%, 11rem); min-height: var(--tap-min); border: 1px solid var(--line-control); border-radius: var(--radius-pill); padding: 0 var(--space-4); background: var(--surface); color: var(--ink-primary); font: 600 var(--fs-body-l) var(--font-ui); text-align: center; }
+.mova-money-page > h1 { margin: 0 0 var(--space-1); font-size: var(--fs-display-xl); }
+.mova-money-breakdown { display: grid; gap: var(--space-3); padding: var(--space-4); }
+.mova-money-breakdown__total { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.mova-money-breakdown__total h2 { margin: 0; font-size: var(--fs-body-l); font-weight: 600; }
+.mova-money-breakdown__total > strong { font-family: var(--font-display); font-size: var(--fs-display-l); font-weight: 800; }
+.mova-money-breakdown__bar { display: flex; height: 10px; overflow: hidden; border-radius: var(--radius-pill); background: var(--line-subtle); }
+.mova-money-breakdown__bar--processed { background: var(--forest); }
+.mova-money-breakdown__bar--recorded { background: var(--sage); }
+.mova-money-breakdown__bar--salon { background: var(--peach); }
+.mova-money-breakdown ul, .mova-money-activity ul { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.mova-money-breakdown li { display: grid; grid-template-columns: 10px minmax(0,1fr) auto; align-items: start; gap: var(--space-3); }
+.mova-money-breakdown li > span { display: grid; gap: 2px; }
+.mova-money-breakdown li strong { font-size: var(--fs-body); }
+.mova-money-breakdown li small { color: var(--ink-muted); font-size: var(--fs-body-s); }
+.mova-money-breakdown li b { font-size: var(--fs-body); }
+.mova-money-breakdown__swatch { width: 10px; height: 10px; margin-top: 4px; border-radius: var(--radius-xs); background: var(--forest); }
+.mova-money-breakdown__swatch--recorded { background: var(--sage); }
+.mova-money-breakdown__swatch--salon { background: var(--peach); }
+.mova-money-estimate { display: grid; gap: var(--space-3); padding: var(--space-4); }
+.mova-money-estimate dl { display: grid; gap: var(--space-3); margin: 0; }
+.mova-money-estimate dl > div { display: flex; justify-content: space-between; gap: var(--space-3); }
+.mova-money-estimate dt, .mova-money-estimate dd { margin: 0; }
+.mova-money-estimate dd { flex: none; font-weight: 600; }
+.mova-money-estimate__total { border-top: 1px solid var(--line-subtle); padding-top: var(--space-3); font-weight: 700; }
+.mova-money-estimate__total dd { font-family: var(--font-display); font-size: var(--fs-display-l); }
+.mova-money-estimate > p { margin: 0; color: var(--ink-muted); font-size: var(--fs-body-s); }
+.mova-money-activity { display: grid; gap: var(--space-2); }
+.mova-money-activity h2 { margin: 0; font-size: var(--fs-display-s); }
+.mova-money-activity li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-2xl); padding: var(--space-3) var(--space-4); background: var(--surface); }
+.mova-money-activity li > span { display: grid; min-width: 0; gap: 2px; }
+.mova-money-activity li small { color: var(--ink-muted); }
+.mova-money-activity li b { flex: none; }
+.mova-page.mova-get-paid { position: relative; z-index: 1; width: min(100%, 390px); min-height: calc(100dvh - 96px); margin: 96px auto 0; padding: var(--space-6) var(--gutter) 132px; border-radius: var(--radius-3xl) var(--radius-3xl) 0 0; background: var(--surface-page); }
+.mova-page.mova-get-paid::before { position: fixed; z-index: -1; inset: 0; background: color-mix(in srgb, var(--scrim) 88%, transparent); content: ''; }
+.mova-page.mova-get-paid::after { position: absolute; top: 10px; left: 50%; width: 40px; height: 5px; transform: translateX(-50%); border-radius: var(--radius-pill); background: var(--line-control); content: ''; }
+.mova-get-paid__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.mova-get-paid__header h1 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-l); font-weight: 800; }
+.mova-get-paid__context { margin: var(--space-2) 0 0; color: var(--ink-secondary); font-size: var(--fs-body-l); }
+.mova-get-paid > .mova-field { margin-top: var(--space-4); }
+.mova-get-paid > .mova-field .mova-input { min-height: 60px; border: 2px solid var(--forest); font-family: var(--font-display); font-size: var(--fs-display-l); font-weight: 800; }
+.mova-get-paid__method-group { min-width: 0; margin: var(--space-3) 0 0; border: 0; padding: 0; }
+.mova-get-paid__method-group .mova-option-group { grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--space-2); }
+.mova-get-paid__method-group .mova-radio-card { position: relative; min-height: 48px; justify-content: center; border-radius: var(--radius-2xl); padding: var(--space-2); text-align: center; }
+.mova-get-paid__method-group .mova-radio-card input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.mova-get-paid__method-group .mova-radio-card > span:first-of-type { min-width: 0; }
+.mova-get-paid__method-group .mova-radio-card strong { font-size: var(--fs-body-l); }
+.mova-get-paid__method-group .mova-radio-card__dot { display: none; }
+.mova-get-paid__method-group .mova-radio-card.is-selected { border: 1px solid var(--forest); background: var(--forest); color: var(--ivory); }
+.mova-get-paid__card-flow { display: grid; gap: var(--space-3); margin-top: var(--space-3); }
+.mova-get-paid__card-flow > .mova-option-group { gap: var(--space-2); }
+.mova-get-paid__status, .mova-get-paid__recorded-status { display: inline-flex; width: fit-content; align-items: center; gap: var(--space-2); margin: 0; border: 1px solid var(--line-control); border-radius: var(--radius-pill); padding: var(--space-1) var(--space-3); background: var(--mint); font-weight: 600; }
+.mova-get-paid__card-flow > p:last-of-type { margin: 0; color: var(--ink-muted); }
+.mova-get-paid__notice { display: grid; gap: var(--space-2); }
+.mova-get-paid__notice p, .mova-get-paid__notice-copy { margin: 0; color: var(--ink-secondary); line-height: 1.45; }
+.mova-get-paid__recorded-status { margin-top: var(--space-3); background: var(--surface); }
+.mova-get-paid__status-icon { color: var(--botanical); font-weight: 800; }
+.mova-get-paid__notice-copy { margin-top: var(--space-3); }
+.mova-get-paid__collector { display: grid; gap: var(--space-2); margin: var(--space-4) 0 0; border: 0; padding: 0; }
+.mova-get-paid__collector legend { margin-bottom: var(--space-2); font-weight: 700; }
+.mova-get-paid__actions { position: fixed; z-index: 2; right: 0; bottom: 0; left: 50%; display: flex; width: min(100%, 390px); transform: translateX(-50%); border-top: 1px solid var(--line); padding: var(--space-3) var(--gutter) calc(var(--space-5) + env(safe-area-inset-bottom)); background: var(--surface-page); }
+.mova-get-paid__actions .mova-button { width: 100%; min-height: var(--btn-primary-h); }
+.mova-service-list li { gap: var(--space-2); padding: var(--space-4); border-radius: var(--radius-xl); }
+.mova-service-list__top { display: flex; justify-content: space-between; gap: var(--space-3); }
+.mova-service-list__top > span { display: grid; min-width: 0; gap: var(--space-1); }
+.mova-service-list__top > span strong { font-size: var(--fs-body-l); }
+.mova-service-list__top > strong { flex: none; font-size: var(--fs-body-l); }
+.mova-service-list__top small { color: var(--ink-secondary); }
+.mova-service-list li > span { color: var(--ink-secondary); }
+.mova-service-list__deposit, .mova-service-list__footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); border-top: 1px solid var(--line-subtle); padding-top: var(--space-3); }
+.mova-service-list__deposit strong { font-size: var(--fs-body-l); }
+.mova-service-list__pricing { display: grid; gap: var(--space-1); border-radius: var(--radius-xl); padding: var(--space-3); background: var(--surface-alt); }
+.mova-service-list__pricing span, .mova-service-list__footer span { color: var(--ink-secondary); }
+.mova-service-list__footer { border-top: 0; padding-top: 0; }
+.mova-service-list__footer > strong { border-radius: var(--radius-pill); padding: var(--space-2) var(--space-3); background: var(--status-confirmed-bg); }
+.mova-services-page h1, .mova-location-settings h1 { margin: var(--space-1) 0 0; }
+.mova-services-page__description { margin: 0; color: var(--ink-secondary); font-size: var(--fs-body-l); }
+.mova-services-page__header { margin-top: calc(var(--space-3) * -1); }
+.mova-services-page__header h1 { margin: 0; }
+.mova-services-page__header .mova-button { min-height: 52px; flex: none; padding-inline: var(--space-4); }
+.mova-location-list { display: grid; gap: var(--space-3); }
+.mova-location-card { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: var(--space-2); }
+.mova-location-card h2 { margin: 0; font-size: var(--fs-body-l); }
+.mova-location-card p { margin: var(--space-1) 0 0; color: var(--ink-secondary); font-size: var(--fs-caption); }
+.mova-location-card__status { border-radius: var(--radius-pill); padding: var(--space-1) var(--space-2); background: var(--status-confirmed-bg); font-size: var(--fs-micro); font-weight: 700; }
+.mova-location-card__hours, .mova-location-card > small { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: var(--space-2); color: var(--ink-secondary); font-size: var(--fs-caption); }
+.mova-location-card > .mova-button { grid-column: 1 / -1; justify-self: start; }
+.mova-location-form { padding: var(--space-4); }
+.mova-location-form form { display: grid; gap: var(--space-4); }
+.mova-location-settings > .mova-screen-header { margin-bottom: calc(var(--space-3) * -1); }
+.mova-artist-view.has-tab-bar { padding-bottom: calc(var(--tab-bar-h) + env(safe-area-inset-bottom)); }
+.mova-page { width: min(100% - 2 * var(--gutter), 680px); min-height: 70dvh; margin-inline: auto; padding-top: var(--space-3); }
+.mova-page.mova-home { padding-top: 18px; }
+.mova-page.mova-calendar { display: block; min-height: 0; padding-top: 18px; padding-bottom: calc(var(--tab-bar-h) + var(--space-8) + env(safe-area-inset-bottom)); }
+.mova-page.mova-appointment-detail { width: min(100% - 40px, 560px); min-height: 100dvh; padding-top: 16px; padding-bottom: calc(230px + env(safe-area-inset-bottom)); }
+.mova-appointment-detail .mova-screen-header { margin-bottom: 10px; }
+.mova-appointment-detail__content { display: flex; flex-direction: column; gap: 14px; }
+.mova-appointment-detail__hero { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.mova-appointment-detail__hero h1 { margin: 0; font-family: var(--font-display); font-size: 27px; line-height: 1.2; font-weight: 800; letter-spacing: -.4px; overflow-wrap: anywhere; }
+.mova-appointment-detail__summary { padding: 4px 16px; }
+.mova-appointment-detail__summary .mova-definition-list { gap: 0; }
+.mova-appointment-detail__summary .mova-definition-list > div { min-height: 52px; padding: 12px 0; align-items: center; border-bottom: 1px solid var(--line-subtle); }
+.mova-appointment-detail__summary .mova-definition-list > div:last-child { min-height: 48px; border-bottom: 0; padding-block: 6px; }
+.mova-appointment-detail__summary .mova-definition-list dt { flex: none; font-size: var(--fs-body-s); }
+.mova-appointment-detail__summary .mova-definition-list dd { min-width: 0; font-size: var(--fs-body-s); overflow-wrap: anywhere; }
+.mova-appointment-detail__location { display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.mova-appointment-detail__location i { width: 8px; height: 8px; flex: none; border-radius: var(--radius-pill); background: var(--botanical); }
+.mova-appointment-detail__client { min-height: 36px; display: inline-flex; align-items: center; gap: 6px; color: var(--forest); font-weight: 700; text-decoration: none; }
+.mova-appointment-detail__payment { display: flex; flex-direction: column; gap: 10px; }
+.mova-appointment-detail__card-heading, .mova-appointment-detail__money-row, .mova-appointment-detail__balance { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.mova-appointment-detail__card-heading h2, .mova-appointment-detail__notes h2 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-s); font-weight: 700; }
+.mova-appointment-detail__card-heading > span { color: var(--ink-secondary); font-size: var(--fs-caption); font-weight: 600; text-align: right; }
+.mova-appointment-detail__money-row { font-size: var(--fs-body-s); }
+.mova-appointment-detail__money-row strong { font-weight: 600; }
+.mova-appointment-detail__divider { height: 1px; background: var(--line-subtle); }
+.mova-appointment-detail__balance strong:first-child { font-size: var(--fs-body); }
+.mova-appointment-detail__balance strong:last-child { font-family: var(--font-display); font-size: 20px; font-weight: 800; }
+.mova-appointment-detail__notes { display: flex; flex-direction: column; gap: 6px; }
+.mova-appointment-detail__note-copy p { margin: 0 0 5px; font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-appointment-detail__note-links { display: flex; flex-wrap: wrap; gap: 16px; }
+.mova-appointment-detail__note-links a { min-height: 32px; display: inline-flex; align-items: center; color: var(--forest); font-size: var(--fs-caption); font-weight: 700; text-decoration: none; }
+.mova-appointment-detail__actions { position: fixed; z-index: 20; inset-inline: 0; bottom: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px max(20px, calc((100vw - 520px) / 2)) calc(26px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line-subtle); background: var(--surface-page); }
+.mova-appointment-detail__actions > .mova-button { min-height: 54px; border-radius: var(--radius-pill); font-size: var(--fs-body); }
+.mova-appointment-detail__actions > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.mova-appointment-detail__actions > div .mova-button { min-width: 0; min-height: 46px; padding-inline: 6px; border-radius: var(--radius-pill); font-size: var(--fs-caption); white-space: nowrap; }
+.mova-appointment-detail__actions .mova-button:disabled { opacity: .58; }
+.mova-appointment-detail__actions small { color: var(--ink-secondary); font-size: var(--fs-micro); text-align: center; }
+.mova-appointment-detail__actions .mova-appointment-detail__cancel { color: var(--danger); }
+.mova-appointment-detail__error { margin: 0; color: var(--danger); }
+.mova-appointment-detail__secondary { display: grid; gap: 10px; padding-bottom: 6px; }
+.mova-appointment-detail__secondary h2 { margin: 0; font-size: var(--fs-body); }
+@media (max-width: 359px) { .mova-page.mova-appointment-detail { width: min(100% - 32px, 560px); } .mova-appointment-detail__summary .mova-definition-list > div { gap: 8px; } .mova-appointment-detail__summary .mova-definition-list dd { max-width: 68%; } .mova-appointment-detail__actions { padding-inline: 12px; } .mova-appointment-detail__actions > div { gap: 4px; } .mova-appointment-detail__actions > div .mova-button { padding-inline: 3px; font-size: var(--fs-micro); } }
+.mova-page.mova-booking-request { width: min(100% - 40px, 560px); min-height: 100dvh; padding-top: 16px; padding-bottom: calc(178px + env(safe-area-inset-bottom)); }
+.mova-booking-request > .mova-screen-header { margin-bottom: 10px; }
+.mova-booking-request__content { display: flex; flex-direction: column; gap: 14px; }
+.mova-booking-request__hero { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.mova-booking-request__hero h1 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-xl); line-height: 1.35; font-weight: 800; letter-spacing: -.4px; overflow-wrap: anywhere; }
+.mova-booking-request__content > .mova-honesty { gap: 12px; padding: 14px 16px; }
+.mova-booking-request__content > .mova-honesty p { font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-booking-request__summary { padding: 4px 16px; border-radius: var(--radius-2xl); }
+.mova-booking-request__summary .mova-definition-list { gap: 0; }
+.mova-booking-request__summary .mova-definition-list > div { min-height: 43px; padding: 10px 0; align-items: center; border-bottom: 1px solid var(--line-subtle); }
+.mova-booking-request__summary .mova-definition-list > div:last-child { border-bottom: 0; }
+.mova-booking-request__summary .mova-definition-list dt, .mova-booking-request__summary .mova-definition-list dd { font-size: var(--fs-body-s); }
+.mova-booking-request__summary .mova-definition-list dd { min-width: 0; overflow-wrap: anywhere; }
+.mova-booking-request__where, .mova-booking-request__language { display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.mova-booking-request__where i { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--accent-warm-strong); }
+.mova-booking-request__note { margin: 0; border: 1px solid var(--line); border-radius: var(--radius-xl); padding: 14px 16px; background: var(--surface); }
+.mova-booking-request__note figcaption { margin-bottom: 6px; color: var(--ink-secondary); font-size: var(--fs-caption); font-weight: 600; }
+.mova-booking-request__note blockquote { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; overflow-wrap: anywhere; }
+.mova-booking-request__locale-note { margin: -4px 0 0; color: var(--ink-secondary); font-size: var(--fs-caption); }
+.mova-booking-request__error { margin: 0; color: var(--danger); font-size: var(--fs-caption); }
+.mova-booking-request__actions { position: fixed; z-index: 20; inset-inline: 0; bottom: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px max(20px,calc((100vw - 520px)/2)) calc(26px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line-bar); background: var(--surface-page); }
+.mova-booking-request__actions > .mova-button { min-height: 54px; border-radius: var(--radius-pill); font-size: var(--fs-body-l); }
+.mova-booking-request__actions > div { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.mova-booking-request__actions > div .mova-button { min-height: 46px; border-radius: var(--radius-pill); font-size: var(--fs-body-s); }
+.mova-booking-request__actions .mova-booking-request__decline { color: var(--danger); }
+.mova-booking-request__suggestions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.mova-booking-request__suggestions > p, .mova-booking-request__suggestions > .mova-button { flex-basis: 100%; }
+@media (max-width: 359px) { .mova-page.mova-clients { width: min(100% - 32px, 680px); } .mova-page.mova-booking-request { width: min(100% - 32px, 560px); } .mova-booking-request__summary .mova-definition-list > div { gap: 8px; } .mova-booking-request__summary .mova-definition-list dd { max-width: 68%; } .mova-booking-request__actions { padding-inline: 12px; } .mova-booking-request__actions > div { gap: 4px; } .mova-booking-request__actions > div .mova-button { padding-inline: 4px; font-size: var(--fs-caption); } }
+.mova-page.mova-client-screen, .mova-page.mova-visit-notes { width: min(100% - 40px, 680px); min-height: 100dvh; padding-top: 16px; padding-bottom: calc(var(--tab-bar-h) + var(--space-8) + env(safe-area-inset-bottom)); }
+.mova-client-screen > .mova-screen-header { margin-bottom: var(--space-1); }
+.mova-client-screen__edit-link { min-height: var(--tap-min); border: 0; padding-inline: var(--space-1); background: transparent; color: var(--forest); font-size: var(--fs-body-s); font-weight: 600; }
+.mova-client-screen__body { display: flex; flex-direction: column; gap: var(--space-3); }
+.mova-client-screen__identity { display: flex; min-width: 0; align-items: center; gap: 14px; }
+.mova-client-screen__identity .mova-avatar { width: 60px; height: 60px; flex: none; border-radius: 50%; background: var(--mint); color: var(--forest); font-family: var(--font-display); font-size: var(--fs-display-m); font-weight: 800; }
+.mova-client-screen__identity > div { display: grid; min-width: 0; gap: 3px; }
+.mova-client-screen__identity h1 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-m); line-height: 1.2; font-weight: 800; overflow-wrap: anywhere; }
+.mova-client-screen__identity p { margin: 0; color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.4; }
+.mova-client-screen__quick-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.mova-client-screen__quick-actions .mova-button { min-height: var(--btn-secondary-h); padding-inline: var(--space-2); font-size: var(--fs-body-s); }
+.mova-client-screen__quick-actions .mova-button:disabled { opacity: 1; }
+.mova-client-screen__tabs { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-1); padding: var(--space-1); border-radius: 22px; background: var(--line-subtle); }
+.mova-client-screen__tabs a { display: flex; min-width: 0; min-height: 38px; align-items: center; justify-content: center; border-radius: 19px; padding-inline: var(--space-2); color: var(--forest); font-size: var(--fs-body-s); font-weight: 600; text-align: center; text-decoration: none; }
+.mova-client-screen__tabs a.is-current { background: var(--forest); color: var(--ivory); font-weight: 700; }
+.mova-client-profile__before { display: flex; flex-direction: column; gap: 6px; padding: var(--space-3) var(--space-4); border-radius: var(--radius-xl); }
+.mova-client-profile__before h2 { display: flex; align-items: center; gap: 6px; margin: 0; font-family: var(--font-display); font-size: 15px; font-weight: 700; }
+.mova-client-profile__before p { margin: 0; font-size: var(--fs-body-s); line-height: 1.4; }
+.mova-client-profile__general { padding: 4px var(--space-4); border-radius: var(--radius-xl); }
+.mova-client-profile__section-heading { display: flex; min-height: 44px; align-items: center; justify-content: space-between; }
+.mova-client-profile__section-heading h2 { margin: 0; font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; }
+.mova-client-profile__section-heading .mova-icon-button { width: 36px; height: 36px; border: 1px solid var(--line-control); }
+.mova-client-profile__general dl { margin: 0; }
+.mova-client-profile__note-row { display: grid; grid-template-columns: 92px minmax(0,1fr); gap: var(--space-2); padding: 9px 0; border-top: 1px solid var(--line-subtle); font-size: var(--fs-body-s); line-height: 1.4; }
+.mova-client-profile__note-row dt { color: var(--ink-secondary); font-weight: 600; }
+.mova-client-profile__note-row dd { display: grid; gap: var(--space-1); min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.mova-client-profile__note-body { border: 0; padding: 0; background: transparent; color: inherit; font: inherit; line-height: inherit; text-align: left; cursor: pointer; }
+.mova-client-profile__empty { margin: 0; padding: var(--space-3) 0; border-top: 1px solid var(--line-subtle); color: var(--ink-secondary); font-size: var(--fs-body-s); }
+.mova-client-profile__privacy { display: flex; align-items: flex-start; gap: 6px; margin: 0; padding-inline: 2px; color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-client-profile__privacy .mova-icon { margin-top: 2px; }
+.mova-client-profile__contact { display: flex; min-height: 40px; align-items: center; justify-content: space-between; gap: var(--space-2); border: 1px solid var(--line); border-radius: 16px; padding: 10px var(--space-4); background: var(--surface); color: var(--ink-primary); text-align: left; }
+.mova-client-profile__contact strong { flex: none; font-size: var(--fs-body-s); }
+.mova-client-profile__contact span { color: var(--ink-secondary); font-size: var(--fs-caption); text-align: right; }
+.mova-client-profile__contact-settings { display: grid; gap: var(--space-2); }
+.mova-client-profile__contact-settings h2 { margin: 0; font-size: var(--fs-body); }
+.mova-client-profile__contact-settings fieldset { display: flex; flex-wrap: wrap; gap: var(--space-2); border: 0; border-top: 1px solid var(--line-subtle); padding: var(--space-2) 0 0; }
+.mova-client-profile__contact-settings legend { padding: 0; font-weight: 700; }
+.mova-client-profile__contact-settings .mova-toggle { font-size: var(--fs-caption); }
+.mova-client-screen__body > .mova-client-visits { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.mova-client-visit { display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--line); border-radius: var(--radius-xl); padding: var(--space-3) 14px; background: var(--surface); color: var(--ink-primary); text-decoration: none; }
+.mova-client-visit--upcoming { border: 1.5px dashed var(--accent-warm-strong); }
+.mova-client-visit__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.mova-client-visit__top > strong { min-width: 0; font-size: var(--fs-body); line-height: 1.35; }
+.mova-client-visit__badge { flex: none; border-radius: var(--radius-pill); padding: 3px 8px; background: var(--surface-warm); font-size: var(--fs-micro); font-weight: 700; }
+.mova-client-visit__photos { display: inline-flex; flex: none; align-items: center; gap: 4px; color: var(--ink-secondary); font-size: var(--fs-caption); }
+.mova-client-visit__meta { color: var(--ink-secondary); font-size: var(--fs-caption); }
+.mova-client-visit__summary { font-size: var(--fs-body-s); line-height: 1.4; }
+.mova-page.mova-visit-notes { padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
+.mova-visit-notes > .mova-screen-header { margin-bottom: var(--space-1); }
+.mova-visit-notes__content { display: flex; flex-direction: column; gap: var(--space-3); }
+.mova-visit-notes__heading { display: grid; gap: 3px; }
+.mova-visit-notes__heading h1 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-l); line-height: 1.18; font-weight: 800; letter-spacing: -.3px; }
+.mova-visit-notes__heading p { margin: 0; color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.35; }
+.mova-visit-notes__photos { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: var(--space-2); }
+.mova-visit-notes__photo, .mova-visit-notes__add-photo { display: flex; min-width: 0; height: 92px; align-items: flex-end; justify-content: flex-start; border: 0; border-radius: var(--radius-l); padding: var(--space-2); background: var(--line); color: var(--ink-secondary); text-align: left; }
+.mova-visit-notes__photo--after { background: var(--mint); color: var(--botanical); }
+.mova-visit-notes__photo img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-s); }
+.mova-visit-notes__photo span { font-size: var(--fs-caption); font-weight: 700; }
+.mova-visit-notes__add-photo { align-items: center; justify-content: center; flex-direction: column; gap: var(--space-1); border: 1.5px dashed var(--sage); background: transparent; color: var(--forest); font-size: var(--fs-caption); font-weight: 600; }
+.mova-visit-notes__what, .mova-visit-notes__next { display: grid; gap: 6px; }
+.mova-visit-notes__what .mova-field__label, .mova-visit-notes__next .mova-field__label { color: var(--ink-primary); font-size: var(--fs-body-s); font-weight: 600; }
+.mova-visit-notes__what .mova-textarea { min-height: 100px; border-radius: var(--radius-l); padding: 10px 12px; font-size: var(--fs-body); line-height: 1.45; }
+.mova-visit-notes__next .mova-textarea { min-height: 82px; border-radius: var(--radius-l); padding: 10px 12px; font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-visit-notes__products h2 { margin: 0 0 var(--space-2); font-size: var(--fs-body-s); font-weight: 600; }
+.mova-visit-notes__products > div { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.mova-visit-notes__products .mova-chip:disabled { opacity: 1; cursor: default; }
+.mova-visit-notes__products .mova-button { min-height: 32px; border: 1.5px dashed var(--sage); padding-inline: 10px; color: var(--forest); font-size: var(--fs-body-s); font-weight: 600; }
+.mova-visit-notes__products .mova-visit-notes__product-entry { display: flex; width: 100%; align-items: end; gap: var(--space-2); }
+.mova-visit-notes__products .mova-visit-notes__product-entry .mova-field { flex: 1; }
+.mova-visit-notes__show-next { padding: 10px 14px; border-radius: 16px; }
+.mova-visit-notes__show-next .mova-toggle { width: 100%; justify-content: space-between; }
+.mova-visit-notes__show-next .mova-toggle > span:first-child { flex: 1; }
+.mova-visit-notes__error { margin: 0; color: var(--danger); font-size: var(--fs-caption); }
+.mova-visit-notes__save { position: fixed; z-index: 20; inset-inline: 0; bottom: 0; display: flex; flex-direction: column; gap: 6px; padding: 12px max(20px,calc((100vw - 640px)/2)) calc(18px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line-bar); background: var(--surface-page); }
+.mova-visit-notes__save .mova-button { min-height: 54px; font-size: var(--fs-body-l); }
+.mova-visit-notes__save > span { color: var(--ink-secondary); font-size: var(--fs-caption); text-align: center; }
+@media (max-width: 359px) { .mova-page.mova-client-screen, .mova-page.mova-visit-notes { width: min(100% - 32px, 680px); } .mova-client-profile__note-row { grid-template-columns: 78px minmax(0,1fr); gap: 6px; } .mova-client-profile__contact { align-items: flex-start; flex-direction: column; } .mova-client-profile__contact span { text-align: left; } .mova-client-visit__top { align-items: flex-start; flex-wrap: wrap; } }
+.mova-page h1 { margin: var(--space-4) 0 var(--space-6); font-family: var(--font-display); font-size: var(--fs-display-xl); font-weight: 800; letter-spacing: -.4px; }
+.mova-home .mova-home__header h1 { margin: 0; font-size: var(--fs-display-l); }
+.mova-avatar-link { display: inline-flex; min-width: var(--tap-min); min-height: var(--tap-min); align-items: center; justify-content: center; }
+.mova-settings-sheet { display: grid; gap: var(--space-4); }
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a,
+input,
+textarea,
+select,
+[tabindex]:not([tabindex="-1"]) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--forest);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--ivory);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/* Calendar sync · screen 20 */
+.mova-calendar-sync>h1{margin:10px 0 24px;font:700 clamp(34px,8vw,52px)/1.05 var(--font-display);letter-spacing:-.035em;color:var(--forest)}
+.mova-calendar-sync>.mova-honesty{margin-bottom:16px}
+.mova-calendar-sync__card{margin:0 0 14px;padding:18px;border:1px solid var(--line);border-radius:22px;background:var(--surface)}
+.mova-calendar-sync__card h2{margin:0;font-size:22px;line-height:1.2;color:var(--forest)}
+.mova-calendar-sync__card h3{margin:16px 0 10px;font-size:15px;color:var(--forest)}
+.mova-calendar-sync__card>p{margin:10px 0 16px;color:var(--ink-muted);line-height:1.5}
+.mova-calendar-sync__heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mova-calendar-sync__heading>span{padding:8px 12px;border-radius:999px;color:var(--mova-ink-muted);font-weight:600;white-space:nowrap}
+.mova-calendar-sync__heading>.mova-calendar-sync__connected{background:var(--mint);color:var(--forest)}
+.mova-calendar-sync__privacy,.mova-calendar-sync__actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 14px}
+.mova-calendar-sync__privacy .mova-radio-card{min-height:48px;padding:8px 12px;border-color:var(--line-control);border-radius:14px}
+.mova-calendar-sync__privacy .mova-radio-card.is-selected{border:2px solid var(--forest)}
+.mova-calendar-sync__privacy .mova-radio-card.is-disabled{color:var(--ink-muted)}
+.mova-calendar-sync__location-details{margin:14px 0;border-top:1px solid var(--line-subtle);padding-top:12px;color:var(--ink-primary)}
+.mova-calendar-sync__location-details>summary{min-height:44px;display:flex;align-items:center;font-weight:600;cursor:pointer}
+.mova-calendar-sync__location-details form{display:grid;gap:10px;padding-top:8px}
+.mova-calendar-sync__card>.mova-button{width:100%;margin-top:4px}
+.mova-calendar-sync__feed{display:flex;align-items:center;gap:12px;min-height:58px;margin:16px 0;padding:12px 14px;border-radius:16px;background:var(--surface-page);color:var(--ink-secondary);overflow:hidden}
+.mova-calendar-sync__feed code{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 14px/1.3 var(--mova-font-mono,monospace)}
+.mova-calendar-sync__actions{margin-bottom:0}
+.mova-calendar-sync__actions>.mova-button{min-width:0;padding-inline:10px}
+.mova-calendar-sync__message{padding:10px 12px;border-radius:12px;background:var(--surface);color:var(--forest)}
+@media(min-width:700px){.mova-calendar-sync{max-width:760px;margin-inline:auto}.mova-calendar-sync__card{padding:24px}.mova-calendar-sync__card h2{font-size:26px}}
+
+/* Client identity and QR surfaces · screens 21, 27, 29 and 30 */
+.mova-generated-qr{display:block;width:100%;height:100%}.mova-generated-qr img{display:block;width:100%;height:100%;object-fit:contain}
+.mova-show-qr{position:fixed;z-index:20;inset:0;display:flex;flex-direction:column;align-items:center;overflow:auto;padding:var(--space-6) var(--gutter) var(--space-5);background:var(--forest);color:var(--surface-page);text-align:center}
+.mova-show-qr>.mova-icon-button{position:absolute;top:var(--space-5);left:var(--gutter);color:var(--surface-page)}
+.mova-show-qr>.mova-wordmark{margin:0 0 var(--space-6);color:var(--surface-page);font:800 28px var(--font-display)}
+.mova-show-qr__profile{display:grid;justify-items:center;gap:var(--space-2);margin-bottom:var(--space-5)}
+.mova-show-qr__avatar{display:grid;width:112px;height:112px;place-items:center;border:4px solid var(--surface-page);border-radius:50%;background:var(--accent-warm-strong);color:var(--forest);font:800 32px var(--font-display);object-fit:cover}
+.mova-show-qr__profile h1{margin:var(--space-2) 0 0;color:var(--surface-page);font:800 clamp(30px,8vw,44px)/1.1 var(--font-display)}
+.mova-show-qr__profile p,.mova-show-qr__url{margin:0;color:var(--mint);font-size:var(--fs-body-l)}
+.mova-show-qr .mova-qr{width:min(100%,540px);aspect-ratio:1;min-width:0;min-height:0;margin:var(--space-2) 0 var(--space-4);padding:var(--space-4);border:0;border-radius:var(--radius-3xl);outline:0}
+.mova-show-qr__code{width:100%;height:100%}
+.mova-show-qr__url{overflow-wrap:anywhere}
+.mova-show-qr__actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);width:min(100%,540px);margin-top:auto;padding-top:var(--space-6)}
+.mova-show-qr__actions .mova-button{min-height:var(--tap-min);padding-inline:var(--space-2);color:var(--mint)}
+.mova-show-qr__notice{position:fixed;bottom:var(--space-8);padding:var(--space-3);border-radius:var(--radius-l);background:var(--surface);color:var(--forest)}
+.mova-client-auth{position:fixed;z-index:30;inset:0;display:flex;align-items:flex-end;width:100%;max-width:none;min-height:100dvh;margin:0;padding:0;background:color-mix(in srgb,var(--forest) 78%,var(--ink-muted));}
+.mova-client-auth__sheet{position:fixed;inset:auto 0 0;display:grid;align-content:start;gap:var(--space-4);width:100%;max-width:780px;height:min(77dvh,760px);max-height:calc(100dvh - env(safe-area-inset-top));margin:0 auto;padding:0 var(--gutter) calc(var(--space-8) + env(safe-area-inset-bottom));overflow:auto;border:0;border-radius:var(--radius-3xl) var(--radius-3xl) 0 0;background:var(--surface-page);color:var(--forest);}
+.mova-client-auth__sheet::backdrop{background:transparent}
+.mova-client-auth__handle{display:grid;height:40px;place-items:center}.mova-client-auth__handle span{width:40px;height:5px;border-radius:var(--radius-pill);background:var(--line-control)}
+.mova-client-auth__close{position:absolute;top:calc(var(--space-6) + env(safe-area-inset-top));right:var(--gutter);width:var(--tap-min);height:var(--tap-min);border:0;background:transparent;color:var(--forest);font-size:32px}
+.mova-client-auth__sheet h1{max-width:calc(100% - 50px);margin:0;font:800 clamp(30px,8vw,42px)/1.12 var(--font-display);color:var(--forest)}
+.mova-client-auth__intro{margin:0;color:var(--ink-muted);font-size:var(--fs-body-l);line-height:1.5}
+.mova-client-auth__benefits{display:grid;gap:var(--space-2);padding:var(--space-4);border:1px solid var(--line);border-radius:var(--radius-2xl)}
+.mova-client-auth__benefits p{margin:0;font-size:var(--fs-body-l);line-height:1.45;color:var(--forest)}
+.mova-client-auth form{display:grid;gap:var(--space-4)}
+.mova-client-auth form>.mova-button{min-height:var(--btn-primary-h)}
+.mova-client-auth__guest{justify-self:center;margin-top:var(--space-2);font-size:var(--fs-body-l);font-weight:700;color:var(--forest);text-decoration:underline}
+.mova-client-auth__terms{margin-top:var(--space-4);color:var(--ink-muted);text-align:center;font-size:var(--fs-body-s)}
+@media(max-height:700px){.mova-client-auth__sheet{height:94dvh;padding-bottom:calc(var(--space-4) + env(safe-area-inset-bottom))}.mova-client-auth__terms{margin-top:var(--space-1)}}
+.mova-client-profile{gap:var(--space-5);padding-top:var(--space-5)}
+.mova-client-profile__brand{display:flex;align-items:center;min-height:40px}.mova-client-profile__brand .mova-wordmark{margin:0;color:var(--forest);font:800 26px var(--font-display)}
+.mova-client-profile>h1{margin:0;color:var(--forest);font:800 var(--fs-display-xl)/1.1 var(--font-display)}
+.mova-client-profile__card{display:grid;grid-template-columns:minmax(0,1fr) 88px;align-items:center;gap:var(--space-3);min-height:190px;padding:var(--space-5);border-radius:var(--radius-3xl);background:var(--forest);color:var(--surface-page)}
+.mova-client-profile__card-copy{display:grid;align-content:start;gap:var(--space-2);min-width:0}.mova-client-profile__card small{color:var(--mint);font-weight:700;letter-spacing:.05em}.mova-client-profile__card strong{font:800 clamp(22px,6vw,30px)/1.15 var(--font-display);overflow-wrap:anywhere}.mova-client-profile__card span{color:var(--mint);font-size:var(--fs-body-s)}
+.mova-client-profile__card-qr{display:grid;justify-items:center;gap:var(--space-1);min-width:0;padding:var(--space-2);border-radius:var(--radius-l);background:var(--surface-page);color:var(--forest);text-align:center}.mova-client-profile__card-qr .mova-qr{width:72px;min-width:0;min-height:0;aspect-ratio:1;padding:0;border:0;border-radius:0}.mova-client-profile__card-qr small{color:var(--forest);font-size:10px;line-height:1.2;letter-spacing:0}.mova-client-profile__card-qr>span{font-size:var(--fs-caption);color:var(--ink-muted)}.mova-client-profile__card-actions{grid-column:1/-1}.mova-client-profile__card-actions .mova-button{width:100%;min-height:48px;border-color:var(--mint)}
+.mova-client-profile__delete-confirm{display:grid;gap:var(--space-3)}.mova-client-profile__delete-confirm p{margin:0 0 var(--space-2);color:var(--ink-muted);line-height:1.5}
+.mova-client-profile__section{display:grid;gap:var(--space-3)}.mova-client-profile__section h2{margin:0;color:var(--forest);font:700 var(--fs-display-m) var(--font-display)}
+.mova-client-profile__claim{display:grid;gap:var(--space-2);padding:var(--space-4);border:1px solid var(--line);border-radius:var(--radius-2xl);background:var(--surface)}.mova-client-profile__claim strong{font:700 var(--fs-display-s) var(--font-display);color:var(--forest)}.mova-client-profile__claim>span{color:var(--ink-muted)}.mova-client-profile__claim>.mova-button{justify-self:start}
+.mova-client-profile__row,.mova-client-profile__stylist{position:relative;display:flex;align-items:center;gap:var(--space-3);padding:var(--space-4);border:1px solid var(--line);border-radius:var(--radius-2xl);background:var(--surface)}
+.mova-client-profile__row{align-items:flex-start;flex-direction:column}.mova-client-profile__row strong,.mova-client-profile__stylist strong{font:700 var(--fs-display-s) var(--font-display);color:var(--forest)}.mova-client-profile__row span{color:var(--ink-muted)}.mova-client-profile__status{align-self:flex-end;padding:var(--space-2) var(--space-3);border-radius:var(--radius-pill);background:var(--status-confirmed-bg);color:var(--status-confirmed-fg)!important}
+.mova-client-profile__stylist{min-height:78px}.mova-client-profile__stylist>div{display:grid;gap:var(--space-1)}.mova-client-profile__stylist a{color:var(--ink-muted)}
+.mova-client-profile__initials{display:grid;width:56px;height:56px;flex:none;place-items:center;border-radius:50%;background:var(--accent-warm);color:var(--forest);font-weight:700}
+.mova-client-profile__consents{padding:0 var(--space-4)}.mova-client-profile__consents .mova-toggle{min-height:72px}.mova-client-profile__consents .mova-toggle+.mova-toggle{border-top:1px solid var(--line-subtle)}
+.mova-client-profile__edit{display:grid;gap:var(--space-3)}.mova-client-profile__footer{padding-block:var(--space-2) var(--space-6);color:var(--ink-muted)}.mova-client-profile__footer button{min-height:var(--tap-min);border:0;padding:0;background:none;color:var(--forest);font:600 var(--fs-body-l) var(--font-ui);text-decoration:underline}.mova-client-profile__footer button:last-child{color:var(--danger)}.mova-client-profile__footer button:disabled{opacity:.6}
+.mova-scan-landing{gap:var(--space-4);padding-top:var(--space-4)}.mova-scan-landing>.mova-wordmark{margin:0;color:var(--forest);font:800 26px var(--font-display)}
+.mova-scan-landing__hero{display:grid;justify-items:center;gap:var(--space-2);padding:var(--space-5);border-radius:var(--radius-2xl);background:var(--forest);color:var(--surface-page);text-align:center}
+.mova-scan-landing__hero img,.mova-scan-landing__avatar{display:grid;width:112px;height:112px;place-items:center;border:3px solid var(--surface-page);border-radius:50%;background:var(--accent-warm-strong);color:var(--forest);font:800 28px var(--font-display);object-fit:cover}
+.mova-scan-landing__hero h1{margin:var(--space-2) 0 0;color:var(--surface-page);font:800 var(--fs-display-l) var(--font-display)}.mova-scan-landing__hero p{margin:0;color:var(--mint)}
+.mova-scan-landing>.mova-button{width:100%}.mova-scan-landing__wallet{margin:0;color:var(--ink-muted);text-align:center}.mova-scan-landing__locations{display:grid;gap:var(--space-3);padding:var(--space-4)}.mova-scan-landing__locations h2{margin:0;font:700 var(--fs-display-s) var(--font-display);color:var(--forest)}
+.mova-scan-landing__card{display:grid;gap:var(--space-2);padding:var(--space-4);border:1px solid var(--line);border-radius:var(--radius-2xl);background:var(--surface)}.mova-scan-landing__card h2{margin:0;color:var(--forest);font:700 var(--fs-display-m) var(--font-display)}.mova-scan-landing__card p{margin:0;color:var(--ink-muted);line-height:1.45}
+.mova-client-card-landing{gap:var(--space-5);padding-top:var(--space-5)}.mova-client-card-landing__brand .mova-wordmark{margin:0;color:var(--forest);font:800 26px var(--font-display)}.mova-client-card-landing__hero{display:grid;gap:var(--space-2);padding:var(--space-5);border-radius:var(--radius-3xl)}.mova-client-card-landing__hero small{color:var(--mint);font-weight:700;letter-spacing:.05em}.mova-client-card-landing__hero h1{margin:0;color:var(--surface-page);font:800 var(--fs-display-l)/1.15 var(--font-display)}.mova-client-card-landing__hero p{margin:0;color:var(--mint)}.mova-client-card-landing__section{display:grid;gap:var(--space-3)}.mova-client-card-landing__section h2{margin:0;color:var(--forest);font:700 var(--fs-display-m) var(--font-display)}.mova-client-card-landing__appointment{display:grid;gap:var(--space-2);padding:var(--space-4);border:1px solid var(--line);border-radius:var(--radius-2xl);background:var(--surface)}.mova-client-card-landing__appointment strong{color:var(--forest);font:700 var(--fs-display-s) var(--font-display)}.mova-client-card-landing__appointment>span:not(.mova-status){color:var(--ink-muted)}.mova-client-card-landing>.mova-button{width:100%}.mova-client-card-landing__profile{justify-self:center;color:var(--forest);font-weight:700;text-decoration:underline}
+.mova-booking__brand{display:flex;justify-content:space-between;align-items:center;min-height:44px}.mova-booking__brand .mova-wordmark{margin:0;color:var(--forest);font:800 26px var(--font-display)}.mova-booking>.mova-status{justify-self:start}.mova-booking>h1{margin:0;color:var(--forest);font:800 var(--fs-display-xl)/1.1 var(--font-display)}.mova-booking__card-section{display:grid;gap:var(--space-3)}.mova-booking__card-section>h2{margin:0;color:var(--forest);font:700 var(--fs-display-m) var(--font-display)}.mova-booking__qr{display:grid;justify-items:center;gap:var(--space-1);width:88px;padding:var(--space-2);border-radius:var(--radius-l);background:var(--surface-page);color:var(--forest);text-align:center}.mova-booking__qr .mova-qr{width:72px;min-width:0;min-height:0;aspect-ratio:1;padding:0;border:0;border-radius:0}.mova-booking__qr small{font-size:10px;line-height:1.2}.mova-booking__save-image{justify-self:center;min-height:var(--tap-min);border:0;padding:var(--space-2);background:transparent;color:var(--forest);font:700 var(--fs-body-l) var(--font-ui);text-decoration:underline}
+.mova-scan-landing__links{display:flex;justify-content:center;gap:var(--space-6);padding-bottom:var(--space-6)}.mova-scan-landing__links a{color:var(--forest);font-weight:700;text-decoration:underline}
+.mova-booking__signin{margin:0 0 var(--space-2);text-align:right}.mova-booking__signin a{color:var(--forest);font-weight:700;text-decoration:underline}
+@media(min-width:700px){.mova-client-auth{width:min(100% - 2 * var(--gutter),680px);margin:var(--space-8) auto;min-height:auto;border-radius:var(--radius-3xl)}.mova-scan-landing{width:min(100% - 2 * var(--gutter),680px);margin-inline:auto}.mova-show-qr{padding-bottom:var(--space-6)}}
+
+/* Temporary public landing page at /. */
+.mova-marketing-home { min-height: 100dvh; background: var(--surface-page); color: var(--forest); }
+.mova-marketing-home__header { border-bottom: 1px solid var(--line-subtle); }
+.mova-marketing-home__header-inner { display: flex; width: min(100% - 2 * var(--gutter), 1200px); min-height: 70px; align-items: center; justify-content: space-between; margin-inline: auto; }
+.mova-marketing-home__wordmark { color: var(--forest); font: 800 26px/1 var(--font-display); letter-spacing: -1.2px; text-decoration: none; }
+.mova-marketing-home__header nav { display: flex; align-items: center; gap: var(--space-5); }
+.mova-marketing-home__signin,.mova-marketing-home__signup { display: inline-flex; min-height: var(--tap-min); align-items: center; justify-content: center; color: var(--forest); font-size: var(--fs-body-s); font-weight: 700; text-decoration: none; }
+.mova-marketing-home__signup { min-width: 92px; border: 1px solid var(--sage); border-radius: var(--radius-pill); padding-inline: var(--space-4); }
+.mova-marketing-home__hero { display: grid; width: min(100% - 2 * var(--gutter), 1200px); grid-template-columns: minmax(0, .84fr) minmax(0, 1fr); align-items: center; gap: clamp(var(--space-8), 4vw, 56px); margin-inline: auto; padding-block: clamp(56px, 5vw, 72px) 80px; }
+.mova-marketing-home__hero-copy { min-width: 0; }
+.mova-marketing-home__badge { display: inline-flex; min-height: 28px; align-items: center; margin: 0 0 var(--space-5); border-radius: var(--radius-pill); padding: var(--space-1) var(--space-3); background: var(--mint); color: var(--forest); font-size: var(--fs-caption); font-weight: 700; }
+.mova-marketing-home__hero h1 { max-width: 570px; margin: 0 0 var(--space-4); color: var(--forest); font: 800 clamp(42px, 4.6vw, 64px)/.99 var(--font-display); letter-spacing: -2.2px; }
+.mova-marketing-home__intro { max-width: 490px; margin: 0 0 var(--space-6); color: var(--ink-secondary); font-size: var(--fs-body-l); line-height: 1.65; }
+.mova-marketing-home__form { display: grid; gap: var(--space-3); }
+.mova-marketing-home__fields { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.mova-marketing-home__fields .mova-field { gap: var(--space-2); }
+.mova-marketing-home__fields .mova-field__label { color: var(--ink-primary); }
+.mova-marketing-home__fields .mova-input { min-height: 50px; padding-block: var(--space-2); font-size: var(--fs-body-s); }
+.mova-marketing-home__fields select { appearance: auto; }
+.mova-marketing-home__form .mova-checkbox { align-items: flex-start; color: var(--ink-secondary); font-size: var(--fs-caption); font-weight: 400; line-height: 1.45; }
+.mova-marketing-home__form .mova-checkbox > span { margin-top: 1px; }
+.mova-marketing-home__submit { width: 100%; min-height: 52px; font-size: var(--fs-body-s); }
+.mova-marketing-home__privacy-note { margin: 0; color: var(--ink-muted); font-size: var(--fs-micro); line-height: 1.45; }
+.mova-marketing-home__privacy-note span { color: var(--forest); font-weight: 700; text-decoration: underline; }
+.mova-marketing-home__form-error { margin: 0; color: var(--danger); font-size: var(--fs-caption); }
+.mova-marketing-home__walkthrough { min-width: 0; margin: 0; }
+.mova-marketing-home__walkthrough video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--radius-3xl); background: var(--forest); object-fit: cover; box-shadow: var(--shadow-raised); }
+.mova-marketing-home__video-link { display: inline-flex; min-height: var(--tap-min); align-items: center; gap: var(--space-2); border: 0; padding: var(--space-2) 0; background: transparent; color: var(--ink-secondary); font: 500 var(--fs-caption) var(--font-ui); cursor: pointer; }
+.mova-marketing-home__video-link span { width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 7px solid var(--forest); }
+.mova-marketing-home__success { display: flex; align-items: flex-start; gap: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-2xl); padding: var(--space-5); background: var(--surface); }
+.mova-marketing-home__success-icon { display: grid; width: 48px; height: 48px; flex: none; place-items: center; border-radius: var(--radius-pill); background: var(--mint); color: var(--forest); }
+.mova-marketing-home__success > span:last-child { display: grid; gap: var(--space-1); }
+.mova-marketing-home__success strong { color: var(--forest); font: 700 var(--fs-display-m)/1.2 var(--font-display); }
+.mova-marketing-home__success small { color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-marketing-home__benefits { background: var(--surface-alt); }
+.mova-marketing-home__benefits-inner { width: min(100% - 2 * var(--gutter), 1200px); margin-inline: auto; padding-block: 80px 88px; }
+.mova-marketing-home__benefits h2 { margin: 0 0 var(--space-6); color: var(--forest); font: 800 var(--fs-display-xl)/1.15 var(--font-display); letter-spacing: -.5px; }
+.mova-marketing-home__benefit-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+.mova-marketing-home__benefit-card { min-height: 220px; border: 1px solid var(--line); border-radius: var(--radius-2xl); padding: var(--space-6); background: var(--surface); }
+.mova-marketing-home__benefit-icon { display: grid; width: 48px; height: 48px; place-items: center; margin-bottom: var(--space-4); border-radius: var(--radius-l); background: var(--mint); color: var(--forest); }
+.mova-marketing-home__benefit-card h3 { margin: 0 0 var(--space-3); color: var(--forest); font: 700 var(--fs-display-s)/1.3 var(--font-display); }
+.mova-marketing-home__benefit-card p { max-width: 34ch; margin: 0; color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.65; }
+.mova-marketing-home__closing { background: var(--forest); color: var(--ivory); }
+.mova-marketing-home__closing-inner { width: min(100% - 2 * var(--gutter), 560px); margin-inline: auto; padding-block: 88px 80px; text-align: center; }
+.mova-marketing-home__closing h2 { margin: 0 0 var(--space-4); color: var(--ivory); font: 800 clamp(30px, 3.4vw, 42px)/1.12 var(--font-display); letter-spacing: -.8px; }
+.mova-marketing-home__closing-inner > p { max-width: 48ch; margin: 0 auto var(--space-6); color: var(--mint); font-size: var(--fs-body-l); line-height: 1.55; }
+.mova-marketing-home__form--dark .mova-field__label,.mova-marketing-home__form--dark .mova-checkbox { color: var(--ivory); }
+.mova-marketing-home__form--dark .mova-field { text-align: left; }
+.mova-marketing-home__form--dark .mova-checkbox { text-align: left; }
+.mova-marketing-home__form--dark .mova-button { background: var(--peach); color: var(--forest); }
+.mova-marketing-home__form--dark .mova-marketing-home__privacy-note { color: var(--mint); text-align: left; }
+.mova-marketing-home__form--dark .mova-marketing-home__privacy-note span { color: var(--ivory); }
+.mova-marketing-home__form--dark .mova-marketing-home__form-error { color: var(--peach); text-align: left; }
+.mova-marketing-home__success--dark { border-color: color-mix(in srgb, var(--mint) 15%, transparent); background: color-mix(in srgb, var(--botanical) 70%, var(--forest)); text-align: left; }
+.mova-marketing-home__footer { border-top: 1px solid color-mix(in srgb, var(--mint) 13%, transparent); background: var(--forest); color: var(--mint); }
+.mova-marketing-home__footer > div { display: flex; width: min(100% - 2 * var(--gutter), 1200px); min-height: 76px; align-items: center; justify-content: space-between; gap: var(--space-4); margin-inline: auto; font-size: var(--fs-micro); }
+.mova-marketing-home__footer nav { display: flex; gap: var(--space-6); color: var(--ivory); font-weight: 600; }
+.mova-marketing-home__form--dark .mova-checkbox > span { background: var(--surface); }
+@media(max-width: 699px) {
+  .mova-marketing-home__header-inner { min-height: 56px; }
+  .mova-marketing-home__wordmark { font-size: 22px; }
+  .mova-marketing-home__header nav { gap: var(--space-3); }
+  .mova-marketing-home__signin,.mova-marketing-home__signup { font-size: var(--fs-caption); }
+  .mova-marketing-home__signup { min-width: 80px; padding-inline: var(--space-3); }
+  .mova-marketing-home__hero { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-6); padding-block: var(--space-6) var(--space-8); }
+  .mova-marketing-home__badge { margin-bottom: var(--space-4); font-size: var(--fs-micro); }
+  .mova-marketing-home__hero h1 { max-width: 360px; margin-bottom: var(--space-4); font-size: clamp(36px, 10vw, 44px); letter-spacing: -1.3px; }
+  .mova-marketing-home__intro { margin-bottom: var(--space-5); font-size: var(--fs-body); line-height: 1.55; }
+  .mova-marketing-home__fields { grid-template-columns: 1fr; gap: var(--space-3); }
+  .mova-marketing-home__walkthrough video { border-radius: var(--radius-2xl); }
+  .mova-marketing-home__benefits-inner { padding-block: var(--space-8); }
+  .mova-marketing-home__benefits h2 { margin-bottom: var(--space-5); font-size: var(--fs-display-m); }
+  .mova-marketing-home__benefit-grid { grid-template-columns: 1fr; gap: var(--space-3); }
+  .mova-marketing-home__benefit-card { min-height: 0; padding: var(--space-5); }
+  .mova-marketing-home__benefit-icon { width: 48px; height: 48px; margin-bottom: var(--space-4); }
+  .mova-marketing-home__benefit-card h3 { margin-bottom: var(--space-3); font-size: var(--fs-display-s); }
+  .mova-marketing-home__benefit-card p { font-size: var(--fs-body-s); }
+  .mova-marketing-home__closing-inner { padding-block: var(--space-8); }
+  .mova-marketing-home__closing h2 { max-width: 12ch; margin-inline: auto; font-size: 30px; }
+  .mova-marketing-home__closing-inner > p { margin-bottom: var(--space-5); font-size: var(--fs-body); }
+  .mova-marketing-home__footer > div { min-height: 64px; font-size: 10px; }
+  .mova-marketing-home__footer nav { gap: var(--space-4); }
+}
+@media(max-width: 359px) {
+  .mova-marketing-home__header-inner,.mova-marketing-home__hero,.mova-marketing-home__benefits-inner,.mova-marketing-home__closing-inner,.mova-marketing-home__footer > div { width: calc(100% - 32px); }
+  .mova-marketing-home__hero h1 { font-size: 34px; }
+  .mova-marketing-home__success { padding: var(--space-4); }
+}

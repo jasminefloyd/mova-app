@@ -3,15 +3,15 @@
  "canvas_version": "1793897337-64fd",
  "exported": "2026-11-05",
  "artboards": 51,
- "renders": 58,
+ "renders": 60,
  "tabled": [
   "15"
  ],
  "files": {
   "CANVAS_NOTES.md": "bc80d3d2e735406984d2dc5041e3a53d98bc6056bfc9dc1b0f73c22aaf166096",
   "COMPONENTS.md": "005c44cb1eaadb5ebc1755a559208b915fe83f463f08393c31824df2c1b14684",
-  "README.md": "9249fd7f8df48a8b2f0b45691cb01628598dfba58234934f1fb88774ddad0818",
-  "SCREEN_MAP.md": "8f33e4018405cc2703b90a306a587793107c1985ab0a4e16ed1b39b6cd9fd0fe",
+  "README.md": "2e808b4bd83926abbbc734e54b6b2a4ed81577c9446e91dfe9c51289d19d9f4b",
+  "SCREEN_MAP.md": "1ad94d87ff8ce7726ca44930eec0b8fe82ba7a4131b599f398e8fff5b988f7b1",
   "fonts/OFL-DM-Sans.txt": "87334fd9bb28fb083d83e2423b115acb3461cbba857079a8d7cc7c77b7aefb0e",
   "fonts/OFL-Manrope.txt": "d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30",
   "fonts/dm-sans-latin-400-normal.woff2": "a71e519e44faaa2a518544f31c899590cd80076d09814d015b69e64dd9202128",
@@ -73,6 +73,8 @@
   "screens/html/14-ai-revenue-center.html": "339213929e08a00c096f1c981963831b1086f5d8721501030c1372edeb618aa4",
   "screens/html/15-outreach-TABLED.html": "586625b1d51e57b65fed4fbbd86c6a84f5c2401070930c9c2d44eb7c4394fb6e",
   "screens/html/16-settings.html": "0d988b78c71ba6846b3324e548d5fb54f498c49abf3d533eea7ba09d01fc6b08",
+  "screens/html/16a-settings-services.html": "99d3a14506b5c210f374d83a471ca7a6fed87e6848d7d754aac97b5f87b8c6b0",
+  "screens/html/16b-settings-portfolio.html": "a250425b29db784b1e90b339fa25ec6e51f85b67eb18f63f3dee322328f910c4",
   "screens/html/17-money.html": "608338f081d4a8014a5e57efd036ae787d826427f5a2a7c92ea8e6607d40d5e9",
   "screens/html/18-get-paid--card.html": "19bb7689a603920c6c71cb9ac708291c18511c95f222fa711f1767f66f24c61d",
   "screens/html/18-get-paid--cash.html": "7daf7d8f0204b7debcb87e3658253a2a59edc1e420c1f6b1f27a792cb4deaf04",
@@ -111,8 +113,8 @@
   "screens/html/43-concierge-setup.html": "4f31cf8f23cd317755d64ac76f3b7a71b2679a0dec2712f38b4047cb3d8b4010",
   "screens/html/44-running-late.html": "82838168cf3a20d45d99842a5a59402dfd710c7db7afe8bb177d010efb066e91",
   "screens/html/45-client-chat-spanish.html": "df70555821b5a6b2a637e8d4886ed71824b4fbebbd2a4a156dbbe13ce4955b47",
-  "screens/index.html": "2ff8eaa15c9b55891e8ad288956ab64071171fb89bf352446efff979caf06cb1",
-  "screens/manifest.json": "c2c586288d90841d6d94951fa9b306ef497f4cfa6035423f17ef46e421779ff5",
+  "screens/index.html": "e4ab00cf826f7289787fdb6f0bcab1cd2f23d5c635a6a2de74a65454947a60f4",
+  "screens/manifest.json": "6bdb03b72c43315f0914082416220c004918434b30a69d64e0319cb9c5c4719e",
   "screens/png/01-account.png": "2fe365e20154d350e9ecab81bae29840c394e73276c0e18d3853b21c88f99f6b",
   "screens/png/02-artist-profile.png": "a677b6a0b3118b3a343ce457981bb4ac12c53c735be9fd3933f4649963d09da5",
   "screens/png/02b-profile-photo--empty.png": "5b2932bc5038f404c6babcd4f9399ba90c5285102bc3e0970aaeb7d190ff707f",
@@ -133,6 +135,8 @@
   "screens/png/14-ai-revenue-center.png": "d5f81a75307f993718b16bb5c2edf3e2b325539ce9cfb3a82fb89545a21d035f",
   "screens/png/15-outreach-TABLED.png": "f48488001c464a5a20666fe7cf9ef75d6fdb1322060e8ab95079bae490946c71",
   "screens/png/16-settings.png": "b3a8b8830c694ff74da5802f35f629cca529ca13f63794a9087e8270da1c5d04",
+  "screens/png/16a-settings-services.png": "59bbc953fa2c200ee8ab1f168515894a23b105e2a9e578e2438a1dc1c124ddfb",
+  "screens/png/16b-settings-portfolio.png": "41ca0e750efaf8994d41894cd8277173a6defdc57ea6bf15461dc1e531a2ce58",
   "screens/png/17-money.png": "95634d2ccf9bf0d46521c6889232bb63e31d82d07b0840b166aca7d722bc7fd2",
   "screens/png/18-get-paid--card.png": "efc520a001119d86e950b67ebdc7afcf11c889cdc07a538212d789112daf1994",
   "screens/png/18-get-paid--cash.png": "907269f8e6c374f1eba8917e58fe1c98358daae2c3936d607aea410b6250cc4b",
@@ -171,7 +175,9 @@
   "screens/png/43-concierge-setup.png": "86140c250e4c2fe0f65176551f1b4f1d258d1b245b13f56f030e599409d3bb8a",
   "screens/png/44-running-late.png": "2ab59b8fc6b8ff43f11bdcda13cb5467fc9301563558e3bb0576949f3ed3cf31",
   "screens/png/45-client-chat-spanish.png": "f0b84df45c0a3bf5a8f58539fe061e5b5e34d52d2893159a635d9bd1cd8ed73d",
-  "tokens/tokens.css": "3d215e809be08b974531205e1d923a797ec107a27f3621c011203e0a46a037a3",
+  "tokens/tokens.css": "f24545acc0c7cfe40a6e6d0ca7258795cf82278aed6b3af9d669bc1145b43647",
   "tokens/tokens.json": "d71d5ab2088c1f100d3f25cecb3d27728900578b4e0def59a08cf48a2a6f6cad"
- }
+ },
+ "derived_references": 2,
+ "derived_authorized_on": "2026-11-05"
 }

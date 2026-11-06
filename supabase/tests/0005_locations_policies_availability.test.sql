@@ -1,0 +1,12 @@
+begin;
+select plan(8);
+select has_table('public','mova_locations');
+select has_table('public','mova_location_hours');
+select has_table('public','mova_location_exceptions');
+select has_table('public','mova_location_policies');
+select has_table('public','mova_availability_blocks');
+select has_column('public','mova_location_policies','door_code_encrypted');
+select ok((select relrowsecurity from pg_class where oid='public.mova_locations'::regclass),'location rows have RLS enabled');
+select has_function('public','mova_save_location',array['uuid','uuid','text','text','text','text','text','text','jsonb','smallint','jsonb','jsonb','jsonb']);
+select * from finish();
+rollback;
