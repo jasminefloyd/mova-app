@@ -9,6 +9,11 @@ const workspaceRoot = fileURLToPath(new URL('../..', import.meta.url));
 
 export default defineConfig({
   envDir: workspaceRoot,
+  ssr: {
+    // Keep React Router inside the server bundle. Vercel's Node function
+    // packaging otherwise resolves react-router/dom to a missing CJS file.
+    noExternal: ['react-router', 'react-router-dom'],
+  },
   plugins: [
     reactRouter(),
     tailwindcss(),
