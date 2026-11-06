@@ -736,10 +736,18 @@ select,
   .mova-marketing-home__header nav { gap: var(--space-3); }
   .mova-marketing-home__signin,.mova-marketing-home__signup { font-size: var(--fs-caption); }
   .mova-marketing-home__signup { min-width: 80px; padding-inline: var(--space-3); }
-  .mova-marketing-home__hero { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-6); padding-block: var(--space-6) var(--space-8); }
+  .mova-marketing-home__hero { display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch; gap: 0; padding-block: var(--space-6) var(--space-8); }
+  .mova-marketing-home__hero-copy { display: contents; }
   .mova-marketing-home__badge { margin-bottom: var(--space-4); font-size: var(--fs-micro); }
+  .mova-marketing-home__hero-copy > .mova-marketing-home__badge { grid-column: 1; grid-row: 1; }
   .mova-marketing-home__hero h1 { max-width: 360px; margin-bottom: var(--space-4); font-size: clamp(36px, 10vw, 44px); letter-spacing: -1.3px; }
+  .mova-marketing-home__hero-copy > h1 { grid-column: 1; grid-row: 2; }
   .mova-marketing-home__intro { margin-bottom: var(--space-5); font-size: var(--fs-body); line-height: 1.55; }
+  .mova-marketing-home__hero-copy > .mova-marketing-home__intro { grid-column: 1; grid-row: 3; }
+  .mova-marketing-home__hero-copy > .mova-marketing-home__form--light { grid-column: 1; grid-row: 5; }
+  .mova-marketing-home__hero-copy > .mova-marketing-home__success--light { grid-column: 1; grid-row: 4; }
+  .mova-marketing-home__hero > .mova-marketing-home__walkthrough { grid-column: 1; grid-row: 4; margin: 0 0 var(--space-6); }
+  .mova-marketing-home__hero.is-joined > .mova-marketing-home__walkthrough { grid-row: 5; margin: var(--space-6) 0 0; }
   .mova-marketing-home__fields { grid-template-columns: 1fr; gap: var(--space-3); }
   .mova-marketing-home__walkthrough video { border-radius: var(--radius-2xl); }
   .mova-marketing-home__benefits-inner { padding-block: var(--space-8); }
