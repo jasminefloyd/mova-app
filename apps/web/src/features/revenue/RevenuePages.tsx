@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useState,type FormEvent} from 'react';
-import {Link,useNavigate} from 'react-router-dom';
+import {Link,useNavigate} from 'react-router';
 import {useTranslation} from 'react-i18next';
 import {Button,Card,EmptyState,ErrorState,ScreenHeader,StatusChip} from '../../components';
 import {operatorUrl} from '../../app/operator-url';

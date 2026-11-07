@@ -6,6 +6,36 @@ verify_jwt = false
 [functions.waitlist-signup]
 verify_jwt = false
 
+[functions.artist-data-export]
+verify_jwt = false
+
+[functions.google-reviews-sync]
+verify_jwt = false
+
+[functions.plan-management]
+verify_jwt = false
+
+[functions.privacy-management]
+verify_jwt = false
+
+[functions.reports-refresh]
+verify_jwt = false
+
+[functions.reports-summary]
+verify_jwt = false
+
+[functions.reports-track]
+verify_jwt = false
+
+[functions.review-management]
+verify_jwt = false
+
+[functions.review-public-context]
+verify_jwt = false
+
+[functions.review-submit]
+verify_jwt = false
+
 [functions.availability-search]
 verify_jwt = false
 

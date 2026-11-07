@@ -1,5 +1,5 @@
-import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from 'react-router-dom';
-import type { LinksFunction } from 'react-router-dom';
+import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from 'react-router';
+import type { LinksFunction } from 'react-router';
 import stylesheet from '../src/styles.css?url';
 import { AppErrorBoundary } from '../src/app/AppErrorBoundary';
 

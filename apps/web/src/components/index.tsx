@@ -113,13 +113,13 @@ export function KPITile({ label, value, delta, tone = 'default', onClick }: { la
   return onClick ? <button className={`mova-kpi mova-kpi--${tone}`} type="button" onClick={onClick}>{content}</button> : <div className={`mova-kpi mova-kpi--${tone}`}>{content}</div>;
 }
 
-export function MiniBarChart({ label, values, tableLabel = 'View data as a table', initialShowTable = false }: { label: string; values: Array<{ name: string; value: number }>; tableLabel?: string; initialShowTable?: boolean }) {
+export function MiniBarChart({ label, values, tableLabel = 'View data as a table', periodHeader = 'Period', valueHeader = 'Value', initialShowTable = false }: { label: string; values: Array<{ name: string; value: number }>; tableLabel?: string; periodHeader?: string; valueHeader?: string; initialShowTable?: boolean }) {
   const [showTable, setShowTable] = useState(initialShowTable);
   const max = Math.max(1, ...values.map((item) => item.value));
   return <figure className="mova-chart"><figcaption>{label}</figcaption><div className="mova-chart__bars" role="img" aria-label={`${label}. ${values.map((item) => `${item.name}: ${item.value}`).join(', ')}`}>
     {values.map((item, index) => <div className="mova-chart__column" key={item.name}><span className="mova-chart__bar" style={{ height: `${Math.max(4, (item.value / max) * 100)}%` }} data-current={index === values.length - 1 || undefined} /><small>{item.name}</small></div>)}
   </div><button type="button" className="mova-link-button" aria-expanded={showTable} onClick={() => setShowTable((shown) => !shown)}>{tableLabel}</button>
-    {showTable && <table className="mova-data-table"><caption>{label}</caption><thead><tr><th scope="col">Period</th><th scope="col">Value</th></tr></thead><tbody>{values.map((item) => <tr key={item.name}><th scope="row">{item.name}</th><td>{item.value}</td></tr>)}</tbody></table>}
+    {showTable && <table className="mova-data-table"><caption>{label}</caption><thead><tr><th scope="col">{periodHeader}</th><th scope="col">{valueHeader}</th></tr></thead><tbody>{values.map((item) => <tr key={item.name}><th scope="row">{item.name}</th><td>{item.value}</td></tr>)}</tbody></table>}
   </figure>;
 }
 

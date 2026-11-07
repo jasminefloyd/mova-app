@@ -184,7 +184,7 @@ Migration 0016. Functions `concierge-*`, `conversations`, `quote-respond`, `hand
 - ACs: F22-AC01…AC08.
 
 **P14 — Reports, reputation, Google presence**
-Migrations 0017, 0018. Functions `reports-summary`, `track`, review functions, `google-reviews-sync`. Screens 07 KPI strip, 37, 38, 39, showcase rating, Settings › Reviews & Google.
+Migration `20261107010000_mova_0024_reports_reviews.sql`. Functions `reports-summary`, `reports-track`, `reports-refresh`, `review-management`, `review-public-context`, `review-submit`, `google-reviews-sync`. Screens 07 KPI strip, 37, 38, 39, showcase rating, Settings › Reviews & Google.
 - P14-T01 ADR-0009 rollups; nightly + incremental.
 - P14-T02 Traffic tracking without PII; source classification.
 - P14-T03 Reports tiles + charts with table views.
@@ -193,13 +193,13 @@ Migrations 0017, 0018. Functions `reports-summary`, `track`, review functions, `
 - ACs: F20-AC01…AC04, F21-AC01…AC05, F09 (v1).
 
 **P15 — Plans, entitlements, billing, analytics**
-Migration 0019. v1 P12 tasks plus new entitlement keys (F12) and message/AI metering hooks. Screen 22. ACs v1 + T15.
+Migration `20261107020000_mova_0025_plans_entitlements.sql`. v1 P12 tasks plus proposed entitlement keys (F12) and message/AI metering hooks. Screen 22. Plan changes and price selection remain disabled while A-01/A-26 are open. ACs v1 + T15.
 
 **P16 — Security, privacy, reliability**
-v1 P13 tasks plus: RLS matrix §4.4 full proof; OTP/token abuse tests; webhook replay tests for every provider; retention jobs; export/delete for artists and clients; DR rehearsal; alerts §12.
+Migration `20261107030000_mova_0026_privacy_ops.sql`; authenticated business/client exports; deletion requests are audited and do not auto-delete business data. Automatic retention is disabled while A-08 is open. This local implementation does not satisfy the §4.4 RLS proof, OTP/token abuse tests, webhook replay tests for every provider, DR rehearsal, or §12 alert exercises; see `PHASE_STATUS.md`.
 
 **P17 — Regression, accessibility, UAT, launch readiness**
-v1 P14 tasks plus: UAT-G…UAT-M (§14.3); AI evals re-run; Spanish human review sign-off (A-12); acquisition site production readiness (F14); confirm no TABLED or OFF feature appears in UI or copy; Zelle decision executed.
+Migration `20261107040000_mova_0027_zelle_hidden.sql` implements the A-16 safe default by hiding new Zelle payment actions and rejecting new Zelle records; historical records are retained and shown as Other. Local regression, locale, accessibility and visual checks are recorded in `TEST_EVIDENCE.md`. UAT-G…UAT-M (§14.3), AI eval re-run, Spanish human review (A-12), acquisition production readiness (F14), accessibility/performance acceptance and owner review remain gates; see `PHASE_STATUS.md`.
 
 **P18 — Owner sign-off & controlled release**
 v1 P15 tasks unchanged. Feature flags at launch reflect approval status in §0.5.

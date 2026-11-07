@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, ErrorState, TextArea, TextField } from '../../components';
 import { publicEnv } from '../../lib/env';
 import type { PublicArtist } from '../showcase/PublicArtistPage';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import { clientProfilesEnabled } from '../../lib/env';
+import { trackProfileEvent } from '../reports/track';
 
 type Slot = { starts_at: string; ends_at: string; local_date: string; local_time: string; utc_offset: string; time_zone: string; booking_mode: 'instant'|'request' };
 type Group = { location_id: string; location_name: string; booking_mode: 'instant'|'request'; slots: Slot[] };
@@ -22,11 +23,13 @@ export function BookingRoute() {
   const [artist,setArtist]=useState<PublicArtist|null>(null);const [groups,setGroups]=useState<Group[]>([]);const [day,setDay]=useState(draft?.day??'');const [serviceId,setServiceId]=useState(draft?.serviceId??params.get('service_id')??'');
   const [slot,setSlot]=useState<Slot|null>(draft?.slot??null);const [locationId,setLocationId]=useState(draft?.locationId??'');const [alternateStartsAt,setAlternateStartsAt]=useState(draft?.alternateStartsAt??'');const [clientNote,setClientNote]=useState('');const [name,setName]=useState('');const [email,setEmail]=useState('');const [phone,setPhone]=useState('');const [busy,setBusy]=useState(false);const [error,setError]=useState(false);
   const requestIdentity=useRef<{key:string;token:string}|null>(null);
+  const trackedBookingStart=useRef('');
   const service=useMemo(()=>artist?.services.find((entry)=>entry.id===serviceId),[artist,serviceId]);
   const selectedLook=useMemo(()=>artist?.looks.find((look)=>look.id===requestedPortfolioItemId&&look.service_ids.includes(serviceId))??null,[artist,requestedPortfolioItemId,serviceId]);
   const alternateSlots=useMemo(()=>slot?.booking_mode==='request'?groups.find((group)=>group.location_id===locationId)?.slots.filter((item)=>item.starts_at!==slot.starts_at)??[]:[],[groups,locationId,slot]);
   const formatSlot=(value:Slot)=>new Intl.DateTimeFormat(locale,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:value.time_zone}).format(new Date(value.starts_at));
   useEffect(()=>{void (async()=>{try{const response=await fetch(api('public-artist'),{method:'POST',headers:{'Content-Type':'application/json',apikey:publicEnv.VITE_SUPABASE_ANON_KEY??''},body:JSON.stringify({handle,tab:'services',locale})});const body=await response.json();if(!response.ok||!body.data)throw new Error();setArtist(body.data);setServiceId((current)=>current||body.data.services[0]?.id||'');}catch{setError(true);}})();},[handle,locale]);
+  useEffect(()=>{if(artist&&trackedBookingStart.current!==handle){trackedBookingStart.current=handle;trackProfileEvent(handle,'booking_started');}},[artist,handle]);
   useEffect(()=>{if(!artist||!serviceId)return;let active=true;void Promise.all(artist.locations.map(async(location)=>{const fromDate=businessDate(location.time_zone);const response=await fetch(api('availability-search'),{method:'POST',headers:{'Content-Type':'application/json',apikey:publicEnv.VITE_SUPABASE_ANON_KEY??''},body:JSON.stringify({location_id:location.id,service_id:serviceId,from_date:fromDate,days:30})});const body=await response.json();if(!response.ok)throw new Error();return {location_id:location.id,location_name:location.name,booking_mode:location.booking_mode,slots:body.data.groups?.[0]?.slots??[]} as Group;})).then((result)=>{if(active){setGroups(result);setDay(current=>current||(result.flatMap((group)=>group.slots).map((item)=>item.local_date).sort()[0]??''));if(draft?.slot){const match=result.find(group=>group.location_id===draft.locationId)?.slots.find(item=>item.starts_at===draft.slot?.starts_at);setSlot(match??null);if(!match)setLocationId('');}}}).catch(()=>{if(active)setError(true);});return()=>{active=false;};},[artist,serviceId,draft]);
   const signIn=()=>{if(typeof window!=='undefined')window.sessionStorage.setItem(`mova_booking_draft_${handle}`,JSON.stringify({serviceId,day,slot,locationId,alternateStartsAt} satisfies BookingDraft));};
   const create=async()=>{
@@ -36,6 +39,7 @@ export function BookingRoute() {
       requestIdentity.current??={key:crypto.randomUUID(),token:btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replaceAll('+','-').replaceAll('/','_').replaceAll('=','')};
       const response=await fetch(api('booking-create'),{method:'POST',headers:{'Content-Type':'application/json',apikey:publicEnv.VITE_SUPABASE_ANON_KEY??'','Idempotency-Key':requestIdentity.current.key},body:JSON.stringify({location_id:locationId,service_id:serviceId,starts_at:slot.starts_at,alternate_starts_at:alternateStartsAt||undefined,client_note:clientNote.trim()||undefined,portfolio_item_id:selectedLook?.id,client_name:name,client_email:email||undefined,client_phone:phone||undefined,client_locale:locale,manage_token:requestIdentity.current.token})});
       const body=await response.json();if(!response.ok||!body.data?.manage_url)throw new Error();
+      if(typeof body.data.id==='string'&&/^[0-9a-f-]{36}$/i.test(body.data.id))trackProfileEvent(handle,'booking_completed',body.data.id);
       if(typeof window!=='undefined'){
         window.sessionStorage.removeItem(`mova_booking_draft_${handle}`);
         if(clientProfilesEnabled){

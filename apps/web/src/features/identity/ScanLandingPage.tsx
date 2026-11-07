@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, LocationTag } from '../../components';
 import { publicEnv } from '../../lib/env';
 import type { PublicArtist } from '../showcase/PublicArtistPage';
+import { trackProfileEvent } from '../reports/track';
 
 const endpoint=(name:string)=>`${publicEnv.VITE_SUPABASE_URL}/functions/v1/${name}`;
 export function ScanLandingPage(){
@@ -11,6 +12,7 @@ export function ScanLandingPage(){
   useEffect(()=>{let active=true;const locale=i18n.resolvedLanguage==='es-US'?'es-US':'en-US';void(async()=>{try{
     const response=await fetch(endpoint('public-artist'),{method:'POST',headers:{'Content-Type':'application/json',apikey:publicEnv.VITE_SUPABASE_ANON_KEY??''},body:JSON.stringify({handle,tab:'looks',locale})});const envelope=await response.json();if(!response.ok||!envelope.data)throw new Error();if(active)setArtist(envelope.data as PublicArtist);
     const session=[...crypto.getRandomValues(new Uint8Array(32))].map(byte=>byte.toString(16).padStart(2,'0')).join('');await fetch(endpoint('scan-landing'),{method:'POST',headers:{'Content-Type':'application/json',apikey:publicEnv.VITE_SUPABASE_ANON_KEY??''},body:JSON.stringify({handle,scan_session:session})});
+    trackProfileEvent(handle,'qr_scan');
   }catch{if(active)setError(true);}finally{if(active)setLoading(false);}})();return()=>{active=false;};},[handle,i18n.resolvedLanguage]);
   if(loading)return <main className="mova-page mova-scan-landing" aria-busy="true"><p role="status">{t('identity.loading')}</p></main>;
   if(error||!artist)return <main className="mova-page mova-scan-landing"><EmptyState title={t('identity.artistUnavailable')} detail={t('identity.artistUnavailableDetail')}/></main>;

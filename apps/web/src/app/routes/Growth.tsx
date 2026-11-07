@@ -1,2 +1,2 @@
-import { ArtistPage } from '../ArtistPages';
-export default function Route() { return <ArtistPage section="growth" />; }
+import { RevenueHomePage } from '../../features/revenue/RevenuePages';
+export default function Route() { return <RevenueHomePage />; }

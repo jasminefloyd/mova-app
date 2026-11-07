@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useLocation, useSearchParams } from 'react-router-dom';
+import { Outlet, useLocation, useSearchParams } from 'react-router';
 import type { Locale } from '@mova/contracts';
 import { createPublicQueryClient } from '../lib/query-client';
 import { GUEST_LOCALE_KEY } from './locale';

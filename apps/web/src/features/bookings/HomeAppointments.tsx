@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Avatar, Card, EmptyState, ErrorState, Icon, KPITile, SectionOverline, StatusChip } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
@@ -9,6 +9,7 @@ import { displayId } from '../../lib/display-ids';
 type Booking = { id: string; appointment_number:number; location_id: string; service_name_snapshot: string; client_name: string; status: string; starts_at: string; ends_at: string; request_expires_at: string | null };
 type Location = { id: string; name: string; time_zone: string; display_color_index: number };
 type Profile = { display_name: string; handle: string; is_published: boolean };
+type HomeMetrics = { revenue: string; revenueDelta: string; booked: string; rating: string; ratingCount: string };
 
 function dateKey(date: Date, timeZone: string) {
   const parts = new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
@@ -33,6 +34,7 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [metrics, setMetrics] = useState<HomeMetrics>({ revenue: '—', revenueDelta: '—', booked: '—', rating: '—', ratingCount: '—' });
 
   const load = useCallback(async () => {
     if (!client || !businessId) { setLoading(false); return; }
@@ -64,6 +66,28 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
     if (!client || !businessId) { setLoading(false); return; }
     void load();
   }, [businessId, client, identityLoading, load]);
+
+  useEffect(() => {
+    let active = true;
+    if (!client || !businessId) return;
+    void (async () => {
+      try {
+        const { data: { session } } = await client.auth.getSession();
+        if (!session) return;
+        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reports-summary`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, 'x-mova-artist-business-id': businessId }, body: JSON.stringify({ range: 'week_to_date' }) });
+        const envelope = await response.json();
+        if (!response.ok || !envelope.data?.current) return;
+        const { current, previous } = envelope.data;
+        const booked = Number(current.offered_seconds) > 0 ? `${Math.round(Number(current.booked_seconds) / Number(current.offered_seconds) * 100)}%` : '—';
+        const ratingCount = Number(current.rating_count) + Number(current.google_rating_count);
+        const rating = ratingCount > 0 ? ((Number(current.rating_sum) + Number(current.google_rating_sum)) / ratingCount).toFixed(1) : '—';
+        const oldRevenue = Number(previous.service_value_minor) || 0;
+        const revenueDelta = oldRevenue > 0 ? `${Number(current.service_value_minor) >= oldRevenue ? '+' : ''}${Math.round((Number(current.service_value_minor) - oldRevenue) / oldRevenue * 100)}%` : (Number(current.service_value_minor) ? '+100%' : '—');
+        if (active) setMetrics({ revenue: Number(current.service_value_minor) ? new Intl.NumberFormat(i18n.resolvedLanguage, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(current.service_value_minor) / 100) : '—', revenueDelta, booked, rating, ratingCount: ratingCount ? t('homeAppointments.ratingCount', { count: ratingCount }) : '—' });
+      } catch { /* Reports remain available on their dedicated screen. */ }
+    })();
+    return () => { active = false; };
+  }, [businessId, client, i18n.resolvedLanguage, t]);
 
   const locationById = useMemo(() => new Map(locations.map((location) => [location.id, location])), [locations]);
   const locationIndexById = useMemo(() => new Map(locations.map((location, index) => [location.id, index % 2])), [locations]);
@@ -106,9 +130,9 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
     </header>
 
     <Link className="mova-home__metrics" to={operatorUrl(businessId, 'reports')} aria-label={t('homeAppointments.openReports')}>
-      <KPITile label={t('homeAppointments.thisWeek')} value="—" delta="—" tone="inverse" />
-      <KPITile label={t('homeAppointments.booked')} value="—" delta={t('homeAppointments.ofHours')} tone="inverse" />
-      <KPITile label={t('homeAppointments.rating')} value="—" delta="—" tone="inverse" />
+      <KPITile label={t('homeAppointments.thisWeek')} value={metrics.revenue} delta={metrics.revenueDelta} tone="inverse" />
+      <KPITile label={t('homeAppointments.booked')} value={metrics.booked} delta={t('homeAppointments.ofHours')} tone="inverse" />
+      <KPITile label={t('homeAppointments.rating')} value={metrics.rating} delta={metrics.ratingCount} tone="inverse" />
     </Link>
 
     <section className="mova-home__section">

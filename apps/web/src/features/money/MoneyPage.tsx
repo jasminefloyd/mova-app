@@ -33,7 +33,7 @@ export function MoneyPage(){
         <div><dt>{t('money.refunds')}</dt><dd>{currency(data.totals.refunds_minor)}</dd></div>
         <div className="mova-money-estimate__total"><dt>{t('money.estimatedToYou')}</dt><dd>{currency(data.totals.estimated_to_artist_minor)}</dd></div>
       </dl><p>{t('money.estimateDisclaimer')}</p></Card>
-      <section className="mova-money-activity"><h2>{t('money.recentActivity')}</h2>{data.activity.length?<ul>{data.activity.map(item=><li key={item.id}><span><strong>{t(`money.activity.${item.category}`)} · {item.client_name}</strong><small>{new Intl.DateTimeFormat(i18n.resolvedLanguage,{month:'short',day:'numeric'}).format(new Date(item.created_at))} · {item.payment_method?t(`money.methods.${item.payment_method}`):item.service_name}</small></span><b>{currency(item.amount_minor)}</b></li>)}</ul>:<EmptyState title={t('money.empty')}/>}</section>
+      <section className="mova-money-activity"><h2>{t('money.recentActivity')}</h2>{data.activity.length?<ul>{data.activity.map(item=><li key={item.id}><span><strong>{t(`money.activity.${item.category}`)} · {item.client_name}</strong><small>{new Intl.DateTimeFormat(i18n.resolvedLanguage,{month:'short',day:'numeric'}).format(new Date(item.created_at))} · {item.payment_method?t(`money.methods.${item.payment_method==='zelle_recorded'?'other':item.payment_method}`):item.service_name}</small></span><b>{currency(item.amount_minor)}</b></li>)}</ul>:<EmptyState title={t('money.empty')}/>}</section>
     </>}
     {typeof navigator!=='undefined'&&!navigator.onLine&&<p className="mova-offline-banner" role="status"><Icon name="info" size={16}/>{t('components.offline')}</p>}
   </main>;

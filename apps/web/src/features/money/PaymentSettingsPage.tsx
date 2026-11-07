@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, ErrorState, HonestyBanner, ScreenHeader, Toggle } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { operatorUrl } from '../../app/operator-url';
 
-type Methods={cash_enabled:boolean;zelle_recorded_enabled:boolean;other_enabled:boolean};
-const defaults:Methods={cash_enabled:true,zelle_recorded_enabled:true,other_enabled:true};
+type Methods={cash_enabled:boolean;other_enabled:boolean};
+const defaults:Methods={cash_enabled:true,other_enabled:true};
 
 export function PaymentSettingsPage(){
   const navigate=useNavigate();const{t}=useTranslation();const{client,businessId,loading:identityLoading}=useArtistBusiness();const[methods,setMethods]=useState(defaults);const[loading,setLoading]=useState(true);const[saving,setSaving]=useState(false);const[loadError,setLoadError]=useState(false);const[saveError,setSaveError]=useState(false);const[saved,setSaved]=useState(false);
@@ -19,7 +19,7 @@ export function PaymentSettingsPage(){
     {identityLoading||loading?<p role="status" aria-busy="true">{t('money.loading')}</p>:loadError?<ErrorState title={t('money.settingsError')} retryLabel={t('money.retry')} onRetry={()=>void load()}/>:<>
       <h1>{t('money.howYouGetPaid')}</h1><p className="mova-payment-settings__intro">{t('money.paymentSettingsIntro')}</p>
       <Card tone="inverse" className="mova-payment-settings__stripe"><div><h2>{t('money.onlinePayments')}</h2><span className="mova-payment-settings__optional">{t('money.optional')}</span></div><p>{t('money.stripeDescription')}</p><Button type="button" variant="on-dark" disabled>{t('money.connectStripe')}</Button><small>{t('money.stripeSetupUnavailable')}</small></Card>
-      <Card className="mova-payment-settings__manual"><h2>{t('money.recordedPayments')}</h2><Toggle label={t('money.methods.cash')} checked={methods.cash_enabled} onChange={value=>setMethods(old=>({...old,cash_enabled:value}))}/><Toggle label={t('money.methods.zelle_recorded')} checked={methods.zelle_recorded_enabled} onChange={value=>setMethods(old=>({...old,zelle_recorded_enabled:value}))}/><p>{t('money.recordedOnlyDisclaimer')}</p></Card>
+      <Card className="mova-payment-settings__manual"><h2>{t('money.recordedPayments')}</h2><Toggle label={t('money.methods.cash')} checked={methods.cash_enabled} onChange={value=>setMethods(old=>({...old,cash_enabled:value}))}/><Toggle label={t('money.methods.other')} checked={methods.other_enabled} onChange={value=>setMethods(old=>({...old,other_enabled:value}))}/><p>{t('money.recordedOnlyDisclaimer')}</p></Card>
       <HonestyBanner>{t('money.salonCollectionNotice')}</HonestyBanner>
       {saveError&&<p role="alert">{t('money.settingsSaveError')}</p>}{saved&&<p role="status">{t('money.settingsSaved')}</p>}
       <footer className="mova-payment-settings__actions"><Button type="button" loading={saving} onClick={()=>void save()}>{t('money.savePaymentSettings')}</Button></footer>

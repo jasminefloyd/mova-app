@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { i18nReady } from '../../i18n';
 import { PublicArtistPage } from './PublicArtistPage';

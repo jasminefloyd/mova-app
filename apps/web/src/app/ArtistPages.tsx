@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Avatar, Button, Card, EmptyState, Icon, IconButton, ListRow, ScreenHeader } from '../components';
 import { HomeAppointments } from '../features/bookings/HomeAppointments';
 import { useArtistBusiness } from '../features/settings/useArtistBusiness';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { operatorUrl } from './operator-url';
+import { ReportsPage } from '../features/reports/ReportsPage';
 
 type Section = 'home' | 'calendar' | 'clients' | 'growth' | 'reports' | 'money';
 
@@ -14,10 +15,11 @@ export function ArtistPage({ section }: { section: Section }) {
   const { businessId } = useArtistBusiness();
   const title = section === 'growth' ? t('navigation.growthTitle') : t(`navigation.${section}`);
   if (section === 'home') return <HomeAppointments onOpenSettings={() => window.location.assign(operatorUrl(businessId, 'settings'))} />;
+  if (section === 'reports') return <ReportsPage />;
   return <main className="mova-page">
     <ScreenHeader title={title} />
     <h1>{title}</h1>
-    {section === 'reports' ? <ListRow title={t('navigation.money')} subtitle={t('navigation.moneyFromReports')} href={operatorUrl(businessId,'money')} /> : <EmptyState title={t('navigation.sectionComing')} />}
+    <EmptyState title={t('navigation.sectionComing')} />
   </main>;
 }
 
@@ -40,12 +42,12 @@ export function SettingsPage() {
         client.from('mova_artist_profiles').select('display_name,handle,is_published').eq('artist_business_id',businessId).maybeSingle(),
         client.from('mova_services').select('id',{count:'exact',head:true}).eq('artist_business_id',businessId).eq('status','active'),
         client.from('mova_locations').select('id',{count:'exact',head:true}).eq('artist_business_id',businessId).eq('is_active',true),
-        client.from('mova_payment_method_settings').select('cash_enabled,zelle_recorded_enabled').eq('artist_business_id',businessId).maybeSingle(),
+        client.from('mova_payment_method_settings').select('cash_enabled').eq('artist_business_id',businessId).maybeSingle(),
         client.from('mova_stripe_connections').select('status').eq('artist_business_id',businessId).maybeSingle(),
         client.from('mova_google_calendar_connections').select('status').eq('artist_business_id',businessId).maybeSingle(),
       ]);
       setProfile(profileData);setServiceCount(services??0);setLocationCount(locations??0);
-      const enabled=[stripe?.status==='active'?'Stripe':null,(paymentMethods?.cash_enabled??true)?'cash':null,(paymentMethods?.zelle_recorded_enabled??true)?'Zelle · recorded':null].filter(Boolean);
+      const enabled=[stripe?.status==='active'?'Stripe':null,(paymentMethods?.cash_enabled??true)?t('money.methods.cash'):null].filter(Boolean);
       setPaymentSummary(enabled.join(' · ')||t('settings.notConnected'));
       setCalendarSummary(calendar?.status==='active'?t('settings.connected'):t('settings.notConnected'));
     })();
@@ -83,10 +85,10 @@ export function SettingsPage() {
       <ListRow title={t('settings.calendarSync')} trailing={calendarSummary} href={operatorUrl(businessId,'settings/calendar-sync')} />
       <ListRow title={t('messaging.settingsTitle')} trailing={<Icon name="chevron" size={18}/>} href={operatorUrl(businessId,'settings/notifications')} />
       <ListRow title={t('messaging.inbox')} trailing={<Icon name="chevron" size={18}/>} href={operatorUrl(businessId,'notifications')} />
-      <ListRow title={t('settings.reviewsGoogle')} trailing={t('settings.notConnected')} />
-      <ListRow title={t('settings.plan')} trailing={t('settings.planNotConfigured')} />
+      <ListRow title={t('settings.reviewsGoogle')} trailing={t('settings.notConnected')} href={operatorUrl(businessId,'settings/reviews')} />
+      <ListRow title={t('settings.plan')} trailing={t('settings.planNotConfigured')} href={operatorUrl(businessId,'settings/plan')} />
       <button type="button" className="mova-list-row mova-settings-language-row" aria-expanded={languageExpanded} onClick={()=>setLanguageExpanded(value=>!value)}><span className="mova-list-row__copy"><strong>{t('settings.languageNotifications')}</strong></span><span className="mova-list-row__trailing">{localeName}</span></button>
-      <ListRow title={t('settings.privacyData')} />
+      <ListRow title={t('settings.privacyData')} href={operatorUrl(businessId,'settings/privacy')} />
     </Card>
     {languageExpanded&&<section className="mova-settings-language" id="mova-settings-language" aria-label={t('settings.languageNotifications')}><LocaleSwitcher /></section>}
     {signOutError && <p role="alert">{t('settings.signOutError')}</p>}

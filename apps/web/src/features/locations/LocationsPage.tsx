@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, ErrorState, IconButton, ScreenHeader, TextField } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { publicEnv } from '../../lib/env';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { operatorUrl } from '../../app/operator-url';
 
 type Location = { id: string; name: string; location_type: string; booking_mode: string; calendar_ownership: string; payment_collector: string; time_zone: string; display_color_index: number; address: Record<string, string>; is_active: boolean };

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, ErrorState, Sheet, TextField, Toggle } from '../../components';
 import { createMovaSupabaseClient } from '../../lib/supabase';
@@ -136,6 +136,15 @@ export function ClientProfilePage() {
       else { const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = file.name; link.click(); URL.revokeObjectURL(link.href); }
     } catch { setError(true); }
   };
+  const exportData = async () => {
+    setBusy(true);
+    try {
+      const payload = await request('customer-profile', { action: 'export' });
+      if (!payload) throw new Error('EXPORT_UNAVAILABLE');
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'mova-client-data.json'; anchor.click(); URL.revokeObjectURL(url);
+    } catch { setError(true); } finally { setBusy(false); }
+  };
 
   if (!clientProfilesEnabled) return <main className="mova-page mova-client-profile"><p className="mova-wordmark">mova.</p><h1>{t('identity.profileTitle')}</h1><p>{t('identity.disabled')}</p><Link to="/">{t('identity.continueGuest')}</Link></main>;
   if (loading) return <main className="mova-page mova-client-profile" aria-busy="true"><p role="status">{t('identity.loading')}</p></main>;
@@ -159,7 +168,7 @@ export function ClientProfilePage() {
     <section className="mova-client-profile__section"><h2>{t('identity.myStylists')}</h2>{data.stylists.length ? data.stylists.map((stylist) => <Card className="mova-client-profile__stylist" key={stylist.business_id}><span className="mova-client-profile__initials" aria-hidden="true">{stylist.name.split(/\s+/).map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</span><div><strong>{stylist.name}</strong><Link to={`/a/${encodeURIComponent(stylist.handle)}/book`}>{t('identity.bookAgain')}</Link></div></Card>) : <EmptyState title={t('identity.noStylists')}/>}</section>
     {data.stylists.map((stylist) => <Card className="mova-client-profile__consents" key={`consent-${stylist.business_id}`}><Toggle label={t('identity.appointmentTexts')} checked={stylist.consents.appointment_updates} disabled={busy} onChange={(value) => void consent(stylist, 'appointment_updates', value)}/><Toggle label={t('identity.remindersAndOffers', { name: stylist.name.split(' ')[0] })} checked={stylist.consents.reminders && stylist.consents.offers} disabled={busy} onChange={async (value) => { await consent(stylist, 'rebooking_reminders', value); await consent(stylist, 'offers', value); }}/></Card>)}
     {editing && <form className="mova-client-profile__edit" onSubmit={(event) => void save(event)}><label className="mova-field"><span>{t('identity.name')}</span><input className="mova-input" value={name} onChange={(event) => setName(event.target.value)} maxLength={160} required/></label><Button type="submit" loading={busy}>{t('identity.save')}</Button></form>}
-    <footer className="mova-client-profile__footer"><button type="button" onClick={() => setEditing((value) => !value)}>{editing ? t('identity.cancel') : t('identity.editDetails')}</button><span> · </span><button type="button" disabled={busy} onClick={() => void signOut()}>{t('settings.signOut')}</button><span> · </span><button type="button" disabled={busy} onClick={() => { setDeleteStep('confirm'); setDeleteCode(''); setDeleteOpen(true); }}>{t('identity.deleteProfile')}</button></footer>
+    <footer className="mova-client-profile__footer"><button type="button" onClick={() => setEditing((value) => !value)}>{editing ? t('identity.cancel') : t('identity.editDetails')}</button><span> · </span><button type="button" disabled={busy} onClick={() => void exportData()}>{t('privacy.exportMyData')}</button><span> · </span><button type="button" disabled={busy} onClick={() => void signOut()}>{t('settings.signOut')}</button><span> · </span><button type="button" disabled={busy} onClick={() => { setDeleteStep('confirm'); setDeleteCode(''); setDeleteOpen(true); }}>{t('identity.deleteProfile')}</button></footer>
     {error && <p role="alert">{t('identity.profileSaveError')}</p>}
     <Sheet open={deleteOpen} title={t('identity.deleteConfirmTitle')} closeLabel={t('identity.cancel')} onClose={() => setDeleteOpen(false)}>
       <div className="mova-client-profile__delete-confirm"><p>{t('identity.deleteConfirmBody')}</p>{deleteStep==='confirm'?<Button type="button" loading={busy} onClick={() => void beginDelete()}>{t('identity.sendDeleteCode')}</Button>:<><p>{t('identity.deleteCodeSent')}</p><TextField label={t('identity.code')} inputMode="numeric" autoComplete="one-time-code" value={deleteCode} onChange={(event) => setDeleteCode(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="••••••" required/><Button type="button" variant="destructive" loading={busy} disabled={deleteCode.length!==6} onClick={() => void confirmDelete()}>{t('identity.deleteProfile')}</Button><button className="mova-link-button" type="button" disabled={busy} onClick={() => { setDeleteCode(''); void beginDelete(); }}>{t('identity.resendDeleteCode')}</button></>}<Button type="button" variant="secondary" disabled={busy} onClick={() => setDeleteOpen(false)}>{t('identity.cancel')}</Button></div>

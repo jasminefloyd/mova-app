@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { DayStrip, EmptyState, ErrorState, HonestyBanner, IconButton } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';

@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { i18nReady } from '../../i18n';
 import MarketingHome from './MarketingHome';

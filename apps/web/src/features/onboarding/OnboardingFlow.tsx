@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Chip, StepperProgress, TextArea, TextField } from '../../components';
 import { createMovaSupabaseClient } from '../../lib/supabase';

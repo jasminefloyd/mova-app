@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react';
 import type { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router';
 import { LocaleProvider } from './LocaleProvider';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { ServiceWorkerUpdateNotice } from './ServiceWorkerUpdateNotice';

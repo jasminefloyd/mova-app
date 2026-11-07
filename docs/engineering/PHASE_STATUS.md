@@ -6,11 +6,11 @@
 
 | | |
 |---|---|
-| **Current phase** | **P11–P13 — Messaging, AI Revenue, Concierge (build-ahead)** |
+| **Current phase** | **P14–P17 — Reports/reviews, plans, privacy/reliability, regression** |
 | **Phase status** | IN PROGRESS |
 | **Spec baseline** | `docs/product/ENGINEERING_SPEC.md` v2.3 (amended hash in `BASELINE_MANIFEST.md`; original v2.0 hash retained) |
-| **Last updated** | 2026-11-06 · Production deployment completed after the initial Vercel SSR runtime failure was diagnosed and fixed by bundling React Router in the server output. Final Vercel deployment `mova-dagzvocqo-fds-ai-projects.vercel.app` is READY and aliased to `https://mova-beauty.co`; live `/`, `/auth`, and `/robots.txt` checks returned HTTP 200. All 12 approved pending `mova_` migrations are applied without changing the 80 pre-existing remote migration records, and all 38 repository Edge Functions were deployed without pruning unrelated functions. Commits `5b9abd4`, `6d8c19e`, `c129ce3`, and `e44d825` are pushed to `main`. Local typecheck/build and earlier typecheck/lint/test/locale checks passed; this deployment does not mark P00–P13 accepted. Some provider integrations remain unverified and require missing/valid provider and encryption secrets. |
-| **Next gate** | Owner to exercise auth, waitlist, and enabled application flows in production. Resolve any missing or invalid provider/encryption secrets before exercising their dependent integrations. P00–P13 acceptance remains open pending their recorded phase evidence, tenant/RLS and Edge integration checks, and browser visual comparison against the referenced artboards. |
+| **Last updated** | 2026-11-07 · P14–P17 implementation is local only. P14–P17 migrations `0024`–`0027` are not applied and their Edge Functions are not deployed. Under Node 24.15.0, typecheck, lint, 62 unit tests, locale parity and client/SSR production build pass after the latest changes. Playwright visual capture could not start because the sandbox rejects local TCP listen (`EPERM`); k6, Deno, psql/Postgres and local Supabase runtime are unavailable. P14–P17 SQL/Edge runtime, pgTAP, tenant isolation, screenshot comparison, UAT and load acceptance remain unverified. Existing P00–P13 acceptance remains open. |
+| **Next gate** | Run SQL/pgTAP and Edge integration in a local Supabase/PostgreSQL + Deno environment, compare rendered screens against artboards, and conduct UAT. Owner review remains pending; no production migrations, function deployment, or Vercel deployment is authorized by this implementation request. |
 
 ## P00 tasks
 
@@ -163,10 +163,10 @@ P08 remains IN PROGRESS. React typecheck and locale key validation pass under No
 | P11 | Messaging foundation, notifications, push, sending identities | IN PROGRESS | P07, P10 | A-03, A-24, A-09; provider adapters, sending identities, push delivery and integration checks |
 | P12 | AI Revenue: hub, forecast, pipeline, autopilot, templates, win-back, seat filler | IN PROGRESS | P08, P11 | A-04, A-21, A-22, A-28; complete planner/campaign/forecast workers and integration checks |
 | P13 | AI Concierge | IN PROGRESS | P11, P12 | A-04, A-23, A-25, A-30; provider, reviewed safety/evals, messaging channels and integration checks |
-| P14 | Reports, reputation & reviews, Google presence | NOT STARTED | P08, P11 | A-05, A-20, A-29 |
-| P15 | Plans, entitlements, billing, analytics | NOT STARTED | P08–P14 | A-01, A-26 |
-| P16 | Security, privacy ops, reliability, observability | NOT STARTED | P15 | A-08 |
-| P17 | Full regression, accessibility, performance, UAT, acquisition readiness | NOT STARTED | P16 | A-07, A-12, A-14, A-15 |
+| P14 | Reports, reputation & reviews, Google presence | IN PROGRESS | P08, P11 | A-05, A-20, A-29; DB/Edge runtime; visual review |
+| P15 | Plans, entitlements, billing, analytics | IN PROGRESS | P08–P14 | A-01, A-26; DB/runtime and plan usage integration |
+| P16 | Security, privacy ops, reliability, observability | IN PROGRESS | P15 | A-08; complete RLS/abuse proof, restore rehearsal, alerts |
+| P17 | Full regression, accessibility, performance, UAT, acquisition readiness | IN PROGRESS | P16 | A-07, A-12, A-14, A-15; k6/load and owner UAT/review |
 | P18 | Owner sign-off & controlled release | NOT STARTED | P17 | **GO** |
 
 F13 (i18n) runs continuously from P01. F14 (acquisition site) may run as a parallel slice after P02.
@@ -176,6 +176,15 @@ F13 (i18n) runs continuously from P01. F14 (acquisition site) may run as a paral
 Approval status is maintained in `DECISION_LOG.md`: A-13 is APPROVED; the remaining approvals retain their recorded statuses. Until that log says otherwise, build affected capabilities behind their flags (default OFF) with the safe default from spec §0.5. Record decisions there with owner, date and rationale.
 
 Gates: G1 Architecture · G2a Design (after P02) · G2 UX · G3 Feature complete · G4 Security & finance · G5 UAT · G6 Production GO. **G2a is APPROVED; all other gates are NOT STARTED.**
+
+## P14–P17 implementation record (2026-11-07)
+
+| Phase | Local implementation | Status and verified limits |
+|---|---|---|
+| P14 | Reports/traffic/reviews schema and service functions; reports/reputation/review screens; review moderation/reply/report; Google import gated by both A-05/A-20 config; review email toggle disabled without a sender; screen 07 KPI data uses server rollups. The demo fixture now includes five synthetic, private reviews, illustrative traffic, one slot-fill, one rebooking, and social-share events. Reports labels are localized; the rollup now reads the actual `initiated_at` column on social-share events. | IN PROGRESS. Migrations and Edge functions are unexecuted. Reports and review screens have not been browser-compared to approved PNG artboards. Review delivery, public display, and Google import remain disabled. |
+| P15 | Proposed plan catalog, tenant assignment/usage meter, send-status usage trigger, Settings plan screen and server plan summary. The demo fixture assigns Rooted Beauty to the proposed Free plan without replacing an existing assignment. Plan selection returns 409 pending approvals. | IN PROGRESS. A-01/A-26 remain open; no subscription billing/provider, live entitlement quotas, or DB tests. |
+| P16 | Tenant business export, client profile export/audit, artist deletion request (no destructive deletion), audited privacy request table, retention hold and operations/security documentation. Privacy screen is derived from approved Settings patterns under lead delegation. | IN PROGRESS. A-08 is open. Export/decryption paths, RLS, audit writes, restore and alerting need integration and operations review. Automatic retention deletion remains off. |
+| P17 | A-16 safe default implemented: Zelle controls hidden, new Zelle records rejected, existing history maps to Other; sequential `mova_` migrations chosen as 0024–0027; pgTAP structure checks and a local-only k6 reports load script added. | IN PROGRESS. Typecheck, lint, 62 unit tests, locale parity and SSR/client build pass locally. Visual Playwright capture is blocked by sandbox `listen EPERM`; k6, Deno, psql/Postgres and local Supabase runtime are unavailable. UAT-G…UAT-M, critical Spanish human review, full WCAG 2.2 AA and owner acceptance remain outstanding. |
 
 ## Open blockers and pending inputs
 

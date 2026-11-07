@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Avatar, Button, Card, Chip, EmptyState, ErrorState, Icon, IconButton, ScreenHeader, TextField } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';

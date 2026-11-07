@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router';
 import OperatorShellRoute from './app/OperatorShellRoute';
 import { ArtistPage, SettingsPage } from './app/ArtistPages';
 import { ComponentGallery } from './components';
@@ -30,6 +30,10 @@ import ClientCardLandingPage from './features/identity/ClientCardLandingPage';
 import {NotificationInboxPage,NotificationSettingsPage} from './features/messaging/NotificationPages';
 import {RevenueHomePage,RevenueDetailPage} from './features/revenue/RevenuePages';
 import {ConciergeInboxPage,ConciergeSetupPage,ConciergeThreadPage} from './features/concierge/ConciergePages';
+import { ReputationPage } from './features/reports/ReputationPage';
+import { ReviewPage } from './features/reports/ReviewPage';
+import { PlanPage } from './features/reports/PlanPage';
+import { PrivacyPage } from './features/settings/PrivacyPage';
 
 export const router = createBrowserRouter([
   { path: '/auth', element: <OnboardingShell /> },
@@ -52,6 +56,10 @@ export const router = createBrowserRouter([
     { path: 'concierge/quotes/:quoteId', element: <ConciergeThreadPage /> },
     { path: 'concierge/:conversationId', element: <ConciergeThreadPage /> },
     { path: 'reports', element: <ArtistPage section="reports" /> },
+    { path: 'reports/reputation', element: <ReputationPage /> },
+    { path: 'settings/reviews', element: <ReputationPage /> },
+    { path: 'settings/plan', element: <PlanPage /> },
+    { path: 'settings/privacy', element: <PrivacyPage /> },
     { path: 'settings', element: <SettingsPage /> },
     { path: 'settings/services', element: <ServiceSettingsPage /> },
     { path: 'settings/portfolio', element: <PortfolioSettingsPage /> },
@@ -80,6 +88,7 @@ export const router = createBrowserRouter([
     { path: 's/:handle', element: <ScanLandingPage /> },
     { path: 'c/:token', element: <ClientCardLandingPage /> },
     { path: 'b/:token', element: <BookingManageRoute /> },
+    { path: 'review/:token', element: <ReviewPage /> },
     { path: '*', element: <Navigate to="/" replace /> },
   ] },
 ]);

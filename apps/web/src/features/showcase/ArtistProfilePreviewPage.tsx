@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { ErrorState, HonestyBanner, ScreenHeader } from '../../components';
 import { PublicArtistPage } from './PublicArtistPage';
 import type { PublicArtist } from './PublicArtistPage';

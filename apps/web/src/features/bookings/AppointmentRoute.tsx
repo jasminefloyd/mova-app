@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, DefinitionList, ErrorState, HonestyBanner, Icon, IconButton, ScreenHeader, Sheet, StatusChip } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';

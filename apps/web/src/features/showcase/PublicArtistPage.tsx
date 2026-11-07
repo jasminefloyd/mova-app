@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, ErrorState, SectionOverline } from '../../components';
 import { publicEnv } from '../../lib/env';
 import { ErrorFallback } from '../../app/ErrorFallback';
 import { ConciergeWidget } from '../concierge/ConciergePages';
+import { trackProfileEvent } from '../reports/track';
 
 type Service = { id: string; name: string; category: string; duration_minutes: number; base_price_minor: number; deposit_type: 'none' | 'fixed' | 'percent'; deposit_value: number; location_deposits: Array<{ location_id: string; price_minor: number; duration_minutes: number; deposit_amount_minor: number }> };
 type Look = { id: string; image_url: string; alt_text: string; service_ids: string[] };
@@ -26,6 +27,7 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
   const [artist, setArtist] = useState<PublicArtist | null>(initialArtist);
   const [loading, setLoading] = useState(!initialArtist);
   const scrollPositions = useRef<Record<string, number>>({});
+  const trackedHandle = useRef('');
   const [error, setError] = useState(false);
 
   const load = useCallback(async () => {
@@ -46,6 +48,11 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
   }, [handle, locale, tab, initialArtist]);
 
   useEffect(() => { if (!initialArtist) void load(); }, [load, initialArtist]);
+  useEffect(() => {
+    if (preview || !artist || trackedHandle.current === artist.profile.handle) return;
+    trackedHandle.current = artist.profile.handle;
+    trackProfileEvent(artist.profile.handle,'page_view');
+  }, [artist, preview]);
   useEffect(() => { window.scrollTo({ top: scrollPositions.current[tab] ?? 0 }); }, [tab]);
 
   const switchTab = (next: 'looks' | 'services') => {

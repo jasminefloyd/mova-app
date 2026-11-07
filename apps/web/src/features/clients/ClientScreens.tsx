@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Avatar, Button, Card, Chip, EmptyState, ErrorState, Icon, IconButton, ScreenHeader, Sheet, TextArea, TextField, Toggle } from '../../components';
 import { operatorUrl } from '../../app/operator-url';
@@ -14,13 +14,27 @@ type Appointment={id:string;appointment_number:number;client_id:string;starts_at
 type Media={id:string;kind:'before'|'after';url:string};
 
 function initials(name:string){return name.trim().split(/\s+/).map((part)=>part[0]).join('').slice(0,2).toUpperCase();}
+function messageEmail(value:string|null){
+  const email=value?.trim()??'';
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||/\.(invalid|example|test|localhost)$/i.test(email))return null;
+  return email;
+}
+function messagePhone(value:string|null){
+  const digits=(value??'').replace(/\D/g,'');
+  const national=digits.length===11&&digits.startsWith('1')?digits.slice(1):digits;
+  if(national.length===10&&national.slice(3,6)==='555'&&Number(national.slice(6))>=100&&Number(national.slice(6))<=199)return null;
+  if(digits.length===10)return `+1${digits}`;
+  if(digits.length===11&&digits.startsWith('1'))return `+${digits}`;
+  if(digits.length>=8&&digits.length<=15&&value?.trim().startsWith('+'))return `+${digits}`;
+  return null;
+}
 function endpoint(){return `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;}
 function money(minor:number,locale:string){return new Intl.NumberFormat(locale,{style:'currency',currency:'USD',maximumFractionDigits:0}).format(minor/100);}
 
 export function ClientDetail(){
   const {clientId=''}=useParams();const clientNumber=parseDisplayId('CID',clientId);const location=useLocation();const navigate=useNavigate();const {t,i18n}=useTranslation();const {client,businessId,loading:identityLoading}=useArtistBusiness();
   const [record,setRecord]=useState<Client|null>(null);const [notes,setNotes]=useState<Note[]>([]);const [visits,setVisits]=useState<Visit[]>([]);const [consents,setConsents]=useState<Consent[]>([]);const [busy,setBusy]=useState(false);const [error,setError]=useState(false);const [loading,setLoading]=useState(true);
-  const [editOpen,setEditOpen]=useState(false);const [contactOpen,setContactOpen]=useState(false);const [editingName,setEditingName]=useState('');const [editingEmail,setEditingEmail]=useState('');const [editingPhone,setEditingPhone]=useState('');const [editingLocale,setEditingLocale]=useState<'en-US'|'es-US'>('en-US');
+  const [editOpen,setEditOpen]=useState(false);const [contactOpen,setContactOpen]=useState(false);const [messageOpen,setMessageOpen]=useState(false);const [editingName,setEditingName]=useState('');const [editingEmail,setEditingEmail]=useState('');const [editingPhone,setEditingPhone]=useState('');const [editingLocale,setEditingLocale]=useState<'en-US'|'es-US'>('en-US');
   const [noteOpen,setNoteOpen]=useState(false);const [noteId,setNoteId]=useState('');const [noteBody,setNoteBody]=useState('');const [category,setCategory]=useState('hair');const [sensitive,setSensitive]=useState(false);const [pinned,setPinned]=useState(false);const [showNext,setShowNext]=useState(false);
   const visitsTab=location.pathname.endsWith('/visits');const profileHref=operatorUrl(businessId,`clients/${clientId}`);const visitsHref=`${profileHref.replace(/\/$/,'')}/visits`;
   const getHeaders=useCallback(async()=>{if(!client)return null;const{data:{session}}=await client.auth.getSession();return{'Content-Type':'application/json',Authorization:`Bearer ${session?.access_token??''}`,'x-mova-artist-business-id':businessId??''};},[client,businessId]);
@@ -52,7 +66,8 @@ export function ClientDetail(){
     <ScreenHeader onBack={back} backLabel={t('clientDetails.back')} trailing={!visitsTab?<button type="button" className="mova-client-screen__edit-link" onClick={()=>setEditOpen(true)}>{t('clientDetails.edit')}</button>:undefined}/>
     <div className="mova-client-screen__body">
       <header className="mova-client-screen__identity"><Avatar label={record.display_name} initials={initialsValue} size={56}/><div><h1>{record.display_name}</h1><p>{displayIdLabel('CID',record.client_number)} · {visitsTab?t('clientDetails.visitsTotal',{count:completed.length,total:money(total,locale)}):t('clientDetails.memberSummary',{year:new Date(record.created_at).getFullYear(),count:record.visit_count,language:t(record.preferred_locale==='es-US'?'onboarding.spanish':'onboarding.english')})}</p></div></header>
-      {!visitsTab&&<div className="mova-client-screen__quick-actions"><Button type="button" disabled aria-describedby="client-actions-unavailable">{t('clientDetails.bookAgain')}</Button><Button variant="secondary" type="button" disabled aria-describedby="client-actions-unavailable">{t('clientDetails.message')}</Button><span id="client-actions-unavailable" className="mova-visually-hidden">{t('clientDetails.actionsUnavailable')}</span></div>}
+      {!visitsTab&&<div className="mova-client-screen__quick-actions"><Button type="button" disabled aria-describedby="client-actions-unavailable">{t('clientDetails.bookAgain')}</Button><Button variant="secondary" type="button" onClick={()=>setMessageOpen(true)}>{t('clientDetails.message')}</Button><span id="client-actions-unavailable" className="mova-visually-hidden">{t('clientDetails.actionsUnavailable')}</span></div>}
+      {!visitsTab&&<Sheet open={messageOpen} title={t('clientDetails.message')} closeLabel={t('settings.cancel')} onClose={()=>setMessageOpen(false)}><div className="mova-form-stack"><p>{t('clientDetails.messageComposerDescription')}</p>{messagePhone(record.phone)&&<Button type="button" onClick={()=>{window.location.href=`sms:${messagePhone(record.phone)}`;setMessageOpen(false);}}>{t('clientDetails.messageByText')}</Button>}{messageEmail(record.email)&&<Button type="button" variant="secondary" onClick={()=>{window.location.href=`mailto:${messageEmail(record.email)}`;setMessageOpen(false);}}>{t('clientDetails.messageByEmail')}</Button>}{!messagePhone(record.phone)&&!messageEmail(record.email)&&<p role="status">{t('clientDetails.noMessageContact')}</p>}</div></Sheet>}
       <nav className="mova-client-screen__tabs" aria-label={t('clientDetails.sections')}><Link to={profileHref} aria-current={!visitsTab?'page':undefined} className={!visitsTab?'is-current':''}>{t('clientDetails.profileNotes')}</Link><Link to={visitsHref} aria-current={visitsTab?'page':undefined} className={visitsTab?'is-current':''}>{t('clientDetails.visits',{count:record.visit_count})}</Link></nav>
       {visitsTab?<ol className="mova-client-visits" aria-label={t('clientDetails.visitsNewestFirst')}>
         {base.map((visit)=>{const upcoming=visit.status==='confirmed'||visit.status==='pending_artist';const target=visitHref(visit.appointment_number);return <li key={visit.id}><Link to={target} className={`mova-client-visit${upcoming?' mova-client-visit--upcoming':''}`}>

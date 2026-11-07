@@ -1,6 +1,6 @@
 -- Rooted Beauty production demo fixture.
 -- All client details are synthetic and use reserved example.invalid / 555-01xx values.
--- Only non-sensitive synthetic client/visit notes are seeded; no sensitive notes, photos, payment data, or public manage tokens are seeded.
+-- Demo reviews are synthetic, private, and never enabled for public display. No sensitive notes, photos, payment data, outbound messages, Google reviews, or public manage tokens are seeded.
 do $rooted_beauty_seed$
 declare
   demo_user_id uuid;
@@ -279,5 +279,99 @@ begin
     ('e2500000-0000-4000-8000-000000000722', business_id, client_4, 'e2500000-0000-4000-8000-000000000406', 'Silk press completed with two low-heat passes.', '["Heat protectant"]'::jsonb, '', false, null, demo_user_id),
     ('e2500000-0000-4000-8000-000000000723', business_id, client_4, 'e2500000-0000-4000-8000-000000000415', 'Discussed protective styling options and care.', '[]'::jsonb, 'Bring reference photos for the next appointment.', true, null, demo_user_id)
   on conflict (appointment_id) do nothing;
+
+  -- P14: synthetic review fixtures linked only to completed demo appointments.
+  -- They are private even when marked approved; public review display stays off.
+  insert into public.mova_review_settings (artist_business_id, ask_after_visit, google_review_url)
+  values (business_id, false, null)
+  on conflict (artist_business_id) do nothing;
+
+  insert into public.mova_review_requests (
+    id, artist_business_id, appointment_id, token_hash, status,
+    expires_at, created_at, sent_at, used_at
+  ) values
+    ('e2500000-0000-4000-8000-000000000901', business_id, 'e2500000-0000-4000-8000-000000000401', decode(md5('rooted-demo-review:901') || md5('rooted-demo-review-2:901'), 'hex'), 'used', now() + interval '12 days', now() - interval '2 days', null, now() - interval '1 day'),
+    ('e2500000-0000-4000-8000-000000000902', business_id, 'e2500000-0000-4000-8000-000000000402', decode(md5('rooted-demo-review:902') || md5('rooted-demo-review-2:902'), 'hex'), 'used', now() + interval '11 days', now() - interval '3 days', null, now() - interval '2 days'),
+    ('e2500000-0000-4000-8000-000000000903', business_id, 'e2500000-0000-4000-8000-000000000404', decode(md5('rooted-demo-review:903') || md5('rooted-demo-review-2:903'), 'hex'), 'used', now() + interval '10 days', now() - interval '4 days', null, now() - interval '3 days'),
+    ('e2500000-0000-4000-8000-000000000904', business_id, 'e2500000-0000-4000-8000-000000000405', decode(md5('rooted-demo-review:904') || md5('rooted-demo-review-2:904'), 'hex'), 'used', now() + interval '9 days', now() - interval '5 days', null, now() - interval '4 days'),
+    ('e2500000-0000-4000-8000-000000000905', business_id, 'e2500000-0000-4000-8000-000000000406', decode(md5('rooted-demo-review:905') || md5('rooted-demo-review-2:905'), 'hex'), 'used', now() + interval '5 days', now() - interval '9 days', null, now() - interval '8 days')
+  on conflict do nothing;
+
+  insert into public.mova_reviews (
+    id, artist_business_id, appointment_id, request_id, rating, tags,
+    body, display_name, locale, moderation_status, public_display_enabled,
+    artist_reply, artist_replied_at, created_at, updated_at
+  )
+  select sample.review_id, business_id, sample.appointment_id, sample.request_id,
+    sample.rating, sample.tags, sample.body, sample.display_name, sample.locale,
+    sample.moderation_status, false, sample.artist_reply,
+    case when sample.artist_reply is null then null else sample.created_at + interval '1 day' end,
+    sample.created_at, sample.created_at
+  from (values
+    ('e2500000-0000-4000-8000-000000000911'::uuid, 'e2500000-0000-4000-8000-000000000901'::uuid, 'e2500000-0000-4000-8000-000000000401'::uuid, 5, array['great_results','listened_to_me']::text[], 'She listened to what I wanted and the silk press came out smooth.', 'Demo Guest 02', 'en-US', 'approved', 'Thank you for coming in. I’m glad you love the result!', now() - interval '1 day'),
+    ('e2500000-0000-4000-8000-000000000912'::uuid, 'e2500000-0000-4000-8000-000000000902'::uuid, 'e2500000-0000-4000-8000-000000000402'::uuid, 5, array['on_time','clean_space']::text[], 'Me explicó cada paso y mi cabello quedó muy hidratado.', 'Demo Guest 03', 'es-US', 'approved', null::text, now() - interval '2 days'),
+    ('e2500000-0000-4000-8000-000000000913'::uuid, 'e2500000-0000-4000-8000-000000000903'::uuid, 'e2500000-0000-4000-8000-000000000404'::uuid, 4, array['great_results']::text[], 'A thoughtful appointment and a beautiful finish.', 'Demo Guest 04', 'en-US', 'approved', null::text, now() - interval '3 days'),
+    ('e2500000-0000-4000-8000-000000000914'::uuid, 'e2500000-0000-4000-8000-000000000904'::uuid, 'e2500000-0000-4000-8000-000000000405'::uuid, 5, array['listened_to_me','healthy_hair']::text[], 'The hydration treatment left my hair feeling soft.', 'Demo Guest 04', 'en-US', 'pending', null::text, now() - interval '4 days'),
+    ('e2500000-0000-4000-8000-000000000915'::uuid, 'e2500000-0000-4000-8000-000000000905'::uuid, 'e2500000-0000-4000-8000-000000000406'::uuid, 4, array['on_time','great_results']::text[], 'Professional, relaxing, and easy to book.', 'Demo Guest 04', 'en-US', 'approved', null::text, now() - interval '8 days')
+  ) as sample(review_id, request_id, appointment_id, rating, tags, body, display_name, locale, moderation_status, artist_reply, created_at)
+  join public.mova_review_requests request on request.id=sample.request_id
+    and request.artist_business_id=business_id and request.appointment_id=sample.appointment_id
+    and request.status='used'
+  join public.mova_appointments appointment on appointment.id=sample.appointment_id
+    and appointment.artist_business_id=business_id and appointment.status='completed'
+  where not exists (select 1 from public.mova_reviews existing where existing.appointment_id=sample.appointment_id)
+  on conflict do nothing;
+
+  -- P15: assignment is only a demo default; all catalog plans remain proposed.
+  insert into public.mova_business_plan_assignments (artist_business_id, plan_key, assignment_status)
+  values (business_id, 'free', 'current')
+  on conflict (artist_business_id) do nothing;
+
+  -- P14: synthetic report activity for this private demo fixture. These are
+  -- illustrative analytics only; the Rooted Beauty profile remains unpublished.
+  insert into public.mova_profile_traffic_events (
+    artist_business_id, event_type, source, event_key, occurred_at
+  ) values
+    (business_id, 'page_view', 'instagram', 'e2500000-0000-4000-8000-000000000930', now() - interval '1 day'),
+    (business_id, 'page_view', 'instagram', 'e2500000-0000-4000-8000-000000000931', now() - interval '2 days'),
+    (business_id, 'page_view', 'instagram', 'e2500000-0000-4000-8000-000000000932', now() - interval '3 days'),
+    (business_id, 'page_view', 'instagram', 'e2500000-0000-4000-8000-000000000933', now() - interval '5 days'),
+    (business_id, 'page_view', 'qr', 'e2500000-0000-4000-8000-000000000934', now() - interval '1 day'),
+    (business_id, 'page_view', 'qr', 'e2500000-0000-4000-8000-000000000935', now() - interval '4 days'),
+    (business_id, 'page_view', 'google', 'e2500000-0000-4000-8000-000000000936', now() - interval '2 days'),
+    (business_id, 'page_view', 'direct', 'e2500000-0000-4000-8000-000000000937', now() - interval '6 days'),
+    (business_id, 'qr_scan', 'qr', 'e2500000-0000-4000-8000-000000000938', now() - interval '1 day'),
+    (business_id, 'qr_scan', 'qr', 'e2500000-0000-4000-8000-000000000939', now() - interval '4 days'),
+    (business_id, 'booking_started', 'instagram', 'e2500000-0000-4000-8000-000000000940', now() - interval '2 days'),
+    (business_id, 'booking_started', 'qr', 'e2500000-0000-4000-8000-000000000941', now() - interval '4 days'),
+    (business_id, 'booking_completed', 'qr', 'e2500000-0000-4000-8000-000000000942', now() - interval '4 days')
+  on conflict (artist_business_id, event_key) do nothing;
+
+  insert into public.mova_slot_events (
+    id, artist_business_id, location_id, starts_at, ends_at, origin, status,
+    expires_at, filled_appointment_id, filled_at, value_minor, dedupe_key, created_at
+  )
+  select 'e2500000-0000-4000-8000-000000000925', business_id, appointment.location_id,
+    appointment.starts_at, appointment.ends_at, 'gap_scan', 'filled',
+    appointment.starts_at, appointment.id, appointment.starts_at, appointment.service_price_minor,
+    'rooted-beauty-demo-report-slot-408', appointment.starts_at - interval '1 day'
+  from public.mova_appointments appointment
+  where appointment.id='e2500000-0000-4000-8000-000000000408'
+    and appointment.artist_business_id=business_id and appointment.status='completed'
+  on conflict (artist_business_id, dedupe_key) do nothing;
+
+  insert into public.mova_autopilot_decisions (
+    id, artist_business_id, client_id, action, reason_code, value_minor, idempotency_key, created_at
+  ) values (
+    'e2500000-0000-4000-8000-000000000929', business_id, client_2, 'rebooked',
+    'demo_fixture_rebooked', 12000, 'rooted-beauty-demo-report-rebook', now() - interval '5 days'
+  ) on conflict (artist_business_id, idempotency_key) do nothing;
+
+  insert into public.mova_social_share_events (id, artist_business_id, initiated_at, target_hint)
+  values
+    ('e2500000-0000-4000-8000-000000000926', business_id, now() - interval '1 day', 'instagram'),
+    ('e2500000-0000-4000-8000-000000000927', business_id, now() - interval '4 days', 'copy_link'),
+    ('e2500000-0000-4000-8000-000000000928', business_id, now() - interval '6 days', 'instagram')
+  on conflict (id) do nothing;
 end
 $rooted_beauty_seed$;

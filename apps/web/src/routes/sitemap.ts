@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs } from 'react-router-dom';
+import type { LoaderFunctionArgs } from 'react-router';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const base = ((typeof process !== 'undefined' && process.env.PUBLIC_BASE_URL) || 'https://mova-beauty.co').replace(/\/$/, '');

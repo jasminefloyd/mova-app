@@ -7,7 +7,7 @@ Deno.serve(async (request) => {
   if (!actor) return respond({ code: 'UNAUTHENTICATED' }, 401);
   const body = await request.json().catch(() => null);
   const idempotencyKey = request.headers.get('Idempotency-Key') ?? body?.idempotency_key;
-  if (!body || typeof body.appointment_id !== 'string' || !['cash', 'zelle_recorded', 'other', 'salon_collected'].includes(body.method)
+  if (!body || typeof body.appointment_id !== 'string' || !['cash', 'other', 'salon_collected'].includes(body.method)
     || !Number.isSafeInteger(body.amount_minor) || body.amount_minor <= 0 || !['artist', 'salon'].includes(body.collector)
     || typeof idempotencyKey !== 'string' || idempotencyKey.length < 8 || idempotencyKey.length > 200
     || (body.method === 'other' && (typeof body.recorded_method_label !== 'string' || !body.recorded_method_label.trim() || body.recorded_method_label.length > 80))) {

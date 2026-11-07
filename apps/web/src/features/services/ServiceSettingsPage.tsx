@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, ErrorState, ScreenHeader, TextField } from '../../components';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { operatorUrl } from '../../app/operator-url';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 

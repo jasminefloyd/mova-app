@@ -1,0 +1,14 @@
+begin;
+select plan(10);
+select has_table('public','mova_plan_catalog');
+select has_table('public','mova_business_plan_assignments');
+select has_table('public','mova_usage_meter_events');
+select has_function('public','mova_plan_entitlement_summary',array['uuid']);
+select has_trigger('public','mova_messages','mova_message_usage_after_send');
+select ok((select relrowsecurity from pg_class where oid='public.mova_usage_meter_events'::regclass),'usage meter has RLS');
+select ok(not has_table_privilege('authenticated','public.mova_usage_meter_events','SELECT'),'members cannot mutate or inspect raw usage events');
+select ok(has_function_privilege('service_role','public.mova_plan_entitlement_summary(uuid)','EXECUTE'),'service role can read plan summary');
+select ok((select count(*)=3 from public.mova_plan_catalog where status='proposed'),'three proposed plans are seeded');
+select ok(not has_function_privilege('authenticated','public.mova_plan_entitlement_summary(uuid)','EXECUTE'),'clients cannot call service plan summary directly');
+select * from finish();
+rollback;

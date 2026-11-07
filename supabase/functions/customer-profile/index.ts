@@ -32,6 +32,12 @@ async function provision(db:ReturnType<typeof serviceClient>,user:{id:string;ema
   }
   return account;
 }
+type ExportPage<T>={data:T[]|null;error:{message:string}|null};
+async function allExportPages<T>(load:(from:number,to:number)=>Promise<ExportPage<T>>){
+  const result:T[]=[];const pageSize=1000;const maxRows=100_000;
+  for(let offset=0;offset<maxRows;offset+=pageSize){const page=await load(offset,offset+pageSize-1);if(page.error)throw new Error('CLIENT_EXPORT_FAILED');const rows=page.data??[];result.push(...rows);if(rows.length<pageSize)return result;}
+  throw new Error('CLIENT_EXPORT_LIMIT_REACHED');
+}
 Deno.serve(async(request)=>{
   if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
   if(Deno.env.get('MOVA_CLIENT_PROFILES_ENABLED')!=='true')return respond({code:'CLIENT_PROFILES_DISABLED'},403);
@@ -80,6 +86,8 @@ Deno.serve(async(request)=>{
       return respond({linked:Boolean(data?.linked)});
     }
     if(body.action==='delete-profile'){
+      const {error:auditError}=await db.from('mova_security_audit_events').insert({actor_user_id:user.id,event_type:'privacy.client_profile_delete_requested',object_type:'customer_account',object_id:account.id});
+      if(auditError)return respond({code:'CLIENT_PROFILE_DELETE_AUDIT_FAILED'},500);
       const {error}=await db.auth.admin.deleteUser(user.id);
       return error?respond({code:'CLIENT_PROFILE_DELETE_FAILED'},500):respond({deleted:true});
     }
@@ -99,6 +107,26 @@ Deno.serve(async(request)=>{
       }
       upcoming.sort((a,b)=>a.starts_at.localeCompare(b.starts_at));
       return respond({profile:{display_name:account.display_name,preferred_locale:account.preferred_locale,email:user.email??null,phone:user.phone??null,verified_contacts:normalizedContacts(user).map((contact)=>({type:contact.contact_type,value:contact.value_normalized}))},stylists,upcoming:upcoming.slice(0,20)});
+    }
+    if(body.action==='export'){
+      const [{data:contacts,error:contactError},{data:links,error:linkError}]=await Promise.all([
+        db.from('mova_customer_contact_methods').select('contact_type,value_normalized,verified_at,created_at').eq('customer_account_id',account.id),
+        db.from('mova_client_customer_links').select('artist_business_id,client_id,linked_at').eq('customer_account_id',account.id).is('unlinked_at',null),
+      ]);
+      if(contactError||linkError)return respond({code:'CLIENT_EXPORT_FAILED'},500);
+      const appointments:Record<string,unknown>[]=[];const consents:Record<string,unknown>[]=[];const reviews:Record<string,unknown>[]=[];
+      for(const link of links??[]){
+        const [appointmentRows,consentRows]=await Promise.all([
+          allExportPages((from,to)=>db.from('mova_appointments').select('id,appointment_number,starts_at,ends_at,status,service_name_snapshot,service_price_minor,currency,location_id,artist_business_id,client_id').eq('artist_business_id',link.artist_business_id).eq('client_id',link.client_id).order('starts_at',{ascending:false}).range(from,to)),
+          allExportPages((from,to)=>db.from('mova_client_consents').select('purpose,channel,granted,locale,changed_at').eq('artist_business_id',link.artist_business_id).eq('client_id',link.client_id).order('changed_at',{ascending:false}).range(from,to)),
+        ]);
+        appointments.push(...appointmentRows);consents.push(...consentRows);
+        const ids=appointmentRows.map((row)=>String(row.id));
+        for(let index=0;index<ids.length;index+=100){const chunk=ids.slice(index,index+100);const reviewRows=await allExportPages((from,to)=>db.from('mova_reviews').select('rating,tags,body,locale,moderation_status,artist_reply,created_at,appointment_id').eq('artist_business_id',link.artist_business_id).in('appointment_id',chunk).range(from,to));reviews.push(...reviewRows);}
+      }
+      const {error:auditError}=await db.from('mova_security_audit_events').insert({actor_user_id:user.id,event_type:'privacy.client_profile_exported',object_type:'customer_account',object_id:account.id});
+      if(auditError)return respond({code:'CLIENT_EXPORT_AUDIT_FAILED'},500);
+      return respond({exported_at:new Date().toISOString(),profile:{id:account.id,display_name:account.display_name,preferred_locale:account.preferred_locale,status:account.status},contacts:contacts??[],bookings:appointments,consents,reviews});
     }
     if(body.action==='update-profile'){
       const name=typeof body.display_name==='string'?body.display_name.trim():'';const locale=body.preferred_locale;

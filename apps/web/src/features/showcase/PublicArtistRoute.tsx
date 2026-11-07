@@ -1,5 +1,5 @@
-import { useLoaderData } from 'react-router-dom';
-import type { LoaderFunctionArgs, MetaFunction } from 'react-router-dom';
+import { useLoaderData } from 'react-router';
+import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
 import { PublicArtistPage } from './PublicArtistPage';
 import type { PublicArtist } from './PublicArtistPage';
 
