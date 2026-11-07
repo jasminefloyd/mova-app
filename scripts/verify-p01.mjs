@@ -17,7 +17,7 @@ const required = [
   'packages/contracts/src/enums.ts',
   'packages/contracts/src/locale.ts',
   'supabase/config.toml',
-  'vercel.json',
+  'apps/web/vercel.json',
   'docs/operations/environments.md',
   'docs/operations/secrets.md',
 ];

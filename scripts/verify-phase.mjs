@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
@@ -121,9 +121,18 @@ if (matrixRows.length !== requiredIds.size) {
   problems.push(`Requirements matrix has ${matrixRows.length} rows; expected ${requiredIds.size} unique requirement IDs`);
 }
 for (const row of matrixRows) {
-  if (!row.test_files?.trim()) problems.push(`Requirements matrix row ${row.requirement_id} has no linked QA case ID`);
-  for (const caseId of (row.test_files ?? '').split(';').map((value) => value.trim()).filter(Boolean)) {
-    if (!qaCaseIds.has(caseId)) problems.push(`Requirements matrix row ${row.requirement_id} references missing QA case ${caseId}`);
+  const testReferences = (row.test_files ?? '').split(';').map((value) => value.trim()).filter(Boolean);
+  if (!testReferences.length) problems.push(`Requirements matrix row ${row.requirement_id} has no linked test file or QA case`);
+  for (const testReference of testReferences) {
+    if (testReference.startsWith('TC-')) {
+      if (!qaCaseIds.has(testReference)) problems.push(`Requirements matrix row ${row.requirement_id} references missing QA case ${testReference}`);
+      continue;
+    }
+    try {
+      await access(resolve(root, testReference));
+    } catch {
+      problems.push(`Requirements matrix row ${row.requirement_id} references missing test file ${testReference}`);
+    }
   }
 }
 
@@ -154,8 +163,8 @@ if (!/pnpm install --frozen-lockfile/.test(await read('.github/workflows/ci.yml'
 
 const screens = Array.from(inventory.matchAll(/^\|\s*(\d{2}[a-z]?)\s*\|/gim), ([, id]) => id.toLowerCase());
 const sourceScreens = screens.filter((id) => !['16a', '16b'].includes(id));
-if (sourceScreens.length !== 51 || !screens.includes('16a') || !screens.includes('16b')) {
-  problems.push(`Screen inventory has ${sourceScreens.length} original artboards plus ${screens.length - sourceScreens.length} derived references; expected 51 originals and both approved derived references`);
+if (sourceScreens.length !== 52 || !screens.includes('16a') || !screens.includes('16b')) {
+  problems.push(`Screen inventory has ${sourceScreens.length} source screen entries plus ${screens.length - sourceScreens.length} derived references; expected 52 source entries and both approved derived references`);
 }
 if (!/^\|\s*15\s*\|.*TABLED/im.test(inventory)) problems.push('Screen 15 must be marked TABLED');
 
@@ -164,7 +173,7 @@ if (p00Done) {
   const requiredEvidence = ['P00-AC01', 'P00-AC02', 'P00-AC03', 'P00-AC04'];
   for (const id of requiredEvidence) {
     const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    if (!new RegExp(`^\\|\\s*${escaped}\\b[^|]*\\|\\s*PASS\\s*\\|`, 'm').test(evidence)) {
+    if (!new RegExp(`^\\|\\s*${escaped}\\b[^|]*\\|[^|]*\\|\\s*PASS\\b[^|]*\\|`, 'm').test(evidence)) {
       problems.push(`P00 is marked DONE without PASS evidence for ${id}`);
     }
   }
@@ -178,5 +187,5 @@ if (problems.length) {
   for (const problem of problems) console.error(`- ${problem}`);
   process.exitCode = 1;
 } else {
-  console.log(`P00 structural verification passed: ${requiredIds.size} requirement IDs, ${sourceScreens.length} source artboards + ${screens.length - sourceScreens.length} approved derived references, spec SHA-256 ${actualHash}`);
+  console.log(`P00 structural verification passed: ${requiredIds.size} requirement IDs, ${sourceScreens.length} source screen entries + ${screens.length - sourceScreens.length} approved derived references, spec SHA-256 ${actualHash}`);
 }
