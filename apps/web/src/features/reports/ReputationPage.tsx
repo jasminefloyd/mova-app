@@ -9,6 +9,7 @@ type Review = { id: string; rating: number; tags: string[]; body: string; displa
 type GoogleReview = { id: string; rating: number; body: string; display_name: string; provider_created_at: string | null };
 type Settings = { ask_after_visit: boolean; google_review_url: string | null };
 type RatingSummary = { count: number; average: number | null; awaiting_reply: number; stars: Record<string, number>; mova_count: number; mova_average: number | null; google_count: number; google_average: number | null };
+type ReviewResponse = { reviews?: Review[]; google_reviews?: GoogleReview[]; summary?: RatingSummary | null; settings?: Settings; email_delivery_enabled?: boolean };
 
 export function ReputationPage() {
   const { t, i18n } = useTranslation();
@@ -30,17 +31,13 @@ export function ReputationPage() {
   const [error, setError] = useState(false);
   const [notice, setNotice] = useState('');
 
-  const call = useCallback(async (payload: Record<string, unknown>) => {
+  const call = useCallback(async (payload: Record<string, unknown>): Promise<ReviewResponse> => {
     if (!client || !businessId) throw new Error('IDENTITY_REQUIRED');
-    const { data: { session } } = await client.auth.getSession();
-    if (!session) throw new Error('SESSION_REQUIRED');
-    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/review-management`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, 'x-mova-artist-business-id': businessId },
-      body: JSON.stringify(payload),
+    const { data: envelope, error } = await client.functions.invoke<{ data?: ReviewResponse }>('review-management', {
+      body: payload,
+      headers: { 'x-mova-artist-business-id': businessId },
     });
-    const envelope = await response.json();
-    if (!response.ok) throw new Error('REVIEW_ACTION_FAILED');
+    if (error || !envelope?.data) throw new Error('REVIEW_ACTION_FAILED');
     return envelope.data;
   }, [businessId, client]);
 

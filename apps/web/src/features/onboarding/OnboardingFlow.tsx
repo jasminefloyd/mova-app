@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Chip, StepperProgress, TextArea, TextField } from '../../components';
 import { createMovaSupabaseClient } from '../../lib/supabase';
@@ -21,6 +21,7 @@ export function OnboardingFlow() {
   const [step, setStep] = useState<Step>(routeStep(location.pathname));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [inviteOnlyError, setInviteOnlyError] = useState(false);
   const [notice, setNotice] = useState('');
   const [signIn, setSignIn] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
@@ -167,6 +168,7 @@ export function OnboardingFlow() {
   const submitAccount = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(''); setNotice('');
+    setInviteOnlyError(false);
     if (!supabase) { setError(t('onboarding.configurationError')); return; }
     if (password.length < 9) { setError(t('onboarding.passwordRule')); return; }
     setLoading(true);
@@ -208,6 +210,11 @@ export function OnboardingFlow() {
           email, password,
           options: { emailRedirectTo: `${window.location.origin}/onboarding/profile`, data: { preferred_locale: 'en-US' } },
         });
+        if (authError?.message === 'Mova is invite-only for now; join the waitlist.') {
+          setError(t('onboarding.inviteOnlyError'));
+          setInviteOnlyError(true);
+          return;
+        }
         if (authError) throw authError;
         if (data.session) { setSignedIn(true); setStep('profile'); }
         else setNotice(t('onboarding.verifyEmail'));
@@ -371,7 +378,7 @@ export function OnboardingFlow() {
         <h1>{t(signIn ? 'onboarding.signInTitle' : 'onboarding.accountTitle')}</h1>
         <TextField label={t('onboarding.email')} type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.currentTarget.value)} />
         <TextField label={t('onboarding.password')} type="password" autoComplete={signIn ? 'current-password' : 'new-password'} required value={password} onChange={(event) => setPassword(event.currentTarget.value)} hint={t('onboarding.passwordRule')} />
-        {notice && <p role="status">{notice}</p>}{error && <p role="alert">{error}</p>}
+        {notice && <p role="status">{notice}</p>}{error && <p role="alert">{error}{inviteOnlyError && <> <Link to="/">{t('onboarding.joinWaitlist')}</Link></>}</p>}
         <Button type="submit" loading={loading}>{t(signIn ? 'onboarding.signIn' : 'onboarding.createAccount')}</Button>
         {!signIn && <p className="mova-form-note">{t('onboarding.verifyEmail')}</p>}
         <p className="mova-form-note">{t(signIn ? 'onboarding.noAccount' : 'onboarding.haveAccount')} <button type="button" className="mova-link-button" onClick={() => setSignIn((current) => !current)}>{t(signIn ? 'onboarding.createAccount' : 'onboarding.signIn')}</button></p>

@@ -373,5 +373,155 @@ begin
     ('e2500000-0000-4000-8000-000000000927', business_id, now() - interval '4 days', 'copy_link'),
     ('e2500000-0000-4000-8000-000000000928', business_id, now() - interval '6 days', 'instagram')
   on conflict (id) do nothing;
+
+  -- Additional demo coverage for P08-P17. These records are synthetic and
+  -- intentionally leave all outbound channels, Stripe, calendar sync, public
+  -- profile visibility, wallet issuance, and AI automation disabled.
+  insert into public.mova_payment_method_settings (
+    artist_business_id, cash_enabled, zelle_recorded_enabled, other_enabled, updated_by
+  ) values (business_id, true, false, true, demo_user_id)
+  on conflict (artist_business_id) do update set
+    cash_enabled = excluded.cash_enabled,
+    zelle_recorded_enabled = false,
+    other_enabled = excluded.other_enabled,
+    updated_by = excluded.updated_by;
+
+  -- Manual demonstration records only; no payment provider is contacted.
+  perform public.mova_payment_record_manual(
+    business_id, 'e2500000-0000-4000-8000-000000000413', 'cash', 12000,
+    'artist', null, 'DEMO-CASH-413', 'rooted-demo-payment-cash-413', demo_user_id
+  );
+  perform public.mova_payment_record_manual(
+    business_id, 'e2500000-0000-4000-8000-000000000405', 'salon_collected', 8000,
+    'salon', null, 'DEMO-SALON-405', 'rooted-demo-payment-salon-405', demo_user_id
+  );
+
+  insert into public.mova_notification_preferences (artist_business_id, user_id, preferences)
+  values (business_id, demo_user_id, '{"in_app":true,"email":true,"push":false}'::jsonb)
+  on conflict (artist_business_id, user_id) do update set preferences = excluded.preferences;
+
+  insert into public.mova_notification_inbox (
+    id, artist_business_id, user_id, event_type, title_key, body_key, payload, created_at
+  ) values
+    ('e2500000-0000-4000-8000-000000000951', business_id, demo_user_id, 'demo_booking_request', 'notifications.appointment.title', 'notifications.appointment.body', '{"appointment_id":"e2500000-0000-4000-8000-000000000410"}'::jsonb, now() - interval '1 hour'),
+    ('e2500000-0000-4000-8000-000000000952', business_id, demo_user_id, 'demo_payment_recorded', 'notifications.payment.title', 'notifications.payment.body', '{"appointment_id":"e2500000-0000-4000-8000-000000000413"}'::jsonb, now() - interval '2 days')
+  on conflict (id) do nothing;
+
+  insert into public.mova_message_templates (
+    artist_business_id, type, locale, body, version, status, source
+  ) values
+    (business_id, 'rebooking_reminder', 'en-US', 'Hi {{first_name}}, it may be time to plan your next visit. Reply if you would like help finding a time.', 1, 'needs_approval', 'system_default'),
+    (business_id, 'rebooking_reminder', 'es-US', 'Hola {{first_name}}, quizá sea momento de planear tu próxima visita. Responde si quieres ayuda para encontrar un horario.', 1, 'needs_approval', 'system_default'),
+    (business_id, 'slot_offer', 'en-US', 'An appointment opened on {{date}} at {{time}}. Reply if you would like to request it.', 1, 'needs_approval', 'system_default'),
+    (business_id, 'slot_offer', 'es-US', 'Se abrió una cita el {{date}} a las {{time}}. Responde si quieres solicitarla.', 1, 'needs_approval', 'system_default'),
+    (business_id, 'slot_taken', 'en-US', 'That opening has been claimed. You can ask us about another time.', 1, 'needs_approval', 'system_default'),
+    (business_id, 'slot_taken', 'es-US', 'Ese horario ya se reservó. Puedes consultar otro horario.', 1, 'needs_approval', 'system_default'),
+    (business_id, 'win_back', 'en-US', 'Hi {{first_name}}, we would love to see you again. Reply if you would like to hear about available times.', 1, 'needs_approval', 'system_default'),
+    (business_id, 'win_back', 'es-US', 'Hola {{first_name}}, nos encantaría verte de nuevo. Responde si quieres conocer los horarios disponibles.', 1, 'needs_approval', 'system_default')
+  on conflict (artist_business_id, type, locale, version) do nothing;
+
+  insert into public.mova_autopilot_settings (artist_business_id, enabled, slot_texts_autopilot, updated_by)
+  values (business_id, false, false, demo_user_id)
+  on conflict (artist_business_id) do update set enabled = false, slot_texts_autopilot = false, updated_by = excluded.updated_by;
+
+  insert into public.mova_growth_opportunities (
+    id, artist_business_id, client_id, service_id, service_category,
+    last_visit_at, next_due_at, window_end_at, confidence, evidence, model_version, status
+  ) values
+    ('e2500000-0000-4000-8000-000000000953', business_id, client_2, service_silk, 'Styling', now() - interval '35 days', now() - interval '2 days', now() + interval '12 days', 'medium', '{"typical_days":35,"visit_count":2,"demo_fixture":true}'::jsonb, 'demo-fixture-v1', 'due'),
+    ('e2500000-0000-4000-8000-000000000954', business_id, client_3, service_hydration, 'Treatment', now() - interval '42 days', now() - interval '7 days', now() + interval '9 days', 'high', '{"typical_days":35,"visit_count":3,"demo_fixture":true}'::jsonb, 'demo-fixture-v1', 'contacted'),
+    ('e2500000-0000-4000-8000-000000000955', business_id, client_4, service_silk, 'Styling', now() - interval '70 days', now() - interval '28 days', now() - interval '7 days', 'high', '{"typical_days":35,"visit_count":4,"demo_fixture":true}'::jsonb, 'demo-fixture-v1', 'no_reply')
+  on conflict (artist_business_id, client_id, service_id) do update set
+    service_category = excluded.service_category, last_visit_at = excluded.last_visit_at,
+    next_due_at = excluded.next_due_at, window_end_at = excluded.window_end_at,
+    confidence = excluded.confidence, evidence = excluded.evidence,
+    model_version = excluded.model_version, status = excluded.status;
+
+  insert into public.mova_forecasts (
+    artist_business_id, period_start, period_end, booked_minor, likely_minor,
+    likely_low_minor, likely_high_minor, usual_minor, inputs, method_version
+  ) values (
+    business_id, date_trunc('month', current_date)::date,
+    (date_trunc('month', current_date) + interval '1 month')::date,
+    22500, 68400, 41000, 89500, 54200,
+    '{"bookedMinor":22500,"remainingHours":[18,16,14,12],"fillRates":[0.55,0.6,0.58,0.62],"avgTicketPerHourMinor":[9000,9000,9000,9000],"openLowMinor":18000,"openHighMinor":46000,"dueClients":3,"rebookConversion":0.35,"averageTicketMinor":9500,"rebookLowMinor":4000,"rebookHighMinor":12000,"usualMonthsMinor":[51000,54800,56800]}'::jsonb,
+    'forecast-v1'
+  ) on conflict (artist_business_id, period_start, method_version) do update set
+    booked_minor = excluded.booked_minor, likely_minor = excluded.likely_minor,
+    likely_low_minor = excluded.likely_low_minor, likely_high_minor = excluded.likely_high_minor,
+    usual_minor = excluded.usual_minor, inputs = excluded.inputs, computed_at = now();
+
+  insert into public.mova_slot_events (
+    id, artist_business_id, location_id, starts_at, ends_at, origin, status,
+    wave_plan, expires_at, value_minor, dedupe_key, created_at
+  ) values
+    ('e2500000-0000-4000-8000-000000000956', business_id, studio_id, now() + interval '12 days', now() + interval '12 days 90 minutes', 'cancellation', 'needs_approval', '[3,2,2]'::jsonb, now() + interval '11 days', 12000, 'rooted-demo-open-slot', now() - interval '3 hours'),
+    ('e2500000-0000-4000-8000-000000000957', business_id, salon_id, now() + interval '14 days', now() + interval '14 days 60 minutes', 'gap_scan', 'gap_found', '[3,2,2]'::jsonb, now() + interval '13 days', 8000, 'rooted-demo-gap-scan', now() - interval '2 hours')
+  on conflict (artist_business_id, dedupe_key) do nothing;
+
+  insert into public.mova_slot_candidates (
+    id, slot_event_id, artist_business_id, client_id, rank, wave, reasons, status
+  ) values
+    ('e2500000-0000-4000-8000-000000000958', 'e2500000-0000-4000-8000-000000000956', business_id, client_2, 1, 1, '["service_match","location_match"]'::jsonb, 'planned'),
+    ('e2500000-0000-4000-8000-000000000959', 'e2500000-0000-4000-8000-000000000956', business_id, client_4, 2, 1, '["service_match"]'::jsonb, 'planned')
+  on conflict do nothing;
+
+  insert into public.mova_slot_campaign_copy (
+    id, slot_event_id, artist_business_id, sms_example, taken_message, social_caption, ai_used, prompt_version
+  ) values (
+    'e2500000-0000-4000-8000-000000000960', 'e2500000-0000-4000-8000-000000000956', business_id,
+    'A silk press opening is available in 12 days. Reply if you would like to request it.',
+    'This opening has been claimed. We can help you find another time.',
+    'A new appointment opening is available at Rooted Beauty. Send a message to ask about it.',
+    false, 'demo-fixture-v1'
+  ) on conflict (slot_event_id) do nothing;
+
+  insert into public.mova_concierge_settings (
+    artist_business_id, enabled, channels, permissions, tone, languages, daily_ai_turn_cap, globally_paused
+  ) values (
+    business_id, false,
+    '{"instagram":false,"sms":false,"missed_call":false,"web_chat":false}'::jsonb,
+    '{"answer":true,"book_instant":false,"request_salon":false,"reschedule":false,"reply_slot_offers":false}'::jsonb,
+    'warm', array['en-US','es-US'], 0, true
+  ) on conflict (artist_business_id) do update set enabled = false, globally_paused = true;
+
+  insert into public.mova_concierge_knowledge (
+    id, artist_business_id, kind, location_id, question, answer_en, answer_es, status
+  ) values
+    ('e2500000-0000-4000-8000-000000000961', business_id, 'faq', null, 'Where can I find your appointment options?', 'Available services and request options appear on the Rooted Beauty booking page. A stylist confirms salon requests.', 'Los servicios y las opciones para solicitar una cita aparecen en la página de reservas de Rooted Beauty. La estilista confirma las solicitudes del salón.', 'draft'),
+    ('e2500000-0000-4000-8000-000000000962', business_id, 'location_detail', studio_id, 'Where is the studio?', 'The studio address is shared after the appointment is confirmed.', 'La dirección del estudio se comparte después de confirmar la cita.', 'draft')
+  on conflict (id) do nothing;
+
+  insert into public.mova_conversations (
+    id, artist_business_id, channel, external_thread_id, client_id, locale,
+    status, ai_enabled, last_message_at, created_at
+  ) values
+    ('e2500000-0000-4000-8000-000000000963', business_id, 'web_chat', 'rooted-demo-thread-963', client_3, 'es-US', 'needs_you', false, now() - interval '20 minutes', now() - interval '22 minutes'),
+    ('e2500000-0000-4000-8000-000000000964', business_id, 'web_chat', 'rooted-demo-thread-964', client_2, 'en-US', 'handled', false, now() - interval '1 day', now() - interval '1 day 10 minutes')
+  on conflict (artist_business_id, channel, external_thread_id) do nothing;
+
+  insert into public.mova_messages (
+    id, artist_business_id, client_id, conversation_id, direction, channel, purpose,
+    origin, body, status, idempotency_key, created_at
+  ) values
+    ('e2500000-0000-4000-8000-000000000965', business_id, client_3, 'e2500000-0000-4000-8000-000000000963', 'inbound', 'web_chat', 'transactional', 'system', 'Hola, ¿puedo pedir una cotización para un estilo protector?', 'received', 'rooted-demo-inbound-963', now() - interval '20 minutes'),
+    ('e2500000-0000-4000-8000-000000000966', business_id, client_2, 'e2500000-0000-4000-8000-000000000964', 'inbound', 'web_chat', 'transactional', 'system', 'Do you have appointment times next week?', 'received', 'rooted-demo-inbound-964', now() - interval '1 day')
+  on conflict (artist_business_id, idempotency_key) do nothing;
+
+  insert into public.mova_handoffs (
+    id, artist_business_id, conversation_id, type, status, summary, created_at
+  ) values (
+    'e2500000-0000-4000-8000-000000000967', business_id, 'e2500000-0000-4000-8000-000000000963',
+    'quote', 'open', 'Client asks for a protective-style quote; stylist review is required.', now() - interval '20 minutes'
+  ) on conflict (id) do nothing;
+
+  insert into public.mova_quote_requests (
+    id, artist_business_id, conversation_id, client_id, service_category,
+    details, media, risk_flags, status, created_at
+  ) values (
+    'e2500000-0000-4000-8000-000000000968', business_id, 'e2500000-0000-4000-8000-000000000963', client_3,
+    'Protective style', '{"hair_now":"Natural curls","goal":"Low-tension protective style","budget":"Please discuss","availability":"Weekends","demo_fixture":true}'::jsonb,
+    '[]'::jsonb, '[]'::jsonb, 'open', now() - interval '20 minutes'
+  ) on conflict (id) do nothing;
 end
 $rooted_beauty_seed$;

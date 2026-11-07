@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { openOperatorPage } from './operator-session';
 
 test('PWA manifest and service worker are available at the standalone start route', async ({ page }) => {
-  await page.goto('/app/home');
-  await expect(page.getByText('mova.', { exact: true })).toBeVisible();
+  await page.goto('/auth');
+  await expect(page.getByText('Create your account', { exact: true })).toBeVisible();
 
   const manifestPath = await page.locator('link[rel="manifest"]').getAttribute('href');
   expect(manifestPath).toBeTruthy();
@@ -10,7 +11,7 @@ test('PWA manifest and service worker are available at the standalone start rout
     const response = await fetch(path!);
     return response.json() as Promise<{ start_url: string; display: string; icons: { sizes: string }[] }>;
   }, manifestPath);
-  expect(manifest.start_url).toBe('/app/home');
+  expect(manifest.start_url).toBe('/auth');
   expect(manifest.display).toBe('standalone');
   expect(manifest.icons.map((icon) => icon.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']));
 
@@ -21,27 +22,31 @@ test('PWA manifest and service worker are available at the standalone start rout
 
 });
 
-test('guest locale can be switched before sign-in and persists after reload', async ({ page }) => {
+test('landing page sign-in and sign-up actions open auth', async ({ page }) => {
   await page.goto('/');
-  await page.getByLabel('Language').selectOption('es-US');
-  await expect(page.locator('html')).toHaveAttribute('lang', 'es-US');
-  await page.reload();
-  await expect(page.getByLabel('Idioma')).toHaveValue('es-US');
-  await expect(page.locator('html')).toHaveAttribute('lang', 'es-US');
+  await expect(page.getByLabel('Language')).toHaveCount(0);
+  await page.getByRole('link', { name: 'Sign in' }).click();
+  await expect(page).toHaveURL(/\/auth$/);
+  await expect(page.getByText('Create your account', { exact: true })).toBeVisible();
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Sign up' }).click();
+  await expect(page).toHaveURL(/\/auth$/);
 });
 
-test('artist and guest locale storage remain independent', async ({ page }) => {
+test('artist locale is selected in Settings without a landing-page selector', async ({ page }) => {
   await page.goto('/');
-  await page.getByLabel('Language').selectOption('es-US');
-  await page.goto('/app/home');
-  await expect(page.getByLabel('Language')).toHaveValue('en-US');
+  await expect(page.getByLabel('Language')).toHaveCount(0);
+  await openOperatorPage(page, '/settings');
+  await page.getByRole('button', { name: /Language & notifications/ }).click();
+  await expect(page.getByLabel('Language', { exact: true })).toHaveValue('en-US');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
-  await page.goto('/');
-  await expect(page.getByLabel('Idioma')).toHaveValue('es-US');
+  await page.getByLabel('Language', { exact: true }).selectOption('es-US');
+  await openOperatorPage(page, '/settings');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'es-US');
 });
 
 test('service worker does not put private API responses in CacheStorage', async ({ page }) => {
-  await page.goto('/app/home');
+  await page.goto('/auth');
   await page.evaluate(async () => {
     if (!('serviceWorker' in navigator)) throw new Error('Service workers are unavailable');
     await navigator.serviceWorker.ready;

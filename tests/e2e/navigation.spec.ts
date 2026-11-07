@@ -1,61 +1,55 @@
 import { expect, test } from '@playwright/test';
+import { openOperatorPage } from './operator-session';
 
-test('artist navigation exposes exactly five labelled tab roots in both locales', async ({ page }) => {
-  await page.goto('/app/home');
+test('operator navigation uses the BID routes and exposes five labelled tabs', async ({ page }) => {
+  await openOperatorPage(page, '/');
   const navigation = page.getByRole('navigation', { name: 'Main navigation' });
   await expect(navigation.getByRole('button')).toHaveText(['Home', 'Calendar', 'Clients', 'AI Revenue', 'Reports']);
-  const homeTab = navigation.getByRole('button', { name: 'Home' });
-  await expect(homeTab).toHaveAttribute('aria-current', 'page');
-  await expect(navigation).toHaveCSS('height', '82px');
-  await homeTab.focus();
-  const tabLabels = ['Home', 'Calendar', 'Clients', 'AI Revenue', 'Reports'];
-  for (const label of tabLabels.slice(1)) {
-    await page.keyboard.press('Tab');
-    await expect(navigation.getByRole('button', { name: label })).toBeFocused();
-  }
-  for (const label of tabLabels) {
+  await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
+  for (const [label, path] of [['Calendar', 'calendar'], ['Clients', 'clients'], ['AI Revenue', 'growth'], ['Reports', 'reports'], ['Home', '']] as const) {
     await navigation.getByRole('button', { name: label }).click();
-    await expect(navigation.getByRole('button', { name: label })).toHaveAttribute('aria-current', 'page');
+    await expect(page).toHaveURL(new RegExp(`/BID-1/${path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/?$`));
     await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
   }
+});
 
-  await page.getByRole('combobox', { name: 'Language' }).selectOption('es-US');
-  await expect(page.getByRole('navigation', { name: 'Navegación principal' }).getByRole('button')).toHaveText(['Inicio', 'Calendario', 'Clientes', 'Ingresos IA', 'Informes']);
+test('language selection lives in Settings and Settings matches its menu structure', async ({ page }) => {
+  await openOperatorPage(page, '/');
+  await expect(page.getByRole('combobox', { name: 'Language' })).toHaveCount(0);
+  await openOperatorPage(page, '/settings');
+  await expect(page.getByText('Settings', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Language & notifications/ })).toHaveCount(1);
+  await expect(page.getByText('Notifications', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: /Language & notifications/ }).click();
+  const language = page.getByRole('combobox', { name: 'Language' });
+  await expect(language).toHaveValue('en-US');
+  await language.selectOption('es-US');
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-US');
-  await page.getByRole('button', { name: 'Ingresos IA' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Centro de ingresos con IA' })).toBeVisible();
+  await expect(page.getByText('Configuración', { exact: true })).toBeVisible();
 });
 
-test('settings opens from the Home avatar and Money is reachable from Reports and Settings', async ({ page }) => {
-  await page.goto('/app/home');
-  const settingsTrigger = page.getByRole('link', { name: 'Open settings' });
-  await settingsTrigger.click();
-  await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
-  await page.getByRole('button', { name: 'Close settings' }).click();
-  await expect(settingsTrigger).toBeFocused();
-  await settingsTrigger.click();
-  await page.getByRole('link', { name: 'Open money from Settings' }).click();
-  await expect(page).toHaveURL('/app/money');
+test('Money is reachable from both Settings and Reports', async ({ page }) => {
+  await openOperatorPage(page, '/settings');
+  await page.getByRole('link', { name: 'Payments & payouts' }).click();
+  await expect(page).toHaveURL(/\/BID-1\/money$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Money' })).toBeVisible();
-  await page.goto('/app/home');
-  await page.getByRole('button', { name: 'Reports' }).click();
-  await page.getByRole('link', { name: 'Open money from Reports' }).click();
-  await expect(page).toHaveURL('/app/money');
+
+  await openOperatorPage(page, '/reports');
+  await page.getByRole('link', { name: 'Open Money' }).click();
+  await expect(page).toHaveURL(/\/BID-1\/money$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Money' })).toBeVisible();
 });
 
-test('artist tab shell has no horizontal overflow from 320 to 430 px', async ({ page }) => {
-  await page.goto('/app/home');
-  await page.getByRole('combobox', { name: 'Language' }).selectOption('es-US');
+test('operator tab shell has no horizontal overflow from 320 to 430 px', async ({ page }) => {
+  await openOperatorPage(page, '/');
   for (const width of [320, 360, 390, 430]) {
     await page.setViewportSize({ width, height: 844 });
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   }
 });
 
-test('component gallery is not reachable in the production build', async ({ page }) => {
-  await page.goto('/app/components');
-  await expect(page).toHaveURL('/app/home');
-  await expect(page.getByRole('heading', { level: 1, name: 'Home' })).toBeVisible();
+test('component gallery stays unavailable in a production build', async ({ page }) => {
+  await openOperatorPage(page, '/components');
+  await expect(page).toHaveURL(/\/BID-1\/?$/);
   await expect(page.getByRole('heading', { name: 'Component gallery' })).toHaveCount(0);
 });

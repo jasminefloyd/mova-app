@@ -6,11 +6,11 @@
 
 | | |
 |---|---|
-| **Current phase** | **P14–P17 — Reports/reviews, plans, privacy/reliability, regression** |
+| **Current phase** | **P0 engineering fix checklist (Nov 7 review)** |
 | **Phase status** | IN PROGRESS |
 | **Spec baseline** | `docs/product/ENGINEERING_SPEC.md` v2.3 (amended hash in `BASELINE_MANIFEST.md`; original v2.0 hash retained) |
-| **Last updated** | 2026-11-07 · P00 structural and P01/P02 structural verifiers pass after fixing the recorded manifest, traceability, approval-status and config-path issues; P00 is DONE – AWAITING REVIEW. Under available Node 20.13.1, lint, typecheck, locale parity and client/SSR production build pass; unit tests fail before collection with `ERR_REQUIRE_ESM` because the repo requires Node 24.22.2. Docker, Podman, Deno, psql/Postgres, k6 and local Supabase runtime are unavailable. P03–P17 database/Edge, integration, accessibility, visual and UAT gaps remain. |
-| **Next gate** | Run SQL/pgTAP and Edge integration in a local Supabase/PostgreSQL + Deno environment, compare rendered screens against artboards, and conduct UAT. Owner review remains pending; no production migrations, function deployment, or Vercel deployment is authorized by this implementation request. |
+| **Last updated** | 2026-11-07 · P0 checklist review is in progress. Playwright server scripts now start the current SSR app and the SSR service-worker import issue is fixed, but E2E and visual tests still fail on stale `/app/*` route/auth assumptions. The ignored local `.env` no longer contains Supabase production URL, anon key, or service-role key; Management API token is absent. Token revocation and production Auth settings are not verified. Owner-approved email allowlist is implemented in an unapplied migration and local Auth hook config. Docker and Podman are unavailable, so local Supabase cannot start yet. Waitlist legal text remains pending from owner. |
+| **Next gate** | Supply owner-authored Privacy/Terms text; establish a local Supabase runtime; then update browser tests to exercise current public/auth routes and authenticated tenant flows without production credentials. Production Auth hook activation, public-signup closure, and PAT revocation remain external owner actions. |
 
 ## P00 tasks
 
@@ -40,7 +40,7 @@ P00 acceptance:
 | P01-T01 | Strict TS, Router, TanStack Query, Zod, Tailwind with tokens | DONE – AWAITING REVIEW | Exact dependency versions are in workspace manifests/lockfile; Node 24.22.2 and pnpm 9.15.0 are pinned. `pnpm lint`, `pnpm typecheck`, and `pnpm build` pass locally. |
 | P01-T02 | Separate shells and query caches for artist vs client | DONE – AWAITING REVIEW | Artist, client, public, and onboarding shells exist. Artist/client query clients are created separately; unit test confirms no cache sharing. |
 | P01-T03 | PWA with asset-only caching; private APIs never cached | DONE – AWAITING REVIEW | Workbox precaches static assets only, has no runtime cache rules, and denies API paths from navigation fallback. Unit and Chromium CacheStorage tests pass. |
-| P01-T04 | Local development + production Supabase/Vercel; isolated secrets; no hosted staging | IN PROGRESS | Ignored `.env` has Supabase API values and access credentials; the URL ref matches the listed production project, and its token successfully read and applied database migrations through the Management API. Vercel project configuration and hosted setup remain unverified. Production deployment requires the written GO gate. |
+| P01-T04 | Local development + production Supabase/Vercel; isolated secrets; no hosted staging | IN PROGRESS | The ignored local `.env` has been cleared of production Supabase URL, anon key, service-role key, and Management API token for P0 isolation. Local Supabase is not yet running; Vercel setup remains unverified. Production deploy still requires the written GO gate. |
 | P01-T05 | Envelope, request IDs, error boundary, redacted logging | DONE – AWAITING REVIEW | Zod envelope/locale/error contracts, request ID header, React error boundary, and allowlisted log context are implemented; tests pass. |
 | P01-T06 | i18n runtime en-US/es-US; locale persistence artist vs guest; `check-locales` in CI | DONE – AWAITING REVIEW | Locale parity/critical-key check is wired to CI. Guest preference persists before sign-in; artist/client/guest storage keys are separate. Local and Chromium checks pass. |
 

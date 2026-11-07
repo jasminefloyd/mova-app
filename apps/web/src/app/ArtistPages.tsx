@@ -83,8 +83,6 @@ export function SettingsPage() {
       <ListRow title={t('settings.locationsHours')} trailing={locationCount===null?'—':String(locationCount)} href={operatorUrl(businessId,'settings/locations')} />
       <ListRow title={t('settings.paymentsPayouts')} trailing={paymentSummary} href={operatorUrl(businessId,'money')} />
       <ListRow title={t('settings.calendarSync')} trailing={calendarSummary} href={operatorUrl(businessId,'settings/calendar-sync')} />
-      <ListRow title={t('messaging.settingsTitle')} trailing={<Icon name="chevron" size={18}/>} href={operatorUrl(businessId,'settings/notifications')} />
-      <ListRow title={t('messaging.inbox')} trailing={<Icon name="chevron" size={18}/>} href={operatorUrl(businessId,'notifications')} />
       <ListRow title={t('settings.reviewsGoogle')} trailing={t('settings.notConnected')} href={operatorUrl(businessId,'settings/reviews')} />
       <ListRow title={t('settings.plan')} trailing={t('settings.planNotConfigured')} href={operatorUrl(businessId,'settings/plan')} />
       <button type="button" className="mova-list-row mova-settings-language-row" aria-expanded={languageExpanded} onClick={()=>setLanguageExpanded(value=>!value)}><span className="mova-list-row__copy"><strong>{t('settings.languageNotifications')}</strong></span><span className="mova-list-row__trailing">{localeName}</span></button>

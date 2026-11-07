@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "react-router dev",
     "build": "react-router build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "test:visual:server": "react-router dev --host 127.0.0.1 --port 4174 --strictPort",
     "typecheck": "react-router typegen && tsc -p tsconfig.json"
   },
   "dependencies": {

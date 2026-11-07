@@ -1,5 +1,9 @@
 project_id = "mova-app"
 
+[auth.hook.before_user_created]
+enabled = true
+uri = "pg-functions://postgres/public/mova_before_user_created"
+
 [functions.public-artist]
 verify_jwt = false
 

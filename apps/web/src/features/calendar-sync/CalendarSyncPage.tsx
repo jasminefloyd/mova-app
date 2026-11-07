@@ -22,7 +22,9 @@ export function CalendarSyncPage(){
   const issueFeed=async()=>{setBusy(true);setError('');try{const result=await request('rotate-feed');if(result?.feedUrl){setIssuedFeed(result.feedUrl);setState(old=>old?{...old,feedConfigured:true}:old);setNotice(t('calendarSync.linkReset'));return result.feedUrl as string;}throw new Error();}catch{setError(t('calendarSync.actionError'));return '';}finally{setBusy(false);}};
   const copyFeed=async()=>{const feed=issuedFeed||await issueFeed();if(!feed)return;try{await navigator.clipboard.writeText(feed);setNotice(t('calendarSync.linkCopied'));}catch{setError(t('calendarSync.copyError'));}};
   const saveLocations=async(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();if(!state)return;setBusy(true);setError('');try{await request({action:'save-settings',location_ids:state.settings.location_ids});setNotice(t('calendarSync.locationsSaved'));}catch{setError(t('calendarSync.actionError'));}finally{setBusy(false);}};
-  const displayFeed=issuedFeed?issuedFeed.replace(/([?&]token=|feed\/)[^/&]+/,'$1••••••••'):state?.feedConfigured?'webcal://[DOMAIN]/feed/••••••••':'webcal://[DOMAIN]/feed/••••••••';
+  const feedOrigin='https://mova-beauty.co';
+  const sourceFeed=issuedFeed||`${feedOrigin}/feed/••••••••`;
+  const displayFeed=sourceFeed.replace(/^https?:/,'webcal:').replace(/([?&]token=|feed\/)[^/&]+/,'$1••••••••');
   return <main className="mova-page mova-calendar-sync">
     <ScreenHeader onBack={()=>navigate(operatorUrl(businessId,'settings'))} backLabel={t('settings.close')}/><h1>{t('calendarSync.title')}</h1>
     <HonestyBanner>{t('calendarSync.oneWay')}</HonestyBanner>

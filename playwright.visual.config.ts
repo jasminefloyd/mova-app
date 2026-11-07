@@ -11,7 +11,7 @@ export default defineConfig({
     ...devices['Desktop Chrome'],
   },
   webServer: {
-    command: 'pnpm --filter @mova/web dev --host 127.0.0.1 --port 4174 --strictPort',
+    command: 'corepack pnpm --filter @mova/web test:visual:server',
     url: 'http://127.0.0.1:4174',
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,

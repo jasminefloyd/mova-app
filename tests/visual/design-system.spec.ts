@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
+import { openOperatorPage } from '../e2e/operator-session';
 
 test('component gallery visual baselines at 320, 360, 390 and 430 px', async ({ page }) => {
-  await page.goto('/app/components');
+  await openOperatorPage(page, '/components');
   await page.evaluate(() => document.fonts.ready);
   await expect(page.getByRole('heading', { name: 'Color palette' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Typography' })).toBeVisible();
@@ -16,7 +17,7 @@ test('component gallery visual baselines at 320, 360, 390 and 430 px', async ({ 
 });
 
 test('sheet traps focus, closes with Escape, and restores focus to its trigger', async ({ page }) => {
-  await page.goto('/app/components');
+  await openOperatorPage(page, '/components');
   const trigger = page.getByRole('button', { name: 'Open accessible sheet' });
   await trigger.focus();
   await trigger.click();
@@ -29,7 +30,7 @@ test('sheet traps focus, closes with Escape, and restores focus to its trigger',
 });
 
 test('form validation, character count and chart table remain accessible', async ({ page }) => {
-  await page.goto('/app/components');
+  await openOperatorPage(page, '/components');
   const area = page.getByRole('textbox', { name: 'Text area' });
   await area.fill('Example');
   await expect(page.getByText('7/1000')).toBeVisible();
@@ -44,7 +45,7 @@ test('form validation, character count and chart table remain accessible', async
 });
 
 test('focus ring, touch-sized chart link, unread dot and photo states are represented', async ({ page }) => {
-  await page.goto('/app/components');
+  await openOperatorPage(page, '/components');
   const primary = page.getByRole('button', { name: 'Primary' });
   await primary.focus();
   await expect(primary).toHaveCSS('outline-width', '2px');

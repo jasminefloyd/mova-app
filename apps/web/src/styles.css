@@ -268,7 +268,7 @@ body {
 .mova-settings-menu .mova-list-row__copy strong { font-size: var(--fs-body); }
 .mova-settings-menu .mova-list-row__trailing { color: var(--ink-muted); font-size: var(--fs-body-s); font-weight: 400; white-space: nowrap; }
 .mova-settings-menu .mova-settings-language-row { width: 100%; border: 0; border-bottom: 1px solid var(--line-subtle); padding: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
-.mova-settings-signout { justify-self: center; color: var(--danger); }
+.mova-settings-page .mova-settings-signout { justify-self: center; color: var(--danger); }
 .mova-messaging-page, .mova-inbox-page, .mova-revenue-page, .mova-concierge-page { display: grid; align-content: start; gap: var(--space-4); padding-bottom: var(--space-8); }
 .mova-messaging-page h1, .mova-inbox-page h1, .mova-revenue-page h1, .mova-concierge-page h1 { margin: 0; }
 .mova-messaging-page__intro { color: var(--ink-secondary); line-height: 1.55; }

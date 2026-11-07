@@ -2,6 +2,9 @@ import { index, route, type RouteConfig } from '@react-router/dev/routes';
 
 export default [
   route('', '../src/app/PublicShell.tsx', { id: 'public-root-shell' }, [index('../src/app/routes/MarketingHomeRoute.tsx')]),
+  route('growth', '../src/app/PublicShell.tsx', { id: 'growth-shortcut-shell' }, [index('../src/app/routes/GrowthAlias.tsx')]),
+  route('money', '../src/app/PublicShell.tsx', { id: 'money-shortcut-shell' }, [index('../src/app/routes/MoneyAlias.tsx')]),
+  route('reports', '../src/app/PublicShell.tsx', { id: 'reports-shortcut-shell' }, [index('../src/app/routes/ReportsAlias.tsx')]),
   route('auth', '../src/app/OnboardingShell.tsx'),
   route(':businessId', '../src/app/OperatorShellRoute.tsx', [
     index('../src/app/routes/Home.tsx'),
@@ -12,6 +15,9 @@ export default [
     route('clients/:clientId/visits', '../src/features/clients/ClientDetailRoute.tsx', { id: 'client-visits' }),
     route('clients/:clientId/visits/:appointmentId', '../src/features/clients/VisitNotesRoute.tsx', { id: 'client-visit-notes' }),
     route('growth', '../src/app/routes/Growth.tsx'),
+    route('growth/concierge', '../src/features/concierge/ConciergeInboxRoute.tsx'),
+    route('growth/concierge/setup', '../src/features/concierge/ConciergeSetupRoute.tsx'),
+    route('growth/concierge/:conversationId', '../src/features/concierge/ConciergeThreadRoute.tsx'),
     route('growth/:view', '../src/app/routes/GrowthDetail.tsx'),
     route('reports', '../src/app/routes/Reports.tsx'),
     route('reports/reputation', '../src/features/reports/ReputationPage.tsx', { id: 'reports-reputation' }),
@@ -21,6 +27,7 @@ export default [
     route('settings/portfolio', '../src/features/showcase/PortfolioSettingsRoute.tsx'),
     route('settings/locations', '../src/features/locations/LocationsRoute.tsx'),
     route('settings/calendar-sync', '../src/features/calendar-sync/CalendarSyncPage.tsx'),
+    route('settings/notifications', '../src/features/messaging/NotificationSettingsRoute.tsx'),
     route('settings/reviews', '../src/features/reports/ReputationPage.tsx', { id: 'settings-reviews' }),
     route('settings/plan', '../src/features/reports/PlanPage.tsx'),
     route('settings/privacy', '../src/features/settings/PrivacyPage.tsx'),
@@ -28,6 +35,7 @@ export default [
     route('appointments/:appointmentId', '../src/features/bookings/AppointmentRoute.tsx'),
     route('appointments/:appointmentId/notes', '../src/features/clients/VisitNotesRoute.tsx'),
     route('money', '../src/app/routes/Money.tsx'),
+    route('notifications', '../src/features/messaging/NotificationInboxRoute.tsx'),
     route('components', '../src/app/routes/Components.tsx'),
   ]),
   route('onboarding/*', '../src/app/OnboardingShell.tsx', { id: 'onboarding-shell' }),

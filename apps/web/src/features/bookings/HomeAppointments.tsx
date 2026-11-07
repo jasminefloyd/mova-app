@@ -72,12 +72,9 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
     if (!client || !businessId) return;
     void (async () => {
       try {
-        const { data: { session } } = await client.auth.getSession();
-        if (!session) return;
-        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reports-summary`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, 'x-mova-artist-business-id': businessId }, body: JSON.stringify({ range: 'week_to_date' }) });
-        const envelope = await response.json();
-        if (!response.ok || !envelope.data?.current) return;
-        const { current, previous } = envelope.data;
+        const { data: envelope, error } = await client.functions.invoke<{ data?: { current?: Record<string, number>; previous?: Record<string, number> } }>('reports-summary', { body: { range: 'week_to_date' }, headers: { 'x-mova-artist-business-id': businessId } });
+        if (error || !envelope?.data?.current) return;
+        const { current, previous = {} } = envelope.data;
         const booked = Number(current.offered_seconds) > 0 ? `${Math.round(Number(current.booked_seconds) / Number(current.offered_seconds) * 100)}%` : '—';
         const ratingCount = Number(current.rating_count) + Number(current.google_rating_count);
         const rating = ratingCount > 0 ? ((Number(current.rating_sum) + Number(current.google_rating_sum)) / ratingCount).toFixed(1) : '—';
