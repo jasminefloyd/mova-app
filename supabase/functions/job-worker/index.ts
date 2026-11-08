@@ -111,6 +111,18 @@ Deno.serve(async (request) => {
         });
         if (saveError || saved !== true) throw new Error('STRIPE_REFUND_STATUS_SAVE_FAILED');
         if (result.status === 'failed') throw new Error('STRIPE_REFUND_FAILED');
+      } else if (job.job_type === 'stripe_processor_fee'
+        && typeof job.payload?.payment_id === 'string'
+        && typeof job.payload?.payment_intent_id === 'string'
+        && typeof job.payload?.account_id === 'string') {
+        // Task 4.1: Stripe's processing fee, read from the charge and posted once to the ledger (0045).
+        if (Deno.env.get('MOVA_STRIPE_TEST_MODE') !== 'true') throw new Error('STRIPE_TEST_MODE_DISABLED');
+        const key = Deno.env.get('STRIPE_SECRET_KEY');
+        if (!key?.startsWith('sk_test_')) throw new Error('STRIPE_TEST_CONFIGURATION_MISSING');
+        const fee = await new StripeTestClient(key).retrieveProcessorFee(job.payload.payment_intent_id, job.payload.account_id);
+        if (!fee) throw new Error('STRIPE_FEE_NOT_SETTLED');
+        const { error: feeError } = await db.rpc('mova_stripe_record_processor_fee', { p_payment_id: job.payload.payment_id, p_fee_minor: fee.feeMinor });
+        if (feeError) throw new Error('STRIPE_FEE_SAVE_FAILED');
       } else if (job.job_type === 'appointment_reminder' && typeof job.payload?.appointment_id === 'string') {
         const emailProvider = emailProviderFromEnv((name) => Deno.env.get(name));
         if (!emailProvider) throw new Error('EMAIL_PROVIDER_NOT_CONFIGURED');
@@ -123,7 +135,7 @@ Deno.serve(async (request) => {
       if (completeError || completed !== true) throw new Error('JOB_LEASE_LOST');
       succeeded += 1;
     } catch (error) {
-      const code = error instanceof Error && ['JOB_TYPE_UNSUPPORTED','JOB_LEASE_LOST','APPOINTMENT_EMAIL_FAILED','EMAIL_PROVIDER_NOT_CONFIGURED','APPOINTMENT_EMAIL_CONTEXT_FAILED','STRIPE_TEST_MODE_DISABLED','STRIPE_TEST_CONFIGURATION_MISSING','CHECKOUT_COMPLETED_AWAITING_WEBHOOK','CHECKOUT_EXPIRY_NOT_CONFIRMED','CHECKOUT_SESSION_STATUS_INVALID','CHECKOUT_HOLD_RELEASE_FAILED','STRIPE_REFUND_RESPONSE_INVALID','STRIPE_REFUND_STATUS_SAVE_FAILED','STRIPE_REFUND_FAILED'].includes(error.message)
+      const code = error instanceof Error && ['JOB_TYPE_UNSUPPORTED','JOB_LEASE_LOST','APPOINTMENT_EMAIL_FAILED','STRIPE_FEE_NOT_SETTLED','STRIPE_FEE_SAVE_FAILED','EMAIL_PROVIDER_NOT_CONFIGURED','APPOINTMENT_EMAIL_CONTEXT_FAILED','STRIPE_TEST_MODE_DISABLED','STRIPE_TEST_CONFIGURATION_MISSING','CHECKOUT_COMPLETED_AWAITING_WEBHOOK','CHECKOUT_EXPIRY_NOT_CONFIRMED','CHECKOUT_SESSION_STATUS_INVALID','CHECKOUT_HOLD_RELEASE_FAILED','STRIPE_REFUND_RESPONSE_INVALID','STRIPE_REFUND_STATUS_SAVE_FAILED','STRIPE_REFUND_FAILED'].includes(error.message)
         ? error.message : 'JOB_HANDLER_FAILED';
       const { data: status, error: failError } = await db.rpc('mova_fail_background_job', {
         p_job_id: job.id, p_worker_id: workerId, p_error_code: code,
