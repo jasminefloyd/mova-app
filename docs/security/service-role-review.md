@@ -48,4 +48,4 @@ The service role bypasses RLS. This is a source-level boundary inventory, not a 
 - Run Deno function tests against a local Supabase project; do not point tests at production.
 - Inspect the RPC definitions invoked by booking, payment, reports, review and token routes as part of runtime authorization coverage.
 
-No handler is marked runtime-verified by this inventory.
+The shared `artistClient` boundary has a mocked Deno test (`TC-SEC-FUZZ-01`) verifying that both user ID and requested business ID are applied to membership lookup. This does not exercise any handler body. No handler is marked runtime-verified by this inventory; all 35 function-level cross-tenant tests remain required.

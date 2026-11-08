@@ -7,19 +7,22 @@ const invokedPath = process.argv[1] ? pathToFileURL(resolve(process.argv[1])).hr
 
 export async function findDirectReadViolations(sourceRoot, migrationRoot, relativeRoot = root) {
   const files = await listFiles(sourceRoot, (path) => /\.(?:ts|tsx|js|jsx)$/.test(path));
-  const migrations = await listFiles(migrationRoot, (path) => path.endsWith('.sql'));
+  const migrations = (await listFiles(migrationRoot, (path) => path.endsWith('.sql'))).sort();
   const grants = new Set();
   const violations = [];
 
   for (const path of migrations) {
     const sql = await readFile(path, 'utf8');
-    for (const statement of sql.matchAll(/\bgrant\s+([^;]+?)\s+on\s+(?:table\s+)?([^;]+?)\s+to\s+([^;]+);/gis)) {
-      const [, privileges, tableList, roleList] = statement;
+    for (const statement of sql.matchAll(/\b(grant|revoke)\s+([^;]+?)\s+on\s+(?:table\s+)?([^;]+?)\s+(?:to|from)\s+([^;]+);/gis)) {
+      const [, action, privileges, tableList, roleList] = statement;
       if (!roleList.split(',').some((role) => role.trim().replaceAll('"', '').toLowerCase() === 'authenticated')) continue;
       if (!/(?:all|select)/i.test(privileges)) continue;
       for (const table of tableList.split(',')) {
         const name = table.trim().replace(/^public\./i, '').replaceAll('"', '');
-        if (/^mova_[a-z0-9_]+$/i.test(name)) grants.add(name);
+        if (/^mova_[a-z0-9_]+$/i.test(name)) {
+          if (action.toLowerCase() === 'grant') grants.add(name);
+          else grants.delete(name);
+        }
       }
     }
   }

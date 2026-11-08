@@ -32,6 +32,11 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Run Edge authorization helper tests
+        run: deno test --allow-env supabase/functions/_shared/tenant.test.ts
       - run: pnpm check-locales
       - run: pnpm build
       - name: Set up Supabase CLI

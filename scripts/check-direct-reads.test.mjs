@@ -29,6 +29,17 @@ test('TC-STATIC-GRANTS-01 accepts authenticated table grants and excludes Storag
   } finally { await rm(fixture.root, { recursive: true, force: true }); }
 });
 
+test('TC-STATIC-GRANTS-01 respects later authenticated SELECT revokes', async () => {
+  const fixture = await makeFixture({
+    source: "client.from('mova_appointments').select('*');",
+    migration: 'grant select on public.mova_appointments to authenticated; revoke select on public.mova_appointments from authenticated;',
+  });
+  try {
+    const { violations } = await findDirectReadViolations(fixture.source, fixture.migrations, fixture.root);
+    assert.equal(violations.length, 1);
+  } finally { await rm(fixture.root, { recursive: true, force: true }); }
+});
+
 async function makeFixture({ source, migration }) {
   const root = await mkdtemp(resolve(tmpdir(), 'mova-direct-reads-'));
   const sourceRoot = resolve(root, 'apps/web/src');
