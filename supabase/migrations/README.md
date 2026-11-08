@@ -35,6 +35,7 @@ The applied Mova remote migration records are mirrored by these local timestampe
 | `20261107180652` | `mova_0029_reports_interval_helper_arity` | `20261107180652_mova_0029_reports_interval_helper_arity.sql` |
 | `20261107180730` | `mova_0030_messages_web_chat` | `20261107180730_mova_0030_messages_web_chat.sql` |
 | `20261107195000` | `mova_0031_block_deposit_bookings_until_checkout` | `20261107195000_mova_0031_block_deposit_bookings_until_checkout.sql` |
+| `20261107200000` | `mova_0032_revoke_anon_tenant_select` | `20261107200000_mova_0032_revoke_anon_tenant_select.sql` (local only; not applied remotely) |
 
 The P06 `0007` migration does not reference a `mova_clients` table. P07 migrations were applied in dependency order. The Management API assigned the returned versions above, which are mirrored locally.
 
