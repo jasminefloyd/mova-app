@@ -1,11 +1,13 @@
 import { artistClient,corsHeaders,respond,serviceClient } from '../_shared/booking.ts';
+import {resolveNotificationPreferences} from '../_shared/notification-preferences.ts';
 
 Deno.serve(async(request)=>{
  if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
  const actor=await artistClient(request);if(!actor)return respond({code:'UNAUTHENTICATED'},401);const db=serviceClient();const body=await request.json().catch(()=>({}));
  if(body.action==='status'){
-  const {data:preferences}=await db.from('mova_notification_preferences').select('preferences').eq('artist_business_id',actor.businessId).eq('user_id',actor.user.id).maybeSingle();
-  return respond({preferences:preferences?.preferences??{in_app:true,email:true,push:false},live:{sms:false,email:false,push:false}});
+  const {data,error}=await db.from('mova_notification_preferences').select('preferences').eq('artist_business_id',actor.businessId).eq('user_id',actor.user.id).maybeSingle();
+  const resolved=resolveNotificationPreferences({data,error});if(!resolved.ok)return respond({code:'MESSAGING_SETTINGS_READ_FAILED'},500);
+  return respond({preferences:resolved.preferences,live:{sms:false,email:false,push:false}});
  }
  if(body.action==='preferences'){
   const prefs=body.preferences;if(!prefs||typeof prefs!=='object'||Array.isArray(prefs)||Object.keys(prefs).some((key)=>!['in_app','email','push'].includes(key))||Object.values(prefs).some((value)=>typeof value!=='boolean'))return respond({code:'INVALID_PREFERENCES'},422);
