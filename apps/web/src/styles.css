@@ -845,3 +845,118 @@ select,
 .mova-concierge-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-2)}.mova-concierge-stats .mova-card{display:grid;align-content:start;gap:var(--space-1);padding:var(--space-3)}.mova-concierge-stats strong{font-size:var(--fs-caption);line-height:1.25;overflow-wrap:anywhere}.mova-concierge-stats span{font-size:var(--fs-micro);color:var(--ink-secondary)}
 
 .mova-offline-notice{position:fixed;z-index:30;inset-inline:var(--gutter);top:calc(var(--space-3) + env(safe-area-inset-top));padding:var(--space-3) var(--space-4);border-radius:var(--radius-md, 14px);background:var(--surface-inverse);color:var(--surface-page);font-weight:600;text-align:center}
+
+/* 3.1 / 3.2 How you get paid (canvas 16a, 16b) */
+.mova-payment-settings { display: grid; gap: var(--space-3); padding-bottom: var(--space-8); }
+.mova-payment-settings__head { display: grid; gap: var(--space-1); }
+.mova-payment-settings__head h1 { margin: 0; }
+.mova-payment-settings__head p { margin: 0; color: var(--ink-muted); font-size: var(--fs-body-s); }
+.mova-payment-settings .mova-card { display: grid; gap: var(--space-3); padding: 14px var(--space-4); border-radius: var(--radius-2xl); }
+.mova-payment-settings h2 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-s); font-weight: 700; }
+.mova-payment-settings .mova-card p { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-payment-settings small { color: var(--ink-muted); font-size: var(--fs-micro); }
+.mova-payment-settings__card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.mova-payment-settings__pill { flex: none; border-radius: var(--radius-s); padding: 3px var(--space-2); background: var(--line-subtle); font-size: var(--fs-micro); font-weight: 700; }
+.mova-payment-settings__pill.is-pending { background: var(--status-pending-bg); }
+.mova-payment-settings__pill.is-restricted { background: #F6E3DF; color: var(--danger); }
+.mova-payment-settings__pill.is-active { background: var(--status-confirmed-bg); }
+.mova-payment-settings__test { color: var(--ink-muted); }
+.mova-payment-settings__benefits { display: grid; gap: var(--space-1); margin: 0; padding-left: var(--space-5); font-size: var(--fs-body-s); list-style: disc; }
+.mova-payment-settings__fee, .mova-payment-settings__notice { border-radius: var(--radius-m); padding: 10px var(--space-3); background: var(--surface-page); font-size: var(--fs-caption) !important; }
+.mova-payment-settings__notice { background: var(--status-pending-bg); }
+.mova-payment-settings__notice.is-alert { background: #F6E3DF; }
+.mova-payment-settings__facts { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2) var(--space-3); margin: 0; font-size: var(--fs-body-s); }
+.mova-payment-settings__facts dt { color: var(--ink-muted); }
+.mova-payment-settings__facts dd { margin: 0; font-weight: 700; text-align: end; }
+.mova-payment-settings__links { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: var(--space-2); }
+.mova-payment-settings__links a { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.mova-payment-settings__manual .mova-toggle { display: flex; justify-content: space-between; }
+.mova-payment-settings__manual .mova-toggle small { color: var(--ink-muted); font-size: var(--fs-micro); }
+.mova-payment-settings__salon { display: grid; gap: var(--space-2); border: 1px dashed var(--accent-warm-strong); border-radius: var(--radius-xl); padding: 14px var(--space-4); background: var(--surface-warm); }
+.mova-payment-settings__salon p { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-payment-settings__salon a { color: var(--forest); font-weight: 700; font-size: var(--fs-body-s); }
+.mova-payment-settings__actions { position: sticky; bottom: 0; padding: var(--space-3) 0 var(--space-5); background: var(--surface-page); }
+.mova-payment-settings__actions .mova-button { width: 100%; }
+
+/* 3.3 Edit your profile (canvas 16c) */
+.mova-profile-edit { display: grid; gap: var(--space-3); padding-bottom: 0; }
+.mova-profile-edit .mova-form-stack { display: grid; gap: 14px; }
+.mova-profile-edit__preview { display: inline-flex; min-height: 36px; align-items: center; border: 1px solid var(--line-control); border-radius: var(--radius-pill); padding: 0 14px; background: var(--surface); color: var(--forest); font-size: var(--fs-body-s); font-weight: 600; text-decoration: none; }
+.mova-profile-edit__photos { position: relative; }
+.mova-profile-edit__cover { position: relative; height: 124px; border-radius: var(--radius-2xl); background: linear-gradient(135deg, var(--botanical) 0%, var(--forest) 55%, var(--accent-warm-strong) 140%) center / cover; }
+.mova-profile-edit__cover-button { position: absolute; top: 10px; right: 10px; display: inline-flex; min-height: 32px; align-items: center; border-radius: var(--radius-pill); padding: 0 12px; background: rgba(247, 245, 239, .92); color: var(--forest); font-size: var(--fs-caption); font-weight: 600; cursor: pointer; }
+.mova-profile-edit__cover-button:focus-within, .mova-profile-edit__photo-button:focus-within { outline: 2px solid var(--forest); outline-offset: 2px; }
+.mova-profile-edit input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.mova-profile-edit__avatar-row { position: relative; display: flex; align-items: flex-end; gap: var(--space-3); margin: -36px 0 0 var(--space-4); }
+.mova-profile-edit__avatar { width: 84px; height: 84px; flex: none; overflow: hidden; border: 3px solid var(--surface-page); border-radius: var(--radius-pill); background: var(--peach); }
+.mova-profile-edit__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.mova-profile-edit__photo-button { position: relative; min-height: 36px !important; margin-bottom: var(--space-1); padding-inline: 14px; font-size: var(--fs-caption); cursor: pointer; }
+.mova-profile-edit__handle { min-width: 0; }
+.mova-profile-edit__handle-box { display: flex; width: 100%; min-width: 0; box-sizing: border-box; align-items: center; }
+.mova-profile-edit__handle-box > span { color: var(--ink-muted); white-space: nowrap; }
+.mova-profile-edit__handle-box input { min-width: 0; flex: 1; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; outline: none; }
+.mova-profile-edit__handle-box:focus-within { outline: 2px solid var(--forest); outline-offset: 1px; }
+.mova-profile-edit__handle-box.is-invalid { border-color: var(--danger); }
+.mova-profile-edit legend span { color: var(--ink-muted); font-weight: 500; }
+.mova-profile-edit .mova-chip:disabled { opacity: .45; cursor: not-allowed; }
+.mova-profile-edit__looks { display: grid; gap: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-2xl); padding: 14px var(--space-4); background: var(--surface); color: var(--forest); text-decoration: none; }
+.mova-profile-edit__looks-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.mova-profile-edit__looks-head > span:first-child { display: grid; gap: 2px; }
+.mova-profile-edit__looks-head strong { font-family: var(--font-display); font-size: var(--fs-display-s); }
+.mova-profile-edit__looks-head small { color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-profile-edit__manage { font-size: var(--fs-body-s); font-weight: 700; }
+.mova-profile-edit__manage::after { content: " ›"; }
+.mova-profile-edit__thumbs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.mova-profile-edit__thumbs img, .mova-profile-edit__thumbs span { aspect-ratio: 1; width: 100%; border-radius: var(--radius-m); object-fit: cover; }
+.mova-profile-edit__thumbs span { display: grid; place-items: center; background: var(--line-subtle); color: var(--ink-muted); font-size: var(--fs-caption); font-weight: 700; }
+.mova-profile-edit__actions { position: sticky; bottom: 0; margin-inline: calc(-1 * var(--gutter)); border-top: 1px solid var(--line); padding: var(--space-3) var(--gutter) var(--space-6); background: var(--surface-page); }
+.mova-profile-edit__actions .mova-button { width: 100%; }
+
+/* 3.4 Looks (canvas 16d) */
+.mova-looks { display: grid; gap: var(--space-3); }
+.mova-looks__head { display: grid; gap: var(--space-1); }
+.mova-looks__head h1 { margin: 0; }
+.mova-looks__head p, .mova-looks__summary { margin: 0; color: var(--ink-muted); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-looks__summary { font-size: var(--fs-caption); }
+.mova-looks__upload { position: relative; display: flex; min-height: 64px; align-items: center; justify-content: center; gap: var(--space-2); border: 1.5px dashed var(--botanical); border-radius: var(--radius-xl); background: var(--surface); color: var(--forest); font-size: var(--fs-body); font-weight: 700; cursor: pointer; }
+.mova-looks__upload:focus-within { outline: 2px solid var(--forest); outline-offset: 2px; }
+.mova-looks__upload.is-busy { opacity: .6; cursor: progress; }
+.mova-looks__upload input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.mova-looks__list { display: grid; gap: 10px; margin: 0; padding: 0 0 var(--space-8); list-style: none; }
+.mova-looks__card { border: 1px solid var(--line); border-radius: var(--radius-xl); padding: var(--space-3); background: var(--surface); }
+.mova-looks__card.is-open { border: 2px solid var(--forest); padding: 11px; }
+.mova-looks__row { display: flex; align-items: center; gap: var(--space-3); }
+.mova-looks__row > img, .mova-looks__thumb { width: 64px; height: 64px; flex: none; border-radius: var(--radius-l); background: var(--line-subtle); object-fit: cover; }
+.mova-looks__summary-button { display: grid; min-width: 0; flex: 1; justify-items: start; gap: var(--space-1); border: 0; padding: 0; background: transparent; color: var(--forest); text-align: start; cursor: pointer; }
+.mova-looks__summary-button strong { font-size: var(--fs-body); overflow-wrap: anywhere; }
+.mova-looks__summary-button small { color: var(--ink-muted); font-size: var(--fs-micro); overflow-wrap: anywhere; }
+.mova-looks__pill { border-radius: var(--radius-s); padding: 2px var(--space-2); background: var(--line-subtle); color: var(--ink-muted); font-size: var(--fs-tab); font-weight: 700; }
+.mova-looks__pill.is-on { background: var(--status-confirmed-bg); color: var(--forest); }
+.mova-looks__arrows { display: grid; gap: var(--space-1); }
+.mova-looks__arrows .mova-icon-button { width: 44px; height: 36px; min-height: 36px; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--surface); }
+.mova-looks__arrows .mova-icon-button:disabled { opacity: .35; }
+.mova-looks__up .mova-icon { transform: rotate(-90deg); }
+.mova-looks__down .mova-icon { transform: rotate(90deg); }
+.mova-looks__editor { display: grid; gap: var(--space-3); margin-top: var(--space-3); border-top: 1px solid var(--line-subtle); padding-top: var(--space-3); }
+.mova-looks__services { display: grid; gap: var(--space-2); margin: 0; border: 0; padding: 0; }
+.mova-looks__services legend { margin-bottom: var(--space-2); font-size: var(--fs-caption); font-weight: 600; }
+.mova-looks .mova-toggle { display: flex; justify-content: space-between; }
+.mova-looks .mova-toggle small { color: var(--ink-muted); font-size: var(--fs-micro); }
+
+/* 3.5 Send feedback (canvas 16e) */
+.mova-settings-feedback { display: inline-flex; min-height: var(--tap-min); align-items: center; justify-self: center; gap: 6px; border: 0; padding: 0 var(--space-2); background: transparent; color: var(--ink-muted); font-size: var(--fs-caption); cursor: pointer; flex-wrap: wrap; justify-content: center; text-align: center; }
+.mova-settings-feedback span { color: var(--forest); text-decoration: underline; }
+.mova-feedback { display: grid; gap: var(--space-3); }
+.mova-feedback p { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-feedback__intro, .mova-feedback__note { color: var(--ink-muted); }
+.mova-feedback__note { font-size: var(--fs-micro) !important; }
+.mova-feedback__types { margin: 0; border: 0; padding: 0; }
+.mova-feedback__types legend { margin-bottom: var(--space-2); font-size: var(--fs-body-s); font-weight: 600; }
+.mova-feedback__types [role="radiogroup"] { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+.mova-feedback__types button { min-height: 52px; border: 1px solid var(--line-control); border-radius: var(--radius-l); padding: 6px; background: var(--surface); color: var(--forest); font-size: var(--fs-caption); font-weight: 600; line-height: 1.2; cursor: pointer; }
+.mova-feedback__types button.is-selected { border: 2px solid var(--forest); background: var(--forest); color: var(--ivory); font-weight: 700; }
+.mova-feedback__types button:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
+.mova-feedback__screenshot { position: relative; cursor: pointer; }
+.mova-feedback__screenshot:focus-within { outline: 2px solid var(--forest); outline-offset: 2px; }
+.mova-feedback__screenshot input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.mova-feedback--sent { justify-items: stretch; }

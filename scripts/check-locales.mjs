@@ -58,7 +58,7 @@ async function validateLiteralTranslationCalls(catalogs) {
     const source = await readFile(path, 'utf8');
     for (const match of source.matchAll(callPattern)) {
       const key = match[2];
-      if (key && !key.includes('${') && !knownKeys.has(key)) problems.push(`${path.replace(`${sourceDirectory}/`, '')} references missing translation ${key}`);
+      if (key && !key.includes('${') && !knownKeys.has(key) && !knownKeys.has(`${key}_other`)) problems.push(`${path.replace(`${sourceDirectory}/`, '')} references missing translation ${key}`);
     }
   }
   return problems;

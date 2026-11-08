@@ -1,5 +1,6 @@
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { StripeTestClient } from '../_shared/providers/stripe/client.ts';
+import { summarizePayouts } from '../_shared/providers/stripe/payouts.ts';
 
 const hex = (bytes: Uint8Array) => [...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join('');
 const digest = async (value: string) => hex(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))));
@@ -69,9 +70,21 @@ Deno.serve(async (request) => {
     return respond({ authorization_url: stripe.createConnectAuthorizationUrl(clientId, redirectUri, state) });
   }
   if (body.action === 'status') {
-    const { data, error } = await db.from('mova_stripe_connections').select('account_type,status,charges_enabled,payouts_enabled,details_submitted,last_checked_at')
+    const { data, error } = await db.from('mova_stripe_connections').select('stripe_account_id,account_type,status,charges_enabled,payouts_enabled,details_submitted,last_checked_at')
       .eq('artist_business_id', actor.businessId).maybeSingle();
-    return error ? respond({ code: 'STRIPE_CONNECTION_READ_FAILED' }, 500) : respond({ connected: data ?? null, test_mode: true });
+    if (error) return respond({ code: 'STRIPE_CONNECTION_READ_FAILED' }, 500);
+    if (!data) return respond({ connected: null, payouts: null, dashboard_url: null, test_mode: true });
+    const { stripe_account_id: accountId, ...connected } = data;
+    let payouts = null;
+    let dashboardUrl: string | null = 'https://dashboard.stripe.com/test/dashboard';
+    if (data.status === 'active' && accountId) {
+      // Task 3.2: payout bank and schedule are read from Stripe, never stored or edited in Mova.
+      try { payouts = summarizePayouts(await stripe.retrieveConnectedAccount(accountId)); } catch { payouts = null; }
+      if (data.account_type === 'express') {
+        try { dashboardUrl = await stripe.createExpressLoginLink(accountId); } catch { dashboardUrl = null; }
+      }
+    }
+    return respond({ connected, payouts, dashboard_url: dashboardUrl, test_mode: true });
   }
   return respond({ code: 'INVALID_ACTION' }, 422);
 });

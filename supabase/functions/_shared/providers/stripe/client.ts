@@ -71,6 +71,14 @@ export class StripeTestClient {
     return result;
   }
 
+  /** Express accounts only: a single-use link into the Express dashboard. */
+  async createExpressLoginLink(accountId: string) {
+    if (!/^acct_[A-Za-z0-9]+$/.test(accountId)) throw new Error('STRIPE_ACCOUNT_ID_INVALID');
+    const result = await this.post(`/accounts/${encodeURIComponent(accountId)}/login_links`, new URLSearchParams());
+    if (typeof result.url !== 'string' || !result.url.startsWith('https://')) throw new Error('STRIPE_LOGIN_LINK_FAILED');
+    return result.url;
+  }
+
   async createCheckoutSession(input: StripeCheckoutInput) {
     if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor < 1
       || !Number.isSafeInteger(input.applicationFeeMinor) || input.applicationFeeMinor < 0

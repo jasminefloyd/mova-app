@@ -26,6 +26,8 @@ export const clientProfilesEnabled = publicEnv.VITE_CLIENT_PROFILES_ENABLED === 
 export const walletClientCardEnabled = publicEnv.VITE_WALLET_CLIENT_CARD_ENABLED === 'true';
 export const waitlistEnabled = publicEnv.VITE_WAITLIST_ENABLED === 'true';
 export const stripeTestModeEnabled = publicEnv.VITE_STRIPE_TEST_MODE === 'true';
+/** Shown on feedback so the team knows which build a stylist used. */
+export const appVersion = String(import.meta.env.VITE_APP_VERSION || import.meta.env.MODE || 'web').slice(0, 60);
 
 export function requireSupabaseEnv(): { url: string; anonKey: string } {
   if (!publicEnv.VITE_SUPABASE_URL || !publicEnv.VITE_SUPABASE_ANON_KEY) {

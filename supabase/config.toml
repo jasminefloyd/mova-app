@@ -79,6 +79,9 @@ verify_jwt = false
 [functions.payment-settings]
 verify_jwt = false
 
+[functions.support-feedback]
+verify_jwt = false
+
 [functions.visit-notes]
 verify_jwt = false
 

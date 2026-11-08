@@ -5,6 +5,7 @@ import { Outlet } from 'react-router';
 import { LocaleProvider } from './LocaleProvider';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { OfflineNotice } from './OfflineNotice';
+import { RouteTrail } from './RouteTrail';
 import { ServiceWorkerUpdateNotice } from './ServiceWorkerUpdateNotice';
 
 type ShellFrameProps = PropsWithChildren<{
@@ -26,6 +27,7 @@ export function ShellFrame({ queryClient, localeStorageKey, showBrandHeader = tr
           {children ?? <Outlet />}
         </main>
         <OfflineNotice />
+        <RouteTrail />
         <ServiceWorkerUpdateNotice />
       </LocaleProvider>
     </QueryClientProvider>

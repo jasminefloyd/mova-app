@@ -210,7 +210,50 @@
     "profilePhoto": "Profile photo",
     "saveProfile": "Save profile",
     "profileSaved": "Profile updated.",
-    "managePortfolio": "Manage looks"
+    "managePortfolio": "Manage looks",
+    "preview": "Preview",
+    "photos": "Photos",
+    "coverPhoto": "Cover photo",
+    "changeCover": "Change cover",
+    "profilePhotoAlt": "{{name}}'s profile photo",
+    "changeProfilePhoto": "Change profile photo",
+    "nameClientsSee": "Name clients see",
+    "handlePrefix": "mova-beauty.co/a/",
+    "handleWarning": "Changing it breaks links and QR codes you've already shared.",
+    "handleChangeWarning": "Saving this new link breaks links and QR codes you've already shared.",
+    "specialtyCount": "pick up to {{limit}} ({{count}} of {{limit}})",
+    "specialtyPresets": {
+      "silkPress": "Silk press",
+      "naturalHair": "Natural hair",
+      "braids": "Braids",
+      "locs": "Locs",
+      "color": "Color",
+      "cuts": "Cuts",
+      "wigs": "Wigs & installs",
+      "kids": "Kids"
+    },
+    "looksSummary_one": "{{count}} look · {{shown}} on your page",
+    "looksSummary_other": "{{count}} looks · {{shown}} on your page",
+    "manage": "Manage",
+    "savedShort": "Saved",
+    "backToProfile": "Back to profile",
+    "looksIntro": "Looks clients see on your page. Link a look to a service and clients can tap \"Book this look\".",
+    "uploadPhotos": "Upload photos",
+    "uploading": "Uploading…",
+    "firstShowsFirst": "first one shows first on your page",
+    "lookNumber": "Look {{number}}",
+    "bookThisLook": "Book this look → {{services}}",
+    "notLinked": "Not linked to a service",
+    "onYourPage": "On your page",
+    "hidden": "Hidden",
+    "moveUpNamed": "Move {{name}} up",
+    "moveDownNamed": "Move {{name}} down",
+    "altTextHint": "Read aloud to clients who use a screen reader.",
+    "showOnMyPage": "Show on my page",
+    "hiddenStaysHere": "Hidden looks stay here for later.",
+    "describeFirst": "Describe the image before showing it on your page.",
+    "deleteLook": "Delete look",
+    "confirmDeleteLook": "Tap again to delete this look"
   },
   "locations": {
     "title": "Locations & hours",
@@ -752,7 +795,50 @@
       "collected_salon": "Salon payment",
       "refund": "Refund"
     },
-    "feeNote": "Percent fees apply only to payments Mova processes. Stripe processing is extra. No Mova fee on cash, other recorded or salon-collected payments."
+    "feeNote": "Percent fees apply only to payments Mova processes. Stripe processing is extra. No Mova fee on cash, other recorded or salon-collected payments.",
+    "stripeState": {
+      "not_connected": "Not set up",
+      "pending": "In review",
+      "restricted": "Action needed",
+      "active": "Active"
+    },
+    "stripeBenefitDeposit": "Ask for a deposit when clients book",
+    "stripeBenefitPayLink": "Send a pay link or show a pay QR at checkout",
+    "stripeBenefitWallets": "Clients pay by card, Apple Pay or Google Pay",
+    "feeNoteStrong": "Mova fee {{percent}} per card payment",
+    "feeNoteSetup": ", plus Stripe processing. Taken out before the payout.",
+    "feeNoteActive": ", plus Stripe processing. You'll see both on every payment in Money.",
+    "stripeIdNote": "Stripe asks for your ID and a bank account. Mova never sees your bank login.",
+    "stripePendingNote": "Stripe is checking your details. Card payments and deposits turn on when it's done. Until then, clients can still book and you can record cash.",
+    "cardPayments": "Card payments",
+    "payoutsToBank": "Payouts to your bank",
+    "notYet": "Not yet",
+    "statusOn": "On",
+    "statusPaused": "Paused",
+    "continueStripe": "Continue Stripe setup",
+    "restrictedStrong": "Stripe needs one more thing.",
+    "restrictedRest": "Payouts are paused until you update your details. New card payments still go through.",
+    "fixInStripe": "Fix in Stripe",
+    "seePayouts": "See payouts",
+    "openStripe": "Open Stripe",
+    "stripeManagedNote": "Bank details and payout schedule are managed in Stripe.",
+    "cashHint": "Record cash you take at the chair",
+    "otherHint": "Cash App, check, gift card — you name it at checkout",
+    "salonCollectsFor": "{{names}} collects for you.",
+    "salonCollectsRest": "Record those visits as salon collected. Mova charges no fee on recorded or salon-collected payments.",
+    "changeInLocations": "Change in Locations & hours",
+    "savedShort": "Saved",
+    "payoutsTo": "Payouts to",
+    "bankEnding": "{{bank}} •••• {{last4}}",
+    "bankGeneric": "Bank",
+    "payoutSchedule": "Payout schedule",
+    "managedInStripe": "Managed in Stripe",
+    "schedule": {
+      "daily": "Daily",
+      "weekly": "Weekly on {{day}}",
+      "monthly": "Monthly on day {{day}}",
+      "manual": "When you request it"
+    }
   },
   "calendarSync": {
     "title": "Calendar sync",
@@ -1326,5 +1412,39 @@
   },
   "components": {
     "offline": "You appear to be offline."
+  },
+  "feedback": {
+    "title": "Send feedback",
+    "sentTitle": "Sent. Thank you",
+    "close": "Close",
+    "link": "Have an idea or found a bug?",
+    "linkAction": "Send feedback",
+    "intro": "This goes straight to the Mova team. We read every message.",
+    "typeLabel": "What's this about?",
+    "types": {
+      "idea": "Idea",
+      "broken": "Something's broken",
+      "question": "Question"
+    },
+    "prompts": {
+      "idea": "What would make Mova better?",
+      "broken": "What happened?",
+      "question": "What do you want to know?"
+    },
+    "placeholders": {
+      "idea": "Tell us what you'd like to see",
+      "broken": "What were you doing, and what went wrong?",
+      "question": "Ask us anything"
+    },
+    "addScreenshot": "Add a screenshot (optional)",
+    "screenshotAdded": "Screenshot added: {{name}}",
+    "screenshotInvalid": "Use a JPG, PNG or WebP image under 5 MB.",
+    "attachedNote": "To help us look into it, we'll include the screen you came from, your device and your app version. We won't include client details.",
+    "send": "Send to Mova",
+    "failed": "We couldn't send that. Try again.",
+    "limited": "You've sent a lot of feedback this hour. Try again later.",
+    "thanks": "Thanks. If we need more detail or have an answer, we'll email you.",
+    "thanksEmail": "Thanks. If we need more detail or have an answer, we'll email {{email}}.",
+    "done": "Done"
   }
 }

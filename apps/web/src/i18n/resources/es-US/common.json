@@ -210,7 +210,50 @@
     "profilePhoto": "Foto de perfil",
     "saveProfile": "Guardar perfil",
     "profileSaved": "Perfil actualizado.",
-    "managePortfolio": "Administrar looks"
+    "managePortfolio": "Administrar looks",
+    "preview": "Vista previa",
+    "photos": "Fotos",
+    "coverPhoto": "Foto de portada",
+    "changeCover": "Cambiar portada",
+    "profilePhotoAlt": "Foto de perfil de {{name}}",
+    "changeProfilePhoto": "Cambiar foto de perfil",
+    "nameClientsSee": "Nombre que ven tus clientes",
+    "handlePrefix": "mova-beauty.co/a/",
+    "handleWarning": "Si lo cambias, dejarán de funcionar los enlaces y códigos QR que ya compartiste.",
+    "handleChangeWarning": "Al guardar este enlace nuevo, dejarán de funcionar los enlaces y códigos QR que ya compartiste.",
+    "specialtyCount": "elige hasta {{limit}} ({{count}} de {{limit}})",
+    "specialtyPresets": {
+      "silkPress": "Alisado (silk press)",
+      "naturalHair": "Cabello natural",
+      "braids": "Trenzas",
+      "locs": "Locs",
+      "color": "Color",
+      "cuts": "Cortes",
+      "wigs": "Pelucas e instalaciones",
+      "kids": "Niños"
+    },
+    "looksSummary_one": "{{count}} look · {{shown}} en tu página",
+    "looksSummary_other": "{{count}} looks · {{shown}} en tu página",
+    "manage": "Administrar",
+    "savedShort": "Guardado",
+    "backToProfile": "Volver al perfil",
+    "looksIntro": "Looks que tus clientes ven en tu página. Vincula un look a un servicio y podrán tocar \"Reservar este look\".",
+    "uploadPhotos": "Subir fotos",
+    "uploading": "Subiendo…",
+    "firstShowsFirst": "el primero aparece primero en tu página",
+    "lookNumber": "Look {{number}}",
+    "bookThisLook": "Reservar este look → {{services}}",
+    "notLinked": "Sin servicio vinculado",
+    "onYourPage": "En tu página",
+    "hidden": "Oculto",
+    "moveUpNamed": "Subir {{name}}",
+    "moveDownNamed": "Bajar {{name}}",
+    "altTextHint": "Se lee en voz alta a clientes que usan un lector de pantalla.",
+    "showOnMyPage": "Mostrar en mi página",
+    "hiddenStaysHere": "Los looks ocultos se quedan aquí para después.",
+    "describeFirst": "Describe la imagen antes de mostrarla en tu página.",
+    "deleteLook": "Eliminar look",
+    "confirmDeleteLook": "Toca de nuevo para eliminar este look"
   },
   "locations": {
     "title": "Ubicaciones y horarios",
@@ -752,7 +795,50 @@
       "collected_salon": "Pago cobrado por el salón",
       "refund": "Reembolso"
     },
-    "feeNote": "Las tarifas porcentuales solo aplican a pagos procesados por Mova. El procesamiento de Stripe se cobra aparte. No hay tarifa de Mova para efectivo, otros pagos registrados o pagos cobrados por el salón."
+    "feeNote": "Las tarifas porcentuales solo aplican a pagos procesados por Mova. El procesamiento de Stripe se cobra aparte. No hay tarifa de Mova para efectivo, otros pagos registrados o pagos cobrados por el salón.",
+    "stripeState": {
+      "not_connected": "Sin configurar",
+      "pending": "En revisión",
+      "restricted": "Requiere acción",
+      "active": "Activo"
+    },
+    "stripeBenefitDeposit": "Pide un depósito cuando tus clientes reservan",
+    "stripeBenefitPayLink": "Envía un enlace de pago o muestra un código QR al cobrar",
+    "stripeBenefitWallets": "Tus clientes pagan con tarjeta, Apple Pay o Google Pay",
+    "feeNoteStrong": "Cargo de Mova de {{percent}} por pago con tarjeta",
+    "feeNoteSetup": ", más el procesamiento de Stripe. Se descuenta antes del depósito.",
+    "feeNoteActive": ", más el procesamiento de Stripe. Verás ambos en cada pago en Dinero.",
+    "stripeIdNote": "Stripe te pide una identificación y una cuenta bancaria. Mova nunca ve el acceso a tu banco.",
+    "stripePendingNote": "Stripe está revisando tus datos. Los pagos con tarjeta y los depósitos se activan cuando termine. Mientras tanto, tus clientes pueden reservar y tú puedes registrar efectivo.",
+    "cardPayments": "Pagos con tarjeta",
+    "payoutsToBank": "Depósitos a tu banco",
+    "notYet": "Todavía no",
+    "statusOn": "Activados",
+    "statusPaused": "En pausa",
+    "continueStripe": "Continuar configuración de Stripe",
+    "restrictedStrong": "Stripe necesita un dato más.",
+    "restrictedRest": "Los depósitos están en pausa hasta que actualices tus datos. Los pagos nuevos con tarjeta siguen funcionando.",
+    "fixInStripe": "Corregir en Stripe",
+    "seePayouts": "Ver depósitos",
+    "openStripe": "Abrir Stripe",
+    "stripeManagedNote": "Los datos bancarios y el calendario de depósitos se administran en Stripe.",
+    "cashHint": "Registra el efectivo que cobras en tu silla",
+    "otherHint": "Cash App, cheque, tarjeta de regalo: lo indicas al cobrar",
+    "salonCollectsFor": "{{names}} cobra por ti.",
+    "salonCollectsRest": "Registra esas citas como cobradas por el salón. Mova no aplica cargos a pagos registrados o cobrados por salones.",
+    "changeInLocations": "Cambiar en Ubicaciones y horarios",
+    "savedShort": "Guardado",
+    "payoutsTo": "Depósitos a",
+    "bankEnding": "{{bank}} •••• {{last4}}",
+    "bankGeneric": "Banco",
+    "payoutSchedule": "Calendario de depósitos",
+    "managedInStripe": "Se administra en Stripe",
+    "schedule": {
+      "daily": "Diario",
+      "weekly": "Semanal, los {{day}}",
+      "monthly": "Mensual, el día {{day}}",
+      "manual": "Cuando lo solicites"
+    }
   },
   "calendarSync": {
     "title": "Sincronización del calendario",
@@ -1326,5 +1412,39 @@
   },
   "components": {
     "offline": "Parece que no tienes conexión."
+  },
+  "feedback": {
+    "title": "Enviar comentarios",
+    "sentTitle": "Enviado. Gracias",
+    "close": "Cerrar",
+    "link": "¿Tienes una idea o encontraste un error?",
+    "linkAction": "Enviar comentarios",
+    "intro": "Esto le llega directamente al equipo de Mova. Leemos cada mensaje.",
+    "typeLabel": "¿De qué se trata?",
+    "types": {
+      "idea": "Idea",
+      "broken": "Algo no funciona",
+      "question": "Pregunta"
+    },
+    "prompts": {
+      "idea": "¿Qué mejoraría Mova?",
+      "broken": "¿Qué pasó?",
+      "question": "¿Qué quieres saber?"
+    },
+    "placeholders": {
+      "idea": "Cuéntanos qué te gustaría ver",
+      "broken": "¿Qué estabas haciendo y qué salió mal?",
+      "question": "Pregúntanos lo que quieras"
+    },
+    "addScreenshot": "Agregar una captura de pantalla (opcional)",
+    "screenshotAdded": "Captura agregada: {{name}}",
+    "screenshotInvalid": "Usa una imagen JPG, PNG o WebP de menos de 5 MB.",
+    "attachedNote": "Para ayudarnos a revisarlo, incluiremos la pantalla de la que vienes, tu dispositivo y la versión de la app. No incluiremos datos de tus clientes.",
+    "send": "Enviar a Mova",
+    "failed": "No pudimos enviarlo. Inténtalo de nuevo.",
+    "limited": "Enviaste muchos comentarios en esta hora. Inténtalo más tarde.",
+    "thanks": "Gracias. Si necesitamos más detalles o tenemos una respuesta, te escribiremos por correo.",
+    "thanksEmail": "Gracias. Si necesitamos más detalles o tenemos una respuesta, te escribiremos a {{email}}.",
+    "done": "Listo"
   }
 }
