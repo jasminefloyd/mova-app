@@ -108,13 +108,23 @@ export function OnboardingFlow() {
         if (typeof savedForm.bio === 'string') setBio(savedForm.bio);
         if (Array.isArray(savedForm.specialties)) setSpecialties(savedForm.specialties.filter((value): value is string => typeof value === 'string').slice(0, 5));
       }
+      if (progress?.current_step === 'complete') {
+        // A stylist who already finished onboarding belongs on Home, not on step 1 (task 2.1).
+        const { data: business } = await supabase.from('mova_artist_businesses').select('business_number').eq('id', id).maybeSingle();
+        if (!active || !business?.business_number) return;
+        window.sessionStorage.setItem('mova_active_artist_business_id', id);
+        window.sessionStorage.setItem('mova_active_artist_business_display_id', displayId('BID', business.business_number));
+        const target = operatorLocation(id, '');
+        if (target.startsWith('https://')) window.location.assign(target); else navigate(target, { replace: true });
+        return;
+      }
       if (progress?.current_step && progress.current_step !== 'complete') {
         const mapped = progress.current_step === 'location' || progress.current_step === 'payments' ? 'publish' : progress.current_step;
         if (mapped === 'profile' || mapped === 'photo' || mapped === 'services' || mapped === 'publish') setStep(mapped);
       }
     })();
     return () => { active = false; };
-  }, [location.pathname, supabase]);
+  }, [location.pathname, navigate, supabase]);
 
   useEffect(() => {
     if (!supabase || !businessId) return;
