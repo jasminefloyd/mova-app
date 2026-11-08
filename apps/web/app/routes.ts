@@ -55,6 +55,7 @@ export default [
   ]),
   route('b', '../src/app/PublicShell.tsx', { id: 'booking-manage-shell' }, [route(':token', '../src/features/bookings/BookingManageRoute.tsx')]),
   route('review', '../src/app/PublicShell.tsx', { id: 'public-review-shell' }, [route(':token', '../src/features/reports/ReviewPage.tsx')]),
+  route('slot', '../src/app/PublicShell.tsx', { id: 'seat-claim-shell' }, [route(':token', '../src/features/seat/ClaimSlotPage.tsx')]),
   route('__admin', '../src/routes/admin-not-found.ts'),
   route('sitemap.xml', '../src/routes/sitemap.ts'),
   route('robots.txt', '../src/routes/robots.ts'),

@@ -997,3 +997,36 @@ select,
 .mova-plan-notice { margin: 0; border-radius: var(--radius-m); padding: 10px var(--space-3); background: var(--status-confirmed-bg); font-size: var(--fs-body-s); }
 .mova-plan-notice.is-failed { background: #F6E3DF; color: var(--danger); }
 .mova-plan-notice.is-cancelled { background: var(--surface-alt); }
+
+/* 5.1 Seat filler: campaigns (31, 31b, 31c) and the client claim page (31d) */
+.mova-slots { display: grid; gap: var(--space-3); }
+.mova-slots__note { margin: 0; border-radius: var(--radius-m); padding: 10px var(--space-3); background: var(--surface-alt); color: var(--ink-secondary); font-size: var(--fs-caption); }
+.mova-slots__list { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.mova-slots__card { display: grid; gap: var(--space-3); }
+.mova-slots__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.mova-slots__head > span { display: grid; min-width: 0; gap: 2px; }
+.mova-slots__head small, .mova-slots__ends { color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-slots__filled { margin: 0; border-radius: var(--radius-m); padding: 10px var(--space-3); background: var(--status-confirmed-bg); font-weight: 600; }
+.mova-slots__fit { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-slots__copy { display: grid; gap: var(--space-1); border-radius: var(--radius-l); padding: var(--space-3); background: var(--surface-page); }
+.mova-slots__copy span, .mova-slots__copy small { color: var(--ink-muted); font-size: var(--fs-micro); font-weight: 600; }
+.mova-slots__copy p { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; overflow-wrap: anywhere; }
+.mova-slots__timeline { display: grid; gap: var(--space-2); margin: 0; padding: 0 0 0 var(--space-4); border-left: 2px solid var(--line); list-style: none; }
+.mova-slots__timeline li { display: grid; gap: 2px; font-size: var(--fs-body-s); }
+.mova-slots__timeline li.is-done strong { color: var(--forest); }
+.mova-slots__timeline small { color: var(--ink-muted); font-size: var(--fs-caption); overflow-wrap: anywhere; }
+.mova-claim { display: grid; gap: var(--space-4); padding-bottom: var(--space-8); }
+.mova-claim h1 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-l); }
+.mova-claim__head { display: grid; gap: var(--space-2); }
+.mova-claim__badge { width: fit-content; border-radius: var(--radius-pill); padding: 4px var(--space-3); background: var(--status-confirmed-bg); color: var(--forest); font-size: var(--fs-caption); font-weight: 700; }
+.mova-claim__badge.is-taken { background: var(--accent-warm); }
+.mova-claim__details dl { display: grid; gap: var(--space-3); margin: 0; }
+.mova-claim__details dl > div { display: grid; gap: 2px; }
+.mova-claim__details dt { color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-claim__details dd { margin: 0; font-weight: 600; }
+.mova-claim__one { margin: var(--space-3) 0 0; color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-claim .mova-button { width: 100%; }
+.mova-claim__other { justify-self: center; color: var(--forest); font-weight: 600; }
+.mova-claim__taken, .mova-claim__done { display: grid; gap: var(--space-3); }
+.mova-claim__taken p, .mova-claim__done p { margin: 0; }
+.mova-claim__taken .mova-button { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
