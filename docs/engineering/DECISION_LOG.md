@@ -74,7 +74,7 @@ Normative source: `docs/product/ENGINEERING_SPEC.md` v2.2. Locked decisions are 
 |---|---|---|---|
 | Stylist signup is limited to an owner-managed email allowlist. | APPROVED | Product owner / 2026-11-07 | Direct reply to invite-policy question |
 
-The allowlist is implemented in source by `mova_early_access_invites` and the Supabase Before User Created hook. The migration is unapplied and the hosted hook is not configured; hosted sign-up status remains unverified.
+The allowlist is implemented in source by `mova_early_access_invites` and the Supabase Before User Created hook. Migration `20261107174713` (`mova_early_access_invites`) is applied and present in linked production migration history; the hosted hook is not configured, so hosted sign-up enforcement remains unverified.
 
 To add or revoke an invite after applying the migration, the owner can use Supabase SQL Editor:
 
@@ -91,7 +91,7 @@ Configure the hosted Auth **Before User Created** hook to call `pg-functions://p
 
 ## Owner constraint: database identifier prefix
 
-The product owner instructed that every project-created Supabase database/schema object use the `mova_` prefix. CR-001 was approved on 2026-11-05 and is normative in Engineering Spec v2.2 §§4.1 and 4.6. Owner additionally directed that no unprefixed PostgreSQL extensions be installed; see v2.2 §4.5. The invite migration adds only `mova_`-prefixed objects and has not been applied to any Supabase database.
+The product owner instructed that every project-created Supabase database/schema object use the `mova_` prefix. CR-001 was approved on 2026-11-05 and is normative in Engineering Spec v2.2 §§4.1 and 4.6. Owner additionally directed that no unprefixed PostgreSQL extensions be installed; see v2.2 §4.5. The applied invite migration creates only `mova_`-prefixed objects.
 
 ## Approved change requests
 

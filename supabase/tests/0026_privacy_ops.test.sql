@@ -1,8 +1,8 @@
 begin;
 select plan(8);
-select has_table('public','mova_privacy_requests');
-select has_table('public','mova_security_audit_events');
-select has_function('public','mova_privacy_request_create',array['uuid','text','text','uuid']);
+select has_table('public'::name, 'mova_privacy_requests'::name);
+select has_table('public'::name, 'mova_security_audit_events'::name);
+select has_function('public'::name, 'mova_privacy_request_create'::name, array['uuid','text','text','uuid']::name[]);
 select ok((select relrowsecurity from pg_class where oid='public.mova_privacy_requests'::regclass),'privacy requests have RLS');
 select ok(not has_table_privilege('anon','public.mova_privacy_requests','SELECT'),'anonymous users cannot read privacy requests');
 select ok(not has_table_privilege('authenticated','public.mova_privacy_requests','SELECT'),'users cannot read other privacy requests');

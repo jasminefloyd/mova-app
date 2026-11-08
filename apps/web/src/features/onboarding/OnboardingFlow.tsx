@@ -5,6 +5,7 @@ import { Button, Card, Chip, StepperProgress, TextArea, TextField } from '../../
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import { operatorLocation } from '../../app/operator-url';
 import { displayId, parseDisplayId } from '../../lib/display-ids';
+import { useLocale } from '../../app/LocaleProvider';
 
 type Step = 'account' | 'profile' | 'photo' | 'services' | 'publish';
 const stepOrder: Step[] = ['account', 'profile', 'photo', 'services', 'publish'];
@@ -15,6 +16,7 @@ export function OnboardingFlow() {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { locale } = useLocale();
   const supabase = useMemo(() => {
     try { return createMovaSupabaseClient(); } catch { return null; }
   }, []);
@@ -262,7 +264,7 @@ export function OnboardingFlow() {
     try {
       if (!businessId) {
         const { data, error: claimError } = await supabase.rpc('mova_claim_artist_profile', {
-          p_display_name: displayName, p_handle: handle, p_specialties: specialties, p_bio: bio, p_preferred_locale: 'en-US',
+          p_display_name: displayName, p_handle: handle, p_specialties: specialties, p_bio: bio, p_preferred_locale: locale,
         });
         if (claimError) throw claimError;
         const claimed = Array.isArray(data) ? data[0] : data;
@@ -270,7 +272,7 @@ export function OnboardingFlow() {
       } else {
         const { error: profileError } = await supabase.rpc('mova_update_artist_profile', {
           p_artist_business_id: businessId, p_display_name: displayName, p_handle: handle,
-          p_specialties: specialties, p_bio: bio, p_preferred_locale: 'en-US',
+          p_specialties: specialties, p_bio: bio, p_preferred_locale: locale,
         });
         if (profileError) throw profileError;
       }

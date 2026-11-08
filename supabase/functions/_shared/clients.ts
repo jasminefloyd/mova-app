@@ -43,6 +43,18 @@ async function send(request: Request, operation: (a: Auth, body: Record<string, 
 export async function clientsEndpoint(request: Request) {
   return send(request, async ({ businessId, user }, body) => {
     const db = serviceClient(); const action = clean(body.action, 32);
+    if (action === 'appointment_client_number') {
+      const appointmentNumber = Number(body.appointment_number);
+      if (!Number.isSafeInteger(appointmentNumber) || appointmentNumber < 1) throw new Error('APPOINTMENT_NUMBER_INVALID');
+      const { data: appointment, error: appointmentError } = await db.from('mova_appointments').select('client_id')
+        .eq('artist_business_id', businessId).eq('appointment_number', appointmentNumber).maybeSingle();
+      if (appointmentError || !appointment) throw new Error('APPOINTMENT_NOT_FOUND');
+      if (!appointment.client_id) return { client_number: null };
+      const { data: client, error: clientError } = await db.from('mova_clients').select('client_number')
+        .eq('artist_business_id', businessId).eq('id', appointment.client_id).maybeSingle();
+      if (clientError || !client) throw new Error('APPOINTMENT_CLIENT_NOT_FOUND');
+      return { client_number: client.client_number };
+    }
     if (action === 'list') {
       const { data, error } = await db.from('mova_clients').select('id,client_number,display_name,email,phone,preferred_locale,source,marketing_opted_out,last_visit_at,visit_count,created_at').eq('artist_business_id', businessId).order('display_name').limit(500);
       if (error) throw new Error('CLIENT_LIST_FAILED'); const search = clean(body.search, 100).toLowerCase();

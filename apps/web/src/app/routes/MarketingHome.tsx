@@ -2,6 +2,7 @@ import { useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Checkbox, Icon, TextField } from '../../components';
+import { waitlistEnabled } from '../../lib/env';
 
 type WorkArrangement = 'booth_chair_renter' | 'suite_renter' | 'commission_stylist' | 'other_beauty_professional';
 type WaitlistValues = { email: string; workArrangement: WorkArrangement; marketingOptIn: boolean };
@@ -56,7 +57,7 @@ export default function MarketingHome() {
           <p className="mova-marketing-home__badge">{t('marketing.comingSoon')}</p>
           <h1>{t('marketing.headline')}</h1>
           <p className="mova-marketing-home__intro">{t('marketing.intro')}</p>
-          <WaitlistForm tone="light" joined={joined} submitting={submitting} error={submitError} onSubmit={submit} />
+          <WaitlistForm tone="light" enabled={waitlistEnabled} joined={joined} submitting={submitting} error={submitError} onSubmit={submit} />
         </div>
         <figure className="mova-marketing-home__walkthrough">
           <video ref={videoRef} controls preload="metadata" playsInline poster="/media/Mova_Walkthrough_poster.jpg" aria-label={t('marketing.walkthrough')}>
@@ -92,7 +93,7 @@ export default function MarketingHome() {
         <div className="mova-marketing-home__closing-inner">
           <h2>{t('marketing.closingTitle')}</h2>
           <p>{t('marketing.closingBody')}</p>
-          <WaitlistForm tone="dark" joined={joined} submitting={submitting} error={submitError} onSubmit={submit} />
+          <WaitlistForm tone="dark" enabled={waitlistEnabled} joined={joined} submitting={submitting} error={submitError} onSubmit={submit} />
         </div>
       </section>
     </main>
@@ -103,12 +104,16 @@ export default function MarketingHome() {
   </div>;
 }
 
-function WaitlistForm({ tone, joined, submitting, error, onSubmit }: { tone: FormTone; joined: boolean; submitting: boolean; error: boolean; onSubmit: (values: WaitlistValues) => Promise<void> }) {
+function WaitlistForm({ tone, enabled, joined, submitting, error, onSubmit }: { tone: FormTone; enabled: boolean; joined: boolean; submitting: boolean; error: boolean; onSubmit: (values: WaitlistValues) => Promise<void> }) {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [workArrangement, setWorkArrangement] = useState<WorkArrangement>('booth_chair_renter');
   const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [localError, setLocalError] = useState(false);
+
+  if (!enabled) return <div className={`mova-marketing-home__success mova-marketing-home__success--${tone}`} role="status">
+    <span><strong>{t('marketing.waitlistClosedTitle')}</strong><small>{t('marketing.waitlistClosedBody')}</small></span>
+  </div>;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

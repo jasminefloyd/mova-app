@@ -1,4 +1,5 @@
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
+import { isWaitlistEnabled } from '../_shared/waitlist-flag.ts';
 
 const workArrangements = new Set(['booth_chair_renter','suite_renter','commission_stylist','other_beauty_professional']);
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -6,6 +7,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
+  if (!isWaitlistEnabled(Deno.env.get('MOVA_WAITLIST_ENABLED'))) return respond({ code: 'WAITLIST_NOT_OPEN' }, 503);
   const length = Number(request.headers.get('content-length') ?? '0');
   if (length > 4096) return respond({ code: 'REQUEST_TOO_LARGE' }, 413);
   const rawBody = await request.text();

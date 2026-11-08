@@ -1,9 +1,9 @@
 begin;
 select plan(14);
-select has_table('public','mova_client_card_tokens');
-select has_table('public','mova_wallet_passes');
-select has_table('public','mova_wallet_device_registrations');
-select has_table('public','mova_artist_qr_scans');
+select has_table('public'::name, 'mova_client_card_tokens'::name);
+select has_table('public'::name, 'mova_wallet_passes'::name);
+select has_table('public'::name, 'mova_wallet_device_registrations'::name);
+select has_table('public'::name, 'mova_artist_qr_scans'::name);
 select ok((select relrowsecurity from pg_class where oid='public.mova_client_card_tokens'::regclass),'client card tokens have RLS enabled');
 select ok((select relrowsecurity from pg_class where oid='public.mova_wallet_passes'::regclass),'wallet passes have RLS enabled');
 select ok((select relrowsecurity from pg_class where oid='public.mova_wallet_device_registrations'::regclass),'wallet device registrations have RLS enabled');
@@ -11,8 +11,8 @@ select ok((select relrowsecurity from pg_class where oid='public.mova_artist_qr_
 select ok(not has_table_privilege('authenticated','public.mova_client_card_tokens','SELECT'),'client card tokens are API-only');
 select ok(not has_table_privilege('authenticated','public.mova_wallet_passes','SELECT'),'wallet passes are API-only');
 select ok(not has_table_privilege('anon','public.mova_wallet_passes','SELECT'),'anonymous wallet access is denied');
-select has_index('public','mova_client_card_tokens','mova_client_card_tokens_active_uq');
-select has_index('public','mova_artist_qr_scans','mova_artist_qr_scans_session_uq');
+select has_index('public'::name, 'mova_client_card_tokens'::name, 'mova_client_card_tokens_active_uq'::name);
+select has_index('public'::name, 'mova_artist_qr_scans'::name, 'mova_artist_qr_scans_session_uq'::name);
 select ok(not has_table_privilege('anon','public.mova_artist_qr_scans','SELECT'),'scan traffic has no anonymous read path');
 select * from finish();
 rollback;

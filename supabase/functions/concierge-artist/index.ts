@@ -61,5 +61,22 @@ Deno.serve(async(request)=>{
   const {error}=await db.from('mova_quote_requests').update({status:body.status,quoted_minor:amount,updated_at:new Date().toISOString()}).eq('artist_business_id',actor.businessId).eq('id',body.id);
   return error?respond({code:'QUOTE_UPDATE_FAILED'},500):respond({updated:true});
  }
+ if(body.action==='quote-detail'){
+  if(typeof body.id!=='string')return respond({code:'INVALID_QUOTE'},422);
+  const {data:quote,error:quoteError}=await db.from('mova_quote_requests').select('id,conversation_id,client_id,service_category,details,media,risk_flags,quoted_minor,status,created_at').eq('artist_business_id',actor.businessId).eq('id',body.id).maybeSingle();
+  if(quoteError)return respond({code:'QUOTE_READ_FAILED'},500);if(!quote)return respond({code:'QUOTE_NOT_FOUND'},404);
+  const [{data:conversation,error:conversationError},{data:client,error:clientError}]=await Promise.all([
+   db.from('mova_conversations').select('channel,locale').eq('artist_business_id',actor.businessId).eq('id',quote.conversation_id).maybeSingle(),
+   quote.client_id?db.from('mova_clients').select('display_name').eq('artist_business_id',actor.businessId).eq('id',quote.client_id).maybeSingle():Promise.resolve({data:null,error:null}),
+  ]);
+  if(conversationError||clientError)return respond({code:'QUOTE_CONTEXT_READ_FAILED'},500);if(!conversation)return respond({code:'CONVERSATION_NOT_FOUND'},404);
+  return respond({quote:{id:quote.id,conversation_id:quote.conversation_id,service_category:quote.service_category,details:quote.details,media_count:Array.isArray(quote.media)?quote.media.length:0,risk_flags:Array.isArray(quote.risk_flags)?quote.risk_flags:[],quoted_minor:quote.quoted_minor,status:quote.status,created_at:quote.created_at,client_name:client?.display_name??null,channel:conversation.channel,locale:conversation.locale}});
+ }
+ if(body.action==='save-quote-estimate'){
+  if(typeof body.id!=='string'||!Number.isSafeInteger(body.quoted_minor)||Number(body.quoted_minor)<=0)return respond({code:'INVALID_QUOTE_AMOUNT'},422);
+  const {data,error}=await db.from('mova_quote_requests').update({quoted_minor:Number(body.quoted_minor),updated_at:new Date().toISOString()}).eq('artist_business_id',actor.businessId).eq('id',body.id).eq('status','open').select('id').maybeSingle();
+  if(error)return respond({code:'QUOTE_ESTIMATE_SAVE_FAILED'},500);if(!data)return respond({code:'QUOTE_NOT_OPEN'},409);
+  return respond({saved:true,message_sent:false});
+ }
  return respond({code:'INVALID_ACTION'},422);
 });

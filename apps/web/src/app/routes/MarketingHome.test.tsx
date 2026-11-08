@@ -15,10 +15,10 @@ describe('temporary public landing page', () => {
     expect(html).toContain('Join the waitlist');
   });
 
-  it('renders the waitlist fields and leaves legal links non-interactive', () => {
+  it('keeps waitlist collection closed by default and leaves legal links non-interactive', () => {
     const html = renderToStaticMarkup(<MemoryRouter><MarketingHome /></MemoryRouter>);
-    expect(html).toContain('type="email"');
-    expect(html).toContain('Booth renter');
+    expect(html).not.toContain('type="email"');
+    expect(html).toContain("Early access registration isn&#x27;t open yet.");
     expect(html).toContain('aria-disabled="true">Privacy policy');
     expect(html).toContain('aria-disabled="true">Terms');
   });

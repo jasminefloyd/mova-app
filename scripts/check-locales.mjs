@@ -1,9 +1,10 @@
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const resourceDirectory = resolve(scriptDirectory, '../apps/web/src/i18n/resources');
+const sourceDirectory = resolve(scriptDirectory, '../apps/web/src');
 
 function leafMap(value, prefix = '', result = new Map()) {
   for (const [key, child] of Object.entries(value)) {
@@ -33,20 +34,46 @@ export function validateLocaleCatalogs(catalogs, criticalKeys) {
   return problems;
 }
 
+async function sourceFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const nested = await Promise.all(entries.map(async (entry) => {
+    const path = resolve(directory, entry.name);
+    if (entry.isDirectory()) return sourceFiles(path);
+    return /\.(?:ts|tsx|js|jsx)$/.test(entry.name) && !/\.(?:test|spec)\./.test(entry.name) ? [path] : [];
+  }));
+  return nested.flat();
+}
+
+async function validateLiteralTranslationCalls(catalogs) {
+  const knownKeys = leafMap(catalogs['en-US']);
+  const files = await sourceFiles(sourceDirectory);
+  const problems = [];
+  const callPattern = /\b(?:t|i18n\.t)\(\s*(['"`])([^'"`]+)\1/g;
+  for (const path of files) {
+    const source = await readFile(path, 'utf8');
+    for (const match of source.matchAll(callPattern)) {
+      const key = match[2];
+      if (key && !key.includes('${') && !knownKeys.has(key)) problems.push(`${path.replace(`${sourceDirectory}/`, '')} references missing translation ${key}`);
+    }
+  }
+  return problems;
+}
+
 async function checkLocaleFiles() {
   const [enText, esText, criticalText] = await Promise.all([
     readFile(resolve(resourceDirectory, 'en-US/common.json'), 'utf8'),
     readFile(resolve(resourceDirectory, 'es-US/common.json'), 'utf8'),
     readFile(resolve(scriptDirectory, '../apps/web/src/i18n/critical-keys.json'), 'utf8'),
   ]);
-  const problems = validateLocaleCatalogs({ 'en-US': JSON.parse(enText), 'es-US': JSON.parse(esText) }, JSON.parse(criticalText));
+  const catalogs = { 'en-US': JSON.parse(enText), 'es-US': JSON.parse(esText) };
+  const problems = [...validateLocaleCatalogs(catalogs, JSON.parse(criticalText)), ...await validateLiteralTranslationCalls(catalogs)];
   if (problems.length) {
     console.error(`Locale validation failed (${problems.length} issue${problems.length === 1 ? '' : 's'}):`);
     for (const problem of problems) console.error(`- ${problem}`);
     process.exitCode = 1;
     return;
   }
-  console.log(`Locale validation passed: en-US and es-US have matching keys and ${JSON.parse(criticalText).length} critical strings.`);
+  console.log(`Locale validation passed: en-US and es-US have matching keys, all literal translation calls resolve, and ${JSON.parse(criticalText).length} critical strings exist.`);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await checkLocaleFiles();

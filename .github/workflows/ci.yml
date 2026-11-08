@@ -28,6 +28,25 @@ jobs:
       - run: pnpm test
       - run: pnpm check-locales
       - run: pnpm build
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: 2.84.2
+      - name: Disable optional demo seed in isolated CI database
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          config = Path("supabase/config.toml")
+          config.write_text(config.read_text() + "\n[db.seed]\nenabled = false\n")
+          PY
+      - name: Start isolated Supabase database stack
+        run: supabase start --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - name: Run pgTAP database suite
+        run: supabase test db
+      - name: Stop isolated local database
+        if: always()
+        run: supabase stop --no-backup
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - run: pnpm test:visual

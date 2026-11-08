@@ -1,8 +1,8 @@
 begin;
 select plan(10);
-select has_table('public','mova_waitlist_signups');
-select has_function('public','mova_waitlist_register',array['text','text','text','boolean']);
-select has_trigger('public','mova_waitlist_signups','mova_waitlist_signups_touch_updated_at');
+select has_table('public'::name, 'mova_waitlist_signups'::name);
+select has_function('public'::name, 'mova_waitlist_register'::name, array['text','text','text','boolean']::name[]);
+select has_trigger('public'::name, 'mova_waitlist_signups'::name, 'mova_waitlist_signups_touch_updated_at'::name);
 select ok((select relrowsecurity from pg_class where oid='public.mova_waitlist_signups'::regclass),'waitlist table has RLS enabled');
 select ok(exists(select 1 from pg_constraint where conrelid='public.mova_waitlist_signups'::regclass and conname='mova_waitlist_signups_email_normalized_uq'),'normalized email is unique');
 select ok(has_function_privilege('service_role','public.mova_waitlist_register(text,text,text,boolean)','EXECUTE'),'waitlist registration is available to service role');

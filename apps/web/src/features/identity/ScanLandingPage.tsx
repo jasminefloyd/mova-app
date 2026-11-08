@@ -5,6 +5,7 @@ import { Button, Card, EmptyState, LocationTag } from '../../components';
 import { publicEnv } from '../../lib/env';
 import type { PublicArtist } from '../showcase/PublicArtistPage';
 import { trackProfileEvent } from '../reports/track';
+import { PublicLocaleToggle } from '../../app/PublicLocaleToggle';
 
 const endpoint=(name:string)=>`${publicEnv.VITE_SUPABASE_URL}/functions/v1/${name}`;
 export function ScanLandingPage(){
@@ -18,7 +19,7 @@ export function ScanLandingPage(){
   if(error||!artist)return <main className="mova-page mova-scan-landing"><EmptyState title={t('identity.artistUnavailable')} detail={t('identity.artistUnavailableDetail')}/></main>;
   const photo=artist.profile.photo_urls.profile?.['512'];const bookUrl=`/a/${encodeURIComponent(artist.profile.handle)}/book`;const signInUrl=`/signin?artist=${encodeURIComponent(artist.profile.handle)}&returnTo=${encodeURIComponent(`/a/${artist.profile.handle}`)}`;
   return <main className="mova-page mova-scan-landing">
-    <p className="mova-wordmark">mova.</p><section className="mova-scan-landing__hero">
+    <div className="mova-scan-landing__brand"><p className="mova-wordmark">mova.</p><PublicLocaleToggle /></div><section className="mova-scan-landing__hero">
       {photo?<img src={photo} alt=""/>:<span className="mova-scan-landing__avatar" aria-hidden="true">{artist.profile.display_name.split(/\s+/).map(part=>part[0]).slice(0,2).join('').toUpperCase()}</span>}
       <h1>{artist.profile.display_name}</h1><p>@{artist.profile.handle}</p>
     </section>

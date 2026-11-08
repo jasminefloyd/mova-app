@@ -33,6 +33,17 @@ test('landing page sign-in and sign-up actions open auth', async ({ page }) => {
   await expect(page).toHaveURL(/\/auth$/);
 });
 
+test('waitlist stays closed by default until A-14 launch checks are approved', async ({ page }) => {
+  const submissions: string[] = [];
+  page.on('request', request => {
+    if (request.url().includes('/functions/v1/waitlist-signup')) submissions.push(request.url());
+  });
+  await page.goto('/');
+  await expect(page.getByLabel('Email', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('status').filter({ hasText: "Early access registration isn't open yet." })).toHaveCount(2);
+  expect(submissions).toEqual([]);
+});
+
 test('artist locale is selected in Settings without a landing-page selector', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByLabel('Language')).toHaveCount(0);
@@ -43,6 +54,41 @@ test('artist locale is selected in Settings without a landing-page selector', as
   await page.getByLabel('Language', { exact: true }).selectOption('es-US');
   await openOperatorPage(page, '/settings');
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-US');
+});
+
+test('public guest locale persists across pages and explicit URL locale takes precedence', async ({ page }) => {
+  const artist = {
+    profile: { display_name: 'Nia Flores', handle: 'nia-flores', specialties: ['Color'], bio: '', photo_urls: {} },
+    services: [], locations: [], looks: [], bookable: false,
+  };
+  const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
+  await page.addInitScript(() => {
+    if (localStorage.getItem('mova_guest_locale') === null) localStorage.setItem('mova_guest_locale', 'en-US');
+  });
+  await page.route('**/functions/v1/public-artist', route => route.fulfill({
+    status: 200, contentType: 'application/json', headers: cors,
+    body: JSON.stringify({ data: artist, error: null, request_id: 'public-locale-fixture' }),
+  }));
+  await page.route('**/functions/v1/scan-landing', route => route.fulfill({
+    status: 200, contentType: 'application/json', headers: cors,
+    body: JSON.stringify({ data: { recorded: true }, error: null, request_id: 'scan-locale-fixture' }),
+  }));
+
+  await page.goto('/s/nia-flores');
+  await expect(page.getByRole('heading', { level: 1, name: 'Nia Flores' })).toBeVisible();
+  await page.getByRole('button', { name: 'ES', exact: true }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'es-US');
+  await expect(page.getByRole('button', { name: 'ES', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page).toHaveURL(/\?locale=es-US$/);
+  await expect(page.getByRole('button', { name: 'Reservar con Nia' })).toBeVisible();
+
+  await page.goto('/s/nia-flores');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'es-US');
+  await expect(page.getByRole('button', { name: 'Reservar con Nia' })).toBeVisible();
+
+  await page.goto('/s/nia-flores?locale=en-US');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
+  await expect(page.getByRole('button', { name: 'Book with Nia' })).toBeVisible();
 });
 
 test('service worker does not put private API responses in CacheStorage', async ({ page }) => {

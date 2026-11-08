@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, ErrorState, SectionOverline } from '../../components';
 import { publicEnv } from '../../lib/env';
 import { ErrorFallback } from '../../app/ErrorFallback';
+import { PublicLocaleToggle } from '../../app/PublicLocaleToggle';
 import { ConciergeWidget } from '../concierge/ConciergePages';
 import { trackProfileEvent } from '../reports/track';
 
@@ -15,13 +16,13 @@ export type PublicArtist = {
   services: Service[]; looks: Look[]; locations: PublicLocation[]; bookable: boolean;
 };
 
-export function PublicArtistPage({ initialArtist = null, preview = false, handleOverride, initialLocale = 'en-US' }: { initialArtist?: PublicArtist | null; preview?: boolean; handleOverride?: string; initialLocale?: 'en-US' | 'es-US' }) {
+export function PublicArtistPage({ initialArtist = null, preview = false, handleOverride, initialLocale }: { initialArtist?: PublicArtist | null; preview?: boolean; handleOverride?: string; initialLocale?: 'en-US' | 'es-US' }) {
   const routeParams = useParams();
   const handle = handleOverride ?? routeParams.handle ?? '';
   const [params, setParams] = useSearchParams();
   const { i18n } = useTranslation();
   const navigate = useNavigate();
-  const locale = params.get('locale') === 'es-US' ? 'es-US' : params.get('locale') === 'en-US' ? 'en-US' : initialLocale;
+  const locale = params.get('locale') === 'es-US' ? 'es-US' : params.get('locale') === 'en-US' ? 'en-US' : initialLocale ?? (i18n.resolvedLanguage === 'es-US' ? 'es-US' : 'en-US');
   const t = i18n.getFixedT(locale);
   const tab = params.get('tab') === 'services' ? 'services' : 'looks';
   const [artist, setArtist] = useState<PublicArtist | null>(initialArtist);
@@ -67,10 +68,13 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
   if (!artist) return <ErrorFallback />;
 
   const servicesById = new Map(artist.services.map((service) => [service.id, service]));
+  const coverUrl = artist.profile.photo_urls.cover?.['512'];
+  const bookingUrl = `/a/${encodeURIComponent(handle)}/book?${new URLSearchParams({ locale })}`;
   return <main lang={locale} className="mova-page mova-public-artist">
-    <header className="mova-public-artist__header">
+    {!preview && <PublicLocaleToggle />}
+    <header className="mova-public-artist__header" style={coverUrl ? { backgroundImage: `linear-gradient(90deg, var(--forest), color-mix(in srgb, var(--forest) 68%, transparent)), url("${coverUrl}")` } : undefined}>
       {artist.profile.photo_urls.profile?.['512'] && <img className="mova-public-artist__avatar" src={artist.profile.photo_urls.profile['512']} alt="" />}
-      <div><p className="mova-wordmark">mova.</p><h1>{artist.profile.display_name}</h1><p>@{artist.profile.handle}</p></div>
+      <div><p className="mova-wordmark">mova.</p><h1>{artist.profile.display_name}</h1><p>@{artist.profile.handle}</p>{artist.locations[0] && <p className="mova-public-artist__location">{artist.locations[0].name}</p>}</div>
     </header>
     {artist.profile.specialties.length > 0 && <div className="mova-chip-list" aria-label={t('showcase.specialties')}>{artist.profile.specialties.map((specialty) => <span className="mova-chip mova-chip--static" key={specialty}>{specialty}</span>)}</div>}
     {artist.profile.bio && <p className="mova-public-artist__bio">{artist.profile.bio}</p>}
@@ -90,12 +94,13 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
       <SectionOverline>{t('showcase.services')}</SectionOverline>
       {artist.services.length ? <ul className="mova-public-services">{artist.services.map((service) => <li key={service.id}>
         <div><strong>{service.name}</strong><small>{service.category} · {service.duration_minutes} {t('showcase.minutes')}</small></div>
-        <div><span>{formatMoney(service.base_price_minor)}</span>{service.location_deposits.map((deposit) => { const location = artist.locations.find((entry) => entry.id === deposit.location_id); return <small key={deposit.location_id}>{location?.name}: {deposit.deposit_amount_minor === 0 ? t('showcase.noDeposit') : `${formatMoney(deposit.deposit_amount_minor)} ${t('showcase.deposit')}`}</small>; })}</div>
-        {artist.bookable && <Button type="button" variant="secondary" disabled={preview} onClick={() => navigate(`/a/${encodeURIComponent(handle)}/book?service_id=${encodeURIComponent(service.id)}`)}>{t('showcase.book')}</Button>}
+        <div><span>{formatMoney(service.base_price_minor, locale)}</span>{service.location_deposits.map((deposit) => { const location = artist.locations.find((entry) => entry.id === deposit.location_id); return <small key={deposit.location_id}>{location?.name}: {formatMoney(deposit.price_minor, locale)} · {deposit.deposit_amount_minor === 0 ? t('showcase.noDeposit') : `${formatMoney(deposit.deposit_amount_minor, locale)} ${t('showcase.deposit')}`}</small>; })}</div>
+        {artist.bookable && <Button type="button" variant="secondary" disabled={preview} onClick={() => navigate(`/a/${encodeURIComponent(handle)}/book?service_id=${encodeURIComponent(service.id)}&locale=${locale}`)}>{t('showcase.book')}</Button>}
       </li>)}</ul> : <EmptyState title={t('showcase.noServices')} />}
     </section>
     {!preview&&<ConciergeWidget artistHandle={handle}/>}
+    {!preview&&artist.bookable&&<div className="mova-public-artist__book"><Button onClick={()=>navigate(bookingUrl)}>{t('showcase.bookAppointment')}</Button></div>}
   </main>;
 }
 
-function formatMoney(amountMinor: number) { return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(amountMinor / 100); }
+function formatMoney(amountMinor: number, locale: string) { return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(amountMinor / 100); }

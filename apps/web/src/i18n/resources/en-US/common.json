@@ -103,7 +103,8 @@
     "locationOverridesLater": "Location-specific prices and duration can be added after you set up a location.",
     "servicesConfigured": "services configured",
     "publish": "Publish my showcase",
-    "publishError": "We couldn't publish your showcase. Try again."
+    "publishError": "We couldn't publish your showcase. Try again.",
+    "signOut": "Sign out"
   },
   "showcase": {
     "loading": "Loading artist page…",
@@ -119,7 +120,9 @@
     "minutes": "min",
     "book": "Book",
     "deposit": "deposit",
-    "noDeposit": "No deposit"
+    "noDeposit": "No deposit",
+    "bookAppointment": "Book an appointment",
+    "bookThisLook": "Book this look"
   },
   "settings": {
     "loading": "Loading your settings…",
@@ -200,7 +203,12 @@
     "plan": "Plan",
     "planNotConfigured": "Not configured",
     "languageNotifications": "Language & notifications",
-    "privacyData": "Privacy & data"
+    "privacyData": "Privacy & data",
+    "profileEditTitle": "Edit your profile",
+    "profilePhoto": "Profile photo",
+    "saveProfile": "Save profile",
+    "profileSaved": "Profile updated.",
+    "managePortfolio": "Manage portfolio"
   },
   "locations": {
     "title": "Locations & hours",
@@ -354,6 +362,11 @@
     "minutes": "min",
     "chooseDate": "Choose a date",
     "chooseTime": "Available times",
+    "bookingSummary": "Your booking",
+    "priceSummary": "Service {{amount}}",
+    "depositSummary": "{{amount}} deposit",
+    "depositUnavailableTitle": "Online booking unavailable",
+    "depositUnavailable": "Online booking is unavailable for this service because its deposit can't be paid online yet. Contact your stylist to book.",
     "yourDetails": "Your details",
     "name": "Name",
     "email": "Email",
@@ -405,7 +418,15 @@
     "runningLateQueued": "The transactional message is queued. The salon is not notified.",
     "noShow": "Mark no show",
     "clientNoteFromLook": "{{name}}’s note about this look: {{look}}",
-    "portfolioLook": "a portfolio look"
+    "portfolioLook": "a portfolio look",
+    "runningLateIntro": "Choose a delay and review what will be queued.",
+    "runningLateSelectDelay": "How late will you be?",
+    "runningLateNextClient": "Next client: {{name}}",
+    "runningLatePreview": "Delay: {{minutes}} minutes",
+    "runningLateOfferPreview": "A new appointment time will be offered in the queued update.",
+    "runningLateKeepPreview": "The queued update will keep the current appointment time.",
+    "runningLateConfirm": "Queue update",
+    "noDeposit": "No deposit"
   },
   "clients": {
     "title": "Clients",
@@ -587,9 +608,13 @@
     "rating": "Rating",
     "needsYou": "Needs you · {{count}}",
     "bookingRequest": "Booking request · {{name}}",
+    "quoteRequest": "Quote request",
+    "slotNeedsApproval": "Open slot needs approval",
+    "slotDetails": "{{time}} · {{location}}",
+    "needsError": "We couldn't load all items that need your attention.",
     "requestDetails": "{{service}} · {{day}} · {{location}} · expires in {{count}} h",
     "requestDetailsNoExpiry": "{{service}} · {{day}} · {{location}}",
-    "noRequests": "No booking requests need your attention.",
+    "noRequests": "Nothing needs your attention right now.",
     "todayCount": "Today · {{count}}",
     "calendar": "Calendar",
     "now": "Now",
@@ -890,7 +915,59 @@
     "approveSend": "Approve text & send wave 1",
     "cancelCampaign": "Cancel campaign",
     "shareSocial": "Share social post",
-    "outboundDisabled": "Messaging is turned off."
+    "outboundDisabled": "Messaging is turned off.",
+    "status": {
+      "due": "Due",
+      "contacted": "Contacted",
+      "rebooked": "Rebooked",
+      "noReply": "No reply",
+      "ineligible": "Not eligible",
+      "unknown": "Status unavailable"
+    },
+    "campaignStatus": {
+      "gapFound": "Open slot found",
+      "drafting": "Draft",
+      "needsApproval": "Needs approval",
+      "live": "Active",
+      "filled": "Filled",
+      "expired": "Expired",
+      "cancelled": "Cancelled",
+      "unknown": "Status unavailable"
+    },
+    "action": {
+      "sent": "Message sent",
+      "skipped": "Skipped",
+      "held": "Held for review",
+      "failed": "Failed",
+      "rebooked": "Rebooked",
+      "other": "Other activity"
+    },
+    "reason": {
+      "rebooked": "Booking attributed to a reminder",
+      "other": "Reason unavailable"
+    },
+    "templateType": {
+      "rebooking_reminder": "Rebooking reminder",
+      "slot_offer": "Open slot offer",
+      "slot_taken": "Slot filled",
+      "win_back": "Win-back message"
+    },
+    "templateStatus": {
+      "approved": "Approved",
+      "paused": "Paused",
+      "needsApproval": "Needs approval"
+    },
+    "progressToUsual": "Booked progress toward your usual month",
+    "groupEmpty": "No clients in this group.",
+    "templateBodyRequired": "Enter stylist-approved message copy.",
+    "saveTemplate": "Save template",
+    "off": "Off",
+    "notReady": "Not ready",
+    "open": "Open",
+    "rulesSummary": "Up to {{dailyCap}} messages per day, with at least {{frequency}} days between messages per client.",
+    "filterActivity": "Filter activity",
+    "allActivity": "All activity",
+    "activityEmpty": "No activity matches this filter."
   },
   "marketing": {
     "home": "Mova home",
@@ -928,6 +1005,8 @@
     "joinedBody": "Your information is saved. We'll invite you as we open.",
     "emailRequired": "Enter your email to join the waitlist.",
     "submitError": "We couldn't save your information. Please try again.",
+    "waitlistClosedTitle": "Early access registration isn't open yet.",
+    "waitlistClosedBody": "Check back soon for updates.",
     "copyright": "© {{year}} Mova"
   },
   "concierge": {
@@ -971,6 +1050,19 @@
     "takeover": "Take over conversation",
     "resolve": "Resolve handoff",
     "quote": "Quote request",
+    "reviewQuote": "Review quote",
+    "quoteDetailTitle": "Quote request",
+    "quoteConversation": "See conversation",
+    "quoteClientUnknown": "Client",
+    "quotePhotosUnavailable": "Photos are attached, but this review cannot display them yet.",
+    "quoteNoPhotos": "No photos were attached to this request.",
+    "quoteRiskNeedsReview": "Review the request details before you respond.",
+    "quoteEstimateLabel": "Estimate amount (USD)",
+    "quoteNotSent": "Saving stores an internal estimate only. It is not sent to the client.",
+    "quoteSaveEstimate": "Save estimate",
+    "quoteEstimateSaved": "Estimate saved. No message was sent.",
+    "quoteEstimateInvalid": "Enter an amount greater than zero.",
+    "quoteLoadError": "We couldn't load this quote request.",
     "quoteDetails": "Request details",
     "decide": "Review request",
     "quoteStatus": "Status",
@@ -987,7 +1079,57 @@
     "handoff": "Needs you",
     "disclosure": "The automated assistant is not active. Your message can be saved for the stylist to review.",
     "chatUnavailable": "Chat is not available yet. Contact the stylist using the options on this page.",
-    "send": "Send"
+    "send": "Send",
+    "conversationStatus": {
+      "handled": "Handled",
+      "needsYou": "Needs you",
+      "closed": "Closed",
+      "unknown": "Status unavailable"
+    },
+    "handoffTypes": {
+      "quote": "Quote request",
+      "exception": "Exception",
+      "complaint": "Complaint",
+      "other": "Other request"
+    },
+    "knowledgeKinds": {
+      "faq": "FAQ",
+      "prep": "Preparation",
+      "policy": "Policy",
+      "locationDetail": "Location detail",
+      "other": "Other information"
+    },
+    "knowledgeStatus": {
+      "draft": "Draft",
+      "active": "Active",
+      "archived": "Archived",
+      "other": "Other"
+    },
+    "messageStatus": {
+      "queued": "Saved for delivery",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "failed": "Failed",
+      "unknown": "Status unavailable"
+    },
+    "lowConfidence": "Low confidence",
+    "toolError": "Tool error",
+    "quoteStatuses": {
+      "open": "Open",
+      "quoted": "Quote prepared",
+      "consultOffered": "Consultation offered",
+      "booked": "Booked",
+      "closed": "Closed",
+      "unknown": "Status unavailable"
+    },
+    "metricUnavailable": "Not available",
+    "channelLabels": {
+      "webChat": "Web chat",
+      "sms": "Text message",
+      "missedCall": "Missed call",
+      "instagram": "Instagram",
+      "unknown": "Other channel"
+    }
   },
   "reports": {
     "title": "Reports",
@@ -1143,5 +1285,8 @@
     "error": "We could not complete this privacy action",
     "retry": "Dismiss",
     "exportMyData": "Download my data"
+  },
+  "components": {
+    "offline": "You appear to be offline."
   }
 }

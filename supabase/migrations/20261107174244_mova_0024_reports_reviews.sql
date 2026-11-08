@@ -180,8 +180,8 @@ begin
     from public.mova_google_reviews where artist_business_id=p_artist_business_id
       and (coalesce(provider_created_at,synced_at) at time zone v_time_zone)::date=p_local_date
   ), slot as (
-    select count(*) filter(where status='filled')::int slot_fills,
-      coalesce(sum(case when status='filled' then coalesce(se.value_minor,a.service_price_minor,0) else 0 end),0)::bigint slot_recovered_minor
+    select count(*) filter(where se.status='filled')::int slot_fills,
+      coalesce(sum(case when se.status='filled' then coalesce(se.value_minor,a.service_price_minor,0) else 0 end),0)::bigint slot_recovered_minor
     from public.mova_slot_events se left join public.mova_appointments a on a.id=se.filled_appointment_id and a.artist_business_id=se.artist_business_id
     where se.artist_business_id=p_artist_business_id and (se.created_at at time zone v_time_zone)::date=p_local_date
   ), rebooking as (
@@ -196,12 +196,12 @@ begin
     select count(*)::int share_count from public.mova_social_share_events where artist_business_id=p_artist_business_id
       and (initiated_at at time zone v_time_zone)::date=p_local_date
   ), offered as (
-    select coalesce(sum(extract(epoch from (public.mova_local_interval_end(p_local_date,l.time_zone,h.opens_at,h.closes_at)-public.mova_local_interval_start(p_local_date,l.time_zone,h.opens_at,h.closes_at))))::bigint,0) seconds
+    select coalesce(sum(extract(epoch from (public.mova_local_interval_end(p_local_date,l.time_zone,h.opens_at,h.closes_at)-public.mova_local_interval_start(p_local_date,l.time_zone,h.opens_at))))::bigint,0) seconds
     from public.mova_locations l join public.mova_location_hours h on h.artist_business_id=l.artist_business_id and h.location_id=l.id
     where l.artist_business_id=p_artist_business_id and l.is_active and l.booking_mode='instant' and h.weekday=extract(dow from p_local_date)::int
       and not exists(select 1 from public.mova_location_exceptions e where e.location_id=l.id and e.exception_date=p_local_date)
   ), exceptions as (
-    select coalesce(sum(extract(epoch from (public.mova_local_interval_end(p_local_date,l.time_zone,(x->>'opens_at')::time,(x->>'closes_at')::time)-public.mova_local_interval_start(p_local_date,l.time_zone,(x->>'opens_at')::time,(x->>'closes_at')::time))))::bigint,0) seconds
+    select coalesce(sum(extract(epoch from (public.mova_local_interval_end(p_local_date,l.time_zone,(x->>'opens_at')::time,(x->>'closes_at')::time)-public.mova_local_interval_start(p_local_date,l.time_zone,(x->>'opens_at')::time))))::bigint,0) seconds
     from public.mova_location_exceptions e join public.mova_locations l on l.id=e.location_id and l.artist_business_id=e.artist_business_id
     cross join lateral jsonb_array_elements(case when e.is_closed then '[]'::jsonb else e.hours end) x
     where e.artist_business_id=p_artist_business_id and e.exception_date=p_local_date and l.is_active and l.booking_mode='instant'

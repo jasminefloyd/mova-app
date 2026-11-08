@@ -6,7 +6,7 @@ One mobile-first web app, installable as a PWA (spec D-02). It serves:
 - **Public and client pages**: showcase `/artists/:handle`, booking, `/b/:token`, `/me`, `/s/:handle`, `/claim/:token`, `/p/:code`, `/review/:token`, `/chat/:handle` (SSR/prerender per ADR-0003)
 - **Marketing** `/en/*`, `/es/*` (F14)
 
-Routes are in spec §2.1; the screen-by-screen map is in `docs/design/SCREEN_MAP.md`.
+The active route table is `app/routes.ts`; the screen-by-screen map is in `docs/design/SCREEN_MAP.md`.
 
 ## Stack (versions pinned in P00/P01, not here)
 React + TypeScript (strict), Vite, React Router, TanStack Query, Zod (schemas from `packages/contracts`), Tailwind mapped to `packages/design-tokens`,
@@ -15,8 +15,9 @@ reviews go through Edge Functions (§3.3).
 
 ## Layout
 ```text
+app/
+  root.tsx  routes.ts
 src/
-  main.tsx  App.tsx  router.tsx
   app/          shells: ArtistShell (tabs), PublicShell, ClientShell, OnboardingShell, TabBar (separate query caches artist vs client)
   components/   design-system primitives from docs/design/COMPONENTS.md (P02)
   features/     one folder per feature (screens, hooks, feature components); see list below
@@ -28,7 +29,7 @@ src/
 Features: `auth`, `onboarding`, `showcase`, `services`, `locations`, `availability`, `booking`, `calendar`, `clients`, `notes`, `import`, `money`, `getpaid`, `calendarsync`, `qr`, `settings`, `plans`, `revenue/hub`, `revenue/forecast`, `revenue/slots`, `revenue/pipeline`, `revenue/winback`, `revenue/autopilot`, `revenue/templates`, `revenue/activity`, `concierge/inbox`, `concierge/thread`, `concierge/quotes`, `concierge/setup`, `reports`, `reputation`, `reviews`, `customer/signin`, `customer/profile`, `customer/card`, `customer/wallet`, `customer/scan`, `customer/claim`, `acquisition`, `notifications`.
 
 i18n namespaces (§9 + v1 F13): common, onboarding, booking, payments, clients, growth, legal, marketing, customer, wallet, notes, revenue, slots,
-autopilot, templates, reports, reviews, concierge, getpaid. `scripts/check-locales.mjs` enforces parity and the critical-string list.
+autopilot, templates, reports, reviews, concierge, getpaid. `scripts/check-locales.mjs` enforces locale parity, critical strings, and literal translation-call keys during builds.
 
 ## Rules
 - Screens compose `src/components/` only, styled with tokens. No raw hex values (see `docs/design/README.md`).

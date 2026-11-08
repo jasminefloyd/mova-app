@@ -103,7 +103,8 @@
     "locationOverridesLater": "Puedes agregar precios y duración por ubicación después de configurar una ubicación.",
     "servicesConfigured": "servicios configurados",
     "publish": "Publicar mi página",
-    "publishError": "No pudimos publicar tu página. Inténtalo de nuevo."
+    "publishError": "No pudimos publicar tu página. Inténtalo de nuevo.",
+    "signOut": "Cerrar sesión"
   },
   "showcase": {
     "loading": "Cargando la página profesional…",
@@ -119,7 +120,9 @@
     "minutes": "min",
     "book": "Reservar",
     "deposit": "depósito",
-    "noDeposit": "Sin depósito"
+    "noDeposit": "Sin depósito",
+    "bookAppointment": "Reservar una cita",
+    "bookThisLook": "Reservar este estilo"
   },
   "settings": {
     "loading": "Cargando tu configuración…",
@@ -200,7 +203,12 @@
     "plan": "Plan",
     "planNotConfigured": "Sin configurar",
     "languageNotifications": "Idioma y notificaciones",
-    "privacyData": "Privacidad y datos"
+    "privacyData": "Privacidad y datos",
+    "profileEditTitle": "Editar tu perfil",
+    "profilePhoto": "Foto de perfil",
+    "saveProfile": "Guardar perfil",
+    "profileSaved": "Perfil actualizado.",
+    "managePortfolio": "Administrar portafolio"
   },
   "locations": {
     "title": "Ubicaciones y horarios",
@@ -354,6 +362,11 @@
     "minutes": "min",
     "chooseDate": "Elige una fecha",
     "chooseTime": "Horarios disponibles",
+    "bookingSummary": "Tu cita",
+    "priceSummary": "Servicio {{amount}}",
+    "depositSummary": "Depósito de {{amount}}",
+    "depositUnavailableTitle": "Reserva en línea no disponible",
+    "depositUnavailable": "La reserva en línea no está disponible para este servicio porque aún no se puede pagar el depósito. Comunícate con tu estilista para coordinar tu cita.",
     "yourDetails": "Tus datos",
     "name": "Nombre",
     "email": "Correo electrónico",
@@ -405,7 +418,15 @@
     "runningLateQueued": "El mensaje transaccional quedó en cola. El salón no recibió aviso.",
     "noShow": "Marcar como inasistencia",
     "clientNoteFromLook": "Nota de {{name}} sobre este look: {{look}}",
-    "portfolioLook": "un look del portafolio"
+    "portfolioLook": "un look del portafolio",
+    "runningLateIntro": "Elige el retraso y revisa lo que se pondrá en cola.",
+    "runningLateSelectDelay": "¿Cuánto tiempo de retraso tendrás?",
+    "runningLateNextClient": "Siguiente cliente: {{name}}",
+    "runningLatePreview": "Retraso: {{minutes}} minutos",
+    "runningLateOfferPreview": "La actualización en cola ofrecerá un nuevo horario.",
+    "runningLateKeepPreview": "La actualización en cola mantendrá el horario actual.",
+    "runningLateConfirm": "Poner actualización en cola",
+    "noDeposit": "Sin depósito"
   },
   "clients": {
     "title": "Clientes",
@@ -587,9 +608,13 @@
     "rating": "Calificación",
     "needsYou": "Requieren tu atención · {{count}}",
     "bookingRequest": "Solicitud de cita · {{name}}",
+    "quoteRequest": "Solicitud de cotización",
+    "slotNeedsApproval": "Un espacio abierto requiere aprobación",
+    "slotDetails": "{{time}} · {{location}}",
+    "needsError": "No pudimos cargar todos los elementos que requieren tu atención.",
     "requestDetails": "{{service}} · {{day}} · {{location}} · vence en {{count}} h",
     "requestDetailsNoExpiry": "{{service}} · {{day}} · {{location}}",
-    "noRequests": "No hay solicitudes de cita que requieran tu atención.",
+    "noRequests": "Nada requiere tu atención por ahora.",
     "todayCount": "Hoy · {{count}}",
     "calendar": "Calendario",
     "now": "Ahora",
@@ -890,7 +915,59 @@
     "approveSend": "Aprobar texto y enviar primera ronda",
     "cancelCampaign": "Cancelar campaña",
     "shareSocial": "Compartir publicación",
-    "outboundDisabled": "La mensajería está desactivada."
+    "outboundDisabled": "La mensajería está desactivada.",
+    "status": {
+      "due": "Pendiente",
+      "contacted": "Contactado",
+      "rebooked": "Volvió a reservar",
+      "noReply": "Sin respuesta",
+      "ineligible": "No elegible",
+      "unknown": "Estado no disponible"
+    },
+    "campaignStatus": {
+      "gapFound": "Espacio libre encontrado",
+      "drafting": "Borrador",
+      "needsApproval": "Requiere aprobación",
+      "live": "Activa",
+      "filled": "Completada",
+      "expired": "Vencida",
+      "cancelled": "Cancelada",
+      "unknown": "Estado no disponible"
+    },
+    "action": {
+      "sent": "Mensaje enviado",
+      "skipped": "Omitido",
+      "held": "En espera de revisión",
+      "failed": "Falló",
+      "rebooked": "Volvió a reservar",
+      "other": "Otra actividad"
+    },
+    "reason": {
+      "rebooked": "Reserva atribuida a un recordatorio",
+      "other": "Motivo no disponible"
+    },
+    "templateType": {
+      "rebooking_reminder": "Recordatorio para volver a reservar",
+      "slot_offer": "Oferta de espacio libre",
+      "slot_taken": "Espacio ocupado",
+      "win_back": "Mensaje para recuperar clientes"
+    },
+    "templateStatus": {
+      "approved": "Aprobado",
+      "paused": "Pausado",
+      "needsApproval": "Requiere aprobación"
+    },
+    "progressToUsual": "Progreso reservado hacia tu mes habitual",
+    "groupEmpty": "No hay clientes en este grupo.",
+    "templateBodyRequired": "Escribe un mensaje aprobado por la estilista.",
+    "saveTemplate": "Guardar plantilla",
+    "off": "Desactivada",
+    "notReady": "Aún no disponible",
+    "open": "Abrir",
+    "rulesSummary": "Hasta {{dailyCap}} mensajes al día y al menos {{frequency}} días entre mensajes por cliente.",
+    "filterActivity": "Filtrar actividad",
+    "allActivity": "Toda la actividad",
+    "activityEmpty": "No hay actividad que coincida con este filtro."
   },
   "marketing": {
     "home": "Inicio de Mova",
@@ -928,6 +1005,8 @@
     "joinedBody": "Guardamos tu información. Te invitaremos cuando abramos.",
     "emailRequired": "Escribe tu correo electrónico para unirte a la lista de espera.",
     "submitError": "No pudimos guardar tu información. Inténtalo de nuevo.",
+    "waitlistClosedTitle": "El registro de acceso anticipado aún no está abierto.",
+    "waitlistClosedBody": "Vuelve pronto para ver las novedades.",
     "copyright": "© {{year}} Mova"
   },
   "concierge": {
@@ -971,6 +1050,19 @@
     "takeover": "Tomar control de la conversación",
     "resolve": "Resolver solicitud",
     "quote": "Solicitud de cotización",
+    "reviewQuote": "Revisar cotización",
+    "quoteDetailTitle": "Solicitud de cotización",
+    "quoteConversation": "Ver conversación",
+    "quoteClientUnknown": "Cliente",
+    "quotePhotosUnavailable": "La solicitud incluye fotos, pero aún no se pueden mostrar aquí.",
+    "quoteNoPhotos": "No se adjuntaron fotos a esta solicitud.",
+    "quoteRiskNeedsReview": "Revisa los detalles antes de responder.",
+    "quoteEstimateLabel": "Monto estimado (USD)",
+    "quoteNotSent": "Al guardar, solo se almacena una estimación interna. No se envía al cliente.",
+    "quoteSaveEstimate": "Guardar estimación",
+    "quoteEstimateSaved": "Estimación guardada. No se envió ningún mensaje.",
+    "quoteEstimateInvalid": "Ingresa un monto mayor que cero.",
+    "quoteLoadError": "No pudimos cargar esta solicitud de cotización.",
     "quoteDetails": "Detalles de la solicitud",
     "decide": "Revisar solicitud",
     "quoteStatus": "Estado",
@@ -987,7 +1079,57 @@
     "handoff": "Necesita tu atención",
     "disclosure": "El asistente automático no está activo. Puedes guardar tu mensaje para que la estilista lo revise.",
     "chatUnavailable": "El chat aún no está disponible. Contacta a la estilista con las opciones de esta página.",
-    "send": "Enviar"
+    "send": "Enviar",
+    "conversationStatus": {
+      "handled": "Atendida",
+      "needsYou": "Necesita tu atención",
+      "closed": "Cerrada",
+      "unknown": "Estado no disponible"
+    },
+    "handoffTypes": {
+      "quote": "Solicitud de cotización",
+      "exception": "Excepción",
+      "complaint": "Queja",
+      "other": "Otra solicitud"
+    },
+    "knowledgeKinds": {
+      "faq": "Pregunta frecuente",
+      "prep": "Preparación",
+      "policy": "Política",
+      "locationDetail": "Detalles de ubicación",
+      "other": "Otra información"
+    },
+    "knowledgeStatus": {
+      "draft": "Borrador",
+      "active": "Activa",
+      "archived": "Archivada",
+      "other": "Otro"
+    },
+    "messageStatus": {
+      "queued": "Guardado para enviar",
+      "sent": "Enviado",
+      "delivered": "Entregado",
+      "failed": "Falló",
+      "unknown": "Estado no disponible"
+    },
+    "lowConfidence": "Confianza baja",
+    "toolError": "Error de herramienta",
+    "quoteStatuses": {
+      "open": "Abierta",
+      "quoted": "Cotización preparada",
+      "consultOffered": "Consulta ofrecida",
+      "booked": "Reservada",
+      "closed": "Cerrada",
+      "unknown": "Estado no disponible"
+    },
+    "metricUnavailable": "No disponible",
+    "channelLabels": {
+      "webChat": "Chat web",
+      "sms": "Mensaje de texto",
+      "missedCall": "Llamada perdida",
+      "instagram": "Instagram",
+      "unknown": "Otro canal"
+    }
   },
   "reports": {
     "title": "Informes",
@@ -1143,5 +1285,8 @@
     "error": "No se pudo completar esta acción de privacidad",
     "retry": "Cerrar",
     "exportMyData": "Descargar mis datos"
+  },
+  "components": {
+    "offline": "Parece que no tienes conexión."
   }
 }

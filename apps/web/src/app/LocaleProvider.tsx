@@ -33,3 +33,7 @@ export function useLocale(): LocaleContextValue {
   if (!value) throw new Error('useLocale must be used inside LocaleProvider');
   return value;
 }
+
+export function useOptionalLocale(): LocaleContextValue | null {
+  return useContext(LocaleContext);
+}

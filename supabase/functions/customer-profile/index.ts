@@ -92,18 +92,26 @@ Deno.serve(async(request)=>{
       return error?respond({code:'CLIENT_PROFILE_DELETE_FAILED'},500):respond({deleted:true});
     }
     if(body.action==='profile'){
-      const {data:links,error:linksError}=await db.from('mova_client_customer_links').select('artist_business_id,client_id,mova_artist_businesses(name),mova_artist_profiles(display_name,handle,profile_photo_path)').eq('customer_account_id',account.id).is('unlinked_at',null);
+      const {data:links,error:linksError}=await db.from('mova_client_customer_links').select('artist_business_id,client_id').eq('customer_account_id',account.id).is('unlinked_at',null);
       if(linksError)return respond({code:'CLIENT_PROFILE_READ_FAILED'},500);
+      const businessIds=[...new Set((links??[]).map((link)=>link.artist_business_id))];
+      const [businessesResult,profilesResult]=await Promise.all([
+        businessIds.length?db.from('mova_artist_businesses').select('id,name').in('id',businessIds):Promise.resolve({data:[],error:null}),
+        businessIds.length?db.from('mova_artist_profiles').select('artist_business_id,display_name,handle,profile_photo_path').in('artist_business_id',businessIds):Promise.resolve({data:[],error:null}),
+      ]);
+      if(businessesResult.error||profilesResult.error)return respond({code:'CLIENT_PROFILE_READ_FAILED'},500);
+      const businessNames=new Map((businessesResult.data??[]).map((business)=>[business.id,business.name]));
+      const profiles=new Map((profilesResult.data??[]).map((profile)=>[profile.artist_business_id,profile]));
       const stylists:Array<{business_id:string;name:string;handle:string;photo_path:string|null;consents:{appointment_updates:boolean;reminders:boolean;offers:boolean}}>=[];
       const upcoming:Array<{id:string;service:string;starts_at:string;status:string;artist:string;handle:string;location:string}>=[];
       for(const link of links??[]){
-        const joined=link as unknown as {artist_business_id:string;client_id:string;mova_artist_businesses:{name:string}|null;mova_artist_profiles:{display_name:string;handle:string;profile_photo_path:string|null}|null};
-        const businessName=joined.mova_artist_profiles?.display_name??joined.mova_artist_businesses?.name??'';
+        const profile=profiles.get(link.artist_business_id);
+        const businessName=profile?.display_name??businessNames.get(link.artist_business_id)??'';
         const {data:consents}=await db.from('mova_client_consents').select('purpose,channel,granted,changed_at').eq('artist_business_id',link.artist_business_id).eq('client_id',link.client_id).order('changed_at',{ascending:false});
         const latest=new Map<string,boolean>();for(const consent of consents??[]){const key=`${consent.purpose}:${consent.channel}`;if(!latest.has(key))latest.set(key,consent.granted);}
-        stylists.push({business_id:link.artist_business_id,name:businessName,handle:joined.mova_artist_profiles?.handle??'',photo_path:joined.mova_artist_profiles?.profile_photo_path??null,consents:{appointment_updates:latest.get('appointment_updates:sms')??false,reminders:latest.get('rebooking_reminders:sms')??false,offers:latest.get('offers:sms')??false}});
+        stylists.push({business_id:link.artist_business_id,name:businessName,handle:profile?.handle??'',photo_path:profile?.profile_photo_path??null,consents:{appointment_updates:latest.get('appointment_updates:sms')??false,reminders:latest.get('rebooking_reminders:sms')??false,offers:latest.get('offers:sms')??false}});
         const {data:appointments}=await db.from('mova_appointments').select('id,service_name_snapshot,starts_at,status,location_id,mova_locations(name)').eq('artist_business_id',link.artist_business_id).eq('client_id',link.client_id).in('status',['confirmed','pending_artist','pending_payment']).gt('starts_at',new Date().toISOString()).order('starts_at').limit(10);
-        for(const item of appointments??[]){const joinedAppointment=item as unknown as {id:string;service_name_snapshot:string;starts_at:string;status:string;mova_locations:{name:string}|null};upcoming.push({id:joinedAppointment.id,service:joinedAppointment.service_name_snapshot,starts_at:joinedAppointment.starts_at,status:joinedAppointment.status,artist:businessName,handle:joined.mova_artist_profiles?.handle??'',location:joinedAppointment.mova_locations?.name??''});}
+        for(const item of appointments??[]){const joinedAppointment=item as unknown as {id:string;service_name_snapshot:string;starts_at:string;status:string;mova_locations:{name:string}|null};upcoming.push({id:joinedAppointment.id,service:joinedAppointment.service_name_snapshot,starts_at:joinedAppointment.starts_at,status:joinedAppointment.status,artist:businessName,handle:profile?.handle??'',location:joinedAppointment.mova_locations?.name??''});}
       }
       upcoming.sort((a,b)=>a.starts_at.localeCompare(b.starts_at));
       return respond({profile:{display_name:account.display_name,preferred_locale:account.preferred_locale,email:user.email??null,phone:user.phone??null,verified_contacts:normalizedContacts(user).map((contact)=>({type:contact.contact_type,value:contact.value_normalized}))},stylists,upcoming:upcoming.slice(0,20)});

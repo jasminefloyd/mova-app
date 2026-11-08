@@ -1,8 +1,8 @@
 begin;
 select plan(9);
 
-select has_table('public', 'mova_early_access_invites', 'invite allowlist is stored in a prefixed table');
-select has_function('public', 'mova_before_user_created', array['jsonb'], 'signup hook function exists');
+select has_table('public'::name, 'mova_early_access_invites'::name, 'invite allowlist is stored in a prefixed table');
+select has_function('public'::name, 'mova_before_user_created'::name, array['jsonb']::name[], 'signup hook function exists');
 select ok((select relrowsecurity from pg_class where oid = 'public.mova_early_access_invites'::regclass), 'invite allowlist has RLS enabled');
 select ok(not has_table_privilege('anon', 'public.mova_early_access_invites', 'SELECT'), 'anonymous clients cannot read invites');
 select ok(not has_table_privilege('authenticated', 'public.mova_early_access_invites', 'SELECT'), 'signed-in clients cannot read invites');

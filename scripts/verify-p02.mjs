@@ -36,8 +36,9 @@ const appSource = await read('apps/web/src/app/ArtistPages.tsx');
 if (!appSource.includes("t(`navigation.${section}`)")) issues.push('Tab page title must reuse the translated navigation key');
 if (tokens?.color?.brand?.forest?.$value !== '#18392F') issues.push('Design token JSON source changed unexpectedly');
 
-const routes = await read('apps/web/src/router.tsx');
-if (!routes.includes("path: 'components'") || !routes.includes('import.meta.env.DEV')) issues.push('Component gallery must be development-only');
+const routes = await read('apps/web/app/routes.ts');
+const galleryRoute = await read('apps/web/src/app/routes/Components.tsx');
+if (!routes.includes("route('components'") || !galleryRoute.includes('import.meta.env.DEV')) issues.push('Component gallery must be registered in the active route table and development-only');
 if (routes.toLowerCase().includes('outreach')) issues.push('Tabled screen 15 must not be routed');
 
 if (issues.length) {

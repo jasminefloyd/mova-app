@@ -7,6 +7,8 @@ import { operatorUrl } from '../../app/operator-url';
 import { displayId } from '../../lib/display-ids';
 
 type Booking = { id: string; appointment_number:number; location_id: string; service_name_snapshot: string; client_name: string; status: string; starts_at: string; ends_at: string; request_expires_at: string | null };
+type QuoteNeed = { id: string; conversation_id: string; service_category: string; created_at: string };
+type SlotNeed = { id: string; location_id: string; starts_at: string };
 type Location = { id: string; name: string; time_zone: string; display_color_index: number };
 type Profile = { display_name: string; handle: string; is_published: boolean };
 type HomeMetrics = { revenue: string; revenueDelta: string; booked: string; rating: string; ratingCount: string };
@@ -30,10 +32,13 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
   const { t, i18n } = useTranslation();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
   const [items, setItems] = useState<Booking[]>([]);
+  const [quoteNeeds, setQuoteNeeds] = useState<QuoteNeed[]>([]);
+  const [slotNeeds, setSlotNeeds] = useState<SlotNeed[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [needsError, setNeedsError] = useState(false);
   const [metrics, setMetrics] = useState<HomeMetrics>({ revenue: '—', revenueDelta: '—', booked: '—', rating: '—', ratingCount: '—' });
 
   const load = useCallback(async () => {
@@ -42,12 +47,16 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
     start.setHours(0, 0, 0, 0);
     const end = new Date(start);
     end.setDate(end.getDate() + 90);
-    const [bookings, locationRows, profileRow] = await Promise.all([
+    const [bookings, locationRows, profileRow, quoteRows, slotRows] = await Promise.all([
       client.from('mova_appointments').select('id,appointment_number,location_id,service_name_snapshot,client_name,status,starts_at,ends_at,request_expires_at')
         .eq('artist_business_id', businessId).in('status', ['pending_artist', 'pending_payment', 'confirmed', 'completed'])
         .gte('starts_at', start.toISOString()).lt('starts_at', end.toISOString()).order('starts_at').limit(100),
       client.from('mova_locations').select('id,name,time_zone,display_color_index').eq('artist_business_id', businessId).eq('is_active', true).order('display_color_index'),
       client.from('mova_artist_profiles').select('display_name,handle,is_published').eq('artist_business_id', businessId).maybeSingle(),
+      client.from('mova_quote_requests').select('id,conversation_id,service_category,created_at')
+        .eq('artist_business_id', businessId).eq('status', 'open').order('created_at', { ascending: false }).limit(5),
+      client.from('mova_slot_events').select('id,location_id,starts_at')
+        .eq('artist_business_id', businessId).eq('status', 'needs_approval').gte('starts_at', new Date().toISOString()).gte('expires_at', new Date().toISOString()).order('starts_at').limit(5),
     ]);
     if (bookings.error || locationRows.error || profileRow.error) {
       setError(true);
@@ -55,6 +64,9 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
       return;
     }
     setItems((bookings.data ?? []) as Booking[]);
+    setQuoteNeeds((quoteRows.data ?? []) as QuoteNeed[]);
+    setSlotNeeds((slotRows.data ?? []) as SlotNeed[]);
+    setNeedsError(Boolean(quoteRows.error || slotRows.error));
     setLocations((locationRows.data ?? []) as Location[]);
     setProfile((profileRow.data ?? null) as Profile | null);
     setError(false);
@@ -96,6 +108,7 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
   });
   const now = Date.now();
   const needsYou = items.filter((item) => item.status === 'pending_artist' && (!item.request_expires_at || new Date(item.request_expires_at).getTime() > now));
+  const needsCount = needsYou.length + quoteNeeds.length + slotNeeds.length;
   const upcomingGroups = useMemo(() => {
     const groups = new Map<string, { date: Date; locationId: string; items: Booking[] }>();
     for (const item of items) {
@@ -133,8 +146,9 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
     </Link>
 
     <section className="mova-home__section">
-      <SectionOverline>{t('homeAppointments.needsYou', { count: needsYou.length })}</SectionOverline>
-      {needsYou.length ? <Card tone="warm" className="mova-home__needs-list">{needsYou.map((item) => {
+      <SectionOverline>{t('homeAppointments.needsYou', { count: needsCount })}</SectionOverline>
+      {needsError ? <ErrorState title={t('homeAppointments.needsError')} retryLabel={t('homeAppointments.retry')} onRetry={() => void load()} /> : needsCount ? <Card tone="warm" className="mova-home__needs-list">
+        {needsYou.map((item) => {
         const location = locationById.get(item.location_id);
         const requestDay = new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'short', timeZone: location?.time_zone }).format(new Date(item.starts_at));
         const requestContext = { service: item.service_name_snapshot, day: requestDay, location: location?.name ?? '' };
@@ -146,7 +160,23 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
           <span><strong>{t('homeAppointments.bookingRequest', { name: item.client_name })}</strong><small>{requestDetails}</small></span>
           <Icon name="chevron" size={18} />
         </Link>;
-      })}</Card> : <EmptyState title={t('homeAppointments.noRequests')} />}
+      })}
+        {quoteNeeds.map((quote) => <Link key={`quote:${quote.id}`} className="mova-home__need" to={operatorUrl(businessId, `growth/concierge/${quote.conversation_id}`)}>
+          <Icon name="message" size={20} />
+          <span><strong>{t('homeAppointments.quoteRequest')}</strong><small>{quote.service_category}</small></span>
+          <Icon name="chevron" size={18} />
+        </Link>)}
+        {slotNeeds.map((slot) => {
+          const location = locationById.get(slot.location_id);
+          const zone = location?.time_zone ?? 'UTC';
+          const slotTime = new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: zone }).format(new Date(slot.starts_at));
+          return <Link key={`slot:${slot.id}`} className="mova-home__need" to={operatorUrl(businessId, 'growth/slots')}>
+            <Icon name="clock" size={20} />
+            <span><strong>{t('homeAppointments.slotNeedsApproval')}</strong><small>{t('homeAppointments.slotDetails', { time: slotTime, location: location?.name ?? '' })}</small></span>
+            <Icon name="chevron" size={18} />
+          </Link>;
+        })}
+      </Card> : <EmptyState title={t('homeAppointments.noRequests')} />}
     </section>
 
     <section className="mova-home__section">

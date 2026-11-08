@@ -34,7 +34,7 @@ Conventions: `/functions/v1/<name>`, envelope `{ data, error, request_id }`, `Id
 - `job-dispatch`
 - `job-worker`
 
-`waitlist-signup` is the public acquisition form endpoint. It stores only the supplied email, selected work arrangement, and explicit optional marketing opt-in; its response does not claim an email was sent. The handler uses the service-role-only `mova_waitlist_register` function. Keep production submissions disabled until A-14 is verified.
+`waitlist-signup` is the public acquisition form endpoint. It stores only the supplied email, selected work arrangement, and explicit optional marketing opt-in; its response does not claim an email was sent. The handler uses the service-role-only `mova_waitlist_register` function. It returns `WAITLIST_NOT_OPEN` unless server secret `MOVA_WAITLIST_ENABLED=true`; the public form separately requires `VITE_WAITLIST_ENABLED=true`. Keep both flags false until A-14 privacy, anti-bot, and production-domain checks are verified and accepted.
 
 ## New in v2 (§6.3)
 - `photo-upload-url`

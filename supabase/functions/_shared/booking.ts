@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 
-export const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, idempotency-key, x-mova-artist-business-id', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
+export const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, idempotency-key, x-client-info, x-mova-artist-business-id', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
 export const respond = (data: unknown, status = 200) => Response.json({ data, error: status >= 400 ? data : null, request_id: crypto.randomUUID() }, { status, headers: corsHeaders });
 export const serviceClient = () => {
   const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');

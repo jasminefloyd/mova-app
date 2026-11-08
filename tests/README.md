@@ -14,3 +14,5 @@ Layers and tooling: `docs/qa/TEST_STRATEGY.md`. Every case has a stable ID and a
 | `visual/` | Baselines from `docs/design/screens/png` (`TC-SCR-*`) |
 | `performance/` | Load and latency targets (`TC-NFR-*`) |
 | `ai-evals/` | ≥300 scripted concierge conversations, EN/ES 50/50 (§8.4) |
+
+Run `pnpm test:e2e` to build a fresh production preview using fixed synthetic Supabase values, then start a fresh Playwright preview server. The operator-session fixtures mock Auth, REST and Edge Function requests and do not read the project `.env`. Port 4173 must be available; the runner never reuses an existing preview server.

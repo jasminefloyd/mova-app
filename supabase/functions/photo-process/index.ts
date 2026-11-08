@@ -42,9 +42,10 @@ Deno.serve(async (request) => {
   if (!['profile', 'cover', 'portfolio', 'visit'].includes(kind) || !Number.isFinite(zoom) || zoom < 1 || zoom > 2) return json({ code: 'INVALID_REQUEST' }, 422);
   if (!path || path.split('/').length !== 3 || path.split('/')[1] !== 'original') return json({ code: 'INVALID_PATH' }, 422);
 
-  const { data: membership } = await userClient.from('mova_artist_memberships').select('artist_business_id')
+  const { data: membership } = await userClient.from('mova_artist_memberships').select('artist_business_id,role')
     .eq('user_id', user.id).eq('artist_business_id', path.split('/')[0]).eq('status', 'active').maybeSingle();
   if (!membership) return json({ code: 'ARTIST_MEMBERSHIP_REQUIRED' }, 403);
+  if ((kind === 'profile' || kind === 'cover') && membership.role !== 'owner') return json({ code: 'OWNER_PROFILE_REQUIRED' }, 403);
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const bucket = kind === 'portfolio' ? 'mova_portfolio_media' : kind === 'visit' ? 'mova_visit_private' : 'mova_profile_photos';
   const visitNoteId = typeof body?.visit_note_id === 'string' ? body.visit_note_id : '';

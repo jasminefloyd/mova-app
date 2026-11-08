@@ -78,10 +78,10 @@ export function SettingsPage() {
     <Card tone="inverse" className="mova-settings-profile"><Avatar label={profile?.display_name ?? t('settings.profile')} {...(initials ? { initials } : { placeholder:true })} size={56}/><span><strong>{profile?.display_name ?? t('settings.profile')}</strong><small>{t('settings.planAndShowcase',{plan:t('settings.planNotConfigured'),status:profile?.is_published?t('settings.published'):t('settings.unpublished')})}</small>{businessDisplayId&&<small>{businessDisplayId.replace('-', ' ')}</small>}</span><IconButton className="mova-settings-profile__preview" label={t('settings.previewProfile')} icon="preview" disabled={!profile?.handle} onClick={()=>navigate(operatorUrl(businessId,'settings/profile/preview'))}/></Card>
     <div className="mova-settings-actions"><Button variant="secondary" disabled={!publicUrl} onClick={()=>publicUrl&&window.open(publicUrl,'_blank','noopener,noreferrer')}>{t('settings.viewMyPage')}</Button><Button variant="secondary" onClick={()=>navigate(operatorUrl(businessId,'settings/qr'))}>{t('settings.showMyQr')}</Button></div>
     <Card className="mova-settings-menu">
-      <ListRow title={t('settings.profilePortfolio')} trailing={<Icon name="chevron" size={18}/>} href={operatorUrl(businessId,'settings/portfolio')} />
+      <ListRow title={t('settings.profilePortfolio')} trailing={<Icon name="chevron" size={18}/>} href={operatorUrl(businessId,'settings/profile')} />
       <ListRow title={t('settings.servicesPricesDeposits')} trailing={serviceCount===null?'—':String(serviceCount)} href={operatorUrl(businessId,'settings/services')} />
       <ListRow title={t('settings.locationsHours')} trailing={locationCount===null?'—':String(locationCount)} href={operatorUrl(businessId,'settings/locations')} />
-      <ListRow title={t('settings.paymentsPayouts')} trailing={paymentSummary} href={operatorUrl(businessId,'money')} />
+      <ListRow title={t('settings.paymentsPayouts')} trailing={paymentSummary} href={operatorUrl(businessId,'settings/payments')} />
       <ListRow title={t('settings.calendarSync')} trailing={calendarSummary} href={operatorUrl(businessId,'settings/calendar-sync')} />
       <ListRow title={t('settings.reviewsGoogle')} trailing={t('settings.notConnected')} href={operatorUrl(businessId,'settings/reviews')} />
       <ListRow title={t('settings.plan')} trailing={t('settings.planNotConfigured')} href={operatorUrl(businessId,'settings/plan')} />

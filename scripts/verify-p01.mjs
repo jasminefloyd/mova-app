@@ -4,7 +4,8 @@ import { resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '..');
 const failures = [];
 const required = [
-  'apps/web/index.html',
+  'apps/web/app/root.tsx',
+  'apps/web/app/routes.ts',
   'apps/web/src/app/ArtistShell.tsx',
   'apps/web/src/app/PublicShell.tsx',
   'apps/web/src/app/ClientShell.tsx',
