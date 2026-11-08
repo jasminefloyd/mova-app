@@ -9,6 +9,7 @@ const publicEnvSchema = z.object({
   VITE_CONCIERGE_WEB_CHAT_ENABLED: z.enum(['true','false']).optional(),
   VITE_WAITLIST_ENABLED: z.enum(['true','false']).optional(),
   VITE_STRIPE_TEST_MODE: z.enum(['true','false']).optional(),
+  VITE_HCAPTCHA_SITE_KEY: z.string().regex(/^[0-9a-f-]{20,64}$/i).optional(),
 });
 
 const rawEnv = {
@@ -19,6 +20,7 @@ const rawEnv = {
   VITE_CONCIERGE_WEB_CHAT_ENABLED: import.meta.env.VITE_CONCIERGE_WEB_CHAT_ENABLED || undefined,
   VITE_WAITLIST_ENABLED: import.meta.env.VITE_WAITLIST_ENABLED || undefined,
   VITE_STRIPE_TEST_MODE: import.meta.env.VITE_STRIPE_TEST_MODE || undefined,
+  VITE_HCAPTCHA_SITE_KEY: import.meta.env.VITE_HCAPTCHA_SITE_KEY || undefined,
 };
 
 export const publicEnv = publicEnvSchema.parse(rawEnv);
@@ -36,3 +38,6 @@ export function requireSupabaseEnv(): { url: string; anonKey: string } {
   }
   return { url: publicEnv.VITE_SUPABASE_URL, anonKey: publicEnv.VITE_SUPABASE_ANON_KEY };
 }
+
+/** O1: hCaptcha on the waitlist and booking forms. Shown only when a site key is configured. */
+export const hcaptchaSiteKey = publicEnv.VITE_HCAPTCHA_SITE_KEY ?? null;

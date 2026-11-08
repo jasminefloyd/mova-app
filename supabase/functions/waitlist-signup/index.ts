@@ -1,5 +1,6 @@
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { isWaitlistEnabled } from '../_shared/waitlist-flag.ts';
+import { checkCaptcha } from '../_shared/captcha.ts';
 
 const workArrangements = new Set(['booth_chair_renter','suite_renter','commission_stylist','other_beauty_professional']);
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -9,9 +10,9 @@ Deno.serve(async (request) => {
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (!isWaitlistEnabled(Deno.env.get('MOVA_WAITLIST_ENABLED'))) return respond({ code: 'WAITLIST_NOT_OPEN' }, 503);
   const length = Number(request.headers.get('content-length') ?? '0');
-  if (length > 4096) return respond({ code: 'REQUEST_TOO_LARGE' }, 413);
+  if (length > 8192) return respond({ code: 'REQUEST_TOO_LARGE' }, 413);
   const rawBody = await request.text();
-  if (new TextEncoder().encode(rawBody).byteLength > 4096) return respond({ code: 'REQUEST_TOO_LARGE' }, 413);
+  if (new TextEncoder().encode(rawBody).byteLength > 8192) return respond({ code: 'REQUEST_TOO_LARGE' }, 413);
   let input: unknown;
   try { input = JSON.parse(rawBody); } catch { return respond({ code: 'INVALID_REQUEST' }, 422); }
   if (!input || typeof input !== 'object' || Array.isArray(input)) return respond({ code: 'INVALID_REQUEST' }, 422);
@@ -23,6 +24,9 @@ Deno.serve(async (request) => {
     || !workArrangements.has(workArrangement) || typeof body.marketing_opt_in !== 'boolean') {
     return respond({ code: 'INVALID_REQUEST' }, 422);
   }
+
+  const captcha = await checkCaptcha(body.captcha_token, (name) => Deno.env.get(name));
+  if (!captcha.ok) return respond({ code: captcha.code }, captcha.status);
 
   const db = serviceClient();
   const { error } = await db.rpc('mova_waitlist_register', {

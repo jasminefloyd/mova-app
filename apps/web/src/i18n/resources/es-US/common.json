@@ -1178,7 +1178,9 @@
     "submitError": "No pudimos guardar tu información. Inténtalo de nuevo.",
     "waitlistClosedTitle": "El registro de acceso anticipado aún no está abierto.",
     "waitlistClosedBody": "Vuelve pronto para ver las novedades.",
-    "copyright": "© {{year}} Mova"
+    "copyright": "© {{year}} Mova",
+    "captchaRequired": "Completa la verificación contra spam antes de unirte.",
+    "captchaUnavailable": "La verificación contra spam no cargó. Actualiza la página e inténtalo de nuevo."
   },
   "concierge": {
     "title": "Conserjería con IA",

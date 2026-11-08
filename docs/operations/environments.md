@@ -46,3 +46,16 @@ When Docker and the Supabase CLI are not available in an agent session, run the 
 - Tests, fixture setup and "rollback-only" checks run on a local or development database only. Never against production, including inside a transaction that is rolled back.
 - Migrations reach production only through the reviewed runbook in `docs/runbooks/production-catch-up.md` (or its successor), after the owner approves those exact versions.
 - An agent that cannot run `pnpm db:test` and `pnpm fn:check` reports its SQL or Edge changes as unverified and does not mark the task done.
+
+## hCaptcha (owner decision O1, 2026-11-08)
+
+The waitlist and public booking forms use hCaptcha once it is switched on. It stays off until all of these are set:
+
+| Where | Setting | Value |
+| --- | --- | --- |
+| Supabase function secrets | `MOVA_CAPTCHA_PROVIDER` | `hcaptcha` |
+| Supabase function secrets | `HCAPTCHA_SITE_KEY` | the site key from the hCaptcha dashboard |
+| Supabase function secrets | `HCAPTCHA_SECRET` | the account secret from the hCaptcha dashboard |
+| Vercel | `VITE_HCAPTCHA_SITE_KEY` | the same site key |
+
+Turn it on in this order: set the Vercel key and deploy (the widget appears), then set the three function secrets (the server starts requiring a token). Switching the server on first would reject every waitlist and booking submission. When the provider is on but a key is missing, `waitlist-signup` and `booking-create` fail closed with `CAPTCHA_UNAVAILABLE`. Only the token and site key are sent to hCaptcha; Mova does not forward visitor IP addresses. The Privacy Policy must name hCaptcha as a service provider before this goes live.

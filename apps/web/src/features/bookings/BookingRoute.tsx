@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, ErrorState, TextArea, TextField } from '../../components';
-import { clientProfilesEnabled, publicEnv, stripeTestModeEnabled } from '../../lib/env';
+import { clientProfilesEnabled, hcaptchaSiteKey, publicEnv, stripeTestModeEnabled } from '../../lib/env';
+import { HCaptcha } from '../../components/HCaptcha';
 import type { PublicArtist } from '../showcase/PublicArtistPage';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import { trackProfileEvent } from '../reports/track';
@@ -26,6 +27,7 @@ export function BookingRoute() {
   const requestedPortfolioItemId=params.get('portfolio_item_id');
   const [artist,setArtist]=useState<PublicArtist|null>(null);const [groups,setGroups]=useState<Group[]>([]);const [openDays,setOpenDays]=useState<OpenDay[]>([]);const [day,setDay]=useState(draft?.day??'');const [dayPage,setDayPage]=useState(0);const [serviceIds,setServiceIds]=useState<string[]>(draft?.serviceIds??(params.get('service_ids')?params.get('service_ids')!.split(',').filter(Boolean):params.get('service_id')?[params.get('service_id')!]:[]));
   const [slot,setSlot]=useState<Slot|null>(draft?.slot??null);const [locationId,setLocationId]=useState(draft?.locationId??'');const [alternateStartsAt,setAlternateStartsAt]=useState(draft?.alternateStartsAt??'');const [clientNote,setClientNote]=useState('');const [name,setName]=useState('');const [email,setEmail]=useState('');const [phone,setPhone]=useState('');const [consents,setConsents]=useState<ConsentChoices>(emptyConsentChoices);const [showServicePicker,setShowServicePicker]=useState(false);const [step,setStep]=useState<'times'|'details'>('times');const [busy,setBusy]=useState(false);const [error,setError]=useState(false);
+  const [captchaToken,setCaptchaToken]=useState<string|null>(null);const [captchaReset,setCaptchaReset]=useState(0);
   const requestIdentity=useRef<{key:string;token:string}|null>(null);
   const trackedBookingStart=useRef('');
   const selectedServices=useMemo(()=>serviceIds.map(id=>artist?.services.find(entry=>entry.id===id)).filter((entry):entry is NonNullable<typeof entry>=>Boolean(entry)),[artist,serviceIds]);
@@ -74,8 +76,8 @@ export function BookingRoute() {
     setBusy(true);setError(false);
     try{
       requestIdentity.current??={key:crypto.randomUUID(),token:btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replaceAll('+','-').replaceAll('/','_').replaceAll('=','')};
-      const response=await fetch(api('booking-create'),{method:'POST',headers:{'Content-Type':'application/json',apikey:publicEnv.VITE_SUPABASE_ANON_KEY??'','Idempotency-Key':requestIdentity.current.key},body:JSON.stringify({location_id:locationId,service_ids:serviceIds,starts_at:slot.starts_at,alternate_starts_at:alternateStartsAt||undefined,client_note:clientNote.trim()||undefined,portfolio_item_id:selectedLook?.id,client_name:name,client_email:email||undefined,client_phone:phone||undefined,client_locale:locale,manage_token:requestIdentity.current.token,consents})});
-      const body=await response.json();if(!response.ok||!body.data?.manage_url)throw new Error();
+      const response=await fetch(api('booking-create'),{method:'POST',headers:{'Content-Type':'application/json',apikey:publicEnv.VITE_SUPABASE_ANON_KEY??'','Idempotency-Key':requestIdentity.current.key},body:JSON.stringify({...(captchaToken?{captcha_token:captchaToken}:{}),location_id:locationId,service_ids:serviceIds,starts_at:slot.starts_at,alternate_starts_at:alternateStartsAt||undefined,client_note:clientNote.trim()||undefined,portfolio_item_id:selectedLook?.id,client_name:name,client_email:email||undefined,client_phone:phone||undefined,client_locale:locale,manage_token:requestIdentity.current.token,consents})});
+      const body=await response.json();if(!response.ok||!body.data?.manage_url){setCaptchaReset((n)=>n+1);throw new Error();}
       if(typeof body.data.id==='string'&&/^[0-9a-f-]{36}$/i.test(body.data.id))trackProfileEvent(handle,'booking_completed',body.data.id);
       if(typeof window!=='undefined'){
         window.sessionStorage.removeItem(`mova_booking_draft_${handle}`);
@@ -142,7 +144,8 @@ export function BookingRoute() {
           {Boolean(email)&&<label><input type="checkbox" checked={consents.offers.email} onChange={(event)=>setConsent('offers','email',event.target.checked)}/><span>{i18n.t('booking.offersEmailChoice')}</span></label>}
           {Boolean(phone)&&<label><input type="checkbox" checked={consents.offers.sms} onChange={(event)=>setConsent('offers','sms',event.target.checked)}/><span>{i18n.t('booking.offersSmsChoice')}</span></label>}
         </fieldset>
-        <Button loading={busy} disabled={!name.trim()||(!email.trim()&&!phone.trim())} onClick={()=>void create()}>{slot?.booking_mode==='instant'?i18n.t('booking.bookAppointment'):i18n.t('booking.submit')}</Button>
+        <HCaptcha siteKey={hcaptchaSiteKey} locale={locale} onToken={setCaptchaToken} resetKey={captchaReset} />
+        <Button loading={busy} disabled={!name.trim()||(!email.trim()&&!phone.trim())||(Boolean(hcaptchaSiteKey)&&!captchaToken)} onClick={()=>void create()}>{slot?.booking_mode==='instant'?i18n.t('booking.bookAppointment'):i18n.t('booking.submit')}</Button>
       </section>
     </>}
   </main>;

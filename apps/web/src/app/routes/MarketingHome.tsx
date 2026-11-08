@@ -1,11 +1,12 @@
-import { useRef, useState, type FormEvent } from 'react';
+import { useCallback, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Checkbox, Icon, TextField } from '../../components';
-import { waitlistEnabled } from '../../lib/env';
+import { HCaptcha } from '../../components/HCaptcha';
+import { hcaptchaSiteKey, waitlistEnabled } from '../../lib/env';
 
 type WorkArrangement = 'booth_chair_renter' | 'suite_renter' | 'commission_stylist' | 'other_beauty_professional';
-type WaitlistValues = { email: string; workArrangement: WorkArrangement; marketingOptIn: boolean };
+type WaitlistValues = { email: string; workArrangement: WorkArrangement; marketingOptIn: boolean; captchaToken: string | null };
 type FormTone = 'light' | 'dark';
 
 export default function MarketingHome() {
@@ -15,24 +16,26 @@ export default function MarketingHome() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(false);
 
-  const submit = async (values: WaitlistValues) => {
+  const submit = async (values: WaitlistValues): Promise<boolean> => {
     const url = import.meta.env.VITE_SUPABASE_URL;
     const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    if (!url || !anonKey) { setSubmitError(true); return; }
+    if (!url || !anonKey) { setSubmitError(true); return false; }
     setSubmitting(true);
     setSubmitError(false);
     try {
       const response = await fetch(`${url}/functions/v1/waitlist-signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: anonKey },
-        body: JSON.stringify({ email: values.email, work_arrangement: values.workArrangement, marketing_opt_in: values.marketingOptIn }),
+        body: JSON.stringify({ email: values.email, work_arrangement: values.workArrangement, marketing_opt_in: values.marketingOptIn, ...(values.captchaToken ? { captcha_token: values.captchaToken } : {}) }),
       });
       if (!response.ok) throw new Error('WAITLIST_SUBMISSION_FAILED');
       const result = await response.json();
       if (result.data?.saved !== true) throw new Error('WAITLIST_SUBMISSION_FAILED');
       setJoined(true);
+      return true;
     } catch {
       setSubmitError(true);
+      return false;
     } finally {
       setSubmitting(false);
     }
@@ -104,12 +107,17 @@ export default function MarketingHome() {
   </div>;
 }
 
-function WaitlistForm({ tone, enabled, joined, submitting, error, onSubmit }: { tone: FormTone; enabled: boolean; joined: boolean; submitting: boolean; error: boolean; onSubmit: (values: WaitlistValues) => Promise<void> }) {
+function WaitlistForm({ tone, enabled, joined, submitting, error, onSubmit }: { tone: FormTone; enabled: boolean; joined: boolean; submitting: boolean; error: boolean; onSubmit: (values: WaitlistValues) => Promise<boolean> }) {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [workArrangement, setWorkArrangement] = useState<WorkArrangement>('booth_chair_renter');
   const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [localError, setLocalError] = useState(false);
+  const { i18n } = useTranslation();
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaReset, setCaptchaReset] = useState(0);
+  const [captchaLoadError, setCaptchaLoadError] = useState(false);
+  const onCaptchaLoadError = useCallback(() => setCaptchaLoadError(true), []);
 
   if (!enabled) return <div className={`mova-marketing-home__success mova-marketing-home__success--${tone}`} role="status">
     <span><strong>{t('marketing.waitlistClosedTitle')}</strong><small>{t('marketing.waitlistClosedBody')}</small></span>
@@ -119,7 +127,8 @@ function WaitlistForm({ tone, enabled, joined, submitting, error, onSubmit }: { 
     event.preventDefault();
     setLocalError(false);
     if (!email.trim()) { setLocalError(true); return; }
-    void onSubmit({ email: email.trim(), workArrangement, marketingOptIn });
+    if (hcaptchaSiteKey && !captchaToken) { setLocalError(true); return; }
+    void onSubmit({ email: email.trim(), workArrangement, marketingOptIn, captchaToken }).then((ok) => { if (!ok) setCaptchaReset((n) => n + 1); });
   };
 
   if (joined) return <div className={`mova-marketing-home__success mova-marketing-home__success--${tone}`} role="status">
@@ -140,7 +149,9 @@ function WaitlistForm({ tone, enabled, joined, submitting, error, onSubmit }: { 
       </label>
     </div>
     <Checkbox checked={marketingOptIn} onChange={(event) => setMarketingOptIn(event.currentTarget.checked)} label={t('marketing.marketingOptIn')} />
-    {(error || localError) && <p className="mova-marketing-home__form-error" role="alert">{t(localError ? 'marketing.emailRequired' : 'marketing.submitError')}</p>}
+    {(error || localError) && <p className="mova-marketing-home__form-error" role="alert">{t(!localError ? 'marketing.submitError' : !email.trim() ? 'marketing.emailRequired' : 'marketing.captchaRequired')}</p>}
+    <HCaptcha siteKey={hcaptchaSiteKey} locale={i18n.language} onToken={setCaptchaToken} resetKey={captchaReset} onLoadError={onCaptchaLoadError} />
+    {captchaLoadError && <p className="mova-marketing-home__form-error" role="alert">{t('marketing.captchaUnavailable')}</p>}
     <Button type="submit" loading={submitting} className="mova-marketing-home__submit">{t('marketing.join')}</Button>
     <p className="mova-marketing-home__privacy-note">{t('marketing.privacyNote')} <span aria-disabled="true">{t('marketing.privacy')}</span></p>
   </form>;
