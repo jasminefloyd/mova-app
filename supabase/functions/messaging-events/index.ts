@@ -1,4 +1,5 @@
 import {corsHeaders,respond,serviceClient} from '../_shared/booking.ts';
+import {parseKeyword} from '../_shared/providers/sms/policy.ts';
 const enc=new TextEncoder();
 async function verify(body:string,signature:string,secret:string){const key=await crypto.subtle.importKey('raw',enc.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);const mac=new Uint8Array(await crypto.subtle.sign('HMAC',key,enc.encode(body)));const expected=[...mac].map(byte=>byte.toString(16).padStart(2,'0')).join('');const supplied=signature.replace(/^sha256=/,'').toLowerCase();if(expected.length!==supplied.length)return false;let diff=0;for(let i=0;i<expected.length;i++)diff|=expected.charCodeAt(i)^supplied.charCodeAt(i);return diff===0;}
 Deno.serve(async(request)=>{
@@ -6,15 +7,17 @@ Deno.serve(async(request)=>{
  const secret=Deno.env.get('MOVA_MESSAGING_WEBHOOK_SECRET');const raw=await request.text();const signature=request.headers.get('x-mova-webhook-signature')??'';if(!secret||!await verify(raw,signature,secret))return respond({code:'INVALID_WEBHOOK_SIGNATURE'},401);
  const body=JSON.parse(raw) as {type?:string;channel?:string;address?:string;provider?:string;provider_message_id?:string;status?:string;cost_micros?:number};const db=serviceClient();
  if(body.type==='inbound'&&typeof body.address==='string'&&['sms','email'].includes(body.channel??'')){
-  const channel=body.channel as 'sms'|'email';let normalized=channel==='sms'?body.address.replace(/\D/g,''):body.address.trim().toLowerCase();if(channel==='sms'&&normalized.length===10)normalized=`1${normalized}`;const addressHash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(normalized)))].map(byte=>byte.toString(16).padStart(2,'0')).join('');
+  const channel=body.channel as 'sms'|'email';
   if(channel==='sms'){
-   const content=(body as {text?:string}).text?.trim().toUpperCase()??'';
-   if(['STOP','STOPALL','UNSUBSCRIBE','CANCEL','END','QUIT'].includes(content)){
-    const {data:identities}=await db.from('mova_sending_identities').select('artist_business_id').eq('channel','sms').eq('address',body.address).eq('status','active');const businessIds=[...new Set((identities??[]).map(row=>row.artist_business_id))];
-    for(const artistBusinessId of businessIds){const {error}=await db.from('mova_suppressions').insert({artist_business_id:artistBusinessId,channel,address_hash:addressHash,reason:'stop'});if(error&&error.code!=='23505')return respond({code:'SUPPRESSION_SAVE_FAILED'},500);}
-    return respond({accepted:true,action:'stop',suppressed_businesses:businessIds.length});
+   // Task 4.4: keywords go through the same rules as messaging-inbound-sms (mova_sms_handle_inbound, 0042),
+   // keyed on the stylist number the text was sent to.
+   const keyword=parseKeyword((body as {text?:string}).text??'');const to=(body as {to?:string}).to;
+   if(keyword&&typeof to==='string'){
+    const {data,error}=await db.rpc('mova_sms_handle_inbound',{p_to:to,p_from:body.address,p_text:(body as {text?:string}).text??'',p_keyword:keyword,p_provider:body.provider??'webhook',p_provider_message_id:body.provider_message_id??null,p_now:new Date().toISOString()});
+    if(error)return respond({code:'SUPPRESSION_SAVE_FAILED'},500);
+    const count=Array.isArray((data as {businesses?:unknown[]}|null)?.businesses)?(data as {businesses:unknown[]}).businesses.length:0;
+    return respond({accepted:true,action:keyword,businesses:count,replyRequired:true});
    }
-   if(['HELP','INFO'].includes(content))return respond({accepted:true,action:'help',replyRequired:true,copyKey:'messaging.helpReply'});
   }
  }
  if(body.type==='delivery'&&typeof body.provider==='string'&&typeof body.provider_message_id==='string'&&['sent','delivered','failed'].includes(body.status??'')){

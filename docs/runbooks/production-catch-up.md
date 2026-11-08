@@ -14,12 +14,14 @@ According to `docs/engineering/PHASE_STATUS.md`, production received migrations 
 | 0039 | `20261108011000_mova_0039_deposit_bookings_flag.sql` | Lets availability read the deposit-booking switch | Updated `availability-search` returns 503 until this exists |
 | 0040 | `20261108012000_mova_0040_revoke_unused_write_grants.sql` | Revokes write grants that had no RLS policy | None functionally; grants and policies stay inconsistent |
 | 0041 | `20261108020000_mova_0041_support_messages.sql` | Stylist feedback table with RLS and a private screenshot bucket | Send feedback (Settings) returns an error |
+| 0042 | `20261108030000_mova_0042_sms_policy.sql` | SMS send gate with daily cap, STOP/START/HELP handling, missed-call gate | SMS adapter, inbound keywords and missed-call text-back return errors (all off until O4/O5) |
+| 0043 | `20261108031000_mova_0043_appointment_emails.sql` | Email suppression gate, appointment email context, reminder queueing | Appointment emails and reminders cannot run (off until O4) |
 
 The production project also holds 83 migration records that are not in this repository. Do not run `supabase db push` against it: it would try to reconcile that history. Apply the files individually as below.
 
 ## Order
 
-Apply 0032, 0034, 0038, 0039, 0040, 0041 in that order, then deploy the Edge Functions that depend on them (`availability-search`, `concierge-artist`, `customer-profile`, `waitlist-signup`, `payment-settings`, `stripe-connect-onboard`, `support-feedback`). Deploying `availability-search` before 0039 makes booking return 503.
+Apply 0032, 0034, 0038, 0039, 0040, 0041, 0042, 0043 in that order, then deploy the Edge Functions that depend on them (`availability-search`, `concierge-artist`, `customer-profile`, `waitlist-signup`, `payment-settings`, `stripe-connect-onboard`, `support-feedback`, `messaging-dispatch`, `messaging-events`, `messaging-inbound-sms`, `missed-call-webhook`, `job-dispatch`, `job-worker`). Deploying `availability-search` before 0039 makes booking return 503.
 
 ## Pre-checks (read-only)
 
@@ -55,4 +57,6 @@ Then, on the deployed app: Book (25) shows times for a no-deposit service; a dep
 - 0034: drop the objects it created, only if no jobs have been enqueued.
 - 0038: no rollback needed (the previous functions failed on every call).
 - 0039: `drop function public.mova_deposit_bookings_enabled();`, after reverting `availability-search`.
+- 0043: drop `mova_email_send_gate`, `mova_appointment_email_context` and `mova_enqueue_appointment_reminders` after reverting `job-dispatch` and `job-worker`.
+- 0042: drop the functions it creates (`mova_sms_daily_cap`, `mova_sms_normalize`, `mova_sms_send_gate`, `mova_sms_handle_inbound`, `mova_missed_call_gate`) and the index `mova_messages_client_sms_recent_idx`; no table changes.
 - 0041: only if no stylist has sent feedback: `drop table public.mova_support_messages;` and remove the empty `mova_support_screenshots` bucket.

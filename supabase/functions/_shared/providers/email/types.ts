@@ -1,0 +1,25 @@
+// Email provider interface (task 4.3). Only the fake exists; the vendor waits on owner decision O4.
+
+export type EmailTemplateId = 'booking_confirmation' | 'request_received' | 'request_accepted' | 'request_declined' | 'appointment_reminder';
+export type EmailLocale = 'en-US' | 'es-US';
+
+export type EmailSendInput = {
+  to: string;
+  /** Sender address; the fake ignores it. */
+  from: string;
+  subject: string;
+  text: string;
+  html: string;
+  templateId: EmailTemplateId;
+  locale: EmailLocale;
+  /** Stable per logical email; providers must de-duplicate on it. */
+  idempotencyKey: string;
+};
+
+export type EmailSendResult = { providerMessageId: string; status: 'queued' | 'sent' };
+
+export interface EmailProvider {
+  readonly name: string;
+  readonly live: boolean;
+  send(input: EmailSendInput): Promise<EmailSendResult>;
+}

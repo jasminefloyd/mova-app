@@ -18,9 +18,13 @@ Deno.serve(async (request) => {
   if (limit < 1 || limit > 500) return respond({ code: 'JOB_LIMIT_INVALID' }, 422);
 
   try {
-    const { data, error } = await serviceClient().rpc('mova_dispatch_outbox_events', { p_limit: limit });
+    const db = serviceClient();
+    const { data, error } = await db.rpc('mova_dispatch_outbox_events', { p_limit: limit });
     if (error) return respond({ code: 'JOB_DISPATCH_FAILED' }, 503);
-    return respond({ enqueued: data });
+    // Task 4.3: reminder emails ~24 hours ahead, as jobs (sent only while the email provider is the fake).
+    const { data: reminders, error: reminderError } = await db.rpc('mova_enqueue_appointment_reminders', { p_now: new Date().toISOString() });
+    if (reminderError) return respond({ code: 'JOB_DISPATCH_FAILED' }, 503);
+    return respond({ enqueued: data, reminders });
   } catch {
     return respond({ code: 'JOB_DISPATCH_FAILED' }, 503);
   }

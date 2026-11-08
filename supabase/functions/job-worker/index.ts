@@ -2,6 +2,8 @@ import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { resolveInAppNotificationPreference } from '../_shared/notification-preferences.ts';
 import { eventNotificationPayload, notificationKeys, type OutboxEvent } from '../_shared/jobs.ts';
 import { StripeTestClient } from '../_shared/providers/stripe/client.ts';
+import { sendAppointmentEmail } from '../_shared/appointment-emails.ts';
+import { emailProviderFromEnv, type EmailDb } from '../_shared/providers/email/index.ts';
 
 const equal = (left: string, right: string) => {
   if (left.length !== right.length) return false;
@@ -12,7 +14,7 @@ const equal = (left: string, right: string) => {
 
 async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId: string) {
   const { data: event, error } = await db.from('mova_outbox_events')
-    .select('id,artist_business_id,event_type,payload').eq('id', eventId).maybeSingle();
+    .select('id,artist_business_id,event_type,payload,aggregate_type,aggregate_id').eq('id', eventId).maybeSingle();
   if (error || !event) throw new Error('OUTBOX_EVENT_READ_FAILED');
   const outboxEvent = event as OutboxEvent;
   if (!outboxEvent.artist_business_id) return;
@@ -38,6 +40,13 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
       payload,
     }, { onConflict: 'artist_business_id,user_id,event_type,payload' });
     if (insertError) throw new Error('INBOX_WRITE_FAILED');
+  }
+  // Task 4.3: the client's appointment email, only while the email provider is the fake (O4).
+  const emailProvider = emailProviderFromEnv((name) => Deno.env.get(name));
+  const aggregate = event as { aggregate_type?: string; aggregate_id?: string };
+  if (emailProvider && outboxEvent.event_type.startsWith('appointment.') && aggregate.aggregate_type === 'appointment' && aggregate.aggregate_id) {
+    const outcome = await sendAppointmentEmail(db as unknown as EmailDb, emailProvider, aggregate.aggregate_id, outboxEvent.event_type, `email:${outboxEvent.id}`);
+    if (outcome?.status === 'failed') throw new Error('APPOINTMENT_EMAIL_FAILED');
   }
 }
 
@@ -102,6 +111,11 @@ Deno.serve(async (request) => {
         });
         if (saveError || saved !== true) throw new Error('STRIPE_REFUND_STATUS_SAVE_FAILED');
         if (result.status === 'failed') throw new Error('STRIPE_REFUND_FAILED');
+      } else if (job.job_type === 'appointment_reminder' && typeof job.payload?.appointment_id === 'string') {
+        const emailProvider = emailProviderFromEnv((name) => Deno.env.get(name));
+        if (!emailProvider) throw new Error('EMAIL_PROVIDER_NOT_CONFIGURED');
+        const outcome = await sendAppointmentEmail(db as unknown as EmailDb, emailProvider, job.payload.appointment_id, 'appointment.reminder', `email:${job.idempotency_key ?? job.id}`);
+        if (outcome?.status === 'failed') throw new Error('APPOINTMENT_EMAIL_FAILED');
       } else {
         throw new Error('JOB_TYPE_UNSUPPORTED');
       }
@@ -109,7 +123,7 @@ Deno.serve(async (request) => {
       if (completeError || completed !== true) throw new Error('JOB_LEASE_LOST');
       succeeded += 1;
     } catch (error) {
-      const code = error instanceof Error && ['JOB_TYPE_UNSUPPORTED','JOB_LEASE_LOST','STRIPE_TEST_MODE_DISABLED','STRIPE_TEST_CONFIGURATION_MISSING','CHECKOUT_COMPLETED_AWAITING_WEBHOOK','CHECKOUT_EXPIRY_NOT_CONFIRMED','CHECKOUT_SESSION_STATUS_INVALID','CHECKOUT_HOLD_RELEASE_FAILED','STRIPE_REFUND_RESPONSE_INVALID','STRIPE_REFUND_STATUS_SAVE_FAILED','STRIPE_REFUND_FAILED'].includes(error.message)
+      const code = error instanceof Error && ['JOB_TYPE_UNSUPPORTED','JOB_LEASE_LOST','APPOINTMENT_EMAIL_FAILED','EMAIL_PROVIDER_NOT_CONFIGURED','APPOINTMENT_EMAIL_CONTEXT_FAILED','STRIPE_TEST_MODE_DISABLED','STRIPE_TEST_CONFIGURATION_MISSING','CHECKOUT_COMPLETED_AWAITING_WEBHOOK','CHECKOUT_EXPIRY_NOT_CONFIRMED','CHECKOUT_SESSION_STATUS_INVALID','CHECKOUT_HOLD_RELEASE_FAILED','STRIPE_REFUND_RESPONSE_INVALID','STRIPE_REFUND_STATUS_SAVE_FAILED','STRIPE_REFUND_FAILED'].includes(error.message)
         ? error.message : 'JOB_HANDLER_FAILED';
       const { data: status, error: failError } = await db.rpc('mova_fail_background_job', {
         p_job_id: job.id, p_worker_id: workerId, p_error_code: code,

@@ -45,6 +45,8 @@ The applied Mova remote migration records are mirrored by these local timestampe
 | `20261108011000` | `mova_0039_deposit_bookings_flag` | `20261108011000_mova_0039_deposit_bookings_flag.sql` (local only) |
 | `20261108012000` | `mova_0040_revoke_unused_write_grants` | `20261108012000_mova_0040_revoke_unused_write_grants.sql` (local only) |
 | `20261108020000` | `mova_0041_support_messages` | `20261108020000_mova_0041_support_messages.sql` (local only) |
+| `20261108030000` | `mova_0042_sms_policy` | `20261108030000_mova_0042_sms_policy.sql` (local only) |
+| `20261108031000` | `mova_0043_appointment_emails` | `20261108031000_mova_0043_appointment_emails.sql` (local only) |
 
 The P06 `0007` migration does not reference a `mova_clients` table. P07 migrations were applied in dependency order. The Management API assigned the returned versions above, which are mirrored locally.
 
@@ -52,4 +54,4 @@ The migrations above install no PostgreSQL extensions. Every Mova-created table,
 
 Migrations 0032 and 0034 remain unapplied; 0033, 0035, 0036, and 0037 were history-verified on 2026-11-08. The 0037 catalog/backfill checks and a rollback-scoped two-service booking runtime assertion passed; its pgTAP file is present but was not run because a local PostgreSQL/Supabase test runtime is unavailable. Application-level database behavior is not uniformly validated: tenant-isolation, concurrency, Edge HTTP, and provider integration tests remain incomplete. P09 depends on P08 migration 0009; P10 depends on P08 and P06; P11–P13 also depend on earlier phases. The forecast migration uses version label `0018` for the P12 forecast slice; migrations 0019–0020 and 0022 remain reserved for the roadmap in `docs/product/ENGINEERING_SPEC.md` §4.5. Production waitlist submissions remain blocked by open A-14 until privacy, anti-bot, and domain checks are verified. P07, 0021, and 0023 schema/history application still require behavioral integration verification.
 
-As of 2026-11-08 every migration through 0041 passes the full pgTAP suite locally (`pnpm db:test`: 26/26 files, 720/720 assertions, with and without the seed). Migrations 0032, 0034 and 0038–0041 are not in production; `docs/runbooks/production-catch-up.md` lists the order, checks and rollback, and needs owner approval (O14) before anything is applied.
+As of 2026-11-08 every migration through 0041 passes the full pgTAP suite locally (`pnpm db:test`: 26/26 files, 720/720 assertions, with and without the seed). Migrations 0032, 0034 and 0038–0043 are not in production; `docs/runbooks/production-catch-up.md` lists the order, checks and rollback, and needs owner approval (O14) before anything is applied.
