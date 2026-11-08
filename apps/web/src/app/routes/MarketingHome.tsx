@@ -10,7 +10,7 @@ type WaitlistValues = { email: string; workArrangement: WorkArrangement; marketi
 type FormTone = 'light' | 'dark';
 
 export default function MarketingHome() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [joined, setJoined] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -26,7 +26,7 @@ export default function MarketingHome() {
       const response = await fetch(`${url}/functions/v1/waitlist-signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: anonKey },
-        body: JSON.stringify({ email: values.email, work_arrangement: values.workArrangement, marketing_opt_in: values.marketingOptIn, ...(values.captchaToken ? { captcha_token: values.captchaToken } : {}) }),
+        body: JSON.stringify({ email: values.email, work_arrangement: values.workArrangement, marketing_opt_in: values.marketingOptIn, locale: i18n.language === 'es-US' ? 'es-US' : 'en-US', ...(values.captchaToken ? { captcha_token: values.captchaToken } : {}) }),
       });
       if (!response.ok) throw new Error('WAITLIST_SUBMISSION_FAILED');
       const result = await response.json();

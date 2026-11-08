@@ -82,6 +82,9 @@ verify_jwt = false
 [functions.support-feedback]
 verify_jwt = false
 
+[functions.waitlist-admin]
+verify_jwt = false
+
 [functions.visit-notes]
 verify_jwt = false
 

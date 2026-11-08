@@ -2,6 +2,8 @@
 
 export type EmailTemplateId = 'booking_confirmation' | 'request_received' | 'request_accepted' | 'request_declined' | 'appointment_reminder';
 export type EmailLocale = 'en-US' | 'es-US';
+/** Emails from Mova itself, not tied to a stylist (O2 invites). */
+export type PlatformEmailId = 'early_access_invite';
 
 export type EmailSendInput = {
   to: string;
@@ -10,7 +12,7 @@ export type EmailSendInput = {
   subject: string;
   text: string;
   html: string;
-  templateId: EmailTemplateId;
+  templateId: EmailTemplateId | PlatformEmailId;
   locale: EmailLocale;
   /** Stable per logical email; providers must de-duplicate on it. */
   idempotencyKey: string;
