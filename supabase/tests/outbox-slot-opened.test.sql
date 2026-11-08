@@ -3,19 +3,19 @@ select plan(8);
 
 -- These assertions use local rows and do not require the optional demo seed/Auth user.
 insert into public.mova_artist_businesses (id, name, status)
-values ('e2500000-0000-4000-8000-000000000001', 'Slot event test tenant', 'active');
+values ('e5100000-0000-4000-8000-000000000001', 'Slot event test tenant', 'active');
 insert into public.mova_locations (
   id, artist_business_id, name, location_type, booking_mode,
   calendar_ownership, payment_collector, time_zone
 ) values
-  ('e2500000-0000-4000-8000-000000000101', 'e2500000-0000-4000-8000-000000000001', 'Slot studio', 'suite', 'instant', 'mova', 'artist', 'America/New_York'),
-  ('e2500000-0000-4000-8000-000000000102', 'e2500000-0000-4000-8000-000000000001', 'External slot salon', 'commission_salon', 'request', 'mova', 'salon', 'America/New_York');
+  ('e5100000-0000-4000-8000-000000000101', 'e5100000-0000-4000-8000-000000000001', 'Slot studio', 'suite', 'instant', 'mova', 'artist', 'America/New_York'),
+  ('e5100000-0000-4000-8000-000000000102', 'e5100000-0000-4000-8000-000000000001', 'External slot salon', 'commission_salon', 'request', 'mova', 'salon', 'America/New_York');
 insert into public.mova_services (
   id, artist_business_id, name, category, duration_minutes, base_price_minor,
   status, deposit_type, deposit_value
 ) values (
-  'e2500000-0000-4000-8000-000000000202',
-  'e2500000-0000-4000-8000-000000000001',
+  'e5100000-0000-4000-8000-000000000202',
+  'e5100000-0000-4000-8000-000000000001',
   'Slot test service', 'Styling', 60, 8000, 'active', 'none', 0
 );
 
@@ -25,29 +25,29 @@ insert into public.mova_appointments(
   client_name,manage_token_hash,idempotency_key
 ) values
   (
-    'e2500000-0000-4000-8000-000000000001'::uuid,
-    'e2500000-0000-4000-8000-000000000101'::uuid,
-    'e2500000-0000-4000-8000-000000000202'::uuid,
+    'e5100000-0000-4000-8000-000000000001'::uuid,
+    'e5100000-0000-4000-8000-000000000101'::uuid,
+    'e5100000-0000-4000-8000-000000000202'::uuid,
     'showcase','confirmed',now()+interval '30 days',now()+interval '30 days 60 minutes',
     'Slot Cancelled',8000,0,8000,'Slot Cancelled',decode(repeat('b1',32),'hex'),'cr-f04-slot-cancel-20261107'
   ),
   (
-    'e2500000-0000-4000-8000-000000000001'::uuid,
-    'e2500000-0000-4000-8000-000000000101'::uuid,
-    'e2500000-0000-4000-8000-000000000202'::uuid,
+    'e5100000-0000-4000-8000-000000000001'::uuid,
+    'e5100000-0000-4000-8000-000000000101'::uuid,
+    'e5100000-0000-4000-8000-000000000202'::uuid,
     'showcase','confirmed',now()+interval '32 days',now()+interval '32 days 60 minutes',
     'Slot No Show',8000,0,8000,'Slot No Show',decode(repeat('b2',32),'hex'),'cr-f04-slot-noshow-20261107'
   ),
   (
-    'e2500000-0000-4000-8000-000000000001'::uuid,
-    'e2500000-0000-4000-8000-000000000102'::uuid,
-    'e2500000-0000-4000-8000-000000000202'::uuid,
+    'e5100000-0000-4000-8000-000000000001'::uuid,
+    'e5100000-0000-4000-8000-000000000102'::uuid,
+    'e5100000-0000-4000-8000-000000000202'::uuid,
     'showcase','confirmed',now()+interval '34 days',now()+interval '34 days 60 minutes',
     'External Slot',8000,0,8000,'External Slot',decode(repeat('b3',32),'hex'),'cr-f04-slot-external-20261107'
   );
 
 update public.mova_locations set calendar_ownership='external'
-where id='e2500000-0000-4000-8000-000000000102'::uuid;
+where id='e5100000-0000-4000-8000-000000000102'::uuid;
 
 select is((public.mova_booking_transition(
   (select id from public.mova_appointments where idempotency_key='cr-f04-slot-cancel-20261107'),

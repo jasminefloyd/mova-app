@@ -4,21 +4,21 @@ select plan(9);
 
 -- These assertions use local rows and do not require the optional demo seed/Auth user.
 insert into public.mova_artist_businesses (id, name, status)
-values ('e2500000-0000-4000-8000-000000000001', 'Booking expiry test tenant', 'active');
+values ('e7000000-0000-4000-8000-000000000001', 'Booking expiry test tenant', 'active');
 insert into public.mova_locations (
   id, artist_business_id, name, location_type, booking_mode,
   calendar_ownership, payment_collector, time_zone
 ) values (
-  'e2500000-0000-4000-8000-000000000101',
-  'e2500000-0000-4000-8000-000000000001',
+  'e7000000-0000-4000-8000-000000000101',
+  'e7000000-0000-4000-8000-000000000001',
   'Expiry test studio', 'suite', 'instant', 'mova', 'artist', 'America/New_York'
 );
 insert into public.mova_services (
   id, artist_business_id, name, category, duration_minutes, base_price_minor,
   status, deposit_type, deposit_value
 ) values (
-  'e2500000-0000-4000-8000-000000000202',
-  'e2500000-0000-4000-8000-000000000001',
+  'e7000000-0000-4000-8000-000000000202',
+  'e7000000-0000-4000-8000-000000000001',
   'Expiry test service', 'Styling', 60, 8000, 'active', 'fixed', 2000
 );
 
@@ -28,17 +28,17 @@ insert into public.mova_appointments(
   client_name,client_locale,request_expires_at,manage_token_hash,idempotency_key
 ) values
   (
-    'e2500000-0000-4000-8000-000000000001'::uuid,
-    'e2500000-0000-4000-8000-000000000101'::uuid,
-    'e2500000-0000-4000-8000-000000000202'::uuid,
+    'e7000000-0000-4000-8000-000000000001'::uuid,
+    'e7000000-0000-4000-8000-000000000101'::uuid,
+    'e7000000-0000-4000-8000-000000000202'::uuid,
     'showcase','pending_artist',now()+interval '30 days',now()+interval '30 days 60 minutes',
     'Hydration Treatment',8000,0,8000,'Expiry Spanish Request','es-US',now()-interval '1 minute',
     decode(repeat('a1',32),'hex'),'cr-f04-expiry-spanish-20261107'
   ),
   (
-    'e2500000-0000-4000-8000-000000000001'::uuid,
-    'e2500000-0000-4000-8000-000000000101'::uuid,
-    'e2500000-0000-4000-8000-000000000202'::uuid,
+    'e7000000-0000-4000-8000-000000000001'::uuid,
+    'e7000000-0000-4000-8000-000000000101'::uuid,
+    'e7000000-0000-4000-8000-000000000202'::uuid,
     'showcase','pending_payment',now()+interval '32 days',now()+interval '32 days 60 minutes',
     'Hydration Treatment',8000,2000,6000,'Expiry Payment Hold','en-US',null,
     decode(repeat('a2',32),'hex'),'cr-f04-expiry-payment-20261107'
