@@ -9,7 +9,7 @@ import { displayId, parseDisplayId } from '../lib/display-ids';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const host = new URL(request.url).hostname;
-  if (host !== 'ops.mova-beauty.co' && host !== 'localhost' && host !== '127.0.0.1' && !host.endsWith('.vercel.app')) throw new Response('Not found', { status: 404 });
+  if (host !== 'ops.mova-beauty.co' && host !== 'mova-beauty.co' && host !== 'localhost' && host !== '127.0.0.1' && !host.endsWith('.vercel.app')) throw new Response('Not found', { status: 404 });
   return null;
 }
 

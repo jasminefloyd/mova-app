@@ -12,9 +12,8 @@ export function operatorUrl(businessId: string | null | undefined, path = '') {
 }
 
 export function operatorLocation(businessId: string | null | undefined, path = '') {
-  const target = operatorUrl(businessId,path);
-  if (typeof window === 'undefined') return target;
-  const host = window.location.hostname;
-  if (host === 'ops.mova-beauty.co' || host === 'localhost' || host === '127.0.0.1' || host.endsWith('.vercel.app')) return target;
-  return `https://ops.mova-beauty.co${target}`;
+  // Keep the operator workspace on the current origin. Supabase persists browser
+  // sessions in origin-scoped storage, so switching from mova-beauty.co to its
+  // ops subdomain drops the authenticated session.
+  return operatorUrl(businessId,path);
 }
