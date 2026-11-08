@@ -210,7 +210,32 @@
     "profilePhoto": "Foto de perfil",
     "saveProfile": "Guardar perfil",
     "profileSaved": "Perfil actualizado.",
-    "managePortfolio": "Administrar looks"
+    "managePortfolio": "Administrar looks",
+    "preview": "Vista previa",
+    "photos": "Fotos",
+    "coverPhoto": "Foto de portada",
+    "changeCover": "Cambiar portada",
+    "profilePhotoAlt": "Foto de perfil de {{name}}",
+    "changeProfilePhoto": "Cambiar foto de perfil",
+    "nameClientsSee": "Nombre que ven tus clientes",
+    "handlePrefix": "mova-beauty.co/a/",
+    "handleWarning": "Si lo cambias, dejarán de funcionar los enlaces y códigos QR que ya compartiste.",
+    "handleChangeWarning": "Al guardar este enlace nuevo, dejarán de funcionar los enlaces y códigos QR que ya compartiste.",
+    "specialtyCount": "elige hasta {{limit}} ({{count}} de {{limit}})",
+    "specialtyPresets": {
+      "silkPress": "Alisado (silk press)",
+      "naturalHair": "Cabello natural",
+      "braids": "Trenzas",
+      "locs": "Locs",
+      "color": "Color",
+      "cuts": "Cortes",
+      "wigs": "Pelucas e instalaciones",
+      "kids": "Niños"
+    },
+    "looksSummary_one": "{{count}} look · {{shown}} en tu página",
+    "looksSummary_other": "{{count}} looks · {{shown}} en tu página",
+    "manage": "Administrar",
+    "savedShort": "Guardado"
   },
   "locations": {
     "title": "Ubicaciones y horarios",

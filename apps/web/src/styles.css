@@ -877,3 +877,37 @@ select,
 .mova-payment-settings__salon a { color: var(--forest); font-weight: 700; font-size: var(--fs-body-s); }
 .mova-payment-settings__actions { position: sticky; bottom: 0; padding: var(--space-3) 0 var(--space-5); background: var(--surface-page); }
 .mova-payment-settings__actions .mova-button { width: 100%; }
+
+/* 3.3 Edit your profile (canvas 16c) */
+.mova-profile-edit { display: grid; gap: var(--space-3); padding-bottom: 0; }
+.mova-profile-edit .mova-form-stack { display: grid; gap: 14px; }
+.mova-profile-edit__preview { display: inline-flex; min-height: 36px; align-items: center; border: 1px solid var(--line-control); border-radius: var(--radius-pill); padding: 0 14px; background: var(--surface); color: var(--forest); font-size: var(--fs-body-s); font-weight: 600; text-decoration: none; }
+.mova-profile-edit__photos { position: relative; }
+.mova-profile-edit__cover { position: relative; height: 124px; border-radius: var(--radius-2xl); background: linear-gradient(135deg, var(--botanical) 0%, var(--forest) 55%, var(--accent-warm-strong) 140%) center / cover; }
+.mova-profile-edit__cover-button { position: absolute; top: 10px; right: 10px; display: inline-flex; min-height: 32px; align-items: center; border-radius: var(--radius-pill); padding: 0 12px; background: rgba(247, 245, 239, .92); color: var(--forest); font-size: var(--fs-caption); font-weight: 600; cursor: pointer; }
+.mova-profile-edit__cover-button:focus-within, .mova-profile-edit__photo-button:focus-within { outline: 2px solid var(--forest); outline-offset: 2px; }
+.mova-profile-edit input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.mova-profile-edit__avatar-row { position: relative; display: flex; align-items: flex-end; gap: var(--space-3); margin: -36px 0 0 var(--space-4); }
+.mova-profile-edit__avatar { width: 84px; height: 84px; flex: none; overflow: hidden; border: 3px solid var(--surface-page); border-radius: var(--radius-pill); background: var(--peach); }
+.mova-profile-edit__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.mova-profile-edit__photo-button { position: relative; min-height: 36px !important; margin-bottom: var(--space-1); padding-inline: 14px; font-size: var(--fs-caption); cursor: pointer; }
+.mova-profile-edit__handle { min-width: 0; }
+.mova-profile-edit__handle-box { display: flex; width: 100%; min-width: 0; box-sizing: border-box; align-items: center; }
+.mova-profile-edit__handle-box > span { color: var(--ink-muted); white-space: nowrap; }
+.mova-profile-edit__handle-box input { min-width: 0; flex: 1; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; outline: none; }
+.mova-profile-edit__handle-box:focus-within { outline: 2px solid var(--forest); outline-offset: 1px; }
+.mova-profile-edit__handle-box.is-invalid { border-color: var(--danger); }
+.mova-profile-edit legend span { color: var(--ink-muted); font-weight: 500; }
+.mova-profile-edit .mova-chip:disabled { opacity: .45; cursor: not-allowed; }
+.mova-profile-edit__looks { display: grid; gap: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-2xl); padding: 14px var(--space-4); background: var(--surface); color: var(--forest); text-decoration: none; }
+.mova-profile-edit__looks-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.mova-profile-edit__looks-head > span:first-child { display: grid; gap: 2px; }
+.mova-profile-edit__looks-head strong { font-family: var(--font-display); font-size: var(--fs-display-s); }
+.mova-profile-edit__looks-head small { color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-profile-edit__manage { font-size: var(--fs-body-s); font-weight: 700; }
+.mova-profile-edit__manage::after { content: " ›"; }
+.mova-profile-edit__thumbs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.mova-profile-edit__thumbs img, .mova-profile-edit__thumbs span { aspect-ratio: 1; width: 100%; border-radius: var(--radius-m); object-fit: cover; }
+.mova-profile-edit__thumbs span { display: grid; place-items: center; background: var(--line-subtle); color: var(--ink-muted); font-size: var(--fs-caption); font-weight: 700; }
+.mova-profile-edit__actions { position: sticky; bottom: 0; margin-inline: calc(-1 * var(--gutter)); border-top: 1px solid var(--line); padding: var(--space-3) var(--gutter) var(--space-6); background: var(--surface-page); }
+.mova-profile-edit__actions .mova-button { width: 100%; }
