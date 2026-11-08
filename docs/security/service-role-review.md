@@ -31,6 +31,7 @@ The service role bypasses RLS. This is a source-level boundary inventory, not a 
 | `notification-dispatch` | CRON/worker processes undelivered outbox events across businesses by design; event business IDs scope downstream work. | Missing |
 | `notification-inbox` | Requires `artistClient`; inbox query/update includes `actor.businessId` and `actor.user.id`. | Missing |
 | `payment-settings` | Requires `artistClient`; settings query/upsert use `actor.businessId`. | Missing |
+| `waitlist-admin` | No user session: requires `x-mova-admin-secret` to match `MOVA_ADMIN_API_SECRET` (constant-time, 32+ characters, fails closed). Service role calls only the 0059 waitlist functions (list, approve within the cohort cap, decline, resend). Super admin only until the admin portal replaces it. | Missing |
 | `support-feedback` | Requires `artistClient`; inserts run through the stylist's own client so RLS (0041) checks business and user; the service role only issues signed upload URLs under `<business>/<user>/`. | Missing |
 | `concierge-web-chat` | Public; resolves the stylist from a published handle, then runs `_shared/concierge/pipeline.ts` scoped to that business; per-thread rate limit, daily turn cap and the O8 platform spend cap. | Missing |
 | `instagram-webhook` | Provider-signed webhook (fake Meta, HMAC); routes only to the business that owns an active Instagram sending identity. | Missing |

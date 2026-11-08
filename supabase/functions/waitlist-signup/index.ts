@@ -34,6 +34,8 @@ Deno.serve(async (request) => {
     p_email_normalized: emailNormalized,
     p_work_arrangement: workArrangement,
     p_marketing_opt_in: body.marketing_opt_in,
+    // O2: the invite email goes out in the language the visitor used.
+    p_locale: body.locale === 'es-US' ? 'es-US' : 'en-US',
   });
   if (error) {
     console.error('waitlist signup persistence failed', { code: error.code });
