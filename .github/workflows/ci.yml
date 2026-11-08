@@ -59,6 +59,8 @@ jobs:
         run: supabase test db
       - name: Verify concurrent artist handle claims
         run: node scripts/test-handle-claim-race.mjs
+      - name: Seat filler claim race (task 5.1, 5 claims, 1 wins)
+        run: node scripts/test-slot-claim-race.mjs
       - name: Stop isolated local database
         if: always()
         run: supabase stop --no-backup

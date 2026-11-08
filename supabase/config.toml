@@ -186,3 +186,6 @@ verify_jwt = false
 
 [functions.subscription-portal]
 verify_jwt = false
+
+[functions.slot-claim]
+verify_jwt = false
