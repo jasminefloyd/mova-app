@@ -87,7 +87,7 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
       <SectionOverline>{t('showcase.looks')}</SectionOverline>
       {artist.looks.length ? <div className="mova-looks-grid">{artist.looks.map((look) => <Card key={look.id} className="mova-look-card">
         <img src={look.image_url} alt={look.alt_text} loading="lazy" />
-        {look.service_ids.map((id) => servicesById.get(id)).filter((service): service is Service => Boolean(service)).map((service) => <div key={service.id}><p>{service.name}</p><Button type="button" variant="secondary" disabled={preview} onClick={() => { const query = new URLSearchParams({ service_id: service.id, portfolio_item_id: look.id }); navigate(`/a/${encodeURIComponent(handle)}/book?${query.toString()}`); }}>{t('showcase.bookThisLook')}</Button></div>)}
+        {look.service_ids.map((id) => servicesById.get(id)).filter((service): service is Service => Boolean(service)).map((service) => {const depositUnavailable=service.location_deposits.some((item)=>item.deposit_amount_minor>0);return <div key={service.id}><p>{service.name}</p>{depositUnavailable?<p className="mova-public-services__deposit-note">{t('booking.depositUnavailable')}</p>:<Button type="button" variant="secondary" disabled={preview} onClick={() => { const query = new URLSearchParams({ service_id: service.id, portfolio_item_id: look.id }); navigate(`/a/${encodeURIComponent(handle)}/book?${query.toString()}`); }}>{t('showcase.bookThisLook')}</Button>}</div>;})}
       </Card>)}</div> : <EmptyState title={t('showcase.noLooks')} />}
     </section>
     <section id="mova-public-services" role="tabpanel" aria-labelledby="mova-public-services-tab" tabIndex={0} hidden={tab !== 'services'}>
@@ -95,7 +95,9 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
       {artist.services.length ? <ul className="mova-public-services">{artist.services.map((service) => <li key={service.id}>
         <div><strong>{service.name}</strong><small>{service.category} · {service.duration_minutes} {t('showcase.minutes')}</small></div>
         <div><span>{formatMoney(service.base_price_minor, locale)}</span>{service.location_deposits.map((deposit) => { const location = artist.locations.find((entry) => entry.id === deposit.location_id); return <small key={deposit.location_id}>{location?.name}: {formatMoney(deposit.price_minor, locale)} · {deposit.deposit_amount_minor === 0 ? t('showcase.noDeposit') : `${formatMoney(deposit.deposit_amount_minor, locale)} ${t('showcase.deposit')}`}</small>; })}</div>
-        {artist.bookable && <Button type="button" variant="secondary" disabled={preview} onClick={() => navigate(`/a/${encodeURIComponent(handle)}/book?service_id=${encodeURIComponent(service.id)}&locale=${locale}`)}>{t('showcase.book')}</Button>}
+        {artist.bookable && (service.location_deposits.some((item)=>item.deposit_amount_minor>0)
+          ? <p className="mova-public-services__deposit-note">{t('booking.depositUnavailable')}</p>
+          : <Button type="button" variant="secondary" disabled={preview} onClick={() => navigate(`/a/${encodeURIComponent(handle)}/book?service_id=${encodeURIComponent(service.id)}&locale=${locale}`)}>{t('showcase.book')}</Button>)}
       </li>)}</ul> : <EmptyState title={t('showcase.noServices')} />}
     </section>
     {!preview&&<ConciergeWidget artistHandle={handle}/>}

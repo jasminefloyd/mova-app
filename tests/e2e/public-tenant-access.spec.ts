@@ -52,3 +52,30 @@ test('TC-RLS-TENANTCFG-ANON signed-out showcase, booking and QR use public Edge 
   expect(edgeCalls).toContain('/functions/v1/client-card-landing');
   expect(directTenantReads).toEqual([]);
 });
+
+test('TC-F04-DEP-02/TC-F04-DEP-04 deposit services never expose online times or a Book action', async ({ page }) => {
+  const calls: string[] = [];
+  const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
+  const artist = {
+    profile: { display_name: 'Nia Flores', handle: 'nia-flores', specialties: ['Color'], bio: 'Color specialist', preferred_locale: 'en-US', search_index_enabled: true, photo_urls: {} },
+    services: [{ id: 'service-hydration', name: 'Hydration Treatment', category: 'Treatment', duration_minutes: 45, base_price_minor: 8500, deposit_type: 'fixed', deposit_value: 2500, location_deposits: [{ location_id: 'location-studio', price_minor: 8500, duration_minutes: 45, deposit_amount_minor: 2500 }] }],
+    looks: [], locations: [{ id: 'location-studio', name: 'Rooted Beauty Studio', booking_mode: 'instant', time_zone: 'America/New_York' }], bookable: true,
+  };
+  await page.route('**/functions/v1/public-artist', async route => {
+    await route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify({ data: artist, error: null, request_id: 'deposit-fixture' }) });
+  });
+  await page.route('**/functions/v1/availability-search', async route => {
+    calls.push(new URL(route.request().url()).pathname);
+    await route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify({ data: { groups: [{ location_id: 'location-studio', slots: [] }], days: [] }, error: null, request_id: 'deposit-availability' }) });
+  });
+
+  await page.goto('/a/nia-flores?tab=services');
+  await expect(page.getByText('Hydration Treatment')).toBeVisible();
+  await expect(page.getByText('Online booking is unavailable for this service', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Book with/ })).toHaveCount(0);
+
+  await page.goto('/a/nia-flores/book?service_id=service-hydration');
+  await expect(page.getByText('Online booking is unavailable for this service', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: /\d{1,2}:\d{2}/ })).toHaveCount(0);
+  expect(calls).toEqual([]);
+});

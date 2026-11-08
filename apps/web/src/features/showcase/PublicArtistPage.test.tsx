@@ -11,7 +11,7 @@ const artist = {
   },
   services: [{ id: 'svc-1', name: 'Signature color', category: 'Color', duration_minutes: 90, base_price_minor: 12000, deposit_type: 'fixed' as const, deposit_value: 2500, location_deposits: [{location_id:'loc-1',price_minor:12000,duration_minutes:90,deposit_amount_minor:2500}] }],
   locations: [{id:'loc-1',name:'North studio',booking_mode:'request' as const,time_zone:'America/New_York'}],
-  looks: [], bookable: false,
+  looks: [], bookable: true,
 };
 
 function renderPublicPage(path: string) {
@@ -22,17 +22,18 @@ function renderPublicPage(path: string) {
 
 describe('public artist server rendering', () => {
   beforeAll(async () => { await i18nReady; });
-  it('renders artist identity and service content without waiting for client effects', () => {
+  it('TC-F04-DEP-03 renders deposit booking guidance without an online booking CTA', () => {
     const html = renderPublicPage('/a/nia-flores');
     expect(html).toContain('Nia Flores');
     expect(html).toContain('Color specialist');
     expect(html).toContain('Signature color');
     expect(html).toContain('North studio: $120.00 · $25.00 deposit');
+    expect(html).toContain('Online booking is unavailable for this service');
     expect(html).not.toContain('role="status">Loading');
     expect(html).not.toContain('Book now');
   });
 
-  it('uses the requested UI locale while retaining artist-authored content', () => {
+  it('TC-F13-V1-02 uses the requested UI locale while retaining artist-authored content', () => {
     const html = renderPublicPage('/a/nia-flores?locale=es-US&tab=services');
     expect(html).toContain('lang="es-US"');
     expect(html).toContain('Servicios');

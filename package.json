@@ -10,9 +10,9 @@
   "scripts": {
     "dev": "corepack pnpm --filter @mova/web dev",
     "build": "corepack pnpm check-locales && corepack pnpm --filter @mova/contracts build && corepack pnpm --filter @mova/web build",
-    "lint": "eslint apps/web packages/contracts/src scripts/check-locales.mjs scripts/check-direct-reads.mjs scripts/check-direct-reads.test.mjs scripts/check-applied-migrations.mjs scripts/run-e2e.mjs scripts/test-handle-claim-race.mjs scripts/verify-p01.mjs scripts/verify-p02.mjs tests playwright.config.ts playwright.visual.config.ts && node scripts/check-direct-reads.mjs",
+    "lint": "eslint apps/web packages/contracts/src scripts/check-locales.mjs scripts/check-direct-reads.mjs scripts/check-direct-reads.test.mjs scripts/check-public-locale-contrast.test.mjs scripts/check-applied-migrations.mjs scripts/run-e2e.mjs scripts/test-handle-claim-race.mjs scripts/verify-p01.mjs scripts/verify-p02.mjs tests playwright.config.ts playwright.visual.config.ts && node scripts/check-direct-reads.mjs",
     "typecheck": "corepack pnpm --filter @mova/contracts build && tsc -p apps/web/tsconfig.json && corepack pnpm --filter @mova/contracts typecheck",
-    "test": "corepack pnpm --filter @mova/contracts build && vitest run --config apps/web/vitest.config.ts && node --test scripts/check-direct-reads.test.mjs",
+    "test": "corepack pnpm --filter @mova/contracts build && vitest run --config apps/web/vitest.config.ts && node --test scripts/check-direct-reads.test.mjs scripts/check-public-locale-contrast.test.mjs",
     "test:e2e": "node scripts/run-e2e.mjs",
     "test:visual": "playwright test --config playwright.visual.config.ts",
     "check-locales": "node scripts/check-locales.mjs",

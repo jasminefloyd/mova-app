@@ -99,7 +99,7 @@
 .mova-booking__summary h2, .mova-booking__summary p { margin: 0; }
 .mova-public-locale-toggle { display: inline-flex; width: fit-content; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--surface); }
 .mova-public-locale-toggle button { min-width: 44px; min-height: 44px; border: 0; border-radius: var(--radius-pill); padding: 0 var(--space-3); background: transparent; color: var(--ink-secondary); font: 700 var(--fs-body-s) var(--font-ui); cursor: pointer; }
-.mova-public-locale-toggle button[aria-pressed="true"] { background: var(--forest); color: var(--surface-inverse); }
+.mova-public-locale-toggle button[aria-pressed="true"] { background: var(--forest); color: var(--ink-inverse); }
 .mova-public-artist > .mova-public-locale-toggle { margin-inline-start: auto; }
 .mova-scan-landing__brand { display: flex; align-items: center; justify-content: space-between; }
 .mova-scan-landing__brand .mova-wordmark { margin: 0; }
@@ -120,6 +120,42 @@
 .mova-public-services li > div { display: grid; gap: var(--space-1); }
 .mova-public-services li > div:last-child { text-align: end; }
 .mova-public-services small { color: var(--ink-secondary); }
+.mova-public-services__deposit-note { max-width: 18rem; margin: 0; color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.4; }
+.mova-booking { padding-bottom: calc(8rem + env(safe-area-inset-bottom)); }
+.mova-booking__service,.mova-booking__details-summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-4); }
+.mova-booking__service > div { display: grid; min-width: 0; gap: var(--space-1); }
+.mova-booking__service strong,.mova-booking__details-summary strong { color: var(--forest); font-size: var(--fs-display-s); }
+.mova-booking__service p,.mova-booking__details-summary p { margin: 0; color: var(--ink-secondary); }
+.mova-booking__service small { color: var(--ink-secondary); }
+.mova-booking__day-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); color: var(--ink-secondary); }
+.mova-booking__day-heading > div { display: flex; gap: var(--space-1); }
+.mova-day-options { display: flex; gap: var(--space-2); }
+.mova-booking__day { display: grid; min-width: 4.8rem; min-height: 5.25rem; flex: 1 0 4.8rem; align-content: center; justify-items: center; gap: var(--space-1); border: 1px solid var(--line-control); border-radius: var(--radius-l); padding: var(--space-2); background: var(--surface); color: var(--ink-secondary); }
+.mova-booking__day strong { color: var(--forest); font-size: var(--fs-display-s); }
+.mova-booking__day small { font-size: var(--fs-caption); }
+.mova-booking__day[aria-pressed="true"] { border-color: var(--forest); background: var(--forest); color: var(--ink-inverse); }
+.mova-booking__day[aria-pressed="true"] strong { color: var(--ink-inverse); }
+.mova-booking__day:disabled { border-style: dashed; color: var(--ink-muted); }
+.mova-booking__location { display: grid; gap: var(--space-3); }
+.mova-booking__location header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.mova-booking__location h3 { margin: 0; color: var(--forest); }
+.mova-booking__location > p { margin: 0; color: var(--ink-secondary); }
+.mova-booking__mode { border-radius: var(--radius-pill); padding: var(--space-1) var(--space-3); background: var(--mint); color: var(--forest); font-size: var(--fs-caption); font-weight: 700; }
+.mova-booking__mode--request { border: 1px dashed var(--peach); background: var(--surface-warm); }
+.mova-booking__price-summary { display: grid; gap: var(--space-1); }
+.mova-booking__price-summary p { margin: 0; color: var(--ink-secondary); }
+.mova-booking__sticky { position: sticky; z-index: 2; bottom: 0; display: grid; gap: var(--space-2); margin: var(--space-5) calc(-1 * var(--gutter)) calc(-1 * var(--space-8)); border-top: 1px solid var(--line-subtle); padding: var(--space-3) var(--gutter) calc(var(--space-3) + env(safe-area-inset-bottom)); background: var(--surface); }
+.mova-booking__sticky p { margin: 0; color: var(--ink-secondary); text-align: center; }
+.mova-booking__details { display: grid; gap: var(--space-4); }
+.mova-booking__details h2 { margin: 0; }
+.mova-booking__details-summary { flex-wrap: wrap; }
+.mova-booking__signin { padding: var(--space-4); background: var(--surface-alt); }
+.mova-booking__consents { display: grid; gap: var(--space-3); margin: 0; border: 0; padding: 0; }
+.mova-booking__consents legend { margin-bottom: var(--space-2); color: var(--forest); font-weight: 700; }
+.mova-booking__consents p { margin: 0; color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-booking__consents label { display: flex; min-height: var(--tap-min); align-items: center; gap: var(--space-2); }
+.mova-booking__consents input { width: 1.25rem; height: 1.25rem; accent-color: var(--forest); }
+.mova-booking__deposit-block p { margin-bottom: 0; line-height: 1.5; }
 .mova-chip--static { display: inline-flex; align-items: center; min-height: 2.25rem; border-radius: var(--radius-pill); padding-inline: var(--space-4); background: var(--mint); font-size: var(--fs-body-s); font-weight: 600; }
 .mova-settings-page { width: min(100% - 2 * var(--gutter), 680px); gap: var(--space-3); padding-top: var(--space-4); padding-bottom: var(--space-8); }
 .mova-portfolio-list { display: grid; gap: var(--space-4); margin: 0 0 var(--space-5); padding: 0; list-style: none; }

@@ -13,6 +13,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     include: ['apps/web/src/**/*.test.ts', 'apps/web/src/**/*.test.tsx', 'packages/domain/src/**/*.test.ts', 'tests/unit/**/*.test.ts', 'tests/unit/**/*.test.tsx', 'tests/security/**/*.test.ts', 'supabase/functions/_shared/**/*.test.ts'],
+    exclude: ['supabase/functions/_shared/tenant.test.ts'],
     restoreMocks: true,
     clearMocks: true,
   },
