@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('signed-out showcase, booking and artist QR use public Edge endpoints without tenant REST reads', async ({ page }) => {
+test('TC-RLS-TENANTCFG-ANON signed-out showcase, booking and QR use public Edge endpoints without tenant REST reads', async ({ page }) => {
   const directTenantReads: string[] = [];
   const edgeCalls: string[] = [];
   page.on('request', request => {

@@ -35,3 +35,7 @@ autopilot, templates, reports, reviews, concierge, getpaid. `scripts/check-local
 - Screens compose `src/components/` only, styled with tokens. No raw hex values (see `docs/design/README.md`).
 - Never import note types or tenant-private DTOs into public/client routes (F17-AC01).
 - Service-role key never in this app (CI check).
+
+## Local database and functions
+
+For isolated database and Edge Function development, install Docker Desktop and the Supabase CLI from the repository's supported toolchain. From the repository root, run `supabase start`, then `supabase db reset --no-seed` for pgTAP against an empty schema or `supabase db reset` to validate the synthetic seed. Run `supabase functions serve` for local Edge Function work and `supabase stop` when done. The app's local `.env` should contain only development/local values; never point these commands at the production project. CI uses a fresh local stack for these checks.

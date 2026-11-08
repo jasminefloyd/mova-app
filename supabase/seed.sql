@@ -17,6 +17,10 @@ declare
   client_5 constant uuid := 'e2500000-0000-4000-8000-000000000305';
   appointment_row record;
 begin
+  insert into auth.users (id, aud, role, email, email_confirmed_at)
+  values ('e2500000-0000-4000-8000-000000000099', 'authenticated', 'authenticated', 'jasmine@demo.com', now())
+  on conflict (id) do nothing;
+
   select id into strict demo_user_id
   from auth.users
   where lower(email) = 'jasmine@demo.com'

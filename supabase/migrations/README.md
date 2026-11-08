@@ -2,7 +2,7 @@
 
 Mova shares the configured Supabase project with other applications. The remote project already had 83 migration records before Mova's schema was applied. Mova migrations were applied through the Supabase Management API using `mova_`-prefixed migration names. The production migration history was read back on 2026-11-07; it contains the Mova records listed below, alongside unrelated application records.
 
-The applied Mova remote migration records are mirrored by these local timestamped files so Supabase CLI migration-history checks recognize them. Versions 0030 and 0031 were applied on 2026-11-07 after explicit product-owner approval. The CLI `db push` command cannot reconcile the 83 unrelated remote records that have no local migration files; the two approved migrations were applied transactionally through the Management API SQL path, with their history rows written in the same transaction.
+The applied Mova remote migration records are mirrored by these local timestamped files so Supabase CLI migration-history checks recognize them. Versions 0030 and 0031 were applied on 2026-11-07 after explicit product-owner approval. Migration 0032 below is a local-only addition and has not been applied remotely. The CLI `db push` command cannot reconcile the 83 unrelated remote records that have no local migration files; the two approved migrations were applied transactionally through the Management API SQL path, with their history rows written in the same transaction.
 
 | Remote version | Remote name | Local file |
 |---|---|---|
