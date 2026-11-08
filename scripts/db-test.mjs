@@ -16,7 +16,8 @@ if (!(host.startsWith('/') || ['localhost', '127.0.0.1', '::1'].includes(host)))
   console.error(`db-test refuses non-local PGHOST "${host}". Tests never run against hosted databases.`);
   process.exit(2);
 }
-const env = { ...process.env, PGHOST: host, PGUSER: process.env.PGUSER || 'postgres', PGPORT: process.env.PGPORT || '5432' };
+// PGTZ=UTC matches the Supabase CLI database used in CI, so time-of-day assumptions in tests fail here too.
+const env = { ...process.env, PGHOST: host, PGUSER: process.env.PGUSER || 'postgres', PGPORT: process.env.PGPORT || '5432', PGTZ: process.env.PGTZ || 'UTC' };
 const psql = (db, extra, opts = {}) => spawnSync('psql', ['-X', '-q', '-d', db, ...extra], { env, encoding: 'utf8', ...opts });
 const must = (db, extra) => { const r = psql(db, ['-v', 'ON_ERROR_STOP=1', ...extra]); if (r.status !== 0) { console.error(r.stdout, r.stderr); process.exit(1); } };
 

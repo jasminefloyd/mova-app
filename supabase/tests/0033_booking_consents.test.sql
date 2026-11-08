@@ -19,7 +19,7 @@ create temporary table mova_booking_consent_result as
 select public.mova_booking_create_with_consent(
   'e3300000-0000-4000-8000-000000000101',
   'e3300000-0000-4000-8000-000000000202',
-  date_trunc('day',now()+interval '30 days')+interval '12 hours',
+  (date_trunc('day',(now() at time zone 'America/New_York')+interval '30 days')+interval '12 hours') at time zone 'America/New_York',
   'Consent Test Guest','consent-test@example.invalid','+12025550299','en-US',
   'consent-test-booking',decode(repeat('31',32),'hex'),null,null,null,
   '{"rebooking_reminders":{"email":true,"sms":true},"offers":{"email":false,"sms":false},"review_requests":{"email":false}}'::jsonb
@@ -34,7 +34,7 @@ select is((select granted from public.mova_client_consents c join public.mova_ap
 select is((select evidence->>'source' from public.mova_client_consents c join public.mova_appointments a on a.client_id=c.client_id and a.artist_business_id=c.artist_business_id where a.idempotency_key='consent-test-booking' and c.purpose='rebooking_reminders' and c.channel='email' order by c.changed_at desc,c.id desc limit 1),'booking_checkout','TC-F04-AC01-02 consent row records checkout evidence');
 select is((select (public.mova_booking_create_with_consent(
   'e3300000-0000-4000-8000-000000000101','e3300000-0000-4000-8000-000000000202',
-  date_trunc('day',now()+interval '30 days')+interval '12 hours',
+  (date_trunc('day',(now() at time zone 'America/New_York')+interval '30 days')+interval '12 hours') at time zone 'America/New_York',
   'Consent Test Guest','consent-test@example.invalid','+12025550299','en-US',
   'consent-test-booking',decode(repeat('31',32),'hex'),null,null,null,
   '{"rebooking_reminders":{"email":false,"sms":false},"offers":{"email":false,"sms":false},"review_requests":{"email":false}}'::jsonb
