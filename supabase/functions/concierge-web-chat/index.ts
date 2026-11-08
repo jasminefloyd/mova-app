@@ -32,5 +32,6 @@ Deno.serve(async (request) => {
   if (outcome.status === 'not_enabled') return respond({ code: 'CHAT_NOT_AVAILABLE' }, 503);
   if (outcome.status === 'rate_limited') return respond({ code: 'CHAT_RATE_LIMITED' }, 429);
   if (outcome.status === 'failed') return respond({ code: 'CHAT_SAVE_FAILED' }, 500);
+  if (!('reply' in outcome)) return respond({ code: 'CHAT_SAVE_FAILED' }, 500);
   return respond({ reply: outcome.reply, needs_you: outcome.status === 'needs_you' });
 });
