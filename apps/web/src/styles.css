@@ -992,3 +992,8 @@ select,
 .mova-web-chat__form input { min-width: 0; flex: 1; min-height: 48px; border: 1px solid var(--line-control); border-radius: var(--radius-pill); padding: 0 var(--space-4); background: var(--surface); color: var(--ink-primary); font: inherit; }
 .mova-web-chat__form input:focus-visible { outline: 2px solid var(--forest); outline-offset: 1px; }
 .mova-web-chat__form .mova-button { min-height: 48px; padding-inline: var(--space-4); }
+
+/* 5.8 Plan notices */
+.mova-plan-notice { margin: 0; border-radius: var(--radius-m); padding: 10px var(--space-3); background: var(--status-confirmed-bg); font-size: var(--fs-body-s); }
+.mova-plan-notice.is-failed { background: #F6E3DF; color: var(--danger); }
+.mova-plan-notice.is-cancelled { background: var(--surface-alt); }

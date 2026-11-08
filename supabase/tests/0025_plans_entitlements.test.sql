@@ -8,7 +8,7 @@ select has_trigger('public'::name, 'mova_messages'::name, 'mova_message_usage_af
 select ok((select relrowsecurity from pg_class where oid='public.mova_usage_meter_events'::regclass),'usage meter has RLS');
 select ok(not has_table_privilege('authenticated','public.mova_usage_meter_events','SELECT'),'members cannot mutate or inspect raw usage events');
 select ok(has_function_privilege('service_role','public.mova_plan_entitlement_summary(uuid)','EXECUTE'),'service role can read plan summary');
-select ok((select count(*)=3 from public.mova_plan_catalog where status='proposed'),'three proposed plans are seeded');
+select ok((select count(*)=3 from public.mova_plan_catalog where status='active'),'three plans are seeded and active after O10 (0055)');
 select ok(not has_function_privilege('authenticated','public.mova_plan_entitlement_summary(uuid)','EXECUTE'),'clients cannot call service plan summary directly');
 select * from finish();
 rollback;

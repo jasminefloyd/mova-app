@@ -1405,11 +1405,9 @@
   "plan": {
     "title": "Tu plan",
     "back": "Atrás",
-    "proposed": "Precios propuestos · no son definitivos",
     "current": "Plan actual",
     "perMonth": "/mes",
     "perMovaPayment": "por pago de Mova",
-    "featuresPlaceholder": "Detalles de precios próximamente",
     "choose": "Elegir {{plan}}",
     "feeNote": "Las tarifas porcentuales solo aplican a pagos procesados por Mova. El procesamiento de Stripe se cobra aparte. No hay tarifa de Mova para efectivo, otros pagos registrados o pagos cobrados por el salón.",
     "loading": "Cargando detalles del plan…",
@@ -1419,6 +1417,13 @@
       "free": "Gratis",
       "pro": "Pro",
       "ai_growth": "AI Growth"
+    },
+    "billingUnavailable": "Podrás cambiar de plan cuando la facturación esté configurada.",
+    "testMode": "Modo de prueba: no se hacen cobros reales.",
+    "notice": {
+      "confirmed": "Tu plan se actualizó.",
+      "cancelled": "Se canceló el pago. Tu plan no cambió.",
+      "failed": "No pudimos cambiar tu plan. Inténtalo de nuevo."
     }
   },
   "privacy": {

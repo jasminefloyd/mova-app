@@ -171,3 +171,15 @@ verify_jwt = false
 
 [functions.concierge-web-chat]
 verify_jwt = false
+
+[functions.instagram-webhook]
+verify_jwt = false
+
+[functions.wallet-pass-create]
+verify_jwt = false
+
+[functions.subscription-checkout]
+verify_jwt = false
+
+[functions.subscription-portal]
+verify_jwt = false

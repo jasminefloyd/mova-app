@@ -1405,11 +1405,9 @@
   "plan": {
     "title": "Your plan",
     "back": "Back",
-    "proposed": "Proposed pricing · not final",
     "current": "Current plan",
     "perMonth": "/month",
     "perMovaPayment": "per Mova payment",
-    "featuresPlaceholder": "Pricing details coming soon",
     "choose": "Choose {{plan}}",
     "feeNote": "Percent fees apply only to payments Mova processes. Stripe processing is extra. No Mova fee on cash, other recorded payments, or salon-collected payments.",
     "loading": "Loading plan details…",
@@ -1419,6 +1417,13 @@
       "free": "Free",
       "pro": "Pro",
       "ai_growth": "AI Growth"
+    },
+    "billingUnavailable": "Plan changes open when billing is set up.",
+    "testMode": "Test mode: no real charges are made.",
+    "notice": {
+      "confirmed": "Your plan is updated.",
+      "cancelled": "Checkout was cancelled. Your plan hasn't changed.",
+      "failed": "We couldn't change your plan. Try again."
     }
   },
   "privacy": {
