@@ -34,6 +34,8 @@ Conventions: `/functions/v1/<name>`, envelope `{ data, error, request_id }`, `Id
 - `job-dispatch`
 - `job-worker`
 
+`job-dispatch` and `job-worker` are server-only. Both reject requests without their separate `x-mova-job-secret`; the Vercel `/api/job-dispatch` cron route verifies `CRON_SECRET`, dispatches pending outbox rows, then invokes the worker. The queue uses database leases and idempotent notification upserts. Dead letters are recorded in `mova_background_job_alerts`; an operator must inspect/acknowledge these records until an external alert destination is configured. All job/provider flags remain OFF by default.
+
 `waitlist-signup` is the public acquisition form endpoint. It stores only the supplied email, selected work arrangement, and explicit optional marketing opt-in; its response does not claim an email was sent. The handler uses the service-role-only `mova_waitlist_register` function. It returns `WAITLIST_NOT_OPEN` unless server secret `MOVA_WAITLIST_ENABLED=true`; the public form separately requires `VITE_WAITLIST_ENABLED=true`. Keep both flags false until A-14 privacy, anti-bot, and production-domain checks are verified and accepted.
 
 ## New in v2 (§6.3)

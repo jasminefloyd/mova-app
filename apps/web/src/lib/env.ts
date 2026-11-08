@@ -8,6 +8,7 @@ const publicEnvSchema = z.object({
   VITE_WALLET_CLIENT_CARD_ENABLED: z.enum(['true','false']).optional(),
   VITE_CONCIERGE_WEB_CHAT_ENABLED: z.enum(['true','false']).optional(),
   VITE_WAITLIST_ENABLED: z.enum(['true','false']).optional(),
+  VITE_STRIPE_TEST_MODE: z.enum(['true','false']).optional(),
 });
 
 const rawEnv = {
@@ -17,12 +18,14 @@ const rawEnv = {
   VITE_WALLET_CLIENT_CARD_ENABLED: import.meta.env.VITE_WALLET_CLIENT_CARD_ENABLED || undefined,
   VITE_CONCIERGE_WEB_CHAT_ENABLED: import.meta.env.VITE_CONCIERGE_WEB_CHAT_ENABLED || undefined,
   VITE_WAITLIST_ENABLED: import.meta.env.VITE_WAITLIST_ENABLED || undefined,
+  VITE_STRIPE_TEST_MODE: import.meta.env.VITE_STRIPE_TEST_MODE || undefined,
 };
 
 export const publicEnv = publicEnvSchema.parse(rawEnv);
 export const clientProfilesEnabled = publicEnv.VITE_CLIENT_PROFILES_ENABLED === 'true';
 export const walletClientCardEnabled = publicEnv.VITE_WALLET_CLIENT_CARD_ENABLED === 'true';
 export const waitlistEnabled = publicEnv.VITE_WAITLIST_ENABLED === 'true';
+export const stripeTestModeEnabled = publicEnv.VITE_STRIPE_TEST_MODE === 'true';
 
 export function requireSupabaseEnv(): { url: string; anonKey: string } {
   if (!publicEnv.VITE_SUPABASE_URL || !publicEnv.VITE_SUPABASE_ANON_KEY) {

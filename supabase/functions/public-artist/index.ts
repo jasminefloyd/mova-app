@@ -1,12 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
+import { corsHeaders } from '../_shared/cors.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, apikey, content-type',
-};
+const publicCorsHeaders = { ...corsHeaders, 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' };
 
 function respond(data: unknown, status = 200): Response {
-  return Response.json({ data, error: null, request_id: crypto.randomUUID() }, { status, headers: corsHeaders });
+  return Response.json({ data, error: null, request_id: crypto.randomUUID() }, { status, headers: publicCorsHeaders });
 }
 
 function computeDepositMinor(priceMinor: number, depositType: string, depositValue: number): number {
@@ -16,7 +14,7 @@ function computeDepositMinor(priceMinor: number, depositType: string, depositVal
 }
 
 Deno.serve(async (request) => {
-  if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  if (request.method === 'OPTIONS') return new Response('ok', { headers: publicCorsHeaders });
   if (!['GET', 'POST'].includes(request.method)) return respond(null, 405);
   const query = request.method === 'GET' ? Object.fromEntries(new URL(request.url).searchParams) : await request.json().catch(() => ({}));
   const handle = typeof query.handle === 'string' ? query.handle.trim().toLowerCase() : '';

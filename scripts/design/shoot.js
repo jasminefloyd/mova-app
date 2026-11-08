@@ -1,5 +1,5 @@
 // Screenshot docs/design/screens/html/*.html to screens/png at 390x844 @2x, offline. Usage: node shoot.js <docs_design_dir>
-const { chromium } = require('playwright');
+const { chromium } = require('@playwright/test');
 const fs = require('fs'), path = require('path');
 (async () => {
   const dir = path.resolve(process.argv[2]);

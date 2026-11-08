@@ -19,6 +19,8 @@ export default [
     route('growth/concierge/setup', '../src/features/concierge/ConciergeSetupRoute.tsx'),
     route('growth/concierge/quotes/:quoteId', '../src/features/concierge/ConciergeQuotePage.tsx'),
     route('growth/concierge/:conversationId', '../src/features/concierge/ConciergeThreadRoute.tsx'),
+    route('growth/autopilot/messages', '../src/app/routes/GrowthTemplatesAlias.tsx'),
+    route('growth/autopilot/activity', '../src/app/routes/GrowthActivityAlias.tsx'),
     route('growth/:view', '../src/app/routes/GrowthDetail.tsx'),
     route('reports', '../src/app/routes/Reports.tsx'),
     route('reports/reputation', '../src/features/reports/ReputationPage.tsx', { id: 'reports-reputation' }),
@@ -57,7 +59,9 @@ export default [
   route('sitemap.xml', '../src/routes/sitemap.ts'),
   route('robots.txt', '../src/routes/robots.ts'),
   route('api/booking-expiry', '../src/routes/booking-expiry.ts'),
+  route('api/job-dispatch', '../src/routes/job-dispatch.ts'),
   route('api/calendar-sync', '../src/routes/calendar-sync.ts'),
   route('api/reports-refresh', '../src/routes/reports-refresh.ts'),
   route('feed/:token', '../src/routes/calendar-feed.ts'),
+  route('pay/:code', '../src/routes/paylink-redirect.ts'),
 ] satisfies RouteConfig;

@@ -8,7 +8,7 @@ import { QrCode } from '../identity/QrCode';
 
 type Slot = { starts_at: string; ends_at: string; local_date: string; local_time: string; utc_offset: string; booking_mode: string };
 type Booking = {
-  id: string; status: string; starts_at: string; ends_at: string; service_id: string; service_name_snapshot: string;
+  id: string; status: string; starts_at: string; ends_at: string; service_id: string; service_ids?: string[]; service_name_snapshot: string; service_names?: string[];
   deposit_due_minor: number; location_id: string; cancellation_window_minutes: number; client_name: string; artist_business_id: string;
   artist?: { display_name: string; handle: string };
   reschedule_requested_starts_at: string | null; artist_suggested_starts_at: string | null;
@@ -87,7 +87,7 @@ export function BookingManageRoute() {
       const fromDate = new Intl.DateTimeFormat('en-CA', { timeZone: booking.location?.time_zone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
       const response = await fetch(`${publicEnv.VITE_SUPABASE_URL}/functions/v1/availability-search`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', apikey: publicEnv.VITE_SUPABASE_ANON_KEY ?? '' },
-        body: JSON.stringify({ location_id: booking.location_id, service_id: booking.service_id, from_date: fromDate, days: 30 }),
+        body: JSON.stringify({ location_id: booking.location_id, service_ids: booking.service_ids??[booking.service_id], from_date: fromDate, days: 30 }),
       });
       const body = await response.json();
       if (!response.ok) throw new Error();
@@ -140,7 +140,7 @@ export function BookingManageRoute() {
     <StatusChip status={booking.status === 'confirmed' ? 'confirmed' : ['cancelled', 'declined', 'expired'].includes(booking.status) ? 'cancelled' : 'pending'}>{t(`booking.status.${booking.status}`, { defaultValue: booking.status })}</StatusChip>
     <h1>{booking.status === 'confirmed' ? t('identity.bookedWith', { name: booking.artist?.display_name ?? t('identity.client') }) : t('booking.manageTitle')}</h1>
     <Card>
-      <h2>{booking.service_name_snapshot}</h2>
+      <h2>{booking.service_names?.join(' + ')||booking.service_name_snapshot}</h2>
       <p>{formattedStart}</p>
       <p>{booking.location?.name}</p>
       <p>{t(`booking.status.${booking.status}`)}</p>

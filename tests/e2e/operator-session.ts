@@ -59,7 +59,7 @@ export async function openOperatorPage(page: Page, pathname: string, businessDis
     if (route.request().method() === 'OPTIONS') return fulfillJson(route, null);
     const name = new URL(route.request().url()).pathname.split('/').pop();
     const body = route.request().postDataJSON() as Record<string, unknown> | null;
-    const quote = { id: 'e2500000-0000-4000-8000-000000000030', conversation_id: 'e2500000-0000-4000-8000-000000000031', service_category: 'Protective style', details: { hair_now: 'Natural curls', goal: 'Low-tension protective style', budget: 'Please discuss', availability: 'Weekends' }, media_count: 0, risk_flags: [], quoted_minor: null, status: 'open', created_at: '2026-11-07T12:00:00.000Z', client_name: 'Alex Rivera', channel: 'web_chat', locale: 'en-US' };
+    const quote = { id: 'e2500000-0000-4000-8000-000000000030', conversation_id: 'e2500000-0000-4000-8000-000000000031', appointment_id: 'e2500000-0000-4000-8000-000000000061', appointment_number: 1, service_category: 'Protective style', details: { hair_now: 'Natural curls', goal: 'Low-tension protective style', budget: 'Please discuss', availability: 'Weekends' }, media_count: 0, risk_flags: [], quoted_minor: null, status: 'open', created_at: '2026-11-07T12:00:00.000Z', client_name: 'Alex Rivera', channel: 'web_chat', locale: 'en-US' };
     const data = name === 'concierge-artist' && body?.action === 'home-needs'
       ? { quotes: [{ id: 'e2500000-0000-4000-8000-000000000030', conversation_id: 'e2500000-0000-4000-8000-000000000031', service_category: 'Protective style', created_at: '2026-11-07T12:00:00.000Z' }] }
       : name === 'slot-campaign' && body?.action === 'home-needs'
@@ -67,7 +67,7 @@ export async function openOperatorPage(page: Page, pathname: string, businessDis
       : name === 'concierge-artist' && body?.action === 'status'
       ? { settings: { enabled: false, globally_paused: true }, conversations: [{ id: quote.conversation_id, channel: 'web_chat', client_id: userId, locale: 'en-US', status: 'needs_you', ai_enabled: false, pause_until: null, last_message_at: quote.created_at, mova_clients: { display_name: quote.client_name } }], handoffs: [], knowledge: [], aiEnabled: false }
       : name === 'concierge-artist' && body?.action === 'conversation'
-        ? { messages: [], handoffs: [], quotes: [{ id: quote.id, service_category: quote.service_category, details: quote.details, status: quote.status, quoted_minor: quote.quoted_minor }] }
+        ? { messages: [], handoffs: [], quotes: [{ id: quote.id, appointment_id: quote.appointment_id, appointment_number: quote.appointment_number, service_category: quote.service_category, details: quote.details, status: quote.status, quoted_minor: quote.quoted_minor }] }
         : name === 'concierge-artist' && body?.action === 'quote-detail'
           ? { quote }
           : name === 'concierge-artist' && body?.action === 'save-quote-estimate'

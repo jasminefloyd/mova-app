@@ -44,7 +44,7 @@ Deno.serve(async(request)=>{
   const [{data:messages,error},{data:handoffs},{data:quotes}]=await Promise.all([
    db.from('mova_messages').select('id,direction,origin,channel,purpose,body,status,created_at').eq('artist_business_id',actor.businessId).eq('conversation_id',body.conversation_id).order('created_at'),
    db.from('mova_handoffs').select('id,type,status,summary,created_at').eq('artist_business_id',actor.businessId).eq('conversation_id',body.conversation_id).order('created_at',{ascending:false}),
-   db.from('mova_quote_requests').select('id,service_category,details,media,risk_flags,quoted_minor,status,created_at').eq('artist_business_id',actor.businessId).eq('conversation_id',body.conversation_id).order('created_at',{ascending:false}),
+   db.from('mova_quote_requests').select('id,appointment_id,service_category,details,media,risk_flags,quoted_minor,status,created_at').eq('artist_business_id',actor.businessId).eq('conversation_id',body.conversation_id).order('created_at',{ascending:false}),
   ]);if(error)return respond({code:'CONVERSATION_READ_FAILED'},500);return respond({messages:messages??[],handoffs:handoffs??[],quotes:quotes??[]});
  }
  if(body.action==='human-reply'){
@@ -61,20 +61,34 @@ Deno.serve(async(request)=>{
  }
  if(body.action==='update-quote'){
   if(typeof body.id!=='string'||!['quoted','consult_offered','booked','closed'].includes(body.status))return respond({code:'INVALID_QUOTE_UPDATE'},422);
+  let appointmentId:string|undefined;
+  if(body.status==='booked'){
+   if(typeof body.appointment_id!=='string')return respond({code:'APPOINTMENT_REQUIRED'},422);
+   const [{data:quote,error:quoteError},{data:appointment,error:appointmentError}]=await Promise.all([
+    db.from('mova_quote_requests').select('id,client_id').eq('artist_business_id',actor.businessId).eq('id',body.id).maybeSingle(),
+    db.from('mova_appointments').select('id,client_id,status').eq('artist_business_id',actor.businessId).eq('id',body.appointment_id).maybeSingle(),
+   ]);
+   if(quoteError||appointmentError)return respond({code:'QUOTE_LINK_VALIDATION_FAILED'},500);
+   if(!quote)return respond({code:'QUOTE_NOT_FOUND'},404);
+   if(!appointment||!['pending_artist','confirmed','completed'].includes(appointment.status)|| (quote.client_id&&quote.client_id!==appointment.client_id))return respond({code:'APPOINTMENT_NOT_LINKABLE'},422);
+   appointmentId=appointment.id;
+  }
   const amount=body.quoted_minor===undefined?null:Number(body.quoted_minor);if(amount!==null&&(!Number.isSafeInteger(amount)||amount<0))return respond({code:'INVALID_QUOTE_AMOUNT'},422);
-  const {error}=await db.from('mova_quote_requests').update({status:body.status,quoted_minor:amount,updated_at:new Date().toISOString()}).eq('artist_business_id',actor.businessId).eq('id',body.id);
+  const {error}=await db.from('mova_quote_requests').update({status:body.status,quoted_minor:amount,...(appointmentId?{appointment_id:appointmentId}:{}),updated_at:new Date().toISOString()}).eq('artist_business_id',actor.businessId).eq('id',body.id);
   return error?respond({code:'QUOTE_UPDATE_FAILED'},500):respond({updated:true});
  }
  if(body.action==='quote-detail'){
   if(typeof body.id!=='string')return respond({code:'INVALID_QUOTE'},422);
-  const {data:quote,error:quoteError}=await db.from('mova_quote_requests').select('id,conversation_id,client_id,service_category,details,media,risk_flags,quoted_minor,status,created_at').eq('artist_business_id',actor.businessId).eq('id',body.id).maybeSingle();
+  const {data:quote,error:quoteError}=await db.from('mova_quote_requests').select('id,conversation_id,client_id,appointment_id,service_category,details,media,risk_flags,quoted_minor,status,created_at').eq('artist_business_id',actor.businessId).eq('id',body.id).maybeSingle();
   if(quoteError)return respond({code:'QUOTE_READ_FAILED'},500);if(!quote)return respond({code:'QUOTE_NOT_FOUND'},404);
   const [{data:conversation,error:conversationError},{data:client,error:clientError}]=await Promise.all([
    db.from('mova_conversations').select('channel,locale').eq('artist_business_id',actor.businessId).eq('id',quote.conversation_id).maybeSingle(),
    quote.client_id?db.from('mova_clients').select('display_name').eq('artist_business_id',actor.businessId).eq('id',quote.client_id).maybeSingle():Promise.resolve({data:null,error:null}),
   ]);
   if(conversationError||clientError)return respond({code:'QUOTE_CONTEXT_READ_FAILED'},500);if(!conversation)return respond({code:'CONVERSATION_NOT_FOUND'},404);
-  return respond({quote:{id:quote.id,conversation_id:quote.conversation_id,service_category:quote.service_category,details:quote.details,media_count:Array.isArray(quote.media)?quote.media.length:0,risk_flags:Array.isArray(quote.risk_flags)?quote.risk_flags:[],quoted_minor:quote.quoted_minor,status:quote.status,created_at:quote.created_at,client_name:client?.display_name??null,channel:conversation.channel,locale:conversation.locale}});
+  const {data:appointment,error:appointmentError}=quote.appointment_id?await db.from('mova_appointments').select('appointment_number').eq('artist_business_id',actor.businessId).eq('id',quote.appointment_id).maybeSingle():{data:null,error:null};
+  if(appointmentError)return respond({code:'QUOTE_APPOINTMENT_READ_FAILED'},500);
+  return respond({quote:{id:quote.id,conversation_id:quote.conversation_id,appointment_id:quote.appointment_id,appointment_number:appointment?.appointment_number??null,service_category:quote.service_category,details:quote.details,media_count:Array.isArray(quote.media)?quote.media.length:0,risk_flags:Array.isArray(quote.risk_flags)?quote.risk_flags:[],quoted_minor:quote.quoted_minor,status:quote.status,created_at:quote.created_at,client_name:client?.display_name??null,channel:conversation.channel,locale:conversation.locale}});
  }
  if(body.action==='save-quote-estimate'){
   if(typeof body.id!=='string'||!Number.isSafeInteger(body.quoted_minor)||Number(body.quoted_minor)<=0)return respond({code:'INVALID_QUOTE_AMOUNT'},422);

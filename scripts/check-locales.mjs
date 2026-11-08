@@ -31,6 +31,11 @@ export function validateLocaleCatalogs(catalogs, criticalKeys) {
       if (!catalog.has(key) || !catalog.get(key)?.trim()) problems.push(`${locale} is missing critical string ${key}`);
     }
   }
+  for (const [locale, catalog] of [['en-US', en], ['es-US', es]]) {
+    for (const [key, value] of catalog) {
+      if (/portfolio|portafolio/i.test(value)) problems.push(`${locale} still exposes the retired stylist-facing term at ${key}`);
+    }
+  }
   return problems;
 }
 

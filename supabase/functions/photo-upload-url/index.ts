@@ -1,12 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
+import { corsHeaders } from '../_shared/cors.ts';
 
 const maxBytes = 10 * 1024 * 1024;
 const allowedMime = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 const json = (data: unknown, status = 200) => Response.json({ data, error: null, request_id: crypto.randomUUID() }, { status, headers: corsHeaders });
 
 Deno.serve(async (request) => {

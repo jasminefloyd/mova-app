@@ -6,7 +6,7 @@ import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { operatorUrl } from '../../app/operator-url';
 import { displayId } from '../../lib/display-ids';
 
-type Booking = { id: string; appointment_number:number; location_id: string; service_name_snapshot: string; client_name: string; status: string; starts_at: string; ends_at: string; request_expires_at: string | null };
+type Booking = { id: string; appointment_number:number; location_id: string; service_name_snapshot: string; service_names?:string[]; client_name: string; status: string; starts_at: string; ends_at: string; request_expires_at: string | null };
 type QuoteNeed = { id: string; conversation_id: string; service_category: string; created_at: string };
 type SlotNeed = { id: string; location_id: string; starts_at: string };
 type Location = { id: string; name: string; time_zone: string; display_color_index: number };
@@ -44,7 +44,7 @@ export function HomeNeedsSection({ businessId, needsYou, quoteNeeds, slotNeeds, 
       {needsYou.map((item) => {
         const location = locationById.get(item.location_id);
         const requestDay = new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'short', timeZone: location?.time_zone }).format(new Date(item.starts_at));
-        const requestContext = { service: item.service_name_snapshot, day: requestDay, location: location?.name ?? '' };
+        const requestContext = { service: item.service_names?.join(' + ')||item.service_name_snapshot, day: requestDay, location: location?.name ?? '' };
         const requestDetails = item.request_expires_at
           ? t('homeAppointments.requestDetails', { ...requestContext, count: Math.max(1, Math.ceil((new Date(item.request_expires_at).getTime() - now) / 3_600_000)) })
           : t('homeAppointments.requestDetailsNoExpiry', requestContext);
@@ -106,7 +106,11 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
       setLoading(false);
       return;
     }
-    setItems((bookings.data ?? []) as Booking[]);
+    const appointmentIds=(bookings.data??[]).map(item=>item.id);
+    const {data:serviceRows,error:serviceError}=appointmentIds.length?await client.from('mova_appointment_services').select('appointment_id,position,service_name_snapshot').eq('artist_business_id',businessId).in('appointment_id',appointmentIds).order('position'):{data:[],error:null};
+    if(serviceError){setError(true);setLoading(false);return;}
+    const namesByAppointment=new Map<string,string[]>();for(const item of serviceRows??[])namesByAppointment.set(item.appointment_id,[...(namesByAppointment.get(item.appointment_id)??[]),item.service_name_snapshot]);
+    setItems((bookings.data ?? []).map(item=>({...item,service_names:namesByAppointment.get(item.id)??[item.service_name_snapshot]})) as Booking[]);
     setQuoteNeeds(quoteRows.error ? [] : (quoteRows.data?.data?.quotes ?? []));
     setSlotNeeds(slotRows.error ? [] : (slotRows.data?.data?.slots ?? []));
     setNeedsError(Boolean(quoteRows.error || slotRows.error));
@@ -203,7 +207,7 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
         const isNow = item.status === 'confirmed' && new Date(item.starts_at).getTime() <= now && new Date(item.ends_at).getTime() > now;
         return <Link className="mova-home__appointment" to={operatorUrl(businessId, `appointments/${displayId('AID',item.appointment_number)}`)} key={item.id}>
           <time>{time}</time><span className="mova-home__appointment-bar" data-location={locationIndexById.get(item.location_id) ?? 0} aria-hidden="true" />
-          <span className="mova-home__appointment-copy"><strong>{item.service_name_snapshot}</strong><small>{item.client_name}{location ? ` · ${location.name}` : ''}</small></span>
+        <span className="mova-home__appointment-copy"><strong>{item.service_names?.join(' + ')||item.service_name_snapshot}</strong><small>{item.client_name}{location ? ` · ${location.name}` : ''}</small></span>
           {isNow && <StatusChip status="confirmed">{t('homeAppointments.now')}</StatusChip>}
         </Link>;
       })}</Card> : <EmptyState title={t('homeAppointments.noToday')} />}

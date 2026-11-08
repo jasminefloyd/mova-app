@@ -12,14 +12,15 @@ const endpoint=(name:string)=>`${import.meta.env.VITE_SUPABASE_URL}/functions/v1
 
 export function GetPaidPage(){
   const{appointmentId=''}=useParams();const appointmentNumber=parseDisplayId('AID',appointmentId);const navigate=useNavigate();const{t,i18n}=useTranslation();const{client,businessId,loading:identityLoading}=useArtistBusiness();
-  const[appointment,setAppointment]=useState<Appointment|null>(null);const[method,setMethod]=useState<Method>('card');const[cardMode,setCardMode]=useState<'qr'|'text'>('text');const[collector,setCollector]=useState<'artist'|'salon'>('artist');const[amount,setAmount]=useState('');const[otherLabel,setOtherLabel]=useState('');const[settings,setSettings]=useState({cash_enabled:true,other_enabled:true});const[stripeReady,setStripeReady]=useState(false);const[loading,setLoading]=useState(true);const[busy,setBusy]=useState(false);const[error,setError]=useState(false);
+  const[appointment,setAppointment]=useState<Appointment|null>(null);const[serviceNames,setServiceNames]=useState<string[]>([]);const[method,setMethod]=useState<Method>('card');const[cardMode,setCardMode]=useState<'qr'|'text'>('text');const[collector,setCollector]=useState<'artist'|'salon'>('artist');const[amount,setAmount]=useState('');const[otherLabel,setOtherLabel]=useState('');const[settings,setSettings]=useState({cash_enabled:true,other_enabled:true});const[stripeReady,setStripeReady]=useState(false);const[loading,setLoading]=useState(true);const[busy,setBusy]=useState(false);const[error,setError]=useState(false);
   const back=()=>navigate(operatorUrl(businessId,`appointments/${appointmentId}`));
   const load=useCallback(async()=>{if(!client||!businessId)return;setLoading(true);setError(false);try{if(!appointmentNumber)throw new Error();const {data:a,error:aError}=await client.from('mova_appointments').select('id,appointment_number,status,starts_at,service_name_snapshot,service_price_minor,balance_due_minor,client_name,location_id,artist_business_id').eq('appointment_number',appointmentNumber).eq('artist_business_id',businessId).maybeSingle();
-    if(aError||!a)throw new Error();const [{data:paymentLocation},{data:stripe},{data:methods}]=await Promise.all([
+    if(aError||!a)throw new Error();const [{data:paymentLocation},{data:stripe},{data:methods},{data:services}]=await Promise.all([
       client.from('mova_locations').select('name,payment_collector,time_zone').eq('id',a.location_id).eq('artist_business_id',businessId).maybeSingle(),
       client.from('mova_stripe_connections').select('status,charges_enabled,account_type').eq('artist_business_id',businessId).maybeSingle(),
       client.from('mova_payment_method_settings').select('cash_enabled,other_enabled').eq('artist_business_id',businessId).maybeSingle(),
-    ]);setAppointment(a as Appointment);setCollector(paymentLocation?.payment_collector==='salon'?'salon':'artist');setAmount(((a.balance_due_minor??0)/100).toFixed(2));setStripeReady(Boolean(stripe?.status==='active'&&stripe.charges_enabled));if(methods)setSettings(methods);}catch{setError(true);}finally{setLoading(false);}},[client,businessId,appointmentNumber]);
+      client.from('mova_appointment_services').select('position,service_name_snapshot').eq('appointment_id',a.id).eq('artist_business_id',businessId).order('position'),
+    ]);setAppointment(a as Appointment);setServiceNames(services?.map(item=>item.service_name_snapshot)??[a.service_name_snapshot]);setCollector(paymentLocation?.payment_collector==='salon'?'salon':'artist');setAmount(((a.balance_due_minor??0)/100).toFixed(2));setStripeReady(Boolean(stripe?.status==='active'&&stripe.charges_enabled));if(methods)setSettings(methods);}catch{setError(true);}finally{setLoading(false);}},[client,businessId,appointmentNumber]);
   useEffect(()=>{void load();},[load]);
   const balance=appointment?.balance_due_minor??0;const amountMinor=useMemo(()=>/^\d+(\.\d{1,2})?$/.test(amount)?Math.round(Number(amount)*100):0,[amount]);
   const currency=(minor:number)=>new Intl.NumberFormat(i18n.resolvedLanguage,{style:'currency',currency:'USD'}).format(minor/100);
@@ -28,7 +29,7 @@ export function GetPaidPage(){
   return <main className="mova-page mova-get-paid">
     <header className="mova-get-paid__header"><h1>{t('money.getPaid')}</h1><IconButton label={t('money.close')} icon="close" onClick={back}/></header>
     {identityLoading||loading?<p role="status" aria-busy="true">{t('money.loading')}</p>:error&&!appointment?<ErrorState title={t('money.error')} retryLabel={t('money.retry')} onRetry={()=>void load()}/>:appointment&&<>
-      <p className="mova-get-paid__context">{appointment.service_name_snapshot} · {appointment.client_name} · {t('money.balance',{amount:currency(balance)})}</p>
+      <p className="mova-get-paid__context">{serviceNames.join(' + ')||appointment.service_name_snapshot} · {appointment.client_name} · {t('money.balance',{amount:currency(balance)})}</p>
       <TextField label={t('money.amount')} inputMode="decimal" value={amount} onChange={event=>setAmount(event.currentTarget.value)}/>
       <fieldset className="mova-get-paid__method-group"><legend className="mova-visually-hidden">{t('money.method')}</legend><OptionGroup label={t('money.method')}>
         {availableMethods.map(value=><RadioCard key={value} name="payment-method" value={value} label={t(`money.methods.${value}`)} checked={method===value} disabled={value==='card'&&!stripeReady} onChange={()=>setMethod(value)}/>) }

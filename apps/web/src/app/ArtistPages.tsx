@@ -27,7 +27,7 @@ export function SettingsPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { client, businessId, businessDisplayId } = useArtistBusiness();
-  const [profile, setProfile] = useState<{display_name:string;handle:string;is_published:boolean}|null>(null);
+  const [profile, setProfile] = useState<{display_name:string;handle:string;is_published:boolean;search_index_enabled:boolean}|null>(null);
   const [serviceCount, setServiceCount] = useState<number|null>(null);
   const [locationCount, setLocationCount] = useState<number|null>(null);
   const [paymentSummary, setPaymentSummary] = useState<string>('—');
@@ -35,11 +35,13 @@ export function SettingsPage() {
   const [languageExpanded, setLanguageExpanded] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState(false);
   useEffect(() => {
     if (!client || !businessId) return;
     void (async()=>{
       const [{data:profileData},{count:services},{count:locations},{data:paymentMethods},{data:stripe},{data:calendar}] = await Promise.all([
-        client.from('mova_artist_profiles').select('display_name,handle,is_published').eq('artist_business_id',businessId).maybeSingle(),
+        client.from('mova_artist_profiles').select('display_name,handle,is_published,search_index_enabled').eq('artist_business_id',businessId).maybeSingle(),
         client.from('mova_services').select('id',{count:'exact',head:true}).eq('artist_business_id',businessId).eq('status','active'),
         client.from('mova_locations').select('id',{count:'exact',head:true}).eq('artist_business_id',businessId).eq('is_active',true),
         client.from('mova_payment_method_settings').select('cash_enabled').eq('artist_business_id',businessId).maybeSingle(),
@@ -70,13 +72,34 @@ export function SettingsPage() {
       setSigningOut(false);
     }
   };
+  const publishShowcase = async () => {
+    if (!client || !businessId || !profile || profile.is_published) return;
+    setPublishing(true); setPublishError(false);
+    try {
+      const { error } = await client.rpc('mova_publish_artist_profile', {
+        p_artist_business_id: businessId,
+        p_search_index_enabled: profile.search_index_enabled,
+      });
+      if (error) throw error;
+      setProfile((current) => current ? { ...current, is_published: true } : current);
+    } catch {
+      setPublishError(true);
+    } finally {
+      setPublishing(false);
+    }
+  };
   const initials = (profile?.display_name ?? '').split(/\s+/).map((part)=>part[0]).join('').slice(0,2).toUpperCase();
   const publicUrl=profile?.handle?`${window.location.hostname==='localhost'?window.location.origin:'https://mova-beauty.co'}/a/${encodeURIComponent(profile.handle)}`:undefined;
   const localeName=i18n.resolvedLanguage==='es-US'?t('onboarding.spanish'):t('onboarding.english');
   return <main className="mova-page mova-settings-page">
     <ScreenHeader title={t('navigation.settings')} leadingIcon="close" backLabel={t('settings.close')} onBack={() => navigate(operatorUrl(businessId,''))} />
     <Card tone="inverse" className="mova-settings-profile"><Avatar label={profile?.display_name ?? t('settings.profile')} {...(initials ? { initials } : { placeholder:true })} size={56}/><span><strong>{profile?.display_name ?? t('settings.profile')}</strong><small>{t('settings.planAndShowcase',{plan:t('settings.planNotConfigured'),status:profile?.is_published?t('settings.published'):t('settings.unpublished')})}</small>{businessDisplayId&&<small>{businessDisplayId.replace('-', ' ')}</small>}</span><IconButton className="mova-settings-profile__preview" label={t('settings.previewProfile')} icon="preview" disabled={!profile?.handle} onClick={()=>navigate(operatorUrl(businessId,'settings/profile/preview'))}/></Card>
-    <div className="mova-settings-actions"><Button variant="secondary" disabled={!publicUrl} onClick={()=>publicUrl&&window.open(publicUrl,'_blank','noopener,noreferrer')}>{t('settings.viewMyPage')}</Button><Button variant="secondary" onClick={()=>navigate(operatorUrl(businessId,'settings/qr'))}>{t('settings.showMyQr')}</Button></div>
+    <div className="mova-settings-actions">{profile?.is_published
+      ? <Button variant="secondary" disabled={!publicUrl} onClick={()=>publicUrl&&window.open(publicUrl,'_blank','noopener,noreferrer')}>{t('settings.viewMyPage')}</Button>
+      : <Button loading={publishing} disabled={!profile} onClick={()=>void publishShowcase()}>{t('settings.publishShowcase')}</Button>}
+      <Button variant="secondary" onClick={()=>navigate(operatorUrl(businessId,'settings/qr'))}>{t('settings.showMyQr')}</Button>
+    </div>
+    {publishError && <p role="alert">{t('settings.publishShowcaseError')}</p>}
     <Card className="mova-settings-menu">
       <ListRow title={t('settings.profilePortfolio')} trailing={<Icon name="chevron" size={18}/>} href={operatorUrl(businessId,'settings/profile')} />
       <ListRow title={t('settings.servicesPricesDeposits')} trailing={serviceCount===null?'—':String(serviceCount)} href={operatorUrl(businessId,'settings/services')} />

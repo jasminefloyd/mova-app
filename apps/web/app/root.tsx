@@ -21,10 +21,9 @@ export default function Root() {
 export function ErrorBoundary() {
   const error = useRouteError();
   const notFound = isRouteErrorResponse(error) && error.status === 404;
-  return <html lang="en-US"><head><meta charSet="utf-8" /><Meta /><Links /></head><body>
-    <main className="mova-page" role="alert"><h1>{notFound ? 'Page not found' : 'This page is temporarily unavailable'}</h1>
+  return <main className="mova-page" role="alert">
+    <h1>{notFound ? 'Page not found' : 'This page is temporarily unavailable'}</h1>
       <p>{notFound ? 'The page may have moved or is not public.' : 'Please try again in a moment.'}</p>
       <a href="/">Return to mova.</a>
-    </main><Scripts />
-  </body></html>;
+  </main>;
 }

@@ -124,6 +124,30 @@ verify_jwt = false
 [functions.notification-dispatch]
 verify_jwt = false
 
+[functions.job-dispatch]
+verify_jwt = false
+
+[functions.job-worker]
+verify_jwt = false
+
+[functions.stripe-connect-onboard]
+verify_jwt = false
+
+[functions.payment-intent-create]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.refund-request]
+verify_jwt = false
+
+[functions.paylink-create]
+verify_jwt = false
+
+[functions.paylink-redirect]
+verify_jwt = false
+
 [functions.revenue-center]
 verify_jwt = false
 

@@ -1,15 +1,11 @@
 import { ImageMagick, initializeImageMagick, MagickFormat, Gravity } from 'npm:@imagemagick/magick-wasm@0.0.44';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
+import { corsHeaders } from '../_shared/cors.ts';
 
 const wasmModule = 'npm:@imagemagick/magick-wasm@0.0.44';
 const wasmBytes = await Deno.readFile(new URL('magick.wasm', import.meta.resolve(wasmModule)));
 await initializeImageMagick(wasmBytes);
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 const json = (data: unknown, status = 200) => Response.json({ data, error: null, request_id: crypto.randomUUID() }, { status, headers: corsHeaders });
 
 function supportedImage(bytes: Uint8Array): boolean {

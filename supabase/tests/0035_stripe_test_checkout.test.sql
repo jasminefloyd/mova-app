@@ -1,0 +1,31 @@
+begin;
+select plan(25);
+
+select has_table('public'::name,'mova_stripe_oauth_states'::name,'TC-F06-AC01-01 Connect OAuth state table exists');
+select has_column('public'::name,'mova_stripe_oauth_states'::name,'return_path'::name,'TC-F06-AC01-01 OAuth state stores a validated same-site return path');
+select ok((select relrowsecurity from pg_class where oid='public.mova_stripe_oauth_states'::regclass),'TC-RLS-MONEY-01 OAuth state table enforces RLS');
+select has_function('public'::name,'mova_booking_create_with_consent_checkout'::name,array['uuid','uuid','timestamp with time zone','text','text','text','text','text','bytea','timestamp with time zone','text','uuid','jsonb']::name[],'TC-F06-AC01-01 test-only booking wrapper is installed');
+select has_function('public'::name,'mova_stripe_checkout_prepare'::name,array['uuid','bytea','text']::name[],'TC-F06-AC01-01 checkout preparation RPC is installed');
+select has_function('public'::name,'mova_stripe_checkout_attach'::name,array['uuid','text','text']::name[],'TC-F06-AC01-01 checkout attachment RPC is installed');
+select has_function('public'::name,'mova_stripe_checkout_fail'::name,array['uuid']::name[],'TC-F06-AC01-01 safe checkout expiration RPC is installed');
+select has_function('public'::name,'mova_stripe_webhook_apply'::name,array['text','text','text','text','text','text','bigint','boolean']::name[],'TC-F06-AC01-02 webhook apply RPC is installed');
+select has_function('public'::name,'mova_stripe_refund_prepare'::name,array['uuid','uuid','bigint','text']::name[],'TC-F06-AC03-01 refund preparation RPC is installed');
+select has_function('public'::name,'mova_stripe_refund_finish'::name,array['uuid','text','text']::name[],'TC-F06-AC03-01 refund completion RPC is installed');
+select has_function('public'::name,'mova_stripe_refund_webhook_apply'::name,array['text','text','text','text','boolean']::name[],'TC-F06-AC03-01 refund webhook RPC is installed');
+select has_function('public'::name,'mova_stripe_paylink_prepare'::name,array['uuid','uuid','text','text','text']::name[],'TC-F23-AC01-01 paylink creation RPC is installed and scoped to an artist');
+select has_function('public'::name,'mova_stripe_paylink_attach'::name,array['uuid','text','text']::name[],'TC-F23-AC01-01 paylink checkout attachment RPC is installed');
+select has_function('public'::name,'mova_stripe_paylink_resolve'::name,array['text']::name[],'TC-F23-AC01-01 public short-code resolution RPC is installed');
+select ok(not has_function_privilege('anon','public.mova_stripe_checkout_prepare(uuid,bytea,text)','EXECUTE'),'TC-RLS-MONEY-01 guests cannot prepare a Stripe checkout directly');
+select ok(not has_function_privilege('authenticated','public.mova_stripe_webhook_apply(text,text,text,text,text,text,bigint,boolean)','EXECUTE'),'TC-RLS-MONEY-01 artists cannot forge Stripe webhook application');
+select ok(has_function_privilege('service_role','public.mova_stripe_webhook_apply(text,text,text,text,text,text,bigint,boolean)','EXECUTE'),'TC-F06-AC01-02 only server runtime can apply verified events');
+select ok(not has_function_privilege('authenticated','public.mova_stripe_refund_prepare(uuid,uuid,bigint,text)','EXECUTE'),'TC-RLS-MONEY-01 artists cannot directly create refund records');
+select ok(has_function_privilege('service_role','public.mova_stripe_refund_prepare(uuid,uuid,bigint,text)','EXECUTE'),'TC-F06-AC03-01 only server runtime can prepare refunds');
+select ok((select count(*)=1 from pg_indexes where schemaname='public' and indexname='mova_payments_checkout_session_id_key'),'TC-F06-AC01-02 Checkout Session IDs are unique for webhook lookup');
+select ok((select count(*)=1 from pg_indexes where schemaname='public' and indexname='mova_payments_one_pending_deposit_uq'),'TC-F06-AC01-01 one pending deposit payment is allowed per appointment');
+select ok(position('refund_platform_fee:' in pg_get_functiondef('public.mova_payment_post_refund_entry()'::regprocedure))>0,'TC-F06-AC03-01 successful partial refunds reverse the proportional Mova fee in the immutable ledger');
+select ok(not has_function_privilege('authenticated','public.mova_stripe_paylink_resolve(text)','EXECUTE'),'TC-RLS-MONEY-01 guests resolve paylinks through a constrained server endpoint');
+select ok((select count(*)=1 from pg_indexes where schemaname='public' and indexname='mova_paylinks_one_open_per_appointment_channel_uq'),'TC-F23-AC01-01 one open paylink per appointment and channel');
+select ok(position($$payment.checkout_kind='paylink'$$ in pg_get_functiondef('public.mova_stripe_webhook_apply(text,text,text,text,text,text,bigint,boolean)'::regprocedure))>0,'TC-F23-AC01-01 a successful balance paylink posts payment without requiring a booking hold');
+
+select * from finish();
+rollback;

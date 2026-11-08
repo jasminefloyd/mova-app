@@ -13,12 +13,15 @@ Deno.serve(async(request)=>{
   if(typeof token!=='string'||token.length<30)return respond({code:'BOOKING_NOT_FOUND'},404);
   const db=serviceClient();const {data:booking,error}=await db.from('mova_appointments').select('id,artist_business_id,client_name,status,starts_at,ends_at,service_id,service_name_snapshot,service_price_minor,deposit_due_minor,balance_due_minor,client_locale,request_expires_at,cancelled_at,location_id,reschedule_requested_starts_at,reschedule_requested_ends_at,artist_suggested_starts_at,artist_suggested_ends_at').eq('manage_token_hash',await tokenHash(token)).maybeSingle();
   if(error||!booking)return respond({code:'BOOKING_NOT_FOUND'},404);
-  const [{data:location},{data:artist}]=await Promise.all([
+  const [{data:location},{data:artist},{data:services}]=await Promise.all([
     db.from('mova_locations').select('name,time_zone,booking_mode,calendar_ownership').eq('id',booking.location_id).maybeSingle(),
     db.from('mova_artist_profiles').select('display_name,handle').eq('artist_business_id',booking.artist_business_id).maybeSingle(),
+    db.from('mova_appointment_services').select('service_id,service_name_snapshot,position').eq('artist_business_id',booking.artist_business_id).eq('appointment_id',booking.id).order('position'),
   ]);
-  if(new URL(request.url).searchParams.get('format')==='ics') return new Response(toIcs(booking,location??{}),{headers:{...corsHeaders,'Content-Type':'text/calendar; charset=utf-8','Content-Disposition':'attachment; filename="mova-appointment.ics"'}});
+  const serviceRows=services??[{service_id:booking.service_id,service_name_snapshot:booking.service_name_snapshot,position:1}];
+  const serviceNames=serviceRows.map((service)=>service.service_name_snapshot);
+  if(new URL(request.url).searchParams.get('format')==='ics') return new Response(toIcs({...booking,service_name_snapshot:serviceNames.join(' + ')},location??{}),{headers:{...corsHeaders,'Content-Type':'text/calendar; charset=utf-8','Content-Disposition':'attachment; filename="mova-appointment.ics"'}});
   let clientDetails=null;let doorCode:string|null=null;const {data:policy}=await db.from('mova_location_policies').select('cancellation_window_minutes,client_details,door_code_encrypted').eq('location_id',booking.location_id).maybeSingle();
   if(booking.status==='confirmed'){clientDetails=policy?.client_details??null;if(policy?.door_code_encrypted)doorCode=await decryptDoorCode(policy.door_code_encrypted);}
-  return respond({booking:{...booking,location,artist,cancellation_window_minutes:policy?.cancellation_window_minutes??1440,client_details:clientDetails,door_code:doorCode,client_email:undefined,client_phone:undefined}});
+  return respond({booking:{...booking,service_ids:serviceRows.map((service)=>service.service_id),service_names:serviceNames,location,artist,cancellation_window_minutes:policy?.cancellation_window_minutes??1440,client_details:clientDetails,door_code:doorCode,client_email:undefined,client_phone:undefined}});
 });

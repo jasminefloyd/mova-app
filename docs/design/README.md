@@ -2,7 +2,7 @@
 
 This folder is everything an engineer or coding agent needs to make the app **look and behave like the approved canvas**, built from **this repo's own components and tokens**.
 
-- **Source:** the "Mova App Screens" design canvas (51 artboards), exported 2026-11-05. Two Settings management references (Services and Portfolio) were derived from the approved design system with owner approval on 2026-11-05; they are not canvas artboards. `design-manifest.json` records the canvas version and file hashes.
+- **Source:** the "Mova App Screens" design canvas (51 artboards), exported 2026-11-05. Two Settings management references (Services and Portfolio) were derived from the approved design system with owner approval on 2026-11-05; they are not canvas artboards. On 2026-11-08, O12 owner approval added multi-service summaries to the Screen 25/26 reference variants; the source canvas itself was unavailable, so those two files are explicitly recorded as local approved updates in `design-manifest.json`. `design-manifest.json` records the canvas version and file hashes.
 - **Status:** normative UI reference (spec §0.1). The engineering spec (`docs/product/ENGINEERING_SPEC.md`) wins on behaviour; this folder wins on layout, hierarchy and visual style.
 
 ## What's here

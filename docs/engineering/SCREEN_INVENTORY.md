@@ -66,3 +66,34 @@ The route examples below reflect the original artboard map where they contain `/
 | Page | Route | Design basis | Implementation | Status |
 |---|---|---|---|---|
 | Privacy & data | `/{BID}/settings/privacy` | Derived from approved Settings screen 16 and the approved card, button, warning and confirmation patterns under the owner’s phase-decision delegation; CR-002 | `apps/web/src/features/settings/PrivacyPage.tsx`; `supabase/functions/artist-data-export/index.ts`; `supabase/functions/privacy-management/index.ts`; `mova_0026_privacy_ops.sql` | IMPLEMENTED LOCALLY; owner visual review and DB/runtime verification pending |
+
+## Supabase function folder replacements (Phase C5)
+
+The following legacy placeholder folder names have concrete implementations under their current canonical function. Calls must use the canonical function name shown here; do not add duplicate endpoints.
+
+| Legacy folder | Canonical implementation | Coverage |
+|---|---|---|
+| `calendar-ics-rotate` | `calendar-google-connect` | `rotate-feed` action rotates the private ICS token through `mova_rotate_calendar_feed_token`. |
+| `calendar-sync-settings` | `calendar-google-connect` | `status` and `save-settings` actions read and update sync preferences. |
+| `client-import-preview` | `client-import` | `preview` action validates and matches import rows without committing. |
+| `client-import-commit` | `client-import` | `commit` action applies the approved merge/keep-both decisions with idempotency. |
+| `publish-showcase` | Authenticated `mova_publish_artist_profile` RPC | The onboarding publish step invokes the prefixed database RPC directly; publication validation and state change live there. |
+| `track` | `reports-track` | Public profile analytics accepts an allowlisted event/source and idempotency key. |
+
+Phase C5 disposition is limited to these six folders. The remaining empty folders are still owned by C2/C4/D1–D11 and remain open until their implementation or an equivalent documented replacement exists.
+
+## Differentiator function replacements
+
+| Legacy folder | Canonical implementation | Coverage / limit |
+|---|---|---|
+| `forecast-get` | `forecast-summary` | Reads the latest stored estimate and recomputes its deterministic range from stored inputs; nightly/event recomputation remains D7 work. |
+| `growth-opportunities-list` | `revenue-center` (`status` / `pipeline`) | Lists deterministic cadence opportunities and current decision rows. |
+| `growth-opportunity-generate` | `revenue-center` (`refresh-pipeline`) | Recomputes cadence opportunities from completed appointments; scheduler/debounce integration remains D7 work. |
+| `customer-appointments` | `customer-profile` (`profile`) | Lists upcoming appointments for explicitly linked stylist relationships. |
+| `customer-claim-bookings` | `customer-profile` (`claim-options` / `claim-booking` / `link-booking`) | Presents and links individual bookings; no automatic merge. |
+| `customer-consents` | `customer-profile` (`consent` / `consent-by-handle`) | Stores explicit per-purpose/channel consent changes. |
+| `customer-delete` | `customer-profile` (`delete-profile`) | Audits and deletes the authenticated client's own account. |
+| `account-export` | `customer-profile` (`export`) | Exports the signed-in client's profile, contacts, linked bookings, consents and reviews. |
+| `account-delete-request` | `customer-profile` (`delete-profile`) | Self-service deletion is immediate after audit; artist privacy requests remain in `privacy-management`. |
+
+These aliases close folder duplication only. D7 scheduling and D11 end-to-end identity/tenant-security evidence remain open.

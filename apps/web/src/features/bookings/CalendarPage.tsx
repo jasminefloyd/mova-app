@@ -7,7 +7,7 @@ import { operatorUrl } from '../../app/operator-url';
 import { displayId } from '../../lib/display-ids';
 
 type Location = { id: string; name: string; time_zone: string; booking_mode: string; calendar_ownership: string; payment_collector: string; display_color_index: number };
-type Appointment = { id: string; appointment_number:number; location_id: string; service_name_snapshot: string; client_name: string; status: string; starts_at: string; ends_at: string };
+type Appointment = { id: string; appointment_number:number; location_id: string; service_name_snapshot: string; service_names?:string[]; client_name: string; status: string; starts_at: string; ends_at: string };
 type AvailabilityBlock = { id: string; location_id: string; reason: string; starts_at: string; ends_at: string };
 
 function dateKey(date: Date, timeZone?: string) {
@@ -67,8 +67,12 @@ export function CalendarPage() {
       setLoading(false);
       return;
     }
+    const appointmentIds=(appointmentRows.data??[]).map(item=>item.id);
+    const {data:serviceRows,error:serviceError}=appointmentIds.length?await client.from('mova_appointment_services').select('appointment_id,position,service_name_snapshot').eq('artist_business_id',businessId).in('appointment_id',appointmentIds).order('position'):{data:[],error:null};
+    if(serviceError){setError(true);setLoading(false);return;}
+    const namesByAppointment=new Map<string,string[]>();for(const item of serviceRows??[])namesByAppointment.set(item.appointment_id,[...(namesByAppointment.get(item.appointment_id)??[]),item.service_name_snapshot]);
     setLocations((locationRows.data ?? []) as Location[]);
-    setAppointments((appointmentRows.data ?? []) as Appointment[]);
+    setAppointments((appointmentRows.data ?? []).map(item=>({...item,service_names:namesByAppointment.get(item.id)??[item.service_name_snapshot]})) as Appointment[]);
     setBlocks((blockRows.data ?? []) as AvailabilityBlock[]);
     setError(false);
     setLoading(false);
@@ -152,8 +156,8 @@ export function CalendarPage() {
         const startTime = new Intl.DateTimeFormat(i18n.resolvedLanguage, { hour: 'numeric', minute: '2-digit', timeZone: zone }).format(new Date(item.starts_at));
         const endTime = new Intl.DateTimeFormat(i18n.resolvedLanguage, { hour: 'numeric', minute: '2-digit', timeZone: zone }).format(new Date(item.ends_at));
         const status = t(`booking.status.${item.status}`);
-        return <Link key={item.id} className={`mova-calendar__event ${color}${compact ? ' mova-calendar__event--compact' : ''}`} aria-label={`${item.service_name_snapshot}, ${item.client_name}, ${startTime}–${endTime}, ${location?.name ?? ''}, ${status}`} style={{ top: `${position.top}px`, minHeight: `${visibleHeight}px` }} to={operatorUrl(businessId, `appointments/${displayId('AID',item.appointment_number)}`)}>
-          <strong>{item.service_name_snapshot} · {item.client_name}</strong>
+        return <Link key={item.id} className={`mova-calendar__event ${color}${compact ? ' mova-calendar__event--compact' : ''}`} aria-label={`${item.service_names?.join(' + ')||item.service_name_snapshot}, ${item.client_name}, ${startTime}–${endTime}, ${location?.name ?? ''}, ${status}`} style={{ top: `${position.top}px`, minHeight: `${visibleHeight}px` }} to={operatorUrl(businessId, `appointments/${displayId('AID',item.appointment_number)}`)}>
+          <strong>{item.service_names?.join(' + ')||item.service_name_snapshot} · {item.client_name}</strong>
           <span>{compact ? startTime : `${startTime} – ${endTime}${location ? ` · ${location.name}` : ''}`}</span>
           {!compact && <small>{location?.payment_collector === 'salon' ? t('calendar.salonCollects') : status}</small>}
         </Link>;

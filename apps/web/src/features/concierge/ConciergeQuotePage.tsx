@@ -3,11 +3,14 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, ErrorState, ScreenHeader, StatusChip, TextField } from '../../components';
 import { operatorUrl } from '../../app/operator-url';
+import { displayId } from '../../lib/display-ids';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 
 type Quote = {
   id: string;
   conversation_id: string;
+  appointment_id: string | null;
+  appointment_number: number | null;
   service_category: string;
   details: Record<string, unknown>;
   media_count: number;
@@ -123,6 +126,8 @@ export default function ConciergeQuotePage() {
           <h1>{t('concierge.quote')} · {quote.client_name ?? t('concierge.quoteClientUnknown')} · {quote.service_category}</h1>
           <p>{channelLabel} · {t(quote.locale === 'es-US' ? 'onboarding.spanish' : 'onboarding.english')}</p>
         </div>
+
+        {quote.appointment_number !== null && <Card><Link to={operatorUrl(businessId, `appointments/${displayId('AID', quote.appointment_number)}`)}>{t('concierge.linkedAppointment')}</Link></Card>}
 
         {quote.media_count > 0
           ? <Card className="mova-concierge-quote__media"><p>{t('concierge.quotePhotosUnavailable')}</p></Card>

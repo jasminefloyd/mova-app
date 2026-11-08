@@ -28,8 +28,11 @@ Deno.serve(async (request) => {
   if (profileResult.error || !profileResult.data || accountResult.error || !accountResult.data) return respond({ code: 'CARD_NOT_AVAILABLE' }, 404);
   if (appointmentResult.error) return respond({ code: 'CARD_DATA_UNAVAILABLE' }, 503);
   const appointment = appointmentResult.data as unknown as { id: string; service_name_snapshot: string; starts_at: string; status: string; mova_locations: { name: string } | null } | null;
+  const {data:serviceRows,error:serviceError}=appointment?await db.from('mova_appointment_services').select('service_name_snapshot').eq('artist_business_id',card.artist_business_id).eq('appointment_id',appointment.id).order('position'):{data:[],error:null};
+  if(serviceError)return respond({code:'CARD_DATA_UNAVAILABLE'},503);
+  const serviceNames=serviceRows?.map((item)=>item.service_name_snapshot)??(appointment?[appointment.service_name_snapshot]:[]);
   return respond({
     card: { client_name: accountResult.data.display_name, artist_name: profileResult.data.display_name, handle: profileResult.data.handle, specialties: profileResult.data.specialties },
-    upcoming: appointment ? { service: appointment.service_name_snapshot, starts_at: appointment.starts_at, status: appointment.status, location: appointment.mova_locations?.name ?? '' } : null,
+    upcoming: appointment ? { service: serviceNames.join(' + '), starts_at: appointment.starts_at, status: appointment.status, location: appointment.mova_locations?.name ?? '' } : null,
   });
 });

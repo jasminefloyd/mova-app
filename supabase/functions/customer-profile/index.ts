@@ -65,17 +65,20 @@ Deno.serve(async(request)=>{
       const results=await Promise.all(queries);if(results.some((result)=>result.error))return respond({code:'CLAIM_LOOKUP_FAILED'},500);
       const candidates=new Map<string,Record<string,unknown>>();for(const result of results)for(const appointment of result.data??[])candidates.set(appointment.id,appointment as unknown as Record<string,unknown>);
       const rows=[...candidates.values()];const businessIds=[...new Set(rows.map((row)=>row.artist_business_id as string))];const locationIds=[...new Set(rows.map((row)=>row.location_id as string))];
+      const appointmentIds=rows.map((row)=>row.id as string);
       const [profilesResult,locationsResult,linksResult]=await Promise.all([
         businessIds.length?db.from('mova_artist_profiles').select('artist_business_id,display_name,handle').in('artist_business_id',businessIds):Promise.resolve({data:[],error:null}),
         locationIds.length?db.from('mova_locations').select('id,name').in('id',locationIds):Promise.resolve({data:[],error:null}),
         businessIds.length?db.from('mova_client_customer_links').select('artist_business_id,client_id').eq('customer_account_id',account.id).is('unlinked_at',null).in('artist_business_id',businessIds):Promise.resolve({data:[],error:null}),
       ]);
-      if(profilesResult.error||locationsResult.error||linksResult.error)return respond({code:'CLAIM_LOOKUP_FAILED'},500);
+      const {data:serviceRows,error:serviceError}=appointmentIds.length?await db.from('mova_appointment_services').select('appointment_id,position,service_name_snapshot').in('appointment_id',appointmentIds).order('position'):{data:[],error:null};
+      if(profilesResult.error||locationsResult.error||linksResult.error||serviceError)return respond({code:'CLAIM_LOOKUP_FAILED'},500);
       const profiles=new Map((profilesResult.data??[]).map((item)=>[item.artist_business_id,{name:item.display_name,handle:item.handle}]));
       const locations=new Map((locationsResult.data??[]).map((item)=>[item.id,item.name]));const linkedClients=new Set((linksResult.data??[]).map((item)=>`${item.artist_business_id}:${item.client_id}`));
+      const serviceNames=new Map<string,string[]>();for(const item of serviceRows??[])serviceNames.set(item.appointment_id,[...(serviceNames.get(item.appointment_id)??[]),item.service_name_snapshot]);
       const options=rows.filter((row)=>row.customer_account_id!==account.id&&!linkedClients.has(`${row.artist_business_id}:${row.client_id}`)).slice(0,50).map((row)=>({
         appointment_id:row.id,artist_business_id:row.artist_business_id,artist:profiles.get(row.artist_business_id as string)?.name??'',handle:profiles.get(row.artist_business_id as string)?.handle??'',
-        service:row.service_name_snapshot,starts_at:row.starts_at,status:row.status,location:locations.get(row.location_id as string)??'',
+        service:row.service_name_snapshot,service_names:serviceNames.get(row.id as string)??[row.service_name_snapshot as string],starts_at:row.starts_at,status:row.status,location:locations.get(row.location_id as string)??'',
       }));
       return respond({options});
     }
@@ -111,7 +114,10 @@ Deno.serve(async(request)=>{
         const latest=new Map<string,boolean>();for(const consent of consents??[]){const key=`${consent.purpose}:${consent.channel}`;if(!latest.has(key))latest.set(key,consent.granted);}
         stylists.push({business_id:link.artist_business_id,name:businessName,handle:profile?.handle??'',photo_path:profile?.profile_photo_path??null,consents:{appointment_updates:latest.get('appointment_updates:sms')??false,reminders:latest.get('rebooking_reminders:sms')??false,offers:latest.get('offers:sms')??false}});
         const {data:appointments}=await db.from('mova_appointments').select('id,service_name_snapshot,starts_at,status,location_id,mova_locations(name)').eq('artist_business_id',link.artist_business_id).eq('client_id',link.client_id).in('status',['confirmed','pending_artist','pending_payment']).gt('starts_at',new Date().toISOString()).order('starts_at').limit(10);
-        for(const item of appointments??[]){const joinedAppointment=item as unknown as {id:string;service_name_snapshot:string;starts_at:string;status:string;mova_locations:{name:string}|null};upcoming.push({id:joinedAppointment.id,service:joinedAppointment.service_name_snapshot,starts_at:joinedAppointment.starts_at,status:joinedAppointment.status,artist:businessName,handle:profile?.handle??'',location:joinedAppointment.mova_locations?.name??''});}
+        const appointmentIds=(appointments??[]).map((item)=>item.id);
+        const {data:serviceRows}=appointmentIds.length?await db.from('mova_appointment_services').select('appointment_id,position,service_name_snapshot').in('appointment_id',appointmentIds).order('position'):{data:[],error:null};
+        const serviceNames=new Map<string,string[]>();for(const item of serviceRows??[])serviceNames.set(item.appointment_id,[...(serviceNames.get(item.appointment_id)??[]),item.service_name_snapshot]);
+        for(const item of appointments??[]){const joinedAppointment=item as unknown as {id:string;service_name_snapshot:string;starts_at:string;status:string;mova_locations:{name:string}|null};const names=serviceNames.get(joinedAppointment.id)??[joinedAppointment.service_name_snapshot];upcoming.push({id:joinedAppointment.id,service:names.join(' + '),starts_at:joinedAppointment.starts_at,status:joinedAppointment.status,artist:businessName,handle:profile?.handle??'',location:joinedAppointment.mova_locations?.name??''});}
       }
       upcoming.sort((a,b)=>a.starts_at.localeCompare(b.starts_at));
       return respond({profile:{display_name:account.display_name,preferred_locale:account.preferred_locale,email:user.email??null,phone:user.phone??null,verified_contacts:normalizedContacts(user).map((contact)=>({type:contact.contact_type,value:contact.value_normalized}))},stylists,upcoming:upcoming.slice(0,20)});

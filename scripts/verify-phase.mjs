@@ -117,8 +117,9 @@ const matrixIds = new Set(Array.from(matrix.matchAll(/^((?:F\d{2}-AC\d{2}|F\d{2}
 for (const id of requiredIds) {
   if (!matrixIds.has(id)) problems.push(`Requirements matrix missing ${id}`);
 }
-if (matrixRows.length !== requiredIds.size) {
-  problems.push(`Requirements matrix has ${matrixRows.length} rows; expected ${requiredIds.size} unique requirement IDs`);
+const normativeMatrixRows = matrixRows.filter((row) => requiredIds.has(row.requirement_id));
+if (normativeMatrixRows.length !== requiredIds.size || new Set(normativeMatrixRows.map((row) => row.requirement_id)).size !== requiredIds.size) {
+  problems.push(`Requirements matrix has ${normativeMatrixRows.length} normative rows; expected ${requiredIds.size} unique requirement IDs`);
 }
 for (const row of matrixRows) {
   const testReferences = (row.test_files ?? '').split(';').map((value) => value.trim()).filter(Boolean);

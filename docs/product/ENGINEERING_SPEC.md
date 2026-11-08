@@ -245,7 +245,7 @@ Acceptance criteria use IDs `Fnn-ACnn`. Each AC becomes at least one row in `REQ
 ### F04. Booking lifecycle
 **Screens 07–10, 25, 26, 28.**
 
-**Client flow (date first, screen 25):** service summary (from look/service) → **pick a day** (next N days with open-count; full days disabled) → times **grouped by where the stylist is that day** (each group tagged "Confirmed instantly" or "Ari confirms") → details (26) → deposit if due → status (28).
+**Client flow (date first, screen 25):** ordered service summary (from look/service; add another service) → **pick a day** (next N days with open-count; full days disabled for the combined duration) → times **grouped by where the stylist is that day** (each group tagged "Confirmed instantly" or "Ari confirms") → details (26) → combined price and per-service deposit total if due → status (28). Appointment detail, booking manage, Get paid and client visit history show every snapshotted service.
 
 **State machine** (unchanged from v1, extended):
 `draft → pending_payment | pending_artist | confirmed`; `pending_payment → confirmed | pending_artist | expired`; `pending_artist → confirmed | declined | expired`; `confirmed → completed | cancelled | no_show`; reschedule is an audited transition preserving identity. Every transition records actor, reason, timestamp, idempotency key, and emits an outbox event.
@@ -874,6 +874,8 @@ All rules live in `packages/domain` as pure, unit-tested functions shared by Edg
 - Ledger postings per payment: `service_value` (once per appointment at confirmation), `processed`/`recorded_artist`/`collected_salon`, `platform_fee` (negative), `processor_fee` (from webhook balance transaction), `refund` (negative). `estimated_to_artist = processed − platform_fee − processor_fee − refunds + recorded_artist`.
 
 ### 5.2 Booking
+An appointment may contain one to eight ordered services. `mova_appointment_services` stores each service identity, display name, effective duration (including that service's buffer), effective price, and deposit inputs/results as snapshots. `mova_appointments.service_id` and `service_name_snapshot` continue to mirror the first service during compatibility; its price, deposit and balance fields hold appointment-wide totals. Each service uses its location override when present and the service base value otherwise. Appointment duration is the sum of effective service durations; location before/after buffers apply once around that combined interval. Appointment deposit is the sum of independently rounded per-service deposits, capped at combined price; salon-collected bookings require no online deposit. Existing appointments backfill to one child row.
+
 State machine per F04. Additional transitions: `pending_artist` created by concierge or seat-filler claim at request locations; `confirmed` created by claim at instant locations after deposit. Holds: `booking_holds` 10 min during checkout; expiry job releases. Booking integrity must prevent overlap across `[starts_at − buffer_before, ends_at + buffer_after)` for `confirmed|completed` appointments plus active holds. ADR-0012 uses a transaction-scoped advisory lock for tenant-scoped idempotency and locks the location row before checking and reserving its interval. All reservation and reschedule operations for one location serialize on that row; no unprefixed extension is installed, and the overlap invariant is preserved.
 
 ### 5.3 Client identity linking (ADR-0004)
