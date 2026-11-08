@@ -23,8 +23,10 @@ select is(public.mova_appointment_email_context('e4400000-0000-4000-8000-0000000
 select is(public.mova_appointment_email_context('e4400000-0000-4000-8000-000000000401', 'appointment.no_show') ->> 'template_id', null, 'TC-EMAIL-01 other events send no email');
 select is(public.mova_appointment_email_context('e4400000-0000-4000-8000-000000000401', 'appointment.confirmed') ->> 'locale', 'es-US', 'TC-EMAIL-01 the client language comes from the booking');
 
-select is(public.mova_enqueue_appointment_reminders(now()), 1, 'TC-EMAIL-02 reminders are queued only for appointments about 24 hours away');
-select is(public.mova_enqueue_appointment_reminders(now()), 0, 'TC-EMAIL-02 reminder queueing is idempotent');
+select public.mova_enqueue_appointment_reminders(now());
+select is((select count(*)::int from public.mova_background_jobs where job_type = 'appointment_reminder' and artist_business_id = 'e4400000-0000-4000-8000-000000000001'), 1, 'TC-EMAIL-02 reminders are queued only for appointments about 24 hours away');
+select public.mova_enqueue_appointment_reminders(now());
+select is((select count(*)::int from public.mova_background_jobs where job_type = 'appointment_reminder' and artist_business_id = 'e4400000-0000-4000-8000-000000000001'), 1, 'TC-EMAIL-02 reminder queueing is idempotent');
 
 insert into public.mova_suppressions(artist_business_id, channel, address_hash, reason)
 values ('e4400000-0000-4000-8000-000000000001', 'email', encode(sha256(convert_to('instant@example.invalid', 'UTF8')), 'hex'), 'bounce');
