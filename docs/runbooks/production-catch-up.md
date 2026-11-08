@@ -28,12 +28,13 @@ According to `docs/engineering/PHASE_STATUS.md`, production received migrations 
 | 0055 | `20261108045000_mova_0055_plans_confirmed.sql` | O10 prices active; test-mode billing subscriptions (5.8) | Plans show as before; plan changes fail |
 | 0056 | `20261108046000_mova_0056_seat_filler.sql` | Seat filler campaigns, ranking, first-claim-wins (5.1) | `slot.opened` is not consumed; claims fail |
 | 0057 | `20261108047000_mova_0057_autopilot_attribution.sql` | Rebooking attribution for the autopilot (5.2) | Autopilot runs fail at attribution |
+| 0058 | `20261108048000_mova_0058_plan_fee_rate.sql` | Mova fee follows the stylist's plan (O10: Free 1.5%, Pro 1.0%, AI Growth 0.5%); plan recorded and locked on each payment | Every stylist pays 1.5% whatever their plan; `payment-settings` cannot read the fee |
 
 The production project also holds 83 migration records that are not in this repository. Do not run `supabase db push` against it: it would try to reconcile that history. Apply the files individually as below.
 
 ## Order
 
-Apply 0032, 0034, 0038, 0039, 0040, 0041, 0042, 0043, 0044, 0045, 0046, 0047, 0050, 0051, 0052, 0053, 0054, 0055, 0056, 0057 in that order, then deploy the Edge Functions that depend on them (`availability-search`, `concierge-artist`, `customer-profile`, `waitlist-signup`, `payment-settings`, `stripe-connect-onboard`, `support-feedback`, `messaging-dispatch`, `messaging-events`, `messaging-inbound-sms`, `missed-call-webhook`, `job-dispatch`, `job-worker`, `stripe-webhook`, `messaging-status`, `concierge-web-chat`, `instagram-webhook`, `wallet-pass-create`, `google-reviews-sync`, `plan-management`, `subscription-checkout`, `subscription-portal`, `slot-campaign`, `slot-claim`, `revenue-center`). Phase 5 platform flags (`MOVA_CONCIERGE_WEB_CHAT_ENABLED`, `MOVA_INSTAGRAM_CONCIERGE_ENABLED`, `MOVA_SMS_CONCIERGE_ENABLED`, `MOVA_SEAT_FILLER_ENABLED`, `MOVA_REBOOKING_TEXTS_ENABLED`, `MOVA_WALLET_CLIENT_CARD_ENABLED`, `MOVA_GOOGLE_REVIEWS_ENABLED`) stay off. Deploying `availability-search` before 0039 makes booking return 503.
+Apply 0032, 0034, 0038, 0039, 0040, 0041, 0042, 0043, 0044, 0045, 0046, 0047, 0050, 0051, 0052, 0053, 0054, 0055, 0056, 0057, 0058 in that order, then deploy the Edge Functions that depend on them (`availability-search`, `concierge-artist`, `customer-profile`, `waitlist-signup`, `payment-settings`, `stripe-connect-onboard`, `support-feedback`, `messaging-dispatch`, `messaging-events`, `messaging-inbound-sms`, `missed-call-webhook`, `job-dispatch`, `job-worker`, `stripe-webhook`, `messaging-status`, `concierge-web-chat`, `instagram-webhook`, `wallet-pass-create`, `google-reviews-sync`, `plan-management`, `subscription-checkout`, `subscription-portal`, `slot-campaign`, `slot-claim`, `revenue-center`). Phase 5 platform flags (`MOVA_CONCIERGE_WEB_CHAT_ENABLED`, `MOVA_INSTAGRAM_CONCIERGE_ENABLED`, `MOVA_SMS_CONCIERGE_ENABLED`, `MOVA_SEAT_FILLER_ENABLED`, `MOVA_REBOOKING_TEXTS_ENABLED`, `MOVA_WALLET_CLIENT_CARD_ENABLED`, `MOVA_GOOGLE_REVIEWS_ENABLED`) stay off. Deploying `availability-search` before 0039 makes booking return 503.
 
 ## Pre-checks (read-only)
 
@@ -72,6 +73,7 @@ Then, on the deployed app: Book (25) shows times for a no-deposit service; a dep
 - 0038: no rollback needed (the previous functions failed on every call).
 - 0039: `drop function public.mova_deposit_bookings_enabled();`, after reverting `availability-search`.
 - 0057: `drop function public.mova_autopilot_attribute(uuid, timestamptz);` after reverting `revenue-center` and `job-dispatch`.
+- 0058: revert `payment-settings`, then restore the 0044 versions of `mova_payment_snapshot_platform_fee` and `mova_payment_fee_locked` and `drop function public.mova_business_fee(uuid, timestamptz);`. Keep the `platform_fee_plan_key` column (stored fees stay as charged).
 - 0056: revert `job-worker`, `job-dispatch`, `slot-campaign`, `slot-claim`; drop the five `mova_slot_*` functions; the added columns are nullable/defaulted and can stay.
 - 0055: set the three plan rows back to `status = 'proposed'`; drop `mova_apply_plan_subscription` and `mova_billing_subscriptions` only if empty.
 - 0054: the two added columns can stay; revert `google-reviews-sync`.
