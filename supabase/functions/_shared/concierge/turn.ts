@@ -36,6 +36,8 @@ export type TurnResult = {
   toolCalls: Array<{ tool: ToolName | 'answer_from_knowledge'; allowed: boolean; reason: string }>;
   offeredTimes?: OpenTime[];
   model: string;
+  /** Model spend for this turn in millionths of a dollar (O8 monthly cap). */
+  costMicros: number;
 };
 
 const summary = (message: string) => message.replace(/\s+/g, ' ').trim().slice(0, 500);
@@ -43,7 +45,7 @@ const summary = (message: string) => message.replace(/\s+/g, ' ').trim().slice(0
 export async function handleTurn(message: string, context: TurnContext, deps: TurnDeps): Promise<TurnResult> {
   const r = replies(context.locale);
   const name = context.stylistName;
-  const base = { model: deps.model.name, toolCalls: [] as TurnResult['toolCalls'] };
+  const base = { model: deps.model.name, costMicros: 0, toolCalls: [] as TurnResult['toolCalls'] };
   const handoff = (type: HandoffType, intent: string, confidence: number, extra: Partial<TurnResult> = {}): TurnResult => ({
     ...base, ...extra, decision: 'handoff', intent, confidence, reply: r.handoff(name), handoff: { type, summary: summary(message) },
   });
@@ -53,6 +55,8 @@ export async function handleTurn(message: string, context: TurnContext, deps: Tu
     services: context.services.map((item) => ({ id: item.id, name: item.name })),
   }).catch(() => null);
   if (!decision) return handoff('tool_error', 'unknown', 0);
+  base.model = decision.servedBy ?? deps.model.name;
+  base.costMicros = decision.costMicros ?? 0;
   const { intent, confidence } = decision;
   if (intent === 'complaint') return handoff('complaint', intent, confidence);
   if (!context.languages.includes(context.locale)) return handoff('exception', intent, confidence);

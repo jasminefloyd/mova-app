@@ -1,6 +1,6 @@
-// Task 5.4: the concierge's model adapter. The vendor waits on owner decision O8, so the only
-// implementation is the deterministic fake in fake.ts. A real adapter must return the same shape
-// and never produce reply text itself: replies are composed from the stylist's approved information.
+// Task 5.4: the concierge's model adapter. Owner decision O8 (Nov 8): Claude is primary and OpenAI the
+// fallback (live.ts); the deterministic fake (fake.ts) serves tests, the eval set and local runs. Every
+// adapter only classifies — it never writes reply text; replies come from the stylist's approved info.
 export type ConciergeIntent = 'answer' | 'price' | 'offer_times' | 'quote' | 'complaint' | 'greeting' | 'unknown';
 
 /** text = the question and its approved answers in every language, for matching only. */
@@ -20,6 +20,10 @@ export type ModelDecision = {
   confidence: number;
   knowledgeId?: string;
   serviceId?: string;
+  /** What the call cost, in millionths of a dollar (0 for the fake). Counts toward the monthly cap. */
+  costMicros?: number;
+  /** Which model actually answered (the fallback when the primary failed). */
+  servedBy?: string;
 };
 
 export interface ConciergeModel {
