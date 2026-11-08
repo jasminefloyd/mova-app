@@ -6,8 +6,8 @@ import { i18nReady } from '../../i18n';
 import { ProfileSettingsPage } from './ProfileSettingsPage';
 
 const mocks = vi.hoisted(() => ({
-  profile: { current: { display_name: 'Nia Flores', bio: 'Color specialist', specialties: ['Color'], handle: 'nia-flores', preferred_locale: 'en-US' as const, profile_photo_path: null as string | null } },
-  from: vi.fn(), select: vi.fn(), eq: vi.fn(), maybeSingle: vi.fn(),
+  profile: { current: { display_name: 'Nia Flores', bio: 'Color specialist', specialties: ['Color'], handle: 'nia-flores', preferred_locale: 'en-US' as const, profile_photo_path: null as string | null, cover_photo_path: null as string | null } },
+  from: vi.fn(), select: vi.fn(), eq: vi.fn(), maybeSingle: vi.fn(), order: vi.fn(),
   storage: { from: vi.fn() }, createSignedUrl: vi.fn(), uploadToSignedUrl: vi.fn(),
   functions: { invoke: vi.fn() }, rpc: vi.fn(),
 }));
@@ -48,9 +48,10 @@ describe('profile settings edit', () => {
 
   beforeAll(async () => { await i18nReady; });
   beforeEach(() => {
-    mocks.profile.current = { display_name: 'Nia Flores', bio: 'Color specialist', specialties: ['Color'], handle: 'nia-flores', preferred_locale: 'en-US', profile_photo_path: null };
+    mocks.profile.current = { display_name: 'Nia Flores', bio: 'Color specialist', specialties: ['Color'], handle: 'nia-flores', preferred_locale: 'en-US', profile_photo_path: null, cover_photo_path: null };
     mocks.maybeSingle.mockImplementation(async () => ({ data: mocks.profile.current, error: null }));
-    mocks.eq.mockReturnValue({ maybeSingle: mocks.maybeSingle });
+    mocks.order.mockResolvedValue({ data: [], error: null });
+    mocks.eq.mockReturnValue({ maybeSingle: mocks.maybeSingle, order: mocks.order });
     mocks.select.mockReturnValue({ eq: mocks.eq });
     mocks.from.mockReturnValue({ select: mocks.select });
     mocks.createSignedUrl.mockImplementation(async (path: string) => ({ data: { signedUrl: `https://images.mova.invalid/${path}` }, error: null }));
@@ -87,10 +88,9 @@ describe('profile settings edit', () => {
     act(() => {
       setValue(view.host.querySelector('.mova-form-stack input:not([type="file"])') as HTMLInputElement, 'Nia Updated');
       setValue(view.host.querySelector('textarea') as HTMLTextAreaElement, 'Updated bio for clients.');
-      setValue(view.host.querySelector('.mova-inline-field input') as HTMLInputElement, 'Balayage');
     });
-    act(() => { (Array.from(view.host.querySelectorAll('button')).find((button) => button.textContent?.trim() === 'Add') as HTMLButtonElement).click(); });
-    const fileInput = view.host.querySelector('input[type="file"]') as HTMLInputElement;
+    act(() => { (Array.from(view.host.querySelectorAll('button')).find((button) => button.textContent?.trim() === 'Braids') as HTMLButtonElement).click(); });
+    const fileInput = view.host.querySelector('.mova-profile-edit__photo-button input[type="file"]') as HTMLInputElement;
     Object.defineProperty(fileInput, 'files', { configurable: true, value: [new File(['synthetic image'], 'profile.png', { type: 'image/png' })] });
     act(() => { fileInput.dispatchEvent(new Event('change', { bubbles: true })); });
     await waitFor(() => view.host.querySelector('img[src="blob:profile-preview"]') !== null);
@@ -102,13 +102,13 @@ describe('profile settings edit', () => {
     await waitFor(() => view.host.querySelector('[role="status"]')?.textContent === 'Profile updated.');
 
     expect(mocks.rpc).toHaveBeenCalledWith('mova_update_artist_profile', expect.objectContaining({
-      p_artist_business_id: 'artist-a', p_display_name: 'Nia Updated', p_bio: 'Updated bio for clients.', p_specialties: ['Color', 'Balayage'],
+      p_artist_business_id: 'artist-a', p_display_name: 'Nia Updated', p_bio: 'Updated bio for clients.', p_specialties: ['Color', 'Braids'],
     }));
     expect(mocks.functions.invoke).toHaveBeenCalledWith('photo-upload-url', expect.objectContaining({ body: { kind: 'profile', size: 15, contentType: 'image/png' } }));
     expect(mocks.uploadToSignedUrl).toHaveBeenCalled();
     expect(mocks.functions.invoke).toHaveBeenCalledWith('photo-process', expect.objectContaining({ body: { path: 'profile/profile-photo.png', kind: 'profile', zoom: 1 } }));
     expect(view.host.textContent).toContain('Updated bio for clients.');
-    expect(view.host.textContent).toContain('Balayage');
-    expect(view.host.querySelector('img')?.getAttribute('src')).toBe('https://images.mova.invalid/profile/profile-photo.png');
+    expect(Array.from(view.host.querySelectorAll('.mova-chip.is-selected')).map((chip) => chip.textContent)).toEqual(['Color', 'Braids']);
+    expect(view.host.querySelector('.mova-profile-edit__avatar img')?.getAttribute('src')).toBe('https://images.mova.invalid/profile/profile-photo.png');
   });
 });
