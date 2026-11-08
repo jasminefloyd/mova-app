@@ -1,9 +1,10 @@
 import type { LoaderFunctionArgs } from 'react-router';
+import { cronAuthorized } from './cron-auth';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const env = typeof process !== 'undefined' ? process.env : undefined;
   const expected = env?.CRON_SECRET;
-  if (!expected || request.headers.get('authorization') !== `Bearer ${expected}`) return new Response('Unauthorized', { status: 401 });
+  if (!cronAuthorized(request, expected)) return new Response('Unauthorized', { status: 401 });
   const url = env?.SUPABASE_URL;
   const serviceKey = env?.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) return Response.json({ error: 'Server configuration missing' }, { status: 503 });
