@@ -1090,7 +1090,21 @@
     "rulesSummary": "Up to {{dailyCap}} messages per day, with at least {{frequency}} days between messages per client.",
     "filterActivity": "Filter activity",
     "allActivity": "All activity",
-    "activityEmpty": "No activity matches this filter."
+    "activityEmpty": "No activity matches this filter.",
+    "method": {
+      "title": "How Mova estimates this",
+      "notComputed": "Your first estimate appears after Mova has a full week of bookings to work from.",
+      "intro": "Every figure is calculated from your own bookings and history. Nothing is guessed by AI.",
+      "booked": "Confirmed and requested appointments this month, at their listed prices.",
+      "openTime": "Open time you're likely to fill",
+      "openBucket": "{{hours}} open hours × {{fill}} usually filled × {{ticket}} per hour = {{total}}",
+      "rebooks": "Clients likely to rebook",
+      "rebookLine": "{{due}} clients due × {{conversion}} usually rebook × {{ticket}} average visit",
+      "likelyLine": "Booked + open time + rebooks.",
+      "range": "Likely range",
+      "rangeLine": "Booked plus a low ({{openLow}} open time, {{rebookLow}} rebooks) and a high ({{openHigh}}, {{rebookHigh}}) from your past months.",
+      "usualLine": "Average of your last three complete months: {{months}}."
+    }
   },
   "marketing": {
     "home": "Mova home",

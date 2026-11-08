@@ -1090,7 +1090,21 @@
     "rulesSummary": "Hasta {{dailyCap}} mensajes al día y al menos {{frequency}} días entre mensajes por cliente.",
     "filterActivity": "Filtrar actividad",
     "allActivity": "Toda la actividad",
-    "activityEmpty": "No hay actividad que coincida con este filtro."
+    "activityEmpty": "No hay actividad que coincida con este filtro.",
+    "method": {
+      "title": "Cómo calcula Mova esta estimación",
+      "notComputed": "Tu primera estimación aparece cuando Mova tenga una semana completa de citas para calcular.",
+      "intro": "Cada cifra se calcula con tus propias citas e historial. La IA no adivina nada.",
+      "booked": "Citas confirmadas y solicitadas este mes, a sus precios publicados.",
+      "openTime": "Horario libre que probablemente llenarás",
+      "openBucket": "{{hours}} horas libres × {{fill}} que sueles llenar × {{ticket}} por hora = {{total}}",
+      "rebooks": "Clientes que probablemente vuelvan a reservar",
+      "rebookLine": "{{due}} clientes pendientes × {{conversion}} que suelen volver × {{ticket}} por visita en promedio",
+      "likelyLine": "Reservado + horario libre + nuevas reservas.",
+      "range": "Rango probable",
+      "rangeLine": "Lo reservado más un mínimo ({{openLow}} de horario libre, {{rebookLow}} de nuevas reservas) y un máximo ({{openHigh}}, {{rebookHigh}}) según tus meses anteriores.",
+      "usualLine": "Promedio de tus últimos tres meses completos: {{months}}."
+    }
   },
   "marketing": {
     "home": "Inicio de Mova",
