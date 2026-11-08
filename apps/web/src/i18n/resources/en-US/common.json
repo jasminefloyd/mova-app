@@ -1185,7 +1185,7 @@
   "concierge": {
     "title": "AI Concierge",
     "subtitle": "Ari’s assistant · AI",
-    "teach": "Teach concierge",
+    "teach": "Teach it",
     "inbox": "Needs you",
     "handledToday": "Handled today",
     "bookedForYou": "Appointments booked",
@@ -1225,7 +1225,7 @@
     "quote": "Quote request",
     "reviewQuote": "Review quote",
     "quoteDetailTitle": "Quote request",
-    "quoteConversation": "See conversation",
+    "quoteConversation": "See chat",
     "linkedAppointment": "View linked appointment",
     "quoteClientUnknown": "Client",
     "quotePhotosUnavailable": "Photos are attached, but this review cannot display them yet.",

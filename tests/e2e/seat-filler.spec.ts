@@ -57,3 +57,9 @@ test('TC-SLOT-31D-02 a late claim is told the spot was taken, with other times',
   await expect(page.getByRole('heading', { name: 'Someone grabbed that spot' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'See all times' })).toHaveAttribute('href', '/a/ari-monroe/book');
 });
+
+test('TC-SLOT-31D-03 a malformed claim link shows the invalid-link card, not a blank page', async ({ page }) => {
+  await page.route('**/functions/v1/slot-claim', (route) => route.request().method() === 'OPTIONS' ? route.fulfill({ status: 204, headers: cors }) : route.fulfill({ status: 422, contentType: 'application/json', headers: cors, body: JSON.stringify({ data: { code: 'INVALID_TOKEN' }, error: { code: 'INVALID_TOKEN' } }) }));
+  await page.goto('/slot/not-a-real-token');
+  await expect(page.getByRole('heading', { name: "This link doesn't work" })).toBeVisible();
+});

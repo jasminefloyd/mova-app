@@ -20,7 +20,9 @@ export function ClaimSlotPage() {
     const response = await fetch(`${publicEnv.VITE_SUPABASE_URL}/functions/v1/slot-claim`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, token }) });
     const json = await response.json().catch(() => null);
     if (!response.ok && response.status !== 422) throw new Error('FAILED');
-    return (json?.data ?? { status: 'invalid' }) as { status: State; slot?: View; appointment_status?: string | null };
+    const data = json?.data as { status?: State; slot?: View; appointment_status?: string | null } | undefined;
+    // A malformed link comes back as 422 INVALID_TOKEN with no status; show the invalid-link card for it.
+    return { ...data, status: data?.status ?? 'invalid' } as { status: State; slot?: View; appointment_status?: string | null };
   }, [token]);
 
   useEffect(() => { void (async () => { try { const result = await call('view'); setView(result.slot ?? null); setState(result.status); } catch { setState('error'); } })(); }, [call]);
