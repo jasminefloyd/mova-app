@@ -5,7 +5,7 @@ select has_table('public'::name, 'mova_location_hours'::name);
 select has_table('public'::name, 'mova_location_exceptions'::name);
 select has_table('public'::name, 'mova_location_policies'::name);
 select has_table('public'::name, 'mova_availability_blocks'::name);
-select has_column('public'::name, 'mova_location_policies'::name, 'door_code_encrypted'::name);
+select has_column('public'::name, 'mova_location_policies'::name, 'door_code_encrypted'::name, 'door code ciphertext column exists');
 select ok((select relrowsecurity from pg_class where oid='public.mova_locations'::regclass),'location rows have RLS enabled');
 select has_function('public'::name, 'mova_save_location'::name, array['uuid','uuid','text','text','text','text','text','text','jsonb','smallint','jsonb','jsonb','jsonb']::name[]);
 select * from finish();

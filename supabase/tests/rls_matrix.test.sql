@@ -1,7 +1,10 @@
 begin;
 select no_plan();
 
-do $rls_catalog$
+create function public.mova_test_rls_matrix_catalog_assertions()
+returns setof text
+language plpgsql
+as $rls_catalog$
 declare
   table_row record;
   command_name text;
@@ -26,8 +29,8 @@ begin
       and relation.relkind in ('r', 'p')
     order by relation.relname
   loop
-    perform ok(table_row.relrowsecurity, format('%s has row-level security enabled', table_row.relname));
-    perform ok(not has_table_privilege('anon', table_row.oid, 'SELECT'), format('anon cannot directly read %s', table_row.relname));
+    return query select ok(table_row.relrowsecurity, format('TC-STATIC-TAP-01 / TC-RLS-TENANT-MATRIX: %s has row-level security enabled', table_row.relname));
+    return query select ok(not has_table_privilege('anon', table_row.oid, 'SELECT'), format('TC-STATIC-TAP-01 / TC-RLS-TENANT-MATRIX: anon cannot directly read %s', table_row.relname));
 
     if has_table_privilege('authenticated', table_row.oid, 'SELECT') then
       select exists (
@@ -37,7 +40,7 @@ begin
           and policy.cmd in ('SELECT', 'ALL')
           and policy.roles && array['authenticated'::name, 'public'::name]
       ) into policy_exists;
-      perform ok(policy_exists, format('authenticated SELECT on %s is governed by an RLS policy', table_row.relname));
+      return query select ok(policy_exists, format('TC-STATIC-TAP-01 / TC-RLS-TENANT-MATRIX: authenticated SELECT on %s is governed by an RLS policy', table_row.relname));
 
       if table_row.is_tenant_table then
         select exists (
@@ -48,7 +51,7 @@ begin
             and policy.roles && array['authenticated'::name, 'public'::name]
             and coalesce(policy.qual, '') ilike '%mova_has_artist_membership%'
         ) into policy_exists;
-        perform ok(policy_exists, format('authenticated SELECT on tenant table %s is membership-scoped', table_row.relname));
+        return query select ok(policy_exists, format('TC-STATIC-TAP-01 / TC-RLS-TENANT-MATRIX: authenticated SELECT on tenant table %s is membership-scoped', table_row.relname));
       end if;
     end if;
 
@@ -61,12 +64,14 @@ begin
             and policy.cmd in (command_name, 'ALL')
             and policy.roles && array['authenticated'::name, 'public'::name]
         ) into policy_exists;
-        perform ok(policy_exists, format('authenticated %s on %s is governed by an RLS policy', command_name, table_row.relname));
+        return query select ok(policy_exists, format('TC-STATIC-TAP-01 / TC-RLS-TENANT-MATRIX: authenticated %s on %s is governed by an RLS policy', command_name, table_row.relname));
       end if;
     end loop;
   end loop;
 end;
 $rls_catalog$;
+
+select * from public.mova_test_rls_matrix_catalog_assertions();
 
 -- A fixture row makes the business-table denial meaningful even without the optional demo seed.
 insert into public.mova_artist_businesses (id, name, status)
@@ -82,10 +87,10 @@ select ok(
   'the synthetic non-member has no active artist membership'
 );
 
-set local role authenticated;
-select set_config('request.jwt.claim.sub', 'f4444444-4444-4444-8444-444444444442', true);
-
-do $rls_nonmember$
+create function public.mova_test_rls_matrix_nonmember_assertions()
+returns setof text
+language plpgsql
+as $rls_nonmember$
 declare
   table_row record;
   visible_rows bigint;
@@ -108,10 +113,14 @@ begin
     order by relation.relname
   loop
     execute format('select count(*) from public.%I', table_row.relname) into visible_rows;
-    perform is(visible_rows, 0::bigint, format('non-member cannot read rows from %s', table_row.relname));
+    return query select is(visible_rows, 0::bigint, format('TC-STATIC-TAP-01 / TC-RLS-TENANT-MATRIX: non-member cannot read rows from %s', table_row.relname));
   end loop;
 end;
 $rls_nonmember$;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'f4444444-4444-4444-8444-444444444442', true);
+select * from public.mova_test_rls_matrix_nonmember_assertions();
 
 reset role;
 select * from finish();

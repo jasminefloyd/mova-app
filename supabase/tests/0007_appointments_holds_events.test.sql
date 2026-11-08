@@ -8,8 +8,8 @@ select ok((select relrowsecurity from pg_class where oid='public.mova_appointmen
 select has_function('public'::name, 'mova_booking_create'::name, array['uuid','uuid','timestamp with time zone','text','text','text','text','text','bytea']::name[]);
 select has_function('public'::name, 'mova_booking_transition'::name, array['uuid','bytea','text','text','text','text','boolean','uuid']::name[]);
 select has_function('public'::name, 'mova_booking_reschedule'::name, array['uuid','bytea','timestamp with time zone','text']::name[]);
-select has_column('public'::name, 'mova_appointments'::name, 'artist_suggested_starts_at'::name);
-select has_column('public'::name, 'mova_appointments'::name, 'artist_suggested_ends_at'::name);
+select has_column('public'::name, 'mova_appointments'::name, 'artist_suggested_starts_at'::name, 'artist suggested start column exists');
+select has_column('public'::name, 'mova_appointments'::name, 'artist_suggested_ends_at'::name, 'artist suggested end column exists');
 select has_function('public'::name, 'mova_booking_suggest_time'::name, array['uuid','uuid','timestamp with time zone','text','uuid']::name[]);
 select has_function('public'::name, 'mova_booking_suggestion_response'::name, array['uuid','bytea','text','text']::name[]);
 select has_function('public'::name, 'mova_booking_reschedule_review'::name, array['uuid','text','text','uuid']::name[]);
