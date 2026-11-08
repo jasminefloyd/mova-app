@@ -1,6 +1,6 @@
 # Production catch-up runbook (Phase 1, task 1.10)
 
-Status: **prepared, not applied.** Applying it needs the owner's approval for these exact versions (owner decision O14). Nothing in this file has been run against production.
+Status: **Supabase and Vercel production deployments completed on 2026-11-08.** Owner authorized the rollout. The 22 migrations (0032, 0034, 0038–0047, 0050–0059) were applied individually with matching history rows in transactions. Non-mutating post-apply checks passed; rollback-only fee-lock and sample-stylist checks were not run against production. Five Supabase secrets were set, and all 27 listed Edge Functions are ACTIVE with `verify_jwt=false`. The same `CRON_SECRET` was added to Vercel Production. Deployment `dpl_CzEJAQn82TrtgSU9UUiUWP9eXjfJ` is READY at `https://mova-beauty.co`. The owner explicitly skipped the backup step; PITR is disabled. Live production smoke checks remain pending.
 
 ## Why
 
@@ -43,9 +43,10 @@ Apply 0032, 0034, 0038, 0039, 0040, 0041, 0042, 0043, 0044, 0045, 0046, 0047, 00
 -- Which of these versions production already has.
 select version, name from supabase_migrations.schema_migrations
 where version in ('20261107200000','20261107220000','20261108010000','20261108011000','20261108012000') order by version;
--- Anonymous grants that 0032 will remove (expect rows before, none after).
+-- Anonymous SELECT grants that 0032 will remove (expect rows before, none after).
 select table_name, privilege_type from information_schema.role_table_grants
-where grantee = 'anon' and table_schema = 'public' and table_name like 'mova\_%' order by 1, 2;
+where grantee = 'anon' and table_schema = 'public' and table_name like 'mova\_%'
+  and privilege_type = 'SELECT' order by 1, 2;
 -- Objects 0034 creates must not already exist.
 select to_regclass('public.mova_background_jobs'), to_regclass('public.mova_background_job_alerts');
 ```
@@ -58,7 +59,8 @@ For each file, in one transaction: run the file's SQL, then insert its row into 
 
 ```sql
 select count(*) from information_schema.role_table_grants
-where grantee = 'anon' and table_schema = 'public' and table_name like 'mova\_%';           -- expect 0 after 0032
+where grantee = 'anon' and table_schema = 'public' and table_name like 'mova\_%'
+  and privilege_type = 'SELECT';                                                           -- expect 0 after 0032
 select public.mova_deposit_bookings_enabled();                                             -- expect false
 select has_function_privilege('anon', 'public.mova_deposit_bookings_enabled()', 'EXECUTE'); -- expect false
 ```
