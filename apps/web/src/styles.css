@@ -911,3 +911,34 @@ select,
 .mova-profile-edit__thumbs span { display: grid; place-items: center; background: var(--line-subtle); color: var(--ink-muted); font-size: var(--fs-caption); font-weight: 700; }
 .mova-profile-edit__actions { position: sticky; bottom: 0; margin-inline: calc(-1 * var(--gutter)); border-top: 1px solid var(--line); padding: var(--space-3) var(--gutter) var(--space-6); background: var(--surface-page); }
 .mova-profile-edit__actions .mova-button { width: 100%; }
+
+/* 3.4 Looks (canvas 16d) */
+.mova-looks { display: grid; gap: var(--space-3); }
+.mova-looks__head { display: grid; gap: var(--space-1); }
+.mova-looks__head h1 { margin: 0; }
+.mova-looks__head p, .mova-looks__summary { margin: 0; color: var(--ink-muted); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-looks__summary { font-size: var(--fs-caption); }
+.mova-looks__upload { position: relative; display: flex; min-height: 64px; align-items: center; justify-content: center; gap: var(--space-2); border: 1.5px dashed var(--botanical); border-radius: var(--radius-xl); background: var(--surface); color: var(--forest); font-size: var(--fs-body); font-weight: 700; cursor: pointer; }
+.mova-looks__upload:focus-within { outline: 2px solid var(--forest); outline-offset: 2px; }
+.mova-looks__upload.is-busy { opacity: .6; cursor: progress; }
+.mova-looks__upload input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.mova-looks__list { display: grid; gap: 10px; margin: 0; padding: 0 0 var(--space-8); list-style: none; }
+.mova-looks__card { border: 1px solid var(--line); border-radius: var(--radius-xl); padding: var(--space-3); background: var(--surface); }
+.mova-looks__card.is-open { border: 2px solid var(--forest); padding: 11px; }
+.mova-looks__row { display: flex; align-items: center; gap: var(--space-3); }
+.mova-looks__row > img, .mova-looks__thumb { width: 64px; height: 64px; flex: none; border-radius: var(--radius-l); background: var(--line-subtle); object-fit: cover; }
+.mova-looks__summary-button { display: grid; min-width: 0; flex: 1; justify-items: start; gap: var(--space-1); border: 0; padding: 0; background: transparent; color: var(--forest); text-align: start; cursor: pointer; }
+.mova-looks__summary-button strong { font-size: var(--fs-body); overflow-wrap: anywhere; }
+.mova-looks__summary-button small { color: var(--ink-muted); font-size: var(--fs-micro); overflow-wrap: anywhere; }
+.mova-looks__pill { border-radius: var(--radius-s); padding: 2px var(--space-2); background: var(--line-subtle); color: var(--ink-muted); font-size: var(--fs-tab); font-weight: 700; }
+.mova-looks__pill.is-on { background: var(--status-confirmed-bg); color: var(--forest); }
+.mova-looks__arrows { display: grid; gap: var(--space-1); }
+.mova-looks__arrows .mova-icon-button { width: 44px; height: 36px; min-height: 36px; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--surface); }
+.mova-looks__arrows .mova-icon-button:disabled { opacity: .35; }
+.mova-looks__up .mova-icon { transform: rotate(-90deg); }
+.mova-looks__down .mova-icon { transform: rotate(90deg); }
+.mova-looks__editor { display: grid; gap: var(--space-3); margin-top: var(--space-3); border-top: 1px solid var(--line-subtle); padding-top: var(--space-3); }
+.mova-looks__services { display: grid; gap: var(--space-2); margin: 0; border: 0; padding: 0; }
+.mova-looks__services legend { margin-bottom: var(--space-2); font-size: var(--fs-caption); font-weight: 600; }
+.mova-looks .mova-toggle { display: flex; justify-content: space-between; }
+.mova-looks .mova-toggle small { color: var(--ink-muted); font-size: var(--fs-micro); }
