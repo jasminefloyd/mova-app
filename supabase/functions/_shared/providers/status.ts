@@ -57,7 +57,7 @@ export async function verifySendGridSignature(publicKeyBase64: string, raw: stri
   try {
     if (!/^\d{1,12}$/.test(timestamp) || Math.abs(nowSeconds - Number(timestamp)) > 600) return false;
     const key = await crypto.subtle.importKey('spki', fromBase64(publicKeyBase64), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
-    return await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, key, derToRaw(fromBase64(signatureBase64)), new TextEncoder().encode(timestamp + raw));
+    return await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, key, new Uint8Array(derToRaw(fromBase64(signatureBase64))), new TextEncoder().encode(timestamp + raw));
   } catch { return false; }
 }
 
