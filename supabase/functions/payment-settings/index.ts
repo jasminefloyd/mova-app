@@ -10,7 +10,8 @@ Deno.serve(async (request) => {
   if (body.action === 'get') {
     const [settings, fee, salons] = await Promise.all([
       db.from('mova_payment_method_settings').select('cash_enabled,other_enabled').eq('artist_business_id', actor.businessId).maybeSingle(),
-      db.from('mova_platform_fee_versions').select('fee_bps').lte('effective_at', new Date().toISOString()).order('version', { ascending: false }).limit(1).maybeSingle(),
+      // Task 4.2: the one server-side setting, read the same way the payment snapshot reads it.
+      db.rpc('mova_current_platform_fee', { p_at: new Date().toISOString() }).maybeSingle(),
       db.from('mova_locations').select('name').eq('artist_business_id', actor.businessId).eq('payment_collector', 'salon').eq('is_active', true).order('name'),
     ]);
     if (settings.error || fee.error || salons.error) return respond({ code: 'PAYMENT_SETTINGS_READ_FAILED' }, 500);
