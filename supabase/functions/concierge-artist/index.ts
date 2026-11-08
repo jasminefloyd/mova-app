@@ -45,7 +45,12 @@ Deno.serve(async(request)=>{
    db.from('mova_messages').select('id,direction,origin,channel,purpose,body,status,created_at').eq('artist_business_id',actor.businessId).eq('conversation_id',body.conversation_id).order('created_at'),
    db.from('mova_handoffs').select('id,type,status,summary,created_at').eq('artist_business_id',actor.businessId).eq('conversation_id',body.conversation_id).order('created_at',{ascending:false}),
    db.from('mova_quote_requests').select('id,appointment_id,service_category,details,media,risk_flags,quoted_minor,status,created_at').eq('artist_business_id',actor.businessId).eq('conversation_id',body.conversation_id).order('created_at',{ascending:false}),
-  ]);if(error)return respond({code:'CONVERSATION_READ_FAILED'},500);return respond({messages:messages??[],handoffs:handoffs??[],quotes:quotes??[]});
+  ]);if(error)return respond({code:'CONVERSATION_READ_FAILED'},500);
+  // Linked quotes carry their appointment's AID number so the thread can link to it (screen 41).
+  const linkedIds=(quotes??[]).map((quote)=>quote.appointment_id).filter((id):id is string=>typeof id==='string');
+  const {data:linked}=linkedIds.length?await db.from('mova_appointments').select('id,appointment_number').eq('artist_business_id',actor.businessId).in('id',linkedIds):{data:[] as Array<{id:string;appointment_number:number}>};
+  const numbers=new Map((linked??[]).map((row)=>[row.id,row.appointment_number]));
+  return respond({messages:messages??[],handoffs:handoffs??[],quotes:(quotes??[]).map((quote)=>({...quote,appointment_number:quote.appointment_id?numbers.get(quote.appointment_id)??null:null}))});
  }
  if(body.action==='human-reply'){
   if(typeof body.conversation_id!=='string'||typeof body.message!=='string'||!body.message.trim()||body.message.length>4000)return respond({code:'INVALID_REPLY'},422);

@@ -5,6 +5,11 @@ export function displayId(kind: DisplayIdKind, value: number): string {
   return `${kind}-${value}`;
 }
 
+/** Like displayId, but returns null for a missing or invalid number instead of throwing (records not yet numbered, absent links). */
+export function displayIdOrNull(kind: DisplayIdKind, value: unknown): string | null {
+  return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? `${kind}-${value}` : null;
+}
+
 export function displayIdLabel(kind: DisplayIdKind, value: number): string {
   if (!Number.isSafeInteger(value) || value < 1) throw new RangeError('Display ID must be a positive safe integer');
   return `${kind} ${value}`;
