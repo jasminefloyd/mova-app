@@ -32,6 +32,11 @@ The service role bypasses RLS. This is a source-level boundary inventory, not a 
 | `notification-inbox` | Requires `artistClient`; inbox query/update includes `actor.businessId` and `actor.user.id`. | Missing |
 | `payment-settings` | Requires `artistClient`; settings query/upsert use `actor.businessId`. | Missing |
 | `support-feedback` | Requires `artistClient`; inserts run through the stylist's own client so RLS (0041) checks business and user; the service role only issues signed upload URLs under `<business>/<user>/`. | Missing |
+| `concierge-web-chat` | Public; resolves the stylist from a published handle, then runs `_shared/concierge/pipeline.ts` scoped to that business; per-thread rate limit, daily turn cap and the O8 platform spend cap. | Missing |
+| `instagram-webhook` | Provider-signed webhook (fake Meta, HMAC); routes only to the business that owns an active Instagram sending identity. | Missing |
+| `slot-claim` | Public; the 48-hex claim token is the only credential and only its SHA-256 is stored; `mova_slot_claim` locks the slot row. | Missing |
+| `subscription-checkout`, `subscription-portal` | Require `artistClient`; Stripe test keys only; the plan changes only after `plan-management` verifies the checkout with Stripe. | Missing |
+| `wallet-pass-create` | Authenticated client; pass only for a stylist the client is linked to and with an existing client card; stylist `wallet_card` switch checked. | Missing |
 | `plan-management` | Requires `artistClient`; entitlement RPC receives `actor.businessId`. | Missing |
 | `privacy-management` | Requires `artistClient`; privacy request RPC receives authenticated actor ID and actor business. | Missing |
 | `reports-refresh` | CRON bearer secret gates an all-business scheduled worker; each business is processed independently. | Missing |
