@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, ErrorState, SectionOverline } from '../../components';
-import { publicEnv, stripeTestModeEnabled } from '../../lib/env';
+import { publicEnv, stripeTestModeEnabled, webChatEnabled } from '../../lib/env';
 import { ErrorFallback } from '../../app/ErrorFallback';
 import { PublicLocaleToggle } from '../../app/PublicLocaleToggle';
-import { ConciergeWidget } from '../concierge/ConciergePages';
+import { WebChat } from '../concierge/WebChat';
 import { trackProfileEvent } from '../reports/track';
 
 type Service = { id: string; name: string; category: string; duration_minutes: number; buffer_minutes?: number; base_price_minor: number; deposit_type: 'none' | 'fixed' | 'percent'; deposit_value: number; location_deposits: Array<{ location_id: string; price_minor: number; duration_minutes: number; deposit_amount_minor: number }> };
@@ -100,7 +100,7 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
           : <Button type="button" variant="secondary" disabled={preview} onClick={() => navigate(`/a/${encodeURIComponent(handle)}/book?service_id=${encodeURIComponent(service.id)}&locale=${locale}`)}>{t('showcase.book')}</Button>)}
       </li>)}</ul> : <EmptyState title={t('showcase.noServices')} />}
     </section>
-    {!preview&&<ConciergeWidget artistHandle={handle}/>}
+    {!preview&&webChatEnabled&&<WebChat artistHandle={handle} stylistName={artist.profile.display_name}/>}
     {!preview&&artist.bookable&&<div className="mova-public-artist__book"><Button onClick={()=>navigate(bookingUrl)}>{t('showcase.bookAppointment')}</Button></div>}
   </main>;
 }

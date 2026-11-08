@@ -1267,6 +1267,17 @@
       "missedCall": "Llamada perdida",
       "instagram": "Instagram",
       "unknown": "Otro canal"
+    },
+    "chat": {
+      "open": "Pregúntale a la asistente de {{name}}",
+      "title": "Chat con la asistente de {{name}}",
+      "subtitle": "Asistente de reservas (IA) · {{name}} ve cada chat",
+      "close": "Cerrar",
+      "messages": "Mensajes",
+      "intro": "Pregunta por precios, horarios, estacionamiento o cómo prepararte. Para todo lo demás, {{name}} te responde personalmente.",
+      "assistant": "Asistente de {{name}} · IA",
+      "typing": "Escribiendo…",
+      "placeholder": "Escribe un mensaje"
     }
   },
   "reports": {

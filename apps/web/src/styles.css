@@ -972,3 +972,23 @@ select,
 .mova-forecast-method small, .mova-forecast-method ul { grid-column: 1 / -1; }
 .mova-forecast-method ul { margin: 0; padding-left: var(--space-4); }
 .mova-forecast-method .is-total dt, .mova-forecast-method .is-total dd { color: var(--forest); font-size: var(--fs-body); }
+
+/* 5.4 Web chat with the booking assistant (style of board 45) */
+.mova-web-chat__launch { display: grid; }
+.mova-web-chat { display: grid; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-2xl); background: var(--surface); }
+.mova-web-chat__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); border-bottom: 1px solid var(--line-subtle); padding: var(--space-3) var(--space-4); }
+.mova-web-chat__head > span { display: grid; min-width: 0; gap: 2px; }
+.mova-web-chat__head small { color: var(--ink-muted); font-size: var(--fs-micro); }
+.mova-web-chat__close { min-height: var(--tap-min); border: 0; background: transparent; color: var(--forest); font-weight: 600; cursor: pointer; }
+.mova-web-chat__log { display: flex; max-height: 420px; flex-direction: column; gap: var(--space-2); overflow-y: auto; padding: var(--space-4); background: var(--surface-page); }
+.mova-web-chat__intro { margin: 0 0 var(--space-2); color: var(--ink-muted); font-size: var(--fs-caption); text-align: center; }
+.mova-web-chat__bubble { max-width: 85%; border-radius: 18px 18px 18px 6px; padding: 10px 14px; background: var(--surface-alt); color: var(--ink-primary); font-size: var(--fs-body-s); line-height: 1.45; overflow-wrap: anywhere; }
+.mova-web-chat__bubble.is-client { align-self: flex-end; border-radius: 18px 18px 6px 18px; background: var(--botanical); color: var(--ivory); }
+.mova-web-chat__bubble.is-typing { color: var(--ink-muted); }
+.mova-web-chat__assistant { display: grid; justify-items: start; gap: 4px; }
+.mova-web-chat__assistant > span { color: var(--ink-muted); font-size: var(--fs-micro); font-weight: 600; }
+.mova-web-chat__error { margin: 0; padding: var(--space-2) var(--space-4); color: var(--danger); font-size: var(--fs-caption); }
+.mova-web-chat__form { display: flex; gap: var(--space-2); border-top: 1px solid var(--line-subtle); padding: var(--space-3); }
+.mova-web-chat__form input { min-width: 0; flex: 1; min-height: 48px; border: 1px solid var(--line-control); border-radius: var(--radius-pill); padding: 0 var(--space-4); background: var(--surface); color: var(--ink-primary); font: inherit; }
+.mova-web-chat__form input:focus-visible { outline: 2px solid var(--forest); outline-offset: 1px; }
+.mova-web-chat__form .mova-button { min-height: 48px; padding-inline: var(--space-4); }

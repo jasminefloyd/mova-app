@@ -1267,6 +1267,17 @@
       "missedCall": "Missed call",
       "instagram": "Instagram",
       "unknown": "Other channel"
+    },
+    "chat": {
+      "open": "Ask {{name}}'s assistant",
+      "title": "Chat with {{name}}'s assistant",
+      "subtitle": "Booking assistant (AI) · {{name}} sees every chat",
+      "close": "Close",
+      "messages": "Messages",
+      "intro": "Ask about prices, open times, parking or how to prep. For anything else, {{name}} replies personally.",
+      "assistant": "{{name}}'s assistant · AI",
+      "typing": "Writing…",
+      "placeholder": "Write a message"
     }
   },
   "reports": {
