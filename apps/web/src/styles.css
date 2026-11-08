@@ -942,3 +942,21 @@ select,
 .mova-looks__services legend { margin-bottom: var(--space-2); font-size: var(--fs-caption); font-weight: 600; }
 .mova-looks .mova-toggle { display: flex; justify-content: space-between; }
 .mova-looks .mova-toggle small { color: var(--ink-muted); font-size: var(--fs-micro); }
+
+/* 3.5 Send feedback (canvas 16e) */
+.mova-settings-feedback { display: inline-flex; min-height: var(--tap-min); align-items: center; justify-self: center; gap: 6px; border: 0; padding: 0 var(--space-2); background: transparent; color: var(--ink-muted); font-size: var(--fs-caption); cursor: pointer; flex-wrap: wrap; justify-content: center; text-align: center; }
+.mova-settings-feedback span { color: var(--forest); text-decoration: underline; }
+.mova-feedback { display: grid; gap: var(--space-3); }
+.mova-feedback p { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-feedback__intro, .mova-feedback__note { color: var(--ink-muted); }
+.mova-feedback__note { font-size: var(--fs-micro) !important; }
+.mova-feedback__types { margin: 0; border: 0; padding: 0; }
+.mova-feedback__types legend { margin-bottom: var(--space-2); font-size: var(--fs-body-s); font-weight: 600; }
+.mova-feedback__types [role="radiogroup"] { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+.mova-feedback__types button { min-height: 52px; border: 1px solid var(--line-control); border-radius: var(--radius-l); padding: 6px; background: var(--surface); color: var(--forest); font-size: var(--fs-caption); font-weight: 600; line-height: 1.2; cursor: pointer; }
+.mova-feedback__types button.is-selected { border: 2px solid var(--forest); background: var(--forest); color: var(--ivory); font-weight: 700; }
+.mova-feedback__types button:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
+.mova-feedback__screenshot { position: relative; cursor: pointer; }
+.mova-feedback__screenshot:focus-within { outline: 2px solid var(--forest); outline-offset: 2px; }
+.mova-feedback__screenshot input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.mova-feedback--sent { justify-items: stretch; }

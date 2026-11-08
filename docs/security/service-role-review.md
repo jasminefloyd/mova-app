@@ -28,6 +28,7 @@ The service role bypasses RLS. This is a source-level boundary inventory, not a 
 | `notification-dispatch` | CRON/worker processes undelivered outbox events across businesses by design; event business IDs scope downstream work. | Missing |
 | `notification-inbox` | Requires `artistClient`; inbox query/update includes `actor.businessId` and `actor.user.id`. | Missing |
 | `payment-settings` | Requires `artistClient`; settings query/upsert use `actor.businessId`. | Missing |
+| `support-feedback` | Requires `artistClient`; inserts run through the stylist's own client so RLS (0041) checks business and user; the service role only issues signed upload URLs under `<business>/<user>/`. | Missing |
 | `plan-management` | Requires `artistClient`; entitlement RPC receives `actor.businessId`. | Missing |
 | `privacy-management` | Requires `artistClient`; privacy request RPC receives authenticated actor ID and actor business. | Missing |
 | `reports-refresh` | CRON bearer secret gates an all-business scheduled worker; each business is processed independently. | Missing |

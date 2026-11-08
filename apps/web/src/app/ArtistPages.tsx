@@ -7,6 +7,7 @@ import { useArtistBusiness } from '../features/settings/useArtistBusiness';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { operatorUrl } from './operator-url';
 import { ReportsPage } from '../features/reports/ReportsPage';
+import { FeedbackSheet } from '../features/settings/FeedbackSheet';
 
 type Section = 'home' | 'calendar' | 'clients' | 'growth' | 'reports' | 'money';
 
@@ -35,6 +36,7 @@ export function SettingsPage() {
   const [languageExpanded, setLanguageExpanded] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState(false);
   useEffect(() => {
@@ -112,6 +114,8 @@ export function SettingsPage() {
       <ListRow title={t('settings.privacyData')} href={operatorUrl(businessId,'settings/privacy')} />
     </Card>
     {languageExpanded&&<section className="mova-settings-language" id="mova-settings-language" aria-label={t('settings.languageNotifications')}><LocaleSwitcher /></section>}
+    <button type="button" className="mova-settings-feedback" onClick={()=>setFeedbackOpen(true)}><Icon name="message" size={16}/>{t('feedback.link')} <span>{t('feedback.linkAction')}</span></button>
+    <FeedbackSheet open={feedbackOpen} onClose={()=>setFeedbackOpen(false)} />
     {signOutError && <p role="alert">{t('settings.signOutError')}</p>}
     <Button variant="ghost" className="mova-settings-signout" loading={signingOut} onClick={()=>void signOut()}>{t('settings.signOut')}</Button>
   </main>;

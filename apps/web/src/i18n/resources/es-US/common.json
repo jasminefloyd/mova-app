@@ -1412,5 +1412,39 @@
   },
   "components": {
     "offline": "Parece que no tienes conexión."
+  },
+  "feedback": {
+    "title": "Enviar comentarios",
+    "sentTitle": "Enviado. Gracias",
+    "close": "Cerrar",
+    "link": "¿Tienes una idea o encontraste un error?",
+    "linkAction": "Enviar comentarios",
+    "intro": "Esto le llega directamente al equipo de Mova. Leemos cada mensaje.",
+    "typeLabel": "¿De qué se trata?",
+    "types": {
+      "idea": "Idea",
+      "broken": "Algo no funciona",
+      "question": "Pregunta"
+    },
+    "prompts": {
+      "idea": "¿Qué mejoraría Mova?",
+      "broken": "¿Qué pasó?",
+      "question": "¿Qué quieres saber?"
+    },
+    "placeholders": {
+      "idea": "Cuéntanos qué te gustaría ver",
+      "broken": "¿Qué estabas haciendo y qué salió mal?",
+      "question": "Pregúntanos lo que quieras"
+    },
+    "addScreenshot": "Agregar una captura de pantalla (opcional)",
+    "screenshotAdded": "Captura agregada: {{name}}",
+    "screenshotInvalid": "Usa una imagen JPG, PNG o WebP de menos de 5 MB.",
+    "attachedNote": "Para ayudarnos a revisarlo, incluiremos la pantalla de la que vienes, tu dispositivo y la versión de la app. No incluiremos datos de tus clientes.",
+    "send": "Enviar a Mova",
+    "failed": "No pudimos enviarlo. Inténtalo de nuevo.",
+    "limited": "Enviaste muchos comentarios en esta hora. Inténtalo más tarde.",
+    "thanks": "Gracias. Si necesitamos más detalles o tenemos una respuesta, te escribiremos por correo.",
+    "thanksEmail": "Gracias. Si necesitamos más detalles o tenemos una respuesta, te escribiremos a {{email}}.",
+    "done": "Listo"
   }
 }
