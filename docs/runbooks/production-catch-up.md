@@ -14,12 +14,18 @@ According to `docs/engineering/PHASE_STATUS.md`, production received migrations 
 | 0039 | `20261108011000_mova_0039_deposit_bookings_flag.sql` | Lets availability read the deposit-booking switch | Updated `availability-search` returns 503 until this exists |
 | 0040 | `20261108012000_mova_0040_revoke_unused_write_grants.sql` | Revokes write grants that had no RLS policy | None functionally; grants and policies stay inconsistent |
 | 0041 | `20261108020000_mova_0041_support_messages.sql` | Stylist feedback table with RLS and a private screenshot bucket | Send feedback (Settings) returns an error |
+| 0042 | `20261108030000_mova_0042_sms_policy.sql` | SMS send gate with daily cap, STOP/START/HELP handling, missed-call gate | SMS adapter, inbound keywords and missed-call text-back return errors (all off until O4/O5) |
+| 0043 | `20261108031000_mova_0043_appointment_emails.sql` | Email suppression gate, appointment email context, reminder queueing | Appointment emails and reminders cannot run (off until O4) |
+| 0044 | `20261108032000_mova_0044_payment_fee_rate.sql` | Fee version on each payment, one fee accessor, fee/amount locked after insert, 150 bps backfill | Past payments' fee could be rewritten; `payment-settings` cannot read the fee |
+| 0045 | `20261108033000_mova_0045_stripe_processor_fee.sql` | Queues and posts Stripe's processing fee to the ledger | Money shows $0 Stripe processing; `stripe-webhook` returns 503 after a paid Checkout (it queues the fee job) |
+| 0046 | `20261108034000_mova_0046_job_dead_letters.sql` | Dead-letter view and requeue function for background jobs | Operators query the jobs table directly |
+| 0047 | `20261108035000_mova_0047_messaging_spend_cap.sql` | Shared $50/month hard-stop spend cap for email and SMS (O4) | Every send fails closed (`SPEND_CHECK_UNAVAILABLE`) |
 
 The production project also holds 83 migration records that are not in this repository. Do not run `supabase db push` against it: it would try to reconcile that history. Apply the files individually as below.
 
 ## Order
 
-Apply 0032, 0034, 0038, 0039, 0040, 0041 in that order, then deploy the Edge Functions that depend on them (`availability-search`, `concierge-artist`, `customer-profile`, `waitlist-signup`, `payment-settings`, `stripe-connect-onboard`, `support-feedback`). Deploying `availability-search` before 0039 makes booking return 503.
+Apply 0032, 0034, 0038, 0039, 0040, 0041, 0042, 0043, 0044, 0045, 0046, 0047 in that order, then deploy the Edge Functions that depend on them (`availability-search`, `concierge-artist`, `customer-profile`, `waitlist-signup`, `payment-settings`, `stripe-connect-onboard`, `support-feedback`, `messaging-dispatch`, `messaging-events`, `messaging-inbound-sms`, `missed-call-webhook`, `job-dispatch`, `job-worker`, `stripe-webhook`, `messaging-status`). Deploying `availability-search` before 0039 makes booking return 503.
 
 ## Pre-checks (read-only)
 
@@ -47,6 +53,8 @@ select public.mova_deposit_bookings_enabled();                                  
 select has_function_privilege('anon', 'public.mova_deposit_bookings_enabled()', 'EXECUTE'); -- expect false
 ```
 
+Pre-check for 0044: `select count(*) from mova_payments where collector='mova_processed' and platform_fee_bps=0` lists rows the backfill will touch (only those whose stored fee already equals 1.5%).
+
 Then, on the deployed app: Book (25) shows times for a no-deposit service; a deposit service at a stylist-collected location shows the "can't be booked online yet" message; a test stylist on a non-production project can claim a handle.
 
 ## Rollback
@@ -55,4 +63,10 @@ Then, on the deployed app: Book (25) shows times for a no-deposit service; a dep
 - 0034: drop the objects it created, only if no jobs have been enqueued.
 - 0038: no rollback needed (the previous functions failed on every call).
 - 0039: `drop function public.mova_deposit_bookings_enabled();`, after reverting `availability-search`.
+- 0047: revert the messaging functions first, then drop `mova_messaging_reserve_spend`, `mova_messaging_month_spend_micros`, `mova_messaging_spend_cap_micros`.
+- 0046: `drop view public.mova_background_job_dead_letters; drop function public.mova_requeue_dead_job(uuid);`
+- 0045: revert `stripe-webhook` and `job-worker` first, then drop `mova_stripe_enqueue_processor_fee` and `mova_stripe_record_processor_fee`. Posted fee ledger rows are immutable and stay.
+- 0044: drop trigger `mova_payments_fee_locked` and function `mova_payment_fee_locked`; keep the `platform_fee_version` column (harmless); restore the 0009 snapshot function only if reverting `payment-settings`.
+- 0043: drop `mova_email_send_gate`, `mova_appointment_email_context` and `mova_enqueue_appointment_reminders` after reverting `job-dispatch` and `job-worker`.
+- 0042: drop the functions it creates (`mova_sms_daily_cap`, `mova_sms_normalize`, `mova_sms_send_gate`, `mova_sms_handle_inbound`, `mova_missed_call_gate`) and the index `mova_messages_client_sms_recent_idx`; no table changes.
 - 0041: only if no stylist has sent feedback: `drop table public.mova_support_messages;` and remove the empty `mova_support_screenshots` bucket.

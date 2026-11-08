@@ -1,0 +1,3 @@
+{"id":"pi_test_e4600000_deposit","object":"payment_intent","amount":2000,"currency":"usd","status":"succeeded",
+ "latest_charge":{"id":"ch_test_e4600000","object":"charge","balance_transaction":{"id":"txn_test_e4600000","object":"balance_transaction","amount":2000,"fee":118,
+ "fee_details":[{"amount":88,"currency":"usd","type":"stripe_fee","description":"Stripe processing fees"},{"amount":30,"currency":"usd","type":"application_fee","description":"Mova application fee"}],"net":1882}}}

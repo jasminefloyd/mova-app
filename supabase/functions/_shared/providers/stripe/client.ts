@@ -79,6 +79,25 @@ export class StripeTestClient {
     return result.url;
   }
 
+  /**
+   * Task 4.1: Stripe's own processing fee for a direct charge, read from the charge's balance
+   * transaction on the connected account. Returns minor units, or null when Stripe has not settled it yet.
+   */
+  async retrieveProcessorFee(paymentIntentId: string, accountId: string) {
+    if (!/^pi_[A-Za-z0-9_]+$/.test(paymentIntentId) || !/^acct_[A-Za-z0-9]+$/.test(accountId)) throw new Error('STRIPE_FEE_REQUEST_INVALID');
+    const url = `https://api.stripe.com/v1/payment_intents/${encodeURIComponent(paymentIntentId)}?expand[]=latest_charge.balance_transaction`;
+    const response = await this.fetcher(url, { headers: { Authorization: `Bearer ${this.secretKey}`, 'Stripe-Account': accountId } });
+    const result = await response.json().catch(() => null) as StripeResponse | null;
+    if (!response.ok || !result) throw new Error('STRIPE_FEE_READ_FAILED');
+    const charge = result.latest_charge as StripeResponse | null | undefined;
+    const balance = charge && typeof charge === 'object' ? charge.balance_transaction as StripeResponse | null | undefined : null;
+    if (!balance || typeof balance !== 'object') return null;
+    const details = Array.isArray(balance.fee_details) ? balance.fee_details as StripeResponse[] : [];
+    const stripeFee = details.filter((item) => item.type === 'stripe_fee').reduce((sum, item) => sum + (Number.isSafeInteger(item.amount) ? Number(item.amount) : 0), 0);
+    const balanceId = typeof balance.id === 'string' ? balance.id : null;
+    return { feeMinor: details.length ? stripeFee : (Number.isSafeInteger(balance.fee) ? Number(balance.fee) : 0), balanceTransactionId: balanceId };
+  }
+
   async createCheckoutSession(input: StripeCheckoutInput) {
     if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor < 1
       || !Number.isSafeInteger(input.applicationFeeMinor) || input.applicationFeeMinor < 0

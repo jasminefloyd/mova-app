@@ -8,7 +8,7 @@ const callLoader = (authorization?: string) => loader({
 
 describe('job dispatcher cron route', () => {
   beforeEach(() => {
-    vi.stubEnv('CRON_SECRET', 'synthetic-cron');
+    vi.stubEnv('CRON_SECRET', 'synthetic-cron-secret');
     vi.stubEnv('SUPABASE_URL', 'https://project.supabase.invalid/');
     vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'synthetic-service-role');
     vi.stubEnv('MOVA_JOB_DISPATCH_SECRET', 'synthetic-dispatch');
@@ -25,7 +25,7 @@ describe('job dispatcher cron route', () => {
 
   it('TC-NFR-JOB-05 fails closed when worker secrets are missing', async () => {
     vi.stubEnv('MOVA_JOB_WORKER_SECRET', '');
-    const response = await callLoader('Bearer synthetic-cron');
+    const response = await callLoader('Bearer synthetic-cron-secret');
     expect(response.status).toBe(503);
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -34,7 +34,7 @@ describe('job dispatcher cron route', () => {
     vi.mocked(fetch)
       .mockResolvedValueOnce(Response.json({ data: { enqueued: 2 } }))
       .mockResolvedValueOnce(Response.json({ data: { leased: 2, succeeded: 2, retried: 0, dead: 0 } }));
-    const response = await callLoader('Bearer synthetic-cron');
+    const response = await callLoader('Bearer synthetic-cron-secret');
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
       dispatch: { enqueued: 2 }, worker: { leased: 2, succeeded: 2, retried: 0, dead: 0 },
@@ -49,7 +49,7 @@ describe('job dispatcher cron route', () => {
 
   it('TC-NFR-JOB-07 does not invoke the worker when dispatch fails', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(Response.json({ error: 'private upstream detail' }, { status: 503 }));
-    const response = await callLoader('Bearer synthetic-cron');
+    const response = await callLoader('Bearer synthetic-cron-secret');
     expect(response.status).toBe(503);
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(await response.text()).not.toContain('private upstream detail');

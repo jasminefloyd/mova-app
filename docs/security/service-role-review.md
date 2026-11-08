@@ -22,8 +22,11 @@ The service role bypasses RLS. This is a source-level boundary inventory, not a 
 | `forecast-summary` | Requires `artistClient`; forecast query filters by `actor.businessId`. | Missing |
 | `manual-payment-record` | Requires `artistClient`; RPC receives `actor.businessId` and authenticated actor ID. | Missing |
 | `messaging-dispatch` | Requires `artistClient`; consent decision receives `actor.businessId` and client ID. | Missing |
+| `messaging-inbound-sms` | Provider-signature webhook (fake HMAC until O4/O5); business resolved from the stylist's active SMS sending identity in `mova_sms_handle_inbound`; keyword changes apply only to that business. | Missing |
 | `messaging-events` | Provider-signature webhook resolves active sending identities; status events are correlated to provider/message identity. | Missing |
 | `messaging-settings` | Requires `artistClient`; preference/template reads and writes include actor business and user IDs. | Missing |
+| `messaging-status` | Provider delivery receipts: Twilio (`X-Twilio-Signature`, account SID checked) and SendGrid (ECDSA-signed Event Webhook, 10-minute window). Rows matched by provider + message ID or our idempotency key; suppressions written for the message's own business. | Missing |
+| `missed-call-webhook` | Off unless `MOVA_MISSED_CALL_TEXTBACK_ENABLED`; signed webhook; business resolved from the called sending identity in `mova_missed_call_gate`, which applies STOP, quiet hours and a daily limit. | Missing |
 | `money-summary` | Requires `artistClient`; summary RPC receives `actor.businessId`. | Missing |
 | `notification-dispatch` | CRON/worker processes undelivered outbox events across businesses by design; event business IDs scope downstream work. | Missing |
 | `notification-inbox` | Requires `artistClient`; inbox query/update includes `actor.businessId` and `actor.user.id`. | Missing |

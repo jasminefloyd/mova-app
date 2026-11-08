@@ -1,0 +1,3 @@
+{"id":"evt_test_paylink_completed","object":"event","type":"checkout.session.completed","livemode":false,"account":"acct_e4600000fixture","created":1762621200,
+ "data":{"object":{"id":"cs_test_e4600000_paylink","object":"checkout.session","mode":"payment","payment_status":"paid","status":"complete","amount_total":6000,"currency":"usd",
+ "payment_intent":"pi_test_e4600000_paylink","livemode":false}}}

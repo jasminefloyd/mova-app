@@ -1,0 +1,2 @@
+{"id":"evt_test_session_expired","object":"event","type":"checkout.session.expired","livemode":false,"account":"acct_e4600000fixture","created":1762617600,
+ "data":{"object":{"id":"cs_test_e4600000_expired","object":"checkout.session","payment_status":"unpaid","status":"expired","amount_total":2000,"livemode":false}}}
