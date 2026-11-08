@@ -43,7 +43,16 @@ export function ClientProfilePage() {
   const load = useCallback(async () => {
     setLoading(true); setError(false);
     try {
-      const result = await request('customer-profile', { action: 'profile' }) as ClientData | null;
+      let result: ClientData | null;
+      try {
+        result = await request('customer-profile', { action: 'profile' }) as ClientData | null;
+      } catch (profileError) {
+        // Signed in but no client account yet (for example after a sign-in that skipped bootstrap):
+        // create it once and show the empty profile instead of an error (task 2.2). Deleted accounts stay refused.
+        if (!(profileError instanceof Error) || profileError.message !== 'CLIENT_PROFILE_NOT_FOUND') throw profileError;
+        await request('customer-profile', { action: 'bootstrap' });
+        result = await request('customer-profile', { action: 'profile' }) as ClientData | null;
+      }
       if (!result) return;
       setData(result); setName(result.profile.display_name);
       try {
