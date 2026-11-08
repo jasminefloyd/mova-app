@@ -8,9 +8,19 @@ Deno.serve(async (request) => {
   const body = await request.json().catch(() => ({}));
   const db = serviceClient();
   if (body.action === 'get') {
-    const { data, error } = await db.from('mova_payment_method_settings').select('cash_enabled,other_enabled').eq('artist_business_id', actor.businessId).maybeSingle();
-    if (error) return respond({ code: 'PAYMENT_SETTINGS_READ_FAILED' }, 500);
-    return respond(data ?? { cash_enabled: true, other_enabled: true });
+    const [settings, fee, salons] = await Promise.all([
+      db.from('mova_payment_method_settings').select('cash_enabled,other_enabled').eq('artist_business_id', actor.businessId).maybeSingle(),
+      db.from('mova_platform_fee_versions').select('fee_bps').lte('effective_at', new Date().toISOString()).order('version', { ascending: false }).limit(1).maybeSingle(),
+      db.from('mova_locations').select('name').eq('artist_business_id', actor.businessId).eq('payment_collector', 'salon').eq('is_active', true).order('name'),
+    ]);
+    if (settings.error || fee.error || salons.error) return respond({ code: 'PAYMENT_SETTINGS_READ_FAILED' }, 500);
+    return respond({
+      ...(settings.data ?? { cash_enabled: true, other_enabled: true }),
+      // Zelle stays hidden until owner decision A-16 turns it on (migration 0027).
+      zelle_available: false,
+      platform_fee_bps: fee.data?.fee_bps ?? null,
+      salon_locations: (salons.data ?? []).map((row: { name: string }) => row.name),
+    });
   }
   if (body.action !== 'save' || typeof body.cash_enabled !== 'boolean' || typeof body.other_enabled !== 'boolean') {
     return respond({ code: 'INVALID_REQUEST' }, 422);

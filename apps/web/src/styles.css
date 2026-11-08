@@ -845,3 +845,35 @@ select,
 .mova-concierge-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-2)}.mova-concierge-stats .mova-card{display:grid;align-content:start;gap:var(--space-1);padding:var(--space-3)}.mova-concierge-stats strong{font-size:var(--fs-caption);line-height:1.25;overflow-wrap:anywhere}.mova-concierge-stats span{font-size:var(--fs-micro);color:var(--ink-secondary)}
 
 .mova-offline-notice{position:fixed;z-index:30;inset-inline:var(--gutter);top:calc(var(--space-3) + env(safe-area-inset-top));padding:var(--space-3) var(--space-4);border-radius:var(--radius-md, 14px);background:var(--surface-inverse);color:var(--surface-page);font-weight:600;text-align:center}
+
+/* 3.1 / 3.2 How you get paid (canvas 16a, 16b) */
+.mova-payment-settings { display: grid; gap: var(--space-3); padding-bottom: var(--space-8); }
+.mova-payment-settings__head { display: grid; gap: var(--space-1); }
+.mova-payment-settings__head h1 { margin: 0; }
+.mova-payment-settings__head p { margin: 0; color: var(--ink-muted); font-size: var(--fs-body-s); }
+.mova-payment-settings .mova-card { display: grid; gap: var(--space-3); padding: 14px var(--space-4); border-radius: var(--radius-2xl); }
+.mova-payment-settings h2 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-s); font-weight: 700; }
+.mova-payment-settings .mova-card p { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-payment-settings small { color: var(--ink-muted); font-size: var(--fs-micro); }
+.mova-payment-settings__card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.mova-payment-settings__pill { flex: none; border-radius: var(--radius-s); padding: 3px var(--space-2); background: var(--line-subtle); font-size: var(--fs-micro); font-weight: 700; }
+.mova-payment-settings__pill.is-pending { background: var(--status-pending-bg); }
+.mova-payment-settings__pill.is-restricted { background: #F6E3DF; color: var(--danger); }
+.mova-payment-settings__pill.is-active { background: var(--status-confirmed-bg); }
+.mova-payment-settings__test { color: var(--ink-muted); }
+.mova-payment-settings__benefits { display: grid; gap: var(--space-1); margin: 0; padding-left: var(--space-5); font-size: var(--fs-body-s); list-style: disc; }
+.mova-payment-settings__fee, .mova-payment-settings__notice { border-radius: var(--radius-m); padding: 10px var(--space-3); background: var(--surface-page); font-size: var(--fs-caption) !important; }
+.mova-payment-settings__notice { background: var(--status-pending-bg); }
+.mova-payment-settings__notice.is-alert { background: #F6E3DF; }
+.mova-payment-settings__facts { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2) var(--space-3); margin: 0; font-size: var(--fs-body-s); }
+.mova-payment-settings__facts dt { color: var(--ink-muted); }
+.mova-payment-settings__facts dd { margin: 0; font-weight: 700; text-align: end; }
+.mova-payment-settings__links { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: var(--space-2); }
+.mova-payment-settings__links a { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.mova-payment-settings__manual .mova-toggle { display: flex; justify-content: space-between; }
+.mova-payment-settings__manual .mova-toggle small { color: var(--ink-muted); font-size: var(--fs-micro); }
+.mova-payment-settings__salon { display: grid; gap: var(--space-2); border: 1px dashed var(--accent-warm-strong); border-radius: var(--radius-xl); padding: 14px var(--space-4); background: var(--surface-warm); }
+.mova-payment-settings__salon p { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-payment-settings__salon a { color: var(--forest); font-weight: 700; font-size: var(--fs-body-s); }
+.mova-payment-settings__actions { position: sticky; bottom: 0; padding: var(--space-3) 0 var(--space-5); background: var(--surface-page); }
+.mova-payment-settings__actions .mova-button { width: 100%; }
