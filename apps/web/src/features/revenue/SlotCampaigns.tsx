@@ -46,8 +46,8 @@ export function SlotCampaigns() {
     {!outbound && <p className="mova-slots__note">{t('revenue.seat.outboundOff')}</p>}
     {error && <p role="alert">{t('revenue.seat.error')}</p>}
     {campaigns.length > 0 && <div className="mova-revenue-kpis">
+      <Card className="is-highlight"><strong>{money(recovered)}</strong><span>{t('revenue.seat.recovered')}</span></Card>
       {counts.map(([key, value]) => <Card key={key}><strong>{value}</strong><span>{status(key)}</span></Card>)}
-      <Card><strong>{money(recovered)}</strong><span>{t('revenue.seat.recovered')}</span></Card>
     </div>}
     {campaigns.length === 0 ? <EmptyState title={t('revenue.campaignEmpty')} detail={t('revenue.campaignEmptyDetail')} /> : <ul className="mova-slots__list">{campaigns.map((campaign) => {
       const copy = Array.isArray(campaign.mova_slot_campaign_copy) ? campaign.mova_slot_campaign_copy[0] : campaign.mova_slot_campaign_copy;
