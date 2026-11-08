@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Outlet } from 'react-router';
 import { LocaleProvider } from './LocaleProvider';
 import { LocaleSwitcher } from './LocaleSwitcher';
+import { OfflineNotice } from './OfflineNotice';
 import { ServiceWorkerUpdateNotice } from './ServiceWorkerUpdateNotice';
 
 type ShellFrameProps = PropsWithChildren<{
@@ -24,6 +25,7 @@ export function ShellFrame({ queryClient, localeStorageKey, showBrandHeader = tr
         <main>
           {children ?? <Outlet />}
         </main>
+        <OfflineNotice />
         <ServiceWorkerUpdateNotice />
       </LocaleProvider>
     </QueryClientProvider>
