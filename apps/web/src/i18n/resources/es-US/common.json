@@ -1185,7 +1185,7 @@
   "concierge": {
     "title": "Conserjería con IA",
     "subtitle": "Asistente de Ari · IA",
-    "teach": "Enseñar a la conserjería",
+    "teach": "Enséñale",
     "inbox": "Necesita tu atención",
     "handledToday": "Atendidas hoy",
     "bookedForYou": "Citas reservadas",
@@ -1225,7 +1225,7 @@
     "quote": "Solicitud de cotización",
     "reviewQuote": "Revisar cotización",
     "quoteDetailTitle": "Solicitud de cotización",
-    "quoteConversation": "Ver conversación",
+    "quoteConversation": "Ver chat",
     "linkedAppointment": "Ver cita vinculada",
     "quoteClientUnknown": "Cliente",
     "quotePhotosUnavailable": "La solicitud incluye fotos, pero aún no se pueden mostrar aquí.",
