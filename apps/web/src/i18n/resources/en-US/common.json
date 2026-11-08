@@ -1294,7 +1294,7 @@
     "current": "Current plan",
     "perMonth": "/month",
     "perMovaPayment": "per Mova payment",
-    "featuresPlaceholder": "[INCLUDED FEATURES · TO BE FINALIZED]",
+    "featuresPlaceholder": "Pricing details coming soon",
     "choose": "Choose {{plan}}",
     "feeNote": "Percent fees apply only to payments Mova processes. Stripe processing is extra. No Mova fee on cash, other recorded payments, or salon-collected payments.",
     "loading": "Loading plan details…",
