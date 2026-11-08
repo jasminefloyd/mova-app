@@ -11,10 +11,19 @@ export default defineConfig({
     trace: 'retain-on-failure',
     ...devices['Desktop Chrome'],
   },
-  webServer: {
-    command: 'corepack pnpm --filter @mova/web preview',
-    url: 'http://127.0.0.1:4173',
-    reuseExistingServer: false,
-    timeout: 30_000,
-  },
+  webServer: [
+    {
+      command: 'corepack pnpm --filter @mova/web preview',
+      url: 'http://127.0.0.1:4173',
+      reuseExistingServer: false,
+      timeout: 30_000,
+    },
+    {
+      // Answers Edge Function calls made by SSR loaders, which page.route cannot intercept.
+      command: 'node tests/e2e/support/mock-edge.mjs',
+      url: 'http://127.0.0.1:54321/health',
+      reuseExistingServer: false,
+      timeout: 10_000,
+    },
+  ],
 });

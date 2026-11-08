@@ -3,7 +3,8 @@ import { openOperatorPage } from '../e2e/operator-session';
 
 test('component gallery visual baselines at 320, 360, 390 and 430 px', async ({ page }) => {
   await openOperatorPage(page, '/components');
-  await page.evaluate(() => document.fonts.ready);
+  await page.waitForLoadState('networkidle');
+  await expect.poll(() => page.evaluate(() => document.fonts.status).catch(() => 'loading')).toBe('loaded');
   await expect(page.getByRole('heading', { name: 'Color palette' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Typography' })).toBeVisible();
   await expect(page.getByRole('img', { name: 'Icon 30' })).toBeVisible();

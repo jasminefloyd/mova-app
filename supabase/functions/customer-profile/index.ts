@@ -33,7 +33,7 @@ async function provision(db:ReturnType<typeof serviceClient>,user:{id:string;ema
   return account;
 }
 type ExportPage<T>={data:T[]|null;error:{message:string}|null};
-async function allExportPages<T>(load:(from:number,to:number)=>Promise<ExportPage<T>>){
+async function allExportPages<T=Record<string,unknown>>(load:(from:number,to:number)=>PromiseLike<ExportPage<T>>){
   const result:T[]=[];const pageSize=1000;const maxRows=100_000;
   for(let offset=0;offset<maxRows;offset+=pageSize){const page=await load(offset,offset+pageSize-1);if(page.error)throw new Error('CLIENT_EXPORT_FAILED');const rows=page.data??[];result.push(...rows);if(rows.length<pageSize)return result;}
   throw new Error('CLIENT_EXPORT_LIMIT_REACHED');
@@ -71,7 +71,7 @@ Deno.serve(async(request)=>{
         locationIds.length?db.from('mova_locations').select('id,name').in('id',locationIds):Promise.resolve({data:[],error:null}),
         businessIds.length?db.from('mova_client_customer_links').select('artist_business_id,client_id').eq('customer_account_id',account.id).is('unlinked_at',null).in('artist_business_id',businessIds):Promise.resolve({data:[],error:null}),
       ]);
-      const {data:serviceRows,error:serviceError}=appointmentIds.length?await db.from('mova_appointment_services').select('appointment_id,position,service_name_snapshot').in('appointment_id',appointmentIds).order('position'):{data:[],error:null};
+      const {data:serviceRows,error:serviceError}=appointmentIds.length?await db.from('mova_appointment_services').select('appointment_id,position,service_name_snapshot').in('appointment_id',appointmentIds).order('position'):{data:[] as Array<{appointment_id:string;position:number;service_name_snapshot:string}>};
       if(profilesResult.error||locationsResult.error||linksResult.error||serviceError)return respond({code:'CLAIM_LOOKUP_FAILED'},500);
       const profiles=new Map((profilesResult.data??[]).map((item)=>[item.artist_business_id,{name:item.display_name,handle:item.handle}]));
       const locations=new Map((locationsResult.data??[]).map((item)=>[item.id,item.name]));const linkedClients=new Set((linksResult.data??[]).map((item)=>`${item.artist_business_id}:${item.client_id}`));
@@ -115,7 +115,7 @@ Deno.serve(async(request)=>{
         stylists.push({business_id:link.artist_business_id,name:businessName,handle:profile?.handle??'',photo_path:profile?.profile_photo_path??null,consents:{appointment_updates:latest.get('appointment_updates:sms')??false,reminders:latest.get('rebooking_reminders:sms')??false,offers:latest.get('offers:sms')??false}});
         const {data:appointments}=await db.from('mova_appointments').select('id,service_name_snapshot,starts_at,status,location_id,mova_locations(name)').eq('artist_business_id',link.artist_business_id).eq('client_id',link.client_id).in('status',['confirmed','pending_artist','pending_payment']).gt('starts_at',new Date().toISOString()).order('starts_at').limit(10);
         const appointmentIds=(appointments??[]).map((item)=>item.id);
-        const {data:serviceRows}=appointmentIds.length?await db.from('mova_appointment_services').select('appointment_id,position,service_name_snapshot').in('appointment_id',appointmentIds).order('position'):{data:[],error:null};
+        const {data:serviceRows}=appointmentIds.length?await db.from('mova_appointment_services').select('appointment_id,position,service_name_snapshot').in('appointment_id',appointmentIds).order('position'):{data:[] as Array<{appointment_id:string;position:number;service_name_snapshot:string}>};
         const serviceNames=new Map<string,string[]>();for(const item of serviceRows??[])serviceNames.set(item.appointment_id,[...(serviceNames.get(item.appointment_id)??[]),item.service_name_snapshot]);
         for(const item of appointments??[]){const joinedAppointment=item as unknown as {id:string;service_name_snapshot:string;starts_at:string;status:string;mova_locations:{name:string}|null};const names=serviceNames.get(joinedAppointment.id)??[joinedAppointment.service_name_snapshot];upcoming.push({id:joinedAppointment.id,service:names.join(' + '),starts_at:joinedAppointment.starts_at,status:joinedAppointment.status,artist:businessName,handle:profile?.handle??'',location:joinedAppointment.mova_locations?.name??''});}
       }

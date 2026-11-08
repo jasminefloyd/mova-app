@@ -11,7 +11,7 @@ select ok((select relrowsecurity from pg_class where oid='public.mova_calendar_f
 select ok(not has_column_privilege('authenticated','public.mova_google_calendar_connections','refresh_token_encrypted','SELECT'),'refresh token ciphertext is not exposed to authenticated clients');
 select ok(not has_table_privilege('anon','public.mova_calendar_feed_tokens','SELECT'),'anonymous clients cannot read feed-token hashes');
 select col_is_pk('public'::name, 'mova_google_calendar_connections'::name, 'artist_business_id'::name);
-select col_not_null('public','mova_calendar_feed_tokens','token_hash');
+select col_not_null('public'::name, 'mova_calendar_feed_tokens'::name, 'token_hash'::name, 'Feed token hash is required');
 select has_index('public'::name, 'mova_external_calendar_events'::name, 'mova_external_calendar_events_appointment_uq'::name);
 select has_index('public'::name, 'mova_calendar_feed_tokens'::name, 'mova_calendar_feed_tokens_active_uq'::name);
 select has_function('public'::name, 'mova_rotate_calendar_feed_token'::name, array['uuid','text']::name[]);

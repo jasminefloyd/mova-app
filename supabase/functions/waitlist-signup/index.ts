@@ -15,11 +15,12 @@ Deno.serve(async (request) => {
   let input: unknown;
   try { input = JSON.parse(rawBody); } catch { return respond({ code: 'INVALID_REQUEST' }, 422); }
   if (!input || typeof input !== 'object' || Array.isArray(input)) return respond({ code: 'INVALID_REQUEST' }, 422);
-  const email = typeof input.email === 'string' ? input.email.trim() : '';
+  const body = input as Record<string, unknown>;
+  const email = typeof body.email === 'string' ? body.email.trim() : '';
   const emailNormalized = email.toLowerCase();
-  const workArrangement = typeof input.work_arrangement === 'string' ? input.work_arrangement : '';
+  const workArrangement = typeof body.work_arrangement === 'string' ? body.work_arrangement : '';
   if (email.length < 3 || email.length > 254 || !emailPattern.test(emailNormalized)
-    || !workArrangements.has(workArrangement) || typeof input.marketing_opt_in !== 'boolean') {
+    || !workArrangements.has(workArrangement) || typeof body.marketing_opt_in !== 'boolean') {
     return respond({ code: 'INVALID_REQUEST' }, 422);
   }
 
@@ -28,7 +29,7 @@ Deno.serve(async (request) => {
     p_email: email,
     p_email_normalized: emailNormalized,
     p_work_arrangement: workArrangement,
-    p_marketing_opt_in: input.marketing_opt_in,
+    p_marketing_opt_in: body.marketing_opt_in,
   });
   if (error) {
     console.error('waitlist signup persistence failed', { code: error.code });

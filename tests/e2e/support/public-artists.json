@@ -1,0 +1,16 @@
+{
+  "nia-flores": {
+    "profile": { "display_name": "Nia Flores", "handle": "nia-flores", "specialties": ["Color"], "bio": "Color specialist", "preferred_locale": "en-US", "search_index_enabled": true, "photo_urls": {} },
+    "services": [{ "id": "service-color", "name": "Color refresh", "category": "Color", "duration_minutes": 60, "base_price_minor": 9000, "deposit_type": "none", "deposit_value": 0, "location_deposits": [] }],
+    "looks": [],
+    "locations": [{ "id": "location-studio", "name": "Rooted Beauty", "booking_mode": "request", "time_zone": "America/New_York" }],
+    "bookable": true
+  },
+  "deposit-demo": {
+    "profile": { "display_name": "Nia Flores", "handle": "deposit-demo", "specialties": ["Color"], "bio": "Color specialist", "preferred_locale": "en-US", "search_index_enabled": true, "photo_urls": {} },
+    "services": [{ "id": "service-hydration", "name": "Hydration Treatment", "category": "Treatment", "duration_minutes": 45, "base_price_minor": 8500, "deposit_type": "fixed", "deposit_value": 2500, "location_deposits": [{ "location_id": "location-studio", "price_minor": 8500, "duration_minutes": 45, "deposit_amount_minor": 2500 }] }],
+    "looks": [],
+    "locations": [{ "id": "location-studio", "name": "Rooted Beauty Studio", "booking_mode": "instant", "time_zone": "America/New_York" }],
+    "bookable": true
+  }
+}

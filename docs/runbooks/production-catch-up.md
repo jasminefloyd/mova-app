@@ -1,0 +1,56 @@
+# Production catch-up runbook (Phase 1, task 1.10)
+
+Status: **prepared, not applied.** Applying it needs the owner's approval for these exact versions (owner decision O14). Nothing in this file has been run against production.
+
+## Why
+
+According to `docs/engineering/PHASE_STATUS.md`, production received migrations 0030, 0031, 0033, 0035, 0036 and 0037 through the Supabase Management API, while these stayed local only:
+
+| Version | File | What it does | Risk if missing |
+| --- | --- | --- | --- |
+| 0032 | `20261107200000_mova_0032_revoke_anon_tenant_select.sql` | Revokes anonymous SELECT on stylist (tenant) tables | Anonymous users hold table grants; RLS is the only protection left |
+| 0034 | `20261107220000_mova_0034_durable_jobs.sql` | Durable background job queue | Job dispatch and retries cannot run |
+| 0038 | `20261108010000_mova_0038_profile_handle_fix.sql` | Fixes "column reference handle is ambiguous" in profile claim and update | New stylists cannot claim a profile; profile edits fail |
+| 0039 | `20261108011000_mova_0039_deposit_bookings_flag.sql` | Lets availability read the deposit-booking switch | Updated `availability-search` returns 503 until this exists |
+| 0040 | `20261108012000_mova_0040_revoke_unused_write_grants.sql` | Revokes write grants that had no RLS policy | None functionally; grants and policies stay inconsistent |
+
+The production project also holds 83 migration records that are not in this repository. Do not run `supabase db push` against it: it would try to reconcile that history. Apply the files individually as below.
+
+## Order
+
+Apply 0032, 0034, 0038, 0039, 0040 in that order, then deploy the Edge Functions that depend on them (`availability-search`, `concierge-artist`, `customer-profile`, `waitlist-signup`). Deploying `availability-search` before 0039 makes booking return 503.
+
+## Pre-checks (read-only)
+
+```sql
+-- Which of these versions production already has.
+select version, name from supabase_migrations.schema_migrations
+where version in ('20261107200000','20261107220000','20261108010000','20261108011000','20261108012000') order by version;
+-- Anonymous grants that 0032 will remove (expect rows before, none after).
+select table_name, privilege_type from information_schema.role_table_grants
+where grantee = 'anon' and table_schema = 'public' and table_name like 'mova\_%' order by 1, 2;
+-- Objects 0034 creates must not already exist.
+select to_regclass('public.mova_background_jobs'), to_regclass('public.mova_background_job_alerts');
+```
+
+## Apply
+
+For each file, in one transaction: run the file's SQL, then insert its row into `supabase_migrations.schema_migrations` (version, name, statements), exactly as the earlier Management API applications did. Stop at the first error; nothing later runs.
+
+## Verify
+
+```sql
+select count(*) from information_schema.role_table_grants
+where grantee = 'anon' and table_schema = 'public' and table_name like 'mova\_%';           -- expect 0 after 0032
+select public.mova_deposit_bookings_enabled();                                             -- expect false
+select has_function_privilege('anon', 'public.mova_deposit_bookings_enabled()', 'EXECUTE'); -- expect false
+```
+
+Then, on the deployed app: Book (25) shows times for a no-deposit service; a deposit service at a stylist-collected location shows the "can't be booked online yet" message; a test stylist on a non-production project can claim a handle.
+
+## Rollback
+
+- 0032, 0040: re-grant the revoked privileges (each file's `revoke` statements, inverted to `grant`).
+- 0034: drop the objects it created, only if no jobs have been enqueued.
+- 0038: no rollback needed (the previous functions failed on every call).
+- 0039: `drop function public.mova_deposit_bookings_enabled();`, after reverting `availability-search`.
