@@ -4,7 +4,7 @@ Deno.test('TC-SEC-FUZZ-01 artistClient constrains service-role scope to the sele
   const priorUrl = Deno.env.get('SUPABASE_URL');
   const priorKey = Deno.env.get('SUPABASE_ANON_KEY');
   const priorFetch = globalThis.fetch;
-  const userId = 'f4444444-4444-4444-8444-444444444451';
+  const userId = 'f6666666-6666-4666-8666-666666666661';
   const stylistBBusinessId = 'f5555555-5555-4555-8555-555555555551';
   const observed: { membershipUrl: URL | null } = { membershipUrl: null };
   Deno.env.set('SUPABASE_URL', 'http://supabase.local');
@@ -24,7 +24,7 @@ Deno.test('TC-SEC-FUZZ-01 artistClient constrains service-role scope to the sele
   try {
     const actor = await artistClient(new Request('http://local/functions/v1/test', {
       headers: {
-        Authorization: 'Bearer synthetic-customer-token',
+        Authorization: 'Bearer synthetic-stylist-b-token',
         'x-mova-artist-business-id': stylistBBusinessId,
       },
     }));

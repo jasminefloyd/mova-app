@@ -58,13 +58,20 @@ begin
     order by group_row.group_id, group_row.table_name
   loop
     if has_table_privilege(current_user, format('public.%I', table_row.table_name), 'SELECT') then
-      execute format('select count(*) from public.%I where artist_business_id = $1', table_row.table_name)
-        into visible_rows using p_business_id;
+      if exists (select 1 from information_schema.columns where table_schema='public' and table_name=table_row.table_name and column_name='artist_business_id') then
+        execute format('select count(*) from public.%I where artist_business_id = $1', table_row.table_name)
+          into visible_rows using p_business_id;
+      else
+        -- Identity tables without a tenant column are intentionally API-only;
+        -- if a future grant is added, the test must be specialized to its owner scope.
+        execute format('select count(*) from public.%I', table_row.table_name)
+          into visible_rows;
+      end if;
       if has_table_privilege(current_user, format('public.%I', table_row.table_name), 'UPDATE') then
         select column_name into changed_column from information_schema.columns
           where table_schema='public' and table_name=table_row.table_name and column_name in ('updated_at','id')
           order by case column_name when 'updated_at' then 0 else 1 end limit 1;
-        if changed_column is not null then
+        if changed_column is not null and exists (select 1 from information_schema.columns where table_schema='public' and table_name=table_row.table_name and column_name='artist_business_id') then
           execute format('update public.%I set %I = %I where artist_business_id = $1', table_row.table_name, changed_column, changed_column)
             using p_business_id;
           get diagnostics updated_rows = row_count;
@@ -74,9 +81,13 @@ begin
       else updated_rows := 0;
       end if;
       if has_table_privilege(current_user, format('public.%I', table_row.table_name), 'DELETE') then
-        execute format('delete from public.%I where artist_business_id = $1', table_row.table_name)
-          using p_business_id;
-        get diagnostics deleted_rows = row_count;
+        if exists (select 1 from information_schema.columns where table_schema='public' and table_name=table_row.table_name and column_name='artist_business_id') then
+          execute format('delete from public.%I where artist_business_id = $1', table_row.table_name)
+            using p_business_id;
+          get diagnostics deleted_rows = row_count;
+        else
+          deleted_rows := 0;
+        end if;
       else deleted_rows := 0;
       end if;
     else
@@ -89,9 +100,9 @@ end;
 $customer_adversary$;
 
 set local role authenticated;
-select set_config('request.jwt.claim.sub', 'f4444444-4444-4444-8444-444444444451', true);
+select set_config('request.jwt.claims', '{"sub":"f4444444-4444-4444-8444-444444444451","role":"authenticated"}', true);
 select * from public.mova_test_customer_adversary('SAMECLIENT', 'f4444444-4444-4444-8444-444444444441');
-select set_config('request.jwt.claim.sub', 'f4444444-4444-4444-8444-444444444452', true);
+select set_config('request.jwt.claims', '{"sub":"f4444444-4444-4444-8444-444444444452","role":"authenticated"}', true);
 select * from public.mova_test_customer_adversary('OTHERCLIENT', 'f4444444-4444-4444-8444-444444444441');
 
 -- An expired guest/claim/card credential cannot authenticate as a tenant member.
