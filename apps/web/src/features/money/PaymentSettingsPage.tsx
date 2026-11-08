@@ -9,6 +9,7 @@ import { publicEnv, stripeTestModeEnabled } from '../../lib/env';
 type Methods = { cash_enabled: boolean; other_enabled: boolean };
 type Settings = Methods & { zelle_available: boolean; platform_fee_bps: number | null; salon_locations: string[] };
 type StripeConnection = { account_type: string | null; status: string; charges_enabled: boolean; payouts_enabled: boolean; details_submitted: boolean } | null;
+type Payouts = { bank_last4: string | null; bank_name: string | null; interval: 'manual' | 'daily' | 'weekly' | 'monthly' | null; weekly_anchor: string | null; monthly_anchor: number | null } | null;
 export type StripeState = 'not_connected' | 'pending' | 'restricted' | 'active';
 
 const defaults: Settings = { cash_enabled: true, other_enabled: true, zelle_available: false, platform_fee_bps: null, salon_locations: [] };
@@ -27,6 +28,26 @@ export function formatFeePercent(bps: number, locale: string) {
   return new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 2 }).format(bps / 10000);
 }
 
+const titleCase = (value: string) => value.toLocaleLowerCase().replace(/\b\p{L}/gu, (letter) => letter.toLocaleUpperCase());
+
+/** Payout schedule label for board 16b; the schedule is read from Stripe and never edited in Mova. */
+type Translate = (key: string, options?: Record<string, unknown>) => string;
+export function scheduleLabel(payouts: Payouts, t: Translate, locale: string) {
+  switch (payouts?.interval) {
+    case 'daily': return t('money.schedule.daily');
+    case 'manual': return t('money.schedule.manual');
+    case 'monthly': return payouts.monthly_anchor ? t('money.schedule.monthly', { day: payouts.monthly_anchor }) : t('money.managedInStripe');
+    case 'weekly': {
+      const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const index = days.indexOf(payouts.weekly_anchor ?? '');
+      if (index < 0) return t('money.managedInStripe');
+      const day = new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(2023, 0, 1 + index)));
+      return t('money.schedule.weekly', { day });
+    }
+    default: return t('money.managedInStripe');
+  }
+}
+
 export function PaymentSettingsPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -34,6 +55,8 @@ export function PaymentSettingsPage() {
   const [settings, setSettings] = useState<Settings>(defaults);
   const [savedMethods, setSavedMethods] = useState<Methods>(defaults);
   const [connection, setConnection] = useState<StripeConnection>(null);
+  const [payouts, setPayouts] = useState<Payouts>(null);
+  const [dashboardUrl, setDashboardUrl] = useState<string | null>(null);
   const [stripeBusy, setStripeBusy] = useState(false);
   const [stripeError, setStripeError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -64,14 +87,17 @@ export function PaymentSettingsPage() {
   useEffect(() => { void load(); }, [load]);
 
   const loadStripe = useCallback(async () => {
-    if (!stripeTestModeEnabled) return;
     const h = await headers();
     if (!h) return;
     try {
       const response = await fetch(`${publicEnv.VITE_SUPABASE_URL}/functions/v1/stripe-connect-onboard`, { method: 'POST', headers: h, body: JSON.stringify({ action: 'status' }) });
-      const body = await response.json();
+      const body = await response.json().catch(() => null);
+      // While Stripe is switched off for this environment the card stays "Not set up" without an error.
+      if (!response.ok && (body?.data?.code === 'STRIPE_TEST_MODE_DISABLED' || body?.data?.code === 'STRIPE_TEST_CONFIGURATION_MISSING')) return;
       if (!response.ok) throw new Error();
       setConnection(body.data?.connected ?? null);
+      setPayouts(body.data?.payouts ?? null);
+      setDashboardUrl(typeof body.data?.dashboard_url === 'string' && body.data.dashboard_url.startsWith('https://') ? body.data.dashboard_url : null);
     } catch { setStripeError(true); }
   }, [headers]);
   useEffect(() => { void loadStripe(); }, [loadStripe]);
@@ -157,12 +183,13 @@ export function PaymentSettingsPage() {
           {state === 'active' && <>
             <dl className="mova-payment-settings__facts">
               <dt>{t('money.cardPayments')}</dt><dd>{t('money.statusOn')}</dd>
-              <dt>{t('money.payoutsToBank')}</dt><dd>{connection?.payouts_enabled ? t('money.statusOn') : t('money.statusPaused')}</dd>
+              <dt>{t('money.payoutsTo')}</dt><dd data-testid="payout-bank">{!connection?.payouts_enabled ? t('money.statusPaused') : payouts?.bank_last4 ? t('money.bankEnding', { bank: payouts.bank_name ? titleCase(payouts.bank_name) : t('money.bankGeneric'), last4: payouts.bank_last4 }) : t('money.managedInStripe')}</dd>
+              <dt>{t('money.payoutSchedule')}</dt><dd data-testid="payout-schedule">{scheduleLabel(payouts, t as unknown as Translate, i18n.language)}</dd>
             </dl>
             {feeNote(t('money.feeNoteActive'))}
             <div className="mova-payment-settings__links">
               <a className="mova-button mova-button--secondary" href={operatorUrl(businessId, 'money')}>{t('money.seePayouts')}</a>
-              <a className="mova-button mova-button--secondary" href="https://dashboard.stripe.com/test/dashboard" target="_blank" rel="noreferrer">{t('money.openStripe')}</a>
+              {dashboardUrl && <a className="mova-button mova-button--secondary" href={dashboardUrl} target="_blank" rel="noreferrer">{t('money.openStripe')}</a>}
             </div>
             <small>{t('money.stripeManagedNote')}</small>
           </>}

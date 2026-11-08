@@ -784,7 +784,18 @@
     "salonCollectsFor": "{{names}} cobra por ti.",
     "salonCollectsRest": "Registra esas citas como cobradas por el salón. Mova no aplica cargos a pagos registrados o cobrados por salones.",
     "changeInLocations": "Cambiar en Ubicaciones y horarios",
-    "savedShort": "Guardado"
+    "savedShort": "Guardado",
+    "payoutsTo": "Depósitos a",
+    "bankEnding": "{{bank}} •••• {{last4}}",
+    "bankGeneric": "Banco",
+    "payoutSchedule": "Calendario de depósitos",
+    "managedInStripe": "Se administra en Stripe",
+    "schedule": {
+      "daily": "Diario",
+      "weekly": "Semanal, los {{day}}",
+      "monthly": "Mensual, el día {{day}}",
+      "manual": "Cuando lo solicites"
+    }
   },
   "calendarSync": {
     "title": "Sincronización del calendario",

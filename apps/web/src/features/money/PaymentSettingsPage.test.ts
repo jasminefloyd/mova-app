@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatFeePercent, stripeState } from './PaymentSettingsPage';
+import { formatFeePercent, scheduleLabel, stripeState } from './PaymentSettingsPage';
 
 const row = (status: string, charges_enabled = false) => ({ account_type: 'standard', status, charges_enabled, payouts_enabled: false, details_submitted: true });
 
@@ -23,5 +23,19 @@ describe('formatFeePercent', () => {
   it('formats basis points for each locale', () => {
     expect(formatFeePercent(150, 'en-US')).toBe('1.5%');
     expect(formatFeePercent(150, 'es-US')).toMatch(/^1\.5\s?%$/);
+  });
+});
+
+describe('scheduleLabel', () => {
+  const t = (key: string, options?: Record<string, unknown>) => options ? `${key}:${JSON.stringify(options)}` : key;
+  const base = { bank_last4: null, bank_name: null, weekly_anchor: null, monthly_anchor: null };
+  it('names each Stripe interval', () => {
+    expect(scheduleLabel({ ...base, interval: 'daily' }, t, 'en-US')).toBe('money.schedule.daily');
+    expect(scheduleLabel({ ...base, interval: 'weekly', weekly_anchor: 'friday' }, t, 'en-US')).toBe('money.schedule.weekly:{"day":"Friday"}');
+    expect(scheduleLabel({ ...base, interval: 'weekly', weekly_anchor: 'friday' }, t, 'es-US')).toBe('money.schedule.weekly:{"day":"viernes"}');
+    expect(scheduleLabel({ ...base, interval: 'monthly', monthly_anchor: 15 }, t, 'en-US')).toBe('money.schedule.monthly:{"day":15}');
+  });
+  it('falls back to Stripe when nothing is known', () => {
+    expect(scheduleLabel(null, t, 'en-US')).toBe('money.managedInStripe');
   });
 });

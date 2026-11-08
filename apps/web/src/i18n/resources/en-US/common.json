@@ -784,7 +784,18 @@
     "salonCollectsFor": "{{names}} collects for you.",
     "salonCollectsRest": "Record those visits as salon collected. Mova charges no fee on recorded or salon-collected payments.",
     "changeInLocations": "Change in Locations & hours",
-    "savedShort": "Saved"
+    "savedShort": "Saved",
+    "payoutsTo": "Payouts to",
+    "bankEnding": "{{bank}} •••• {{last4}}",
+    "bankGeneric": "Bank",
+    "payoutSchedule": "Payout schedule",
+    "managedInStripe": "Managed in Stripe",
+    "schedule": {
+      "daily": "Daily",
+      "weekly": "Weekly on {{day}}",
+      "monthly": "Monthly on day {{day}}",
+      "manual": "When you request it"
+    }
   },
   "calendarSync": {
     "title": "Calendar sync",
