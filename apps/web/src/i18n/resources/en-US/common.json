@@ -1132,7 +1132,13 @@
       "details": "Details",
       "hide": "Hide details",
       "ends": "Ends 2 hours before the slot if no one books."
-    }
+    },
+    "autopilotSwitch": "Rebooking autopilot",
+    "autopilotSwitchDetail": "Texts clients when they're due to rebook, using your approved messages and these rules.",
+    "textsOffPlatform": "Texts are off until the messaging provider is live. Your settings are saved and take effect then.",
+    "autopilotHow": "Only clients who agreed to reminders, are due to rebook and have nothing booked get a text. Quiet hours are 9 AM–8 PM in the client's time zone. Every decision shows in Activity.",
+    "manualTap": "Win-back messages always require your tap.",
+    "sentStatus": "Sent"
   },
   "marketing": {
     "home": "Mova home",

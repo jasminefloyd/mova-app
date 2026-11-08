@@ -1,6 +1,7 @@
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { smsProviderFromEnv } from '../_shared/providers/sms/index.ts';
 import { sendNextWave } from '../_shared/seat-filler.ts';
+import { growthTextsEnabled, runAutopilot } from '../_shared/autopilot.ts';
 
 const equal = (left: string, right: string) => {
   if (left.length !== right.length) return false;
@@ -34,7 +35,17 @@ Deno.serve(async (request) => {
       const { data: due } = await db.rpc('mova_slot_due_waves', { p_now: new Date().toISOString() });
       for (const slotId of (due ?? []) as string[]) if (await sendNextWave(db, provider, slotId, Deno.env.get('PUBLIC_SITE_URL') ?? 'https://mova-beauty.co')) waves += 1;
     }
-    return respond({ enqueued: data, reminders, seat_filler: { expired: expired ?? 0, waves } });
+    // Task 5.2: rebooking autopilot for stylists with it on (O11 default ON), behind MOVA_REBOOKING_TEXTS_ENABLED.
+    let autopilot = 0;
+    const smsForGrowth = growthTextsEnabled((name) => Deno.env.get(name)) ? smsProviderFromEnv((name) => Deno.env.get(name)) : null;
+    if (smsForGrowth) {
+      const { data: businesses } = await db.from('mova_growth_opportunities').select('artist_business_id').eq('status', 'due').lte('next_due_at', new Date().toISOString()).limit(500);
+      for (const businessId of [...new Set(((businesses ?? []) as Array<{ artist_business_id: string }>).map((row) => row.artist_business_id))].slice(0, 50)) {
+        const result = await runAutopilot(db, smsForGrowth, businessId, Deno.env.get('PUBLIC_SITE_URL') ?? 'https://mova-beauty.co');
+        autopilot += result.sent;
+      }
+    }
+    return respond({ enqueued: data, reminders, seat_filler: { expired: expired ?? 0, waves }, autopilot });
   } catch {
     return respond({ code: 'JOB_DISPATCH_FAILED' }, 503);
   }

@@ -13,8 +13,13 @@ Deno.serve(async(request)=>{
   return error?respond({code:'SLOT_NEEDS_READ_FAILED'},500):respond({slots:data??[]});
  }
  if(body.action==='list'){
-  const {data,error}=await db.from('mova_slot_events').select('id,location_id,starts_at,ends_at,origin,status,expires_at,value_minor,mova_locations(name),mova_slot_candidates(id,status,wave,rank,reasons,claimed_at,mova_clients(display_name)),current_wave,wave_minutes,next_wave_at,filled_at,service_id,mova_services(name,base_price_minor),mova_slot_campaign_copy(sms_example,taken_message,social_caption,approved_at)').eq('artist_business_id',actor.businessId).order('created_at',{ascending:false}).limit(100);
-  return error?respond({code:'SLOT_CAMPAIGNS_READ_FAILED'},500):respond({campaigns:data??[],outboundEnabled:outbound()!==null});
+  const {data,error}=await db.from('mova_slot_events').select('id,location_id,starts_at,ends_at,origin,status,expires_at,value_minor,mova_locations(name),mova_slot_candidates(id,status,wave,rank,reasons,claimed_at,mova_clients(display_name)),current_wave,wave_minutes,next_wave_at,filled_at,service_id,mova_slot_campaign_copy(sms_example,taken_message,social_caption,approved_at)').eq('artist_business_id',actor.businessId).order('created_at',{ascending:false}).limit(100);
+  if(error)return respond({code:'SLOT_CAMPAIGNS_READ_FAILED'},500);
+  // slot_events.service_id (0056) has no foreign key; attach service names here.
+  const ids=[...new Set((data??[]).map((row:{service_id:string|null})=>row.service_id).filter(Boolean))] as string[];
+  const {data:services}=ids.length?await db.from('mova_services').select('id,name,base_price_minor').in('id',ids):{data:[]};
+  const byId=new Map((services??[]).map((row:{id:string})=>[row.id,row]));
+  return respond({campaigns:(data??[]).map((row:{service_id:string|null})=>({...row,mova_services:row.service_id?byId.get(row.service_id)??null:null})),outboundEnabled:outbound()!==null});
  }
  if(body.action==='approve'||body.action==='send-next-wave'){
   if(typeof body.slot_event_id!=='string')return respond({code:'INVALID_SLOT'},422);

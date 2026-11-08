@@ -1132,7 +1132,13 @@
       "details": "Detalles",
       "hide": "Ocultar detalles",
       "ends": "Termina 2 horas antes del espacio si nadie reserva."
-    }
+    },
+    "autopilotSwitch": "Piloto automático de reservas",
+    "autopilotSwitchDetail": "Envía mensajes a tus clientes cuando les toca volver, con tus mensajes aprobados y estas reglas.",
+    "textsOffPlatform": "Los mensajes están apagados hasta que el proveedor de mensajes esté activo. Tu configuración se guarda y se aplica entonces.",
+    "autopilotHow": "Solo reciben mensaje los clientes que aceptaron recordatorios, a quienes les toca volver y que no tienen cita. El horario permitido es de 9 a. m. a 8 p. m. en la zona horaria del cliente. Cada decisión aparece en Actividad.",
+    "manualTap": "Los mensajes para recuperar clientes siempre requieren que los envíes tú.",
+    "sentStatus": "Enviado"
   },
   "marketing": {
     "home": "Inicio de Mova",
