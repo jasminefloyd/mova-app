@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, visual-baselines-tmp2]
+    branches: [main, visual-baselines-tmp3]
 
 permissions:
   contents: write
@@ -80,7 +80,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add tests/visual/design-system.spec.ts-snapshots
           git commit -m "TEMP: baselines regenerated in CI" || echo "no changes"
-          git push origin HEAD:visual-baselines-tmp2
+          git push origin HEAD:visual-baselines-tmp3
       - run: pnpm phase:verify
       - run: pnpm phase:p01:verify
       - run: pnpm phase:p02:verify
