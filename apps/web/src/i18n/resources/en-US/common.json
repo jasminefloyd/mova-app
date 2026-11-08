@@ -947,7 +947,11 @@
     "saveArtistCard": "Save {{name}}’s card to your phone",
     "saveArtistCardDetail": "Rebook in one tap, wherever {{name}} is working.",
     "walletHomeScreenFallback": "Add this page to your home screen to keep it close.",
-    "deleteCodeSent": "Enter the six-digit code sent to your verified contact."
+    "deleteCodeSent": "Enter the six-digit code sent to your verified contact.",
+    "wallet": {
+      "apple": "Add to Apple Wallet",
+      "google": "Save to Google Wallet"
+    }
   },
   "messaging": {
     "settingsTitle": "Language & notifications",

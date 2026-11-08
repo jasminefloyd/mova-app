@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, ErrorState, Sheet, TextField, Toggle } from '../../components';
 import { createMovaSupabaseClient } from '../../lib/supabase';
-import { clientProfilesEnabled, publicEnv } from '../../lib/env';
+import { clientProfilesEnabled, publicEnv, walletClientCardEnabled } from '../../lib/env';
 import { QrCode } from './QrCode';
 
 type Stylist = { business_id: string; name: string; handle: string; consents: { appointment_updates: boolean; reminders: boolean; offers: boolean } };
@@ -145,6 +145,20 @@ export function ClientProfilePage() {
       else { const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = file.name; link.click(); URL.revokeObjectURL(link.href); }
     } catch { setError(true); }
   };
+  // Task 5.7: save the client card to a wallet app (flag VITE_WALLET_CLIENT_CARD_ENABLED, default off).
+  const addToWallet = async (platform: 'apple' | 'google') => {
+    const current = data?.stylists.find((item) => item.handle === data.upcoming[0]?.handle) ?? data?.stylists[0];
+    const selectedStylistId = current?.business_id;
+    if (!selectedStylistId) return;
+    setBusy(true);
+    try {
+      const result = await request('wallet-pass-create', { artist_business_id: selectedStylistId, platform }) as { pass_base64?: string; content_type?: string; file_name?: string } | null;
+      if (!result?.pass_base64) throw new Error('WALLET_PASS_FAILED');
+      const bytes = Uint8Array.from(atob(result.pass_base64), (char) => char.charCodeAt(0));
+      const blob = new Blob([bytes], { type: result.content_type ?? 'application/octet-stream' });
+      const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = result.file_name ?? 'mova-client-card'; link.click(); URL.revokeObjectURL(link.href);
+    } catch { setError(true); } finally { setBusy(false); }
+  };
   const exportData = async () => {
     setBusy(true);
     try {
@@ -170,7 +184,8 @@ export function ClientProfilePage() {
       <div className="mova-client-profile__card-qr" aria-label={t('identity.clientCardQr')}>
         {cardUrl ? <><QrCode value={cardUrl} label={t('identity.clientCardQr')} size={160} className="mova-client-profile__qr"/><small>{t('identity.rebookCheckIn')}</small></> : <span>{t('identity.clientCardUnavailable')}</span>}
       </div>
-      <div className="mova-client-profile__card-actions"><Button type="button" variant="secondary" disabled={!cardUrl} onClick={() => void saveCardImage()}>{t('identity.saveImage')}</Button></div>
+      <div className="mova-client-profile__card-actions"><Button type="button" variant="secondary" disabled={!cardUrl} onClick={() => void saveCardImage()}>{t('identity.saveImage')}</Button>
+        {walletClientCardEnabled && (['apple', 'google'] as const).map((platform) => <Button key={platform} type="button" variant="secondary" disabled={!cardUrl || busy} onClick={() => void addToWallet(platform)}>{t(`identity.wallet.${platform}`)}</Button>)}</div>
     </Card>}
     {next && <section className="mova-client-profile__section"><h2>{t('identity.upcoming')}</h2><Card className="mova-client-profile__row"><strong>{next.service} · {next.artist}</strong><span>{nextDate} · {next.location}</span><span className="mova-client-profile__status">{t(`booking.status.${next.status}`, { defaultValue: next.status })}</span></Card></section>}
     {claimOptions.length > 0 && <section className="mova-client-profile__section"><h2>{t('identity.claimPastBookings')}</h2>{claimOptions.map((claim) => <Card className="mova-client-profile__claim" key={claim.appointment_id}><strong>{claim.service} · {claim.artist}</strong><span>{new Intl.DateTimeFormat(i18n.resolvedLanguage, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(claim.starts_at))} · {claim.location}</span><Button type="button" variant="secondary" disabled={busy} loading={busy} onClick={() => void claimBooking(claim.appointment_id)}>{t('identity.claimBooking')}</Button></Card>)}</section>}

@@ -947,7 +947,11 @@
     "saveArtistCard": "Guarda la tarjeta de {{name}} en tu teléfono",
     "saveArtistCardDetail": "Vuelve a reservar con un toque, dondequiera que trabaje {{name}}.",
     "walletHomeScreenFallback": "Agrega esta página a la pantalla de inicio para tenerla a mano.",
-    "deleteCodeSent": "Ingresa el código de seis dígitos enviado a tu contacto verificado."
+    "deleteCodeSent": "Ingresa el código de seis dígitos enviado a tu contacto verificado.",
+    "wallet": {
+      "apple": "Agregar a Apple Wallet",
+      "google": "Guardar en Google Wallet"
+    }
   },
   "messaging": {
     "settingsTitle": "Idioma y notificaciones",
