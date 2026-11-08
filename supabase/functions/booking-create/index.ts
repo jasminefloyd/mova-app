@@ -1,5 +1,6 @@
 import { corsHeaders, respond, serviceClient, tokenHash } from '../_shared/booking.ts';
 import { normalizeBookingConsentChoices } from '../_shared/booking-consent.ts';
+import { checkCaptcha } from '../_shared/captcha.ts';
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok',{headers:corsHeaders});
@@ -11,6 +12,8 @@ Deno.serve(async (request) => {
   if (body.client_note != null && (typeof body.client_note !== 'string' || body.client_note.trim().length > 1000)) return respond({code:'INVALID_CLIENT_NOTE'},422);
   if (body.portfolio_item_id != null && (typeof body.portfolio_item_id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.portfolio_item_id))) return respond({code:'INVALID_PORTFOLIO_LOOK'},422);
   if (!body.client_email && !body.client_phone) return respond({code:'CONTACT_REQUIRED'},422);
+  const captcha = await checkCaptcha(body.captcha_token, (name) => Deno.env.get(name));
+  if (!captcha.ok) return respond({ code: captcha.code }, captcha.status);
   const consentChoices=normalizeBookingConsentChoices(body.consents);
   if(!consentChoices)return respond({code:'BOOKING_CONSENTS_INVALID'},422);
   try {

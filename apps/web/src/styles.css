@@ -1030,3 +1030,6 @@ select,
 .mova-claim__taken, .mova-claim__done { display: grid; gap: var(--space-3); }
 .mova-claim__taken p, .mova-claim__done p { margin: 0; }
 .mova-claim__taken .mova-button { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+
+/* O1 hCaptcha: the widget is 303 px wide; keep it inside 320 px screens. */
+.mova-hcaptcha { min-height: 78px; max-width: 100%; overflow: hidden; }

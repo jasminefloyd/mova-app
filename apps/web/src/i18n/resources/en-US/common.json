@@ -1178,7 +1178,9 @@
     "submitError": "We couldn't save your information. Please try again.",
     "waitlistClosedTitle": "Early access registration isn't open yet.",
     "waitlistClosedBody": "Check back soon for updates.",
-    "copyright": "© {{year}} Mova"
+    "copyright": "© {{year}} Mova",
+    "captchaRequired": "Complete the spam check before you join.",
+    "captchaUnavailable": "The spam check didn't load. Refresh the page and try again."
   },
   "concierge": {
     "title": "AI Concierge",
