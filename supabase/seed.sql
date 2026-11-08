@@ -52,12 +52,13 @@ begin
 
   insert into public.mova_artist_profiles (
     id, artist_business_id, display_name, handle, specialties, bio,
-    preferred_locale, is_published, search_index_enabled
+    preferred_locale, is_published, published_at, search_index_enabled
   ) values (
     'e2500000-0000-4000-8000-000000000002', business_id, 'Rooted Beauty',
     'rooted-beauty', array['Natural hair', 'Protective styling'],
     'Demo profile for internal product evaluation. All client records and appointments are fictional.',
-    'en-US', false, false
+    -- Published so local and CI E2E runs can reach the public pages (task 2.8); search indexing stays off.
+    'en-US', true, now(), false
   ) on conflict (artist_business_id) do nothing;
 
   insert into public.mova_onboarding_progress (
