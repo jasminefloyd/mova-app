@@ -29,6 +29,12 @@ You are implementing **Mova**, a mobile-first web app (PWA) that gives independe
 9. Re-run all previously accepted critical-path tests at every phase.
 10. **Match the design canvas.** If a screen needs a design listed in `docs/design/SCREEN_MAP.md` → "Screens with no artboard yet", stop and request it.
 
+## Testing and production stop rules (Nov 8 checklist)
+- Run `pnpm db:test` and `pnpm fn:check` before committing any migration, SQL test or Edge Function change (see `docs/operations/environments.md`). If you cannot run them, report the change as unverified; it is not done.
+- Never test against production: no fixture writes, no rollback-only assertions, no "read-only" probes that create rows. Use a local or development database.
+- Stop and ask before: any production write (migrations, data, settings, deploys, Auth, secrets); anything that moves real money or messages a real person; work that needs an open owner decision; editing an applied migration, deleting data or force-pushing; changes to scope, price, legal or consent copy, or the brand; spending on a new service.
+- Inside a pre-approved phase, decide everything else yourself, finish the phase, post the phase summary, and wait for the go-ahead before the next phase.
+
 ## Design rules (from docs/design/README.md)
 - Build the components in `docs/design/COMPONENTS.md` first (P02). Screens are composed **only** from `apps/web/src/components/` and styled **only** with tokens from `packages/design-tokens` (source: `docs/design/tokens/tokens.json`). No raw hex values in feature code.
 - Use `docs/design/screens/png/*.png` as the visual target. `screens/html/` is a reference for spacing and copy and must **never be copied** into the app.
