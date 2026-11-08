@@ -1294,7 +1294,7 @@
     "current": "Plan actual",
     "perMonth": "/mes",
     "perMovaPayment": "por pago de Mova",
-    "featuresPlaceholder": "[FUNCIONES INCLUIDAS · POR DEFINIR]",
+    "featuresPlaceholder": "Detalles de precios próximamente",
     "choose": "Elegir {{plan}}",
     "feeNote": "Las tarifas porcentuales solo aplican a pagos procesados por Mova. El procesamiento de Stripe se cobra aparte. No hay tarifa de Mova para efectivo, otros pagos registrados o pagos cobrados por el salón.",
     "loading": "Cargando detalles del plan…",
