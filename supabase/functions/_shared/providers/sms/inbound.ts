@@ -1,6 +1,7 @@
 import type { SmsDb } from './send.ts';
 import type { SmsInbound, SmsProvider } from './types.ts';
 import { keywordReply, parseKeyword, type SmsKeyword } from './policy.ts';
+import { reserveSpend } from '../spend.ts';
 
 export type InboundOutcome = { keyword: SmsKeyword | null; businesses: number; replies: number };
 
@@ -27,8 +28,15 @@ export async function handleInboundSms(db: SmsDb, provider: SmsProvider, inbound
         purpose: `keyword_${keyword}`, origin: 'transactional', body, provider: provider.name, status: 'queued', idempotency_key: key,
       }).select('id').single();
       if (insertError || !row) continue;
+      const replyInput = { to: inbound.from, from: inbound.to, body, idempotencyKey: key };
+      // The keyword itself is always recorded (above); only the confirmation text is subject to the cap.
+      const spend = await reserveSpend(db, row.id, provider.estimateCostMicros?.(replyInput) ?? 0, now);
+      if (!spend.allowed) {
+        if (spend.reason !== 'spend_cap_reached') await db.from('mova_messages').update({ status: 'failed', error_code: 'SPEND_CHECK_UNAVAILABLE' }).eq('id', row.id);
+        continue;
+      }
       try {
-        const sent = await provider.send({ to: inbound.from, from: inbound.to, body, idempotencyKey: key });
+        const sent = await provider.send(replyInput);
         await db.from('mova_messages').update({ status: 'sent', provider_message_id: sent.providerMessageId, sent_at: now.toISOString() }).eq('id', row.id);
         replies += 1;
       } catch {

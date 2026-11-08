@@ -1,7 +1,11 @@
 # Email provider adapter (task 4.3)
 
-Import from `_shared/providers/email/index.ts`. Nothing here sends a real email: the only provider is
-`FakeEmailProvider`. The vendor waits on owner decision O4.
+Import from `_shared/providers/email/index.ts`. Providers: `FakeEmailProvider` (never sends) and
+`SendGridEmailProvider` (owner decision O4, Nov 8). SendGrid stays unwired unless explicitly switched live:
+`MOVA_EMAIL_PROVIDER=sendgrid`, `MOVA_MESSAGING_LIVE_EMAIL=true`, `SENDGRID_API_KEY`, `MOVA_EMAIL_FROM` (a verified
+sender); optional `MOVA_SENDGRID_SANDBOX=true` (validate without delivering) and `MOVA_EMAIL_COST_MICROS` (estimate
+for the shared $50/month cap, default 1000). Click and open tracking are off. Bounces and spam reports arrive at
+`messaging-status?provider=sendgrid` (signed Event Webhook, `SENDGRID_WEBHOOK_PUBLIC_KEY`) and add suppressions.
 
 ## Interface (`types.ts`)
 
@@ -24,7 +28,8 @@ All variables are HTML-escaped.
 ## Sending: always through `sendEmail(db, provider, input)`
 
 Checks `mova_email_send_gate` (migration 0043: bounce, complaint and manual suppressions), writes a
-`mova_messages` row (channel `email`, unique idempotency key, rendered subject and text in `body`), then calls
+`mova_messages` row, reserves the estimated cost against the shared monthly cap (0047; at the cap the result is
+`suppressed` / `spend_cap_reached`), (channel `email`, unique idempotency key, rendered subject and text in `body`), then calls
 the provider and records the outcome. Outcomes: `sent | suppressed | duplicate | failed`.
 
 Appointment emails are wired in `_shared/appointment-emails.ts`: outbox events `appointment.confirmed`

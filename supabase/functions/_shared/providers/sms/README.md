@@ -1,7 +1,8 @@
 # SMS provider adapter (task 4.4)
 
-Import from `_shared/providers/sms/index.ts`. Nothing here reaches a real phone: the only
-provider is `FakeSmsProvider`. The real vendor waits on owner decisions O4 and O5.
+Import from `_shared/providers/sms/index.ts`. Providers: `FakeSmsProvider` (never reaches a phone) and
+`TwilioSmsProvider` (owner decision O4, Nov 8). Twilio stays unwired unless explicitly switched live (below);
+no live keys exist and it is tested only against a fake fetcher.
 
 ## Interface (`types.ts`)
 
@@ -35,10 +36,20 @@ Outcomes: `sent | suppressed (reason) | duplicate | failed (error)`.
 `mova_sms_handle_inbound`: STOP (and STOPALL, UNSUBSCRIBE, CANCEL, END, QUIT, PARAR, ALTO, BAJA…) adds a
 suppression and a revoked SMS consent row per purpose; START removes the suppression but does not re-grant
 consent; HELP/AYUDA only replies. Confirmation replies (`keywordReply`) are the only texts sent without
-consent. Their wording is a draft: the final STOP/HELP copy is part of sender registration (O4/O5).
+consent. Their wording is a draft: the final STOP/HELP copy is part of Twilio sender (A2P 10DLC) registration.
+
+## Spend cap (O4)
+
+Every send reserves `provider.estimateCostMicros(input)` with `mova_messaging_reserve_spend` (migration 0047)
+after the row is queued and before the provider is called. One hard-stop cap of $50 per UTC calendar month is
+shared by SMS and email (`mova.messaging_spend_cap_micros`, default 50000000). At the cap the message is recorded
+as `suppressed` / `spend_cap_reached` and nothing is sent. Twilio's estimate is segments × `MOVA_SMS_SEGMENT_COST_MICROS`
+(default 8300 = $0.0083); real prices from status callbacks (`messaging-status?provider=twilio`) replace it.
 
 ## Choosing a provider
 
-`smsProviderFromEnv(Deno.env.get)` returns the fake when `MOVA_SMS_PROVIDER=fake`, otherwise `null`
-(callers answer `PROVIDER_NOT_CONFIGURED`). The fake's inbound webhook expects JSON `{from,to,text,id}`
+`smsProviderFromEnv(Deno.env.get)` returns the fake when `MOVA_SMS_PROVIDER=fake`; Twilio only when
+`MOVA_SMS_PROVIDER=twilio`, `MOVA_MESSAGING_LIVE_SMS=true`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and
+`MOVA_TWILIO_WEBHOOK_URL` (the exact URL used in Twilio's request signature) are all set; otherwise `null`
+(callers answer `PROVIDER_NOT_CONFIGURED`). Optional: `MOVA_TWILIO_STATUS_CALLBACK_URL`. The fake's inbound webhook expects JSON `{from,to,text,id}`
 signed with HMAC-SHA256 (hex) in `x-mova-fake-sms-signature` using `MOVA_SMS_FAKE_WEBHOOK_SECRET`.

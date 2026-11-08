@@ -2,3 +2,4 @@ export type { EmailLocale, EmailProvider, EmailSendInput, EmailSendResult, Email
 export { FakeEmailProvider } from './fake.ts';
 export { EMAIL_TEMPLATES, formatWhen, renderEmail, type AppointmentEmailVars } from './templates.ts';
 export { emailProviderFromEnv, sendEmail, type EmailDb, type SendEmailInput, type SendEmailOutcome } from './send.ts';
+export { SendGridEmailProvider, type SendGridConfig } from './sendgrid.ts';

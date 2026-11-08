@@ -1,6 +1,7 @@
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { fakeSignature, smsProviderFromEnv } from '../_shared/providers/sms/index.ts';
 import { missedCallText } from './copy.ts';
+import { reserveSpend, type SpendDb } from '../_shared/providers/spend.ts';
 
 // Task 4.4: missed-call text-back. Off unless MOVA_MISSED_CALL_TEXTBACK_ENABLED=true and the stylist
 // turned on the concierge missed_call channel. mova_missed_call_gate (0042) applies STOP, quiet hours and
@@ -33,8 +34,15 @@ Deno.serve(async (request) => {
       direction: 'outbound', channel: 'sms', purpose: 'missed_call_textback', origin: 'concierge', body: text, provider: provider.name, status: 'queued', idempotency_key: key,
     }).select('id').single();
     if (insertError || !row) { results.push({ artist_business_id: business.artist_business_id, status: 'duplicate' }); continue; }
+    const sendInput = { to: business.to, from: business.from, body: text, idempotencyKey: key };
+    const spend = await reserveSpend(db as unknown as SpendDb, row.id, provider.estimateCostMicros?.(sendInput) ?? 0, now);
+    if (!spend.allowed) {
+      if (spend.reason !== 'spend_cap_reached') await db.from('mova_messages').update({ status: 'failed', error_code: 'SPEND_CHECK_UNAVAILABLE' }).eq('id', row.id);
+      results.push({ artist_business_id: business.artist_business_id, status: spend.reason ?? 'SPEND_CHECK_UNAVAILABLE' });
+      continue;
+    }
     try {
-      const sent = await provider.send({ to: business.to, from: business.from, body: text, idempotencyKey: key });
+      const sent = await provider.send(sendInput);
       await db.from('mova_messages').update({ status: 'sent', provider_message_id: sent.providerMessageId, sent_at: now.toISOString() }).eq('id', row.id);
       results.push({ artist_business_id: business.artist_business_id, status: 'sent' });
     } catch {

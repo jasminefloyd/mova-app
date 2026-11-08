@@ -21,6 +21,8 @@ export interface SmsProvider {
   /** True only for providers that reach real phones. The fake returns false. */
   readonly live: boolean;
   send(input: SmsSendInput): Promise<SmsSendResult>;
+  /** Estimated cost in micro-dollars, reserved against the shared monthly cap before sending (0047). */
+  estimateCostMicros?(input: SmsSendInput): number;
   /** Verifies and parses an inbound webhook; returns null when the signature or payload is invalid. */
   parseInbound(request: Request): Promise<SmsInbound | null>;
 }

@@ -10,6 +10,11 @@ export class FakeEmailProvider implements EmailProvider {
   readonly outbox: (EmailSendInput & { providerMessageId: string })[] = [];
   private failNext = false;
 
+  /** costMicros lets tests exercise the spend cap; the fake costs nothing by default. */
+  constructor(private readonly costMicros = 0) {}
+
+  estimateCostMicros() { return this.costMicros; }
+
   failOnce() { this.failNext = true; }
 
   send(input: EmailSendInput): Promise<EmailSendResult> {

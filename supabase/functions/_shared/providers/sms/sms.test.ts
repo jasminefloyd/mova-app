@@ -3,13 +3,16 @@ import { FakeSmsProvider, fakeSignature } from './fake.ts';
 import { handleInboundSms } from './inbound.ts';
 import { isQuietHours, keywordReply, parseKeyword, toE164, underDailyCap } from './policy.ts';
 import { sendSms, smsProviderFromEnv, type SmsDb } from './send.ts';
+import { TwilioSmsProvider, twilioSignature } from './twilio.ts';
+import { smsSegments } from '../spend.ts';
+import { vi } from 'vitest';
 
 type Row = Record<string, unknown> & { id: string };
-function stubDb(gate: Record<string, unknown> | null, inbound: Record<string, unknown> | null = null) {
+function stubDb(gate: Record<string, unknown> | null, inbound: Record<string, unknown> | null = null, capped = false) {
   const rows: Row[] = [];
   const calls: { name: string; args: Record<string, unknown> }[] = [];
   const db: SmsDb = {
-    rpc: async (name, args) => { calls.push({ name, args }); return name === 'mova_sms_send_gate' ? { data: gate, error: null } : { data: inbound, error: null }; },
+    rpc: async (name, args) => { calls.push({ name, args }); if (name === 'mova_messaging_reserve_spend') { if (capped) { const row = rows.find((r) => r.id === args.p_message_id); if (row) Object.assign(row, { status: 'suppressed', error_code: 'spend_cap_reached' }); } return { data: { allowed: !capped }, error: null }; } return name === 'mova_sms_send_gate' ? { data: gate, error: null } : { data: inbound, error: null }; },
     from: () => ({
       insert: (row) => ({ select: () => ({ single: async () => {
         if (rows.some((existing) => existing.idempotency_key === row.idempotency_key && existing.artist_business_id === row.artist_business_id)) return { data: null, error: { message: 'duplicate key value (23505)' } };
@@ -115,5 +118,61 @@ describe('inbound texts (task 4.4)', () => {
     const fake = new FakeSmsProvider();
     expect(await handleInboundSms(db, fake, { from: '+15551230001', to: '+15559990000', text: 'Running 5 min late', providerMessageId: null })).toEqual({ keyword: null, businesses: 1, replies: 0 });
     expect(fake.outbox).toHaveLength(0);
+  });
+});
+
+describe('O4 spend cap and Twilio (Nov 8)', () => {
+  it('pauses sending at the shared monthly cap without calling the provider', async () => {
+    const { db, rows, calls } = stubDb(allowed, null, true);
+    const fake = new FakeSmsProvider(null, 8300);
+    expect(await sendSms(db, fake, input)).toMatchObject({ status: 'suppressed', reason: 'spend_cap_reached' });
+    expect(fake.outbox).toHaveLength(0);
+    expect(calls.find((c) => c.name === 'mova_messaging_reserve_spend')?.args).toMatchObject({ p_cost_micros: 8300 });
+    expect(rows[0]).toMatchObject({ status: 'suppressed', error_code: 'spend_cap_reached' });
+  });
+  it('reserves the estimated cost before every send', async () => {
+    const { db, calls } = stubDb(allowed);
+    await sendSms(db, new FakeSmsProvider(null, 8300), input);
+    expect(calls.map((c) => c.name)).toEqual(['mova_sms_send_gate', 'mova_messaging_reserve_spend']);
+  });
+  it('counts SMS segments for the estimate', () => {
+    expect(smsSegments('a'.repeat(160))).toBe(1);
+    expect(smsSegments('a'.repeat(161))).toBe(2);
+    expect(smsSegments('ñ'.repeat(70))).toBe(1);
+    expect(smsSegments('💇'.repeat(35))).toBe(1);
+    expect(smsSegments('💇'.repeat(36))).toBe(2);
+  });
+  const config = { accountSid: 'AC' + '0'.repeat(32), authToken: 'twilio-test-token-0000', webhookUrl: 'https://project.supabase.invalid/functions/v1/messaging-inbound-sms' };
+  it('Twilio sends with basic auth and form fields, through a fake fetcher', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ sid: 'SM' + 'a'.repeat(32), status: 'queued' }, { status: 201 }));
+    const twilio = new TwilioSmsProvider(config, fetcher);
+    expect(await twilio.send({ to: '+15551230001', from: '+15559990000', body: 'Hi', idempotencyKey: 'k1' })).toEqual({ providerMessageId: 'SM' + 'a'.repeat(32), status: 'queued' });
+    const [url, init] = fetcher.mock.calls[0]!;
+    expect(String(url)).toBe(`https://api.twilio.com/2010-04-01/Accounts/${config.accountSid}/Messages.json`);
+    expect((init?.headers as Record<string, string>).Authorization).toBe(`Basic ${btoa(`${config.accountSid}:${config.authToken}`)}`);
+    expect(Object.fromEntries(new URLSearchParams(String(init?.body)))).toEqual({ To: '+15551230001', From: '+15559990000', Body: 'Hi' });
+    expect(twilio.estimateCostMicros({ to: '', from: '', body: 'a'.repeat(200), idempotencyKey: '' })).toBe(16600);
+  });
+  it('Twilio errors and bad numbers throw', async () => {
+    const twilio = new TwilioSmsProvider(config, vi.fn<typeof fetch>().mockResolvedValue(Response.json({ code: 21610, message: 'unsubscribed' }, { status: 400 })));
+    await expect(twilio.send({ to: '+15551230001', from: '+15559990000', body: 'Hi', idempotencyKey: 'k' })).rejects.toThrow('TWILIO_SEND_FAILED_21610');
+    await expect(twilio.send({ to: '555', from: '+15559990000', body: 'Hi', idempotencyKey: 'k' })).rejects.toThrow('TWILIO_NUMBER_INVALID');
+  });
+  it('Twilio inbound requires a valid X-Twilio-Signature and our account', async () => {
+    const twilio = new TwilioSmsProvider(config);
+    const params = { AccountSid: config.accountSid, From: '+15551230001', To: '+15559990000', Body: 'STOP', MessageSid: 'SM' + 'b'.repeat(32) };
+    const body = new URLSearchParams(params).toString();
+    const signature = await twilioSignature(config.authToken, config.webhookUrl, params);
+    expect(await twilio.parseInbound(new Request(config.webhookUrl, { method: 'POST', body, headers: { 'x-twilio-signature': signature } })))
+      .toEqual({ from: '+15551230001', to: '+15559990000', text: 'STOP', providerMessageId: params.MessageSid });
+    expect(await twilio.parseInbound(new Request(config.webhookUrl, { method: 'POST', body: body.replace('STOP', 'START'), headers: { 'x-twilio-signature': signature } }))).toBeNull();
+  });
+  it('Twilio is wired only with the live switch and complete configuration', () => {
+    const env = (values: Record<string, string>) => (name: string) => values[name];
+    const full = { MOVA_SMS_PROVIDER: 'twilio', TWILIO_ACCOUNT_SID: config.accountSid, TWILIO_AUTH_TOKEN: config.authToken, MOVA_TWILIO_WEBHOOK_URL: config.webhookUrl };
+    expect(smsProviderFromEnv(env(full))).toBeNull();
+    expect(smsProviderFromEnv(env({ ...full, MOVA_MESSAGING_LIVE_SMS: 'true' }))?.name).toBe('twilio');
+    expect(smsProviderFromEnv(env({ ...full, MOVA_MESSAGING_LIVE_SMS: 'true', TWILIO_AUTH_TOKEN: '' }))).toBeNull();
+    expect(smsProviderFromEnv(env({ ...full, MOVA_MESSAGING_LIVE_SMS: 'true', TWILIO_ACCOUNT_SID: 'bad' }))).toBeNull();
   });
 });
