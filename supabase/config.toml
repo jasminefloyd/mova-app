@@ -127,6 +127,9 @@ verify_jwt = false
 [functions.missed-call-webhook]
 verify_jwt = false
 
+[functions.messaging-status]
+verify_jwt = false
+
 [functions.messaging-events]
 verify_jwt = false
 

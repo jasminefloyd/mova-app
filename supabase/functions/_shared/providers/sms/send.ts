@@ -1,5 +1,7 @@
 import type { SmsProvider } from './types.ts';
 import { FakeSmsProvider } from './fake.ts';
+import { reserveSpend } from '../spend.ts';
+import { TwilioSmsProvider } from './twilio.ts';
 
 // Minimal shape of the Supabase client used here, so tests can pass a stub.
 type Result<T> = Promise<{ data: T | null; error: { message: string } | null }>;
@@ -59,8 +61,15 @@ export async function sendSms(db: SmsDb, provider: SmsProvider, input: SendSmsIn
   const { data: row, error: insertError } = await db.from('mova_messages').insert({ ...base, status: 'queued' }).select('id').single();
   if (insertError && /duplicate|23505/i.test(insertError.message)) return { status: 'duplicate' };
   if (insertError || !row) return { status: 'failed', messageId: null, error: 'MESSAGE_SAVE_FAILED' };
+  const sendInput = { to: String(gate.to), from: String(gate.from), body, idempotencyKey: input.idempotencyKey };
+  const spend = await reserveSpend(db, row.id, provider.estimateCostMicros?.(sendInput) ?? 0, now);
+  if (!spend.allowed) {
+    if (spend.reason === 'spend_cap_reached') return { status: 'suppressed', reason: 'spend_cap_reached', messageId: row.id };
+    await db.from('mova_messages').update({ status: 'failed', error_code: 'SPEND_CHECK_UNAVAILABLE' }).eq('id', row.id);
+    return { status: 'failed', messageId: row.id, error: 'SPEND_CHECK_UNAVAILABLE' };
+  }
   try {
-    const result = await provider.send({ to: String(gate.to), from: String(gate.from), body, idempotencyKey: input.idempotencyKey });
+    const result = await provider.send(sendInput);
     await db.from('mova_messages').update({ status: 'sent', provider_message_id: result.providerMessageId, sent_at: now.toISOString() }).eq('id', row.id);
     return { status: 'sent', messageId: row.id, providerMessageId: result.providerMessageId };
   } catch (caught) {
@@ -70,10 +79,21 @@ export async function sendSms(db: SmsDb, provider: SmsProvider, input: SendSmsIn
 }
 
 /**
- * Picks the SMS provider from the environment. Only the fake exists until O4/O5 are decided, so any
- * other value returns null and callers answer PROVIDER_NOT_CONFIGURED. Nothing here reaches a real phone.
+ * Picks the SMS provider from the environment: the fake, or Twilio only when explicitly switched live
+ * with complete configuration. Anything else returns null and callers answer PROVIDER_NOT_CONFIGURED.
  */
-export function smsProviderFromEnv(env: (name: string) => string | undefined): SmsProvider | null {
-  if (env('MOVA_SMS_PROVIDER') === 'fake') return new FakeSmsProvider(env('MOVA_SMS_FAKE_WEBHOOK_SECRET') ?? null);
+export function smsProviderFromEnv(env: (name: string) => string | undefined, fetcher: typeof fetch = fetch): SmsProvider | null {
+  const choice = env('MOVA_SMS_PROVIDER');
+  if (choice === 'fake') return new FakeSmsProvider(env('MOVA_SMS_FAKE_WEBHOOK_SECRET') ?? null);
+  // Twilio (O4) is wired only with an explicit live switch and complete configuration.
+  if (choice === 'twilio' && env('MOVA_MESSAGING_LIVE_SMS') === 'true') {
+    const accountSid = env('TWILIO_ACCOUNT_SID'), authToken = env('TWILIO_AUTH_TOKEN'), webhookUrl = env('MOVA_TWILIO_WEBHOOK_URL');
+    if (!accountSid || !authToken || !webhookUrl) return null;
+    const segment = Number(env('MOVA_SMS_SEGMENT_COST_MICROS'));
+    try {
+      return new TwilioSmsProvider({ accountSid, authToken, webhookUrl, statusCallbackUrl: env('MOVA_TWILIO_STATUS_CALLBACK_URL') ?? null,
+        segmentCostMicros: Number.isSafeInteger(segment) && segment > 0 ? segment : undefined }, fetcher);
+    } catch { return null; }
+  }
   return null;
 }

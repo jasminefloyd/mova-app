@@ -22,4 +22,6 @@ export interface EmailProvider {
   readonly name: string;
   readonly live: boolean;
   send(input: EmailSendInput): Promise<EmailSendResult>;
+  /** Estimated cost in micro-dollars, reserved against the shared monthly cap before sending (0047). */
+  estimateCostMicros?(input: EmailSendInput): number;
 }

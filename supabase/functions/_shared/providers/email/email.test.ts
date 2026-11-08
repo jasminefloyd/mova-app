@@ -3,13 +3,15 @@ import { FakeEmailProvider } from './fake.ts';
 import { emailProviderFromEnv, sendEmail, type EmailDb } from './send.ts';
 import { EMAIL_TEMPLATES, renderEmail } from './templates.ts';
 import { sendAppointmentEmail } from '../../appointment-emails.ts';
+import { SendGridEmailProvider } from './sendgrid.ts';
+import { vi } from 'vitest';
 
 const vars = { clientName: 'Jordan Lee', businessName: 'Rooted Beauty', serviceName: 'Silk press', startsAt: '2026-11-12T20:00:00.000Z', timeZone: 'America/New_York', locationName: 'Rooted Beauty Studio' };
 
-function stubDb(gate: Record<string, unknown> | null, context: Record<string, unknown> | null = null) {
+function stubDb(gate: Record<string, unknown> | null, context: Record<string, unknown> | null = null, capped = false) {
   const rows: (Record<string, unknown> & { id: string })[] = [];
   const db: EmailDb = {
-    rpc: async (name) => ({ data: name === 'mova_email_send_gate' ? gate : context, error: null }),
+    rpc: async (name) => ({ data: name === 'mova_messaging_reserve_spend' ? { allowed: !capped } : name === 'mova_email_send_gate' ? gate : context, error: null }),
     from: () => ({
       insert: (row) => ({ select: () => ({ single: async () => {
         if (rows.some((r) => r.idempotency_key === row.idempotency_key)) return { data: null, error: { message: '23505 duplicate' } };
@@ -90,5 +92,41 @@ describe('appointment emails from events (task 4.3)', () => {
     expect(await sendAppointmentEmail(stubDb({ allowed: true }, { ...context, template_id: null }).db, fake, 'a1', 'appointment.no_show', 'k1')).toBeNull();
     expect(await sendAppointmentEmail(stubDb({ allowed: true }, { ...context, to: null }).db, fake, 'a1', 'appointment.confirmed', 'k2')).toBeNull();
     expect(fake.outbox).toHaveLength(0);
+  });
+});
+
+describe('O4 SendGrid and the spend cap (Nov 8)', () => {
+  const input = { artistBusinessId: 'b1', clientId: null, to: 'guest@example.com', templateId: 'booking_confirmation' as const, locale: 'en-US' as const, vars, idempotencyKey: 'email:cap' };
+  it('pauses email at the shared monthly cap', async () => {
+    const fake = new FakeEmailProvider(1000);
+    expect(await sendEmail(stubDb({ allowed: true }, null, true).db, fake, input)).toEqual({ status: 'suppressed', reason: 'spend_cap_reached' });
+    expect(fake.outbox).toHaveLength(0);
+  });
+  const config = { apiKey: 'SG.test_key_0000000.secret_part_00000000', fromAddress: 'bookings@mova-beauty.co' };
+  it('SendGrid posts the rendered email through a fake fetcher, tracking off', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 202, headers: { 'x-message-id': 'sg-msg-123456' } }));
+    const sendgrid = new SendGridEmailProvider(config, fetcher);
+    const email = renderEmail('request_received', 'es-US', vars);
+    expect(await sendgrid.send({ to: 'guest@example.com', from: 'x', ...email, templateId: 'request_received', locale: 'es-US', idempotencyKey: 'email:evt-9' }))
+      .toEqual({ providerMessageId: 'sg-msg-123456', status: 'queued' });
+    const [url, init] = fetcher.mock.calls[0]!;
+    expect(String(url)).toBe('https://api.sendgrid.com/v3/mail/send');
+    expect((init?.headers as Record<string, string>).Authorization).toBe(`Bearer ${config.apiKey}`);
+    const body = JSON.parse(String(init?.body));
+    expect(body).toMatchObject({ personalizations: [{ to: [{ email: 'guest@example.com' }] }], from: { email: 'bookings@mova-beauty.co' }, subject: email.subject,
+      custom_args: { mova_idempotency_key: 'email:evt-9', mova_template: 'request_received' }, tracking_settings: { click_tracking: { enable: false }, open_tracking: { enable: false } } });
+    expect(body.content.map((c: { type: string }) => c.type)).toEqual(['text/plain', 'text/html']);
+    expect(sendgrid.estimateCostMicros()).toBe(1000);
+  });
+  it('SendGrid failures throw', async () => {
+    const sendgrid = new SendGridEmailProvider(config, vi.fn<typeof fetch>().mockResolvedValue(new Response('{}', { status: 401 })));
+    await expect(sendgrid.send({ to: 'a@b.co', from: 'x', subject: 's', text: 't', html: 'h', templateId: 'booking_confirmation', locale: 'en-US', idempotencyKey: 'k' })).rejects.toThrow('SENDGRID_SEND_FAILED_401');
+  });
+  it('SendGrid is wired only with the live switch and complete configuration', () => {
+    const env = (values: Record<string, string>) => (name: string) => values[name];
+    const full = { MOVA_EMAIL_PROVIDER: 'sendgrid', SENDGRID_API_KEY: config.apiKey, MOVA_EMAIL_FROM: config.fromAddress };
+    expect(emailProviderFromEnv(env(full))).toBeNull();
+    expect(emailProviderFromEnv(env({ ...full, MOVA_MESSAGING_LIVE_EMAIL: 'true' }))?.name).toBe('sendgrid');
+    expect(emailProviderFromEnv(env({ ...full, MOVA_MESSAGING_LIVE_EMAIL: 'true', SENDGRID_API_KEY: 'nope' }))).toBeNull();
   });
 });

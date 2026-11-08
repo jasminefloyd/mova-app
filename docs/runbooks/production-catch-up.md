@@ -19,12 +19,13 @@ According to `docs/engineering/PHASE_STATUS.md`, production received migrations 
 | 0044 | `20261108032000_mova_0044_payment_fee_rate.sql` | Fee version on each payment, one fee accessor, fee/amount locked after insert, 150 bps backfill | Past payments' fee could be rewritten; `payment-settings` cannot read the fee |
 | 0045 | `20261108033000_mova_0045_stripe_processor_fee.sql` | Queues and posts Stripe's processing fee to the ledger | Money shows $0 Stripe processing; `stripe-webhook` returns 503 after a paid Checkout (it queues the fee job) |
 | 0046 | `20261108034000_mova_0046_job_dead_letters.sql` | Dead-letter view and requeue function for background jobs | Operators query the jobs table directly |
+| 0047 | `20261108035000_mova_0047_messaging_spend_cap.sql` | Shared $50/month hard-stop spend cap for email and SMS (O4) | Every send fails closed (`SPEND_CHECK_UNAVAILABLE`) |
 
 The production project also holds 83 migration records that are not in this repository. Do not run `supabase db push` against it: it would try to reconcile that history. Apply the files individually as below.
 
 ## Order
 
-Apply 0032, 0034, 0038, 0039, 0040, 0041, 0042, 0043, 0044, 0045, 0046 in that order, then deploy the Edge Functions that depend on them (`availability-search`, `concierge-artist`, `customer-profile`, `waitlist-signup`, `payment-settings`, `stripe-connect-onboard`, `support-feedback`, `messaging-dispatch`, `messaging-events`, `messaging-inbound-sms`, `missed-call-webhook`, `job-dispatch`, `job-worker`, `stripe-webhook`). Deploying `availability-search` before 0039 makes booking return 503.
+Apply 0032, 0034, 0038, 0039, 0040, 0041, 0042, 0043, 0044, 0045, 0046, 0047 in that order, then deploy the Edge Functions that depend on them (`availability-search`, `concierge-artist`, `customer-profile`, `waitlist-signup`, `payment-settings`, `stripe-connect-onboard`, `support-feedback`, `messaging-dispatch`, `messaging-events`, `messaging-inbound-sms`, `missed-call-webhook`, `job-dispatch`, `job-worker`, `stripe-webhook`, `messaging-status`). Deploying `availability-search` before 0039 makes booking return 503.
 
 ## Pre-checks (read-only)
 
@@ -62,6 +63,7 @@ Then, on the deployed app: Book (25) shows times for a no-deposit service; a dep
 - 0034: drop the objects it created, only if no jobs have been enqueued.
 - 0038: no rollback needed (the previous functions failed on every call).
 - 0039: `drop function public.mova_deposit_bookings_enabled();`, after reverting `availability-search`.
+- 0047: revert the messaging functions first, then drop `mova_messaging_reserve_spend`, `mova_messaging_month_spend_micros`, `mova_messaging_spend_cap_micros`.
 - 0046: `drop view public.mova_background_job_dead_letters; drop function public.mova_requeue_dead_job(uuid);`
 - 0045: revert `stripe-webhook` and `job-worker` first, then drop `mova_stripe_enqueue_processor_fee` and `mova_stripe_record_processor_fee`. Posted fee ledger rows are immutable and stay.
 - 0044: drop trigger `mova_payments_fee_locked` and function `mova_payment_fee_locked`; keep the `platform_fee_version` column (harmless); restore the 0009 snapshot function only if reverting `payment-settings`.

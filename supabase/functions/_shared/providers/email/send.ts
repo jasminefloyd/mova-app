@@ -1,4 +1,6 @@
 import { FakeEmailProvider } from './fake.ts';
+import { reserveSpend } from '../spend.ts';
+import { SendGridEmailProvider } from './sendgrid.ts';
 import { renderEmail, type AppointmentEmailVars } from './templates.ts';
 import type { EmailLocale, EmailProvider, EmailTemplateId } from './types.ts';
 
@@ -50,8 +52,15 @@ export async function sendEmail(db: EmailDb, provider: EmailProvider, input: Sen
   }).select('id').single();
   if (insertError && /duplicate|23505/i.test(insertError.message)) return { status: 'duplicate' };
   if (insertError || !row) return { status: 'failed', messageId: null, error: 'MESSAGE_SAVE_FAILED' };
+  const sendInput = { to, from: 'Mova <bookings@mova-beauty.co>', ...rendered, templateId: input.templateId, locale: input.locale, idempotencyKey: input.idempotencyKey };
+  const spend = await reserveSpend(db, row.id, provider.estimateCostMicros?.(sendInput) ?? 0, now);
+  if (!spend.allowed) {
+    if (spend.reason === 'spend_cap_reached') return { status: 'suppressed', reason: 'spend_cap_reached' };
+    await db.from('mova_messages').update({ status: 'failed', error_code: 'SPEND_CHECK_UNAVAILABLE' }).eq('id', row.id);
+    return { status: 'failed', messageId: row.id, error: 'SPEND_CHECK_UNAVAILABLE' };
+  }
   try {
-    const sent = await provider.send({ to, from: 'Mova <bookings@mova-beauty.co>', ...rendered, templateId: input.templateId, locale: input.locale, idempotencyKey: input.idempotencyKey });
+    const sent = await provider.send(sendInput);
     await db.from('mova_messages').update({ status: 'sent', provider_message_id: sent.providerMessageId, sent_at: now.toISOString() }).eq('id', row.id);
     return { status: 'sent', messageId: row.id, providerMessageId: sent.providerMessageId };
   } catch {
@@ -60,7 +69,18 @@ export async function sendEmail(db: EmailDb, provider: EmailProvider, input: Sen
   }
 }
 
-/** Only the fake can be configured until O4; any other value returns null (PROVIDER_NOT_CONFIGURED). */
-export function emailProviderFromEnv(env: (name: string) => string | undefined): EmailProvider | null {
-  return env('MOVA_EMAIL_PROVIDER') === 'fake' ? new FakeEmailProvider() : null;
+/** The fake, or SendGrid (O4) only with an explicit live switch and complete configuration; else null. */
+export function emailProviderFromEnv(env: (name: string) => string | undefined, fetcher: typeof fetch = fetch): EmailProvider | null {
+  const choice = env('MOVA_EMAIL_PROVIDER');
+  if (choice === 'fake') return new FakeEmailProvider();
+  if (choice === 'sendgrid' && env('MOVA_MESSAGING_LIVE_EMAIL') === 'true') {
+    const apiKey = env('SENDGRID_API_KEY'), fromAddress = env('MOVA_EMAIL_FROM');
+    if (!apiKey || !fromAddress) return null;
+    const cost = Number(env('MOVA_EMAIL_COST_MICROS'));
+    try {
+      return new SendGridEmailProvider({ apiKey, fromAddress, sandbox: env('MOVA_SENDGRID_SANDBOX') === 'true',
+        costMicros: Number.isSafeInteger(cost) && cost > 0 ? cost : undefined }, fetcher);
+    } catch { return null; }
+  }
+  return null;
 }

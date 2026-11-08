@@ -19,7 +19,10 @@ export class FakeSmsProvider implements SmsProvider {
   readonly outbox: (SmsSendInput & { providerMessageId: string })[] = [];
   private failNext = false;
 
-  constructor(private readonly webhookSecret: string | null = null) {}
+  /** costMicros lets tests exercise the spend cap; the fake costs nothing by default. */
+  constructor(private readonly webhookSecret: string | null = null, private readonly costMicros = 0) {}
+
+  estimateCostMicros() { return this.costMicros; }
 
   /** Makes the next send throw, to test failure handling. */
   failOnce() { this.failNext = true; }
