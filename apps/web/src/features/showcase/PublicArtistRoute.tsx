@@ -22,15 +22,15 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  if (!data?.artist) return [{ title: 'mova.' }];
+  if (!data?.artist) return [{ title: 'mova' }];
   const artist = data.artist;
   const description = artist.profile.bio || artist.profile.specialties.join(', ');
   const canonical = `${data.publicBaseUrl}/a/${encodeURIComponent(artist.profile.handle)}`;
   const hrefFor = (locale: string) => `${canonical}?locale=${locale}`;
   return [
-    { title: `${artist.profile.display_name} | mova.` },
+    { title: `${artist.profile.display_name} | mova` },
     { name: 'description', content: description },
-    { property: 'og:title', content: `${artist.profile.display_name} | mova.` },
+    { property: 'og:title', content: `${artist.profile.display_name} | mova` },
     { property: 'og:description', content: description },
     { property: 'og:url', content: canonical },
     { property: 'og:type', content: 'profile' },

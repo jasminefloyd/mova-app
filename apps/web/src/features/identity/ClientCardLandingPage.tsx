@@ -44,7 +44,7 @@ export function ClientCardLandingPage() {
   if (unavailable || !card) return <main className="mova-page mova-client-card-landing"><EmptyState title={t('identity.cardUnavailable')} detail={t('identity.cardUnavailableDetail')}/></main>;
   const date = appointment ? new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(appointment.starts_at)) : null;
   return <main className="mova-page mova-client-card-landing">
-    <header className="mova-client-card-landing__brand"><span className="mova-wordmark">mova.</span></header>
+    <header className="mova-client-card-landing__brand"><span className="mova-wordmark">mova</span></header>
     <Card tone="inverse" className="mova-client-card-landing__hero">
       <small>{t('identity.clientCard')}</small>
       <h1>{card.client_name || t('identity.client')}</h1>

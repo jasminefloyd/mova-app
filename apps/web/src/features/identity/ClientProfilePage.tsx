@@ -133,7 +133,7 @@ export function ClientProfilePage() {
       const context = canvas.getContext('2d'); if (!context) throw new Error('CANVAS_UNAVAILABLE');
       const style = getComputedStyle(document.documentElement);
       context.fillStyle = style.getPropertyValue('--forest').trim(); context.fillRect(0, 0, canvas.width, canvas.height);
-      context.fillStyle = style.getPropertyValue('--surface-page').trim(); context.font = '800 52px Manrope'; context.fillText('mova.', 64, 80);
+      context.fillStyle = style.getPropertyValue('--surface-page').trim(); context.font = '800 52px Manrope'; context.fillText('mova', 64, 80);
       context.font = '700 22px "DM Sans"'; context.fillStyle = style.getPropertyValue('--mint').trim(); context.fillText(t('identity.clientCard'), 64, 155);
       context.fillStyle = style.getPropertyValue('--surface-page').trim(); context.font = '800 54px Manrope'; context.fillText(data.profile.display_name || t('identity.client'), 64, 245);
       context.fillStyle = style.getPropertyValue('--mint').trim(); context.font = '500 28px "DM Sans"'; context.fillText(t('identity.withStylist', { name: selectedStylist?.name ?? t('identity.client') }), 64, 305);
@@ -169,7 +169,7 @@ export function ClientProfilePage() {
     } catch { setError(true); } finally { setBusy(false); }
   };
 
-  if (!clientProfilesEnabled) return <main className="mova-page mova-client-profile"><p className="mova-wordmark">mova.</p><h1>{t('identity.profileTitle')}</h1><p>{t('identity.disabled')}</p><Link to="/">{t('identity.continueGuest')}</Link></main>;
+  if (!clientProfilesEnabled) return <main className="mova-page mova-client-profile"><p className="mova-wordmark">mova</p><h1>{t('identity.profileTitle')}</h1><p>{t('identity.disabled')}</p><Link to="/">{t('identity.continueGuest')}</Link></main>;
   if (loading) return <main className="mova-page mova-client-profile" aria-busy="true"><p role="status">{t('identity.loading')}</p></main>;
   if (error || !data) return <main className="mova-page mova-client-profile"><ErrorState title={t('identity.profileLoadError')} retryLabel={t('identity.retry')} onRetry={() => void load()}/></main>;
 
@@ -177,7 +177,7 @@ export function ClientProfilePage() {
   const selectedStylist = data.stylists.find((item) => item.handle === next?.handle) ?? data.stylists[0];
   const nextDate = next ? new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(next.starts_at)) : null;
   return <main className="mova-page mova-client-profile">
-    <header className="mova-client-profile__brand"><span className="mova-wordmark">mova.</span></header>
+    <header className="mova-client-profile__brand"><span className="mova-wordmark">mova</span></header>
     <h1>{t('identity.profileTitle')}</h1>
     {selectedStylist && <Card tone="inverse" className="mova-client-profile__card">
       <div className="mova-client-profile__card-copy"><small>{t('identity.clientCard')}</small><strong>{data.profile.display_name || t('identity.client')}</strong><span>{t('identity.withStylist', { name: selectedStylist.name })}</span><span>{nextDate ? t('identity.nextAppointment', { date: nextDate }) : t('identity.noUpcoming')}</span></div>

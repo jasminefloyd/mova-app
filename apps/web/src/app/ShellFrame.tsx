@@ -20,7 +20,7 @@ export function ShellFrame({ queryClient, localeStorageKey, showBrandHeader = tr
     <QueryClientProvider client={queryClient}>
       <LocaleProvider storageKey={localeStorageKey}>
         {showBrandHeader && <header className="flex items-center justify-between p-4">
-          <span className="font-display font-bold" aria-label="mova">mova.</span>
+          <span className="font-display font-bold" aria-label="mova">mova</span>
           {showLocaleSwitcher && <LocaleSwitcher />}
         </header>}
         <main>

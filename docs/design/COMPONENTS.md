@@ -146,7 +146,7 @@ Vertical list with a 28 px icon circle per event and text status (Sent, Skipped,
 - Artist version is full-bleed on forest (21); client card version is small inside the card (28, 29). Optional centre photo where shown.
 
 ### ClientCard
-- `--surface-inverse` card: "mova." wordmark, "CLIENT CARD", client name, "With {artist}", next appointment line (or "Requested · …"), small QR.
+- `--surface-inverse` card: "mova" wordmark, "CLIENT CARD", client name, "With {artist}", next appointment line (or "Requested · …"), small QR.
 - Followed by the wallet buttons. **Use the official Apple Wallet / Google Wallet badges, not the black placeholders** (A-06/A-19). There's also a "Save the card as an image" link.
 - Seen on 28 and 29.
 

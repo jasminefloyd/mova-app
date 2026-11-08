@@ -24,6 +24,6 @@ export function ErrorBoundary() {
   return <main className="mova-page" role="alert">
     <h1>{notFound ? 'Page not found' : 'This page is temporarily unavailable'}</h1>
       <p>{notFound ? 'The page may have moved or is not public.' : 'Please try again in a moment.'}</p>
-      <a href="/">Return to mova.</a>
+      <a href="/">Return to mova</a>
   </main>;
 }

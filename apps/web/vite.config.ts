@@ -24,8 +24,8 @@ export default defineConfig({
       includeAssets: ['icons/mova-192.svg', 'icons/mova-512.svg'],
       manifest: {
         id: '/',
-        name: 'mova.',
-        short_name: 'mova.',
+        name: 'mova',
+        short_name: 'mova',
         description: 'Your business moves with you.',
         start_url: '/auth',
         scope: '/',
