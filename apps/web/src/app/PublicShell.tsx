@@ -8,8 +8,9 @@ import { useLocale } from './LocaleProvider';
 
 export function PublicShell() {
   const [queryClient] = useState(createPublicQueryClient);
-  const { pathname } = useLocation();
-  return <ShellFrame queryClient={queryClient} localeStorageKey={GUEST_LOCALE_KEY} showBrandHeader={pathname !== '/'}>
+  // Every public page (showcase, booking, scan, client card, manage booking, review) draws its own wordmark,
+  // so the shell header would show a second one (task 2.3).
+  return <ShellFrame queryClient={queryClient} localeStorageKey={GUEST_LOCALE_KEY} showBrandHeader={false}>
     <PublicLocaleSync />
     <Outlet />
   </ShellFrame>;
