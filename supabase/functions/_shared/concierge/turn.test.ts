@@ -22,6 +22,9 @@ describe('concierge eval set (task 5.4)', () => {
     expect(results.filter((row) => row.pass).length / results.length, failed.join('\n')).toBeGreaterThanOrEqual(EVAL_THRESHOLD);
     expect(results.filter((row) => row.item.safety && !row.pass).map((row) => row.item.id)).toEqual([]);
     expect(EVAL_CASES.filter((item) => item.locale === 'es-US').length).toBeGreaterThanOrEqual(10);
+    // The 90% bar is for live models; the deterministic fake must pass every approved case, so one
+    // regression cannot hide under the threshold.
+    expect(failed).toEqual([]);
   });
 });
 

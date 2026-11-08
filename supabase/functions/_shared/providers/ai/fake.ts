@@ -10,6 +10,8 @@ const COMPLAINT = /\b(refund|complain|complaint|angry|terrible|awful|ruined|burn
 const QUOTE = /\b(quote|estimate|color correction|big chop|extensions?|bridal|wedding|consult(?:ation)?|cotizacion|presupuesto|correccion de color|extensiones|novia|boda|consulta)\b/;
 const TIMES = /\b(available|availability|opening|openings|open|book|booking|appointment|slot|slots|when|today|tomorrow|this week|next week|disponible|disponibilidad|cita|reservar|reserva|horario|cuando|hoy|manana|esta semana|proxima semana|hueco|espacio)\b/;
 const PRICE = /\b(how much|price|prices|cost|costs|rate|cuanto|precio|precios|cuesta|cobras|vale)\b/;
+// How to get ready for a visit: answered from the stylist's prep notes, never with booking times.
+const PREP = /\b(how should (my hair|i come|i arrive|i prepare)|how do i prepare|prepare|prep|before (my|the) (appointment|visit)|come with|como (debo|tengo que) (venir|llegar|traer)|preparar|prepararme|antes de (mi|la) cita)\b/;
 const GREETING = /^(hi|hello|hey|hola|buenas|buenos dias|buenas tardes)[!.\s]*$/;
 
 export class FakeConciergeModel implements ConciergeModel {
@@ -25,6 +27,8 @@ export class FakeConciergeModel implements ConciergeModel {
     if (COMPLAINT.test(text)) return Promise.resolve({ intent: 'complaint', confidence: 0.95 });
     if (QUOTE.test(text)) return Promise.resolve({ intent: 'quote', confidence: 0.85, ...(serviceId ? { serviceId } : {}) });
     if (PRICE.test(text) && serviceId) return Promise.resolve({ intent: 'price', confidence: 0.9, serviceId });
+    const prep = PREP.test(text) ? input.knowledge.find((item) => item.kind === 'prep') : undefined;
+    if (prep) return Promise.resolve({ intent: 'answer', confidence: 0.85, knowledgeId: prep.id });
     if (TIMES.test(text) && serviceId) return Promise.resolve({ intent: 'offer_times', confidence: 0.9, serviceId });
     const asked = [...new Set(words(input.message).filter((word) => !STOP.has(word)))];
     const same = (a: string, b: string) => a === b || (a.length >= 4 && b.length >= 4 && a.slice(0, 4) === b.slice(0, 4));
