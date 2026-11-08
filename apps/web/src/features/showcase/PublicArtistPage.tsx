@@ -74,7 +74,7 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
     {!preview && <PublicLocaleToggle />}
     <header className="mova-public-artist__header" style={coverUrl ? { backgroundImage: `linear-gradient(90deg, var(--forest), color-mix(in srgb, var(--forest) 68%, transparent)), url("${coverUrl}")` } : undefined}>
       {artist.profile.photo_urls.profile?.['512'] && <img className="mova-public-artist__avatar" src={artist.profile.photo_urls.profile['512']} alt="" />}
-      <div><p className="mova-wordmark">mova.</p><h1>{artist.profile.display_name}</h1><p>@{artist.profile.handle}</p>{artist.locations[0] && <p className="mova-public-artist__location">{artist.locations[0].name}</p>}</div>
+      <div><p className="mova-wordmark">mova</p><h1>{artist.profile.display_name}</h1><p>@{artist.profile.handle}</p>{artist.locations[0] && <p className="mova-public-artist__location">{artist.locations[0].name}</p>}</div>
     </header>
     {artist.profile.specialties.length > 0 && <div className="mova-chip-list" aria-label={t('showcase.specialties')}>{artist.profile.specialties.map((specialty) => <span className="mova-chip mova-chip--static" key={specialty}>{specialty}</span>)}</div>}
     {artist.profile.bio && <p className="mova-public-artist__bio">{artist.profile.bio}</p>}

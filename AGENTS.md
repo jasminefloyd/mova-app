@@ -1,6 +1,6 @@
 # AGENTS.md: operating rules for AI engineers (Codex and humans)
 
-You are implementing **Mova**, a mobile-first web app (PWA) that gives independent hairstylists a business that moves with them. Brand: `mova.`, *Your business moves with you.*
+You are implementing **Mova**, a mobile-first web app (PWA) that gives independent hairstylists a business that moves with them. Brand: `mova` (no dot; owner decision O13, 2026-11-08), *Your business moves with you.*
 
 ## Read first, every session
 1. `docs/product/ENGINEERING_SPEC.md` (v2.1). **The single engineering source of truth.**

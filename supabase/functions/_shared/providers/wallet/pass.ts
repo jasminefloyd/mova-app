@@ -18,7 +18,7 @@ export type ClientCardPass = {
   authenticationToken: string;
   organizationName: 'Mova';
   description: string;
-  logoText: 'mova.';
+  logoText: 'mova';
   colors: { background: string; foreground: string; label: string };
   barcode: { format: 'QR'; message: string; altText: string };
   fields: Array<{ key: string; label: string; value: string }>;
@@ -43,7 +43,7 @@ export function buildClientCardPass(input: ClientCardPassInput): ClientCardPass 
     authenticationToken: input.authToken,
     organizationName: 'Mova',
     description: t.description(input.stylistName),
-    logoText: 'mova.',
+    logoText: 'mova',
     // Brand forest, ivory and mint from the design tokens.
     colors: { background: '#18392F', foreground: '#F7F5EF', label: '#C9E6D4' },
     barcode: { format: 'QR', message: input.cardUrl, altText: t.scan },

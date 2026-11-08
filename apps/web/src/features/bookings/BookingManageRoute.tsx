@@ -124,7 +124,7 @@ export function BookingManageRoute() {
       const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 700;
       const context = canvas.getContext('2d'); if (!context) throw new Error();
       const style = getComputedStyle(document.documentElement); context.fillStyle = style.getPropertyValue('--forest').trim(); context.fillRect(0, 0, canvas.width, canvas.height);
-      context.fillStyle = style.getPropertyValue('--surface-page').trim(); context.font = '800 52px Manrope'; context.fillText('mova.', 64, 80);
+      context.fillStyle = style.getPropertyValue('--surface-page').trim(); context.font = '800 52px Manrope'; context.fillText('mova', 64, 80);
       context.fillStyle = style.getPropertyValue('--mint').trim(); context.font = '700 22px "DM Sans"'; context.fillText(t('identity.clientCard'), 64, 155);
       context.fillStyle = style.getPropertyValue('--surface-page').trim(); context.font = '800 54px Manrope'; context.fillText(booking.client_name || t('identity.client'), 64, 245);
       context.fillStyle = style.getPropertyValue('--mint').trim(); context.font = '500 28px "DM Sans"'; context.fillText(t('identity.withStylist', { name: booking.artist?.display_name ?? t('identity.client') }), 64, 305);
@@ -136,7 +136,7 @@ export function BookingManageRoute() {
   };
 
   return <main className="mova-page mova-booking">
-    <header className="mova-booking__brand"><span className="mova-wordmark">mova.</span></header>
+    <header className="mova-booking__brand"><span className="mova-wordmark">mova</span></header>
     <StatusChip status={booking.status === 'confirmed' ? 'confirmed' : ['cancelled', 'declined', 'expired'].includes(booking.status) ? 'cancelled' : 'pending'}>{t(`booking.status.${booking.status}`, { defaultValue: booking.status })}</StatusChip>
     <h1>{booking.status === 'confirmed' ? t('identity.bookedWith', { name: booking.artist?.display_name ?? t('identity.client') }) : t('booking.manageTitle')}</h1>
     <Card>

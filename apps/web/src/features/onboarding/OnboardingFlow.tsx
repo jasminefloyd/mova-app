@@ -380,7 +380,7 @@ export function OnboardingFlow() {
   const current = step === 'publish' ? 6 : stepOrder.indexOf(step) + 1;
   return <div className="mova-onboarding-page">
     <header className="mova-onboarding-header">
-      <span className="mova-wordmark" aria-label="mova">mova.</span>
+      <span className="mova-wordmark" aria-label="mova">mova</span>
       <p>{t('onboarding.tagline')}</p>
       {signedIn && <Button type="button" variant="on-dark" onClick={signOut}>{t('onboarding.signOut')}</Button>}
     </header>

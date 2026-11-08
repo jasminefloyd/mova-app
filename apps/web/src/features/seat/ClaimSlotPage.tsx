@@ -38,7 +38,7 @@ export function ClaimSlotPage() {
   const bookLink = view?.handle ? `/a/${encodeURIComponent(view.handle)}/book` : '/';
 
   return <main className="mova-page mova-claim">
-    <p className="mova-wordmark">mova.</p>
+    <p className="mova-wordmark">mova</p>
     {state === 'loading' && <p role="status" aria-busy="true">{t('seat.loading')}</p>}
     {state === 'error' && <ErrorState title={t('seat.error')} retryLabel={t('seat.retry')} onRetry={() => window.location.reload()} />}
     {state === 'invalid' && <Card><h1>{t('seat.invalidTitle')}</h1><p>{t('seat.invalidBody')}</p></Card>}

@@ -136,7 +136,7 @@ export function QRDisplay({ label = 'QR code', children }: PropsWithChildren<{ l
 }
 
 export function ClientCard({ name, artist, nextAppointment, children }: PropsWithChildren<{ name: string; artist: string; nextAppointment: string }>) {
-  return <Card tone="inverse" className="mova-client-card"><span className="mova-wordmark">mova.</span><small>CLIENT CARD</small><strong>{name}</strong><span>With {artist}</span><span>{nextAppointment}</span><div>{children}</div></Card>;
+  return <Card tone="inverse" className="mova-client-card"><span className="mova-wordmark">mova</span><small>CLIENT CARD</small><strong>{name}</strong><span>With {artist}</span><span>{nextAppointment}</span><div>{children}</div></Card>;
 }
 
 export function StepperProgress({ current, total = 6, label }: { current: number; total?: number; label: string }) {
