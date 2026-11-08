@@ -16,3 +16,5 @@ Layers and tooling: `docs/qa/TEST_STRATEGY.md`. Every case has a stable ID and a
 | `ai-evals/` | ≥300 scripted concierge conversations, EN/ES 50/50 (§8.4) |
 
 Run `pnpm test:e2e` to build a fresh production preview using fixed synthetic Supabase values, then start a fresh Playwright preview server. The operator-session fixtures mock Auth, REST and Edge Function requests and do not read the project `.env`. Port 4173 must be available; the runner never reuses an existing preview server.
+
+The Supabase CI job runs pgTAP from `supabase/tests/` and then runs `scripts/test-handle-claim-race.mjs` against two concurrent local PostgreSQL sessions. The race check uses synthetic verified Auth users and removes its rows after each run.
