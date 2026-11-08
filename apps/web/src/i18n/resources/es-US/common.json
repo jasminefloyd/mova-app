@@ -947,7 +947,11 @@
     "saveArtistCard": "Guarda la tarjeta de {{name}} en tu teléfono",
     "saveArtistCardDetail": "Vuelve a reservar con un toque, dondequiera que trabaje {{name}}.",
     "walletHomeScreenFallback": "Agrega esta página a la pantalla de inicio para tenerla a mano.",
-    "deleteCodeSent": "Ingresa el código de seis dígitos enviado a tu contacto verificado."
+    "deleteCodeSent": "Ingresa el código de seis dígitos enviado a tu contacto verificado.",
+    "wallet": {
+      "apple": "Agregar a Apple Wallet",
+      "google": "Guardar en Google Wallet"
+    }
   },
   "messaging": {
     "settingsTitle": "Idioma y notificaciones",
@@ -1090,7 +1094,51 @@
     "rulesSummary": "Hasta {{dailyCap}} mensajes al día y al menos {{frequency}} días entre mensajes por cliente.",
     "filterActivity": "Filtrar actividad",
     "allActivity": "Toda la actividad",
-    "activityEmpty": "No hay actividad que coincida con este filtro."
+    "activityEmpty": "No hay actividad que coincida con este filtro.",
+    "method": {
+      "title": "Cómo calcula Mova esta estimación",
+      "notComputed": "Tu primera estimación aparece cuando Mova tenga una semana completa de citas para calcular.",
+      "intro": "Cada cifra se calcula con tus propias citas e historial. La IA no adivina nada.",
+      "booked": "Citas confirmadas y solicitadas este mes, a sus precios publicados.",
+      "openTime": "Horario libre que probablemente llenarás",
+      "openBucket": "{{hours}} horas libres × {{fill}} que sueles llenar × {{ticket}} por hora = {{total}}",
+      "rebooks": "Clientes que probablemente vuelvan a reservar",
+      "rebookLine": "{{due}} clientes pendientes × {{conversion}} que suelen volver × {{ticket}} por visita en promedio",
+      "likelyLine": "Reservado + horario libre + nuevas reservas.",
+      "range": "Rango probable",
+      "rangeLine": "Lo reservado más un mínimo ({{openLow}} de horario libre, {{rebookLow}} de nuevas reservas) y un máximo ({{openHigh}}, {{rebookHigh}}) según tus meses anteriores.",
+      "usualLine": "Promedio de tus últimos tres meses completos: {{months}}."
+    },
+    "seat": {
+      "outboundOff": "Los mensajes están apagados hasta que el proveedor de mensajes esté activo. Ya puedes revisar campañas.",
+      "error": "No pudimos actualizar esta campaña. Inténtalo de nuevo.",
+      "recovered": "Recuperado",
+      "liveWave": "Activa · ronda {{wave}} de {{waves}}",
+      "bookedBy": "{{name}} lo reservó",
+      "fit_one": "{{count}} cliente encaja en este espacio",
+      "fit_other": "{{count}} clientes encajan en este espacio",
+      "fitDetail": "Pendientes de volver o inactivos, aceptaron mensajes. Rondas de {{waves}}, cada {{minutes}} min. Se detiene al reservarse.",
+      "textMessage": "Mensaje de texto · personalizado para cada cliente",
+      "takenNote": "Si se llena antes, los demás reciben: \"{{text}}\"",
+      "timeline": "Cronología de la campaña",
+      "waveSent_one": "Ronda {{wave}} · {{count}} mensaje enviado",
+      "waveSent_other": "Ronda {{wave}} · {{count}} mensajes enviados",
+      "wavePlanned_one": "Ronda {{wave}} · {{count}} cliente",
+      "wavePlanned_other": "Ronda {{wave}} · {{count}} clientes",
+      "sendsAt": "se envía a las {{time}} si nadie reserva",
+      "approve": "Aprobar texto y enviar ronda 1",
+      "sendNext": "Enviar ronda {{wave}} ahora",
+      "stop": "Detener campaña",
+      "details": "Detalles",
+      "hide": "Ocultar detalles",
+      "ends": "Termina 2 horas antes del espacio si nadie reserva."
+    },
+    "autopilotSwitch": "Piloto automático de reservas",
+    "autopilotSwitchDetail": "Envía mensajes a tus clientes cuando les toca volver, con tus mensajes aprobados y estas reglas.",
+    "textsOffPlatform": "Los mensajes están apagados hasta que el proveedor de mensajes esté activo. Tu configuración se guarda y se aplica entonces.",
+    "autopilotHow": "Solo reciben mensaje los clientes que aceptaron recordatorios, a quienes les toca volver y que no tienen cita. El horario permitido es de 9 a. m. a 8 p. m. en la zona horaria del cliente. Cada decisión aparece en Actividad.",
+    "manualTap": "Los mensajes para recuperar clientes siempre requieren que los envíes tú.",
+    "sentStatus": "Enviado"
   },
   "marketing": {
     "home": "Inicio de Mova",
@@ -1253,6 +1301,17 @@
       "missedCall": "Llamada perdida",
       "instagram": "Instagram",
       "unknown": "Otro canal"
+    },
+    "chat": {
+      "open": "Pregúntale a la asistente de {{name}}",
+      "title": "Chat con la asistente de {{name}}",
+      "subtitle": "Asistente de reservas (IA) · {{name}} ve cada chat",
+      "close": "Cerrar",
+      "messages": "Mensajes",
+      "intro": "Pregunta por precios, horarios, estacionamiento o cómo prepararte. Para todo lo demás, {{name}} te responde personalmente.",
+      "assistant": "Asistente de {{name}} · IA",
+      "typing": "Escribiendo…",
+      "placeholder": "Escribe un mensaje"
     }
   },
   "reports": {
@@ -1376,11 +1435,9 @@
   "plan": {
     "title": "Tu plan",
     "back": "Atrás",
-    "proposed": "Precios propuestos · no son definitivos",
     "current": "Plan actual",
     "perMonth": "/mes",
     "perMovaPayment": "por pago de Mova",
-    "featuresPlaceholder": "Detalles de precios próximamente",
     "choose": "Elegir {{plan}}",
     "feeNote": "Las tarifas porcentuales solo aplican a pagos procesados por Mova. El procesamiento de Stripe se cobra aparte. No hay tarifa de Mova para efectivo, otros pagos registrados o pagos cobrados por el salón.",
     "loading": "Cargando detalles del plan…",
@@ -1390,6 +1447,13 @@
       "free": "Gratis",
       "pro": "Pro",
       "ai_growth": "AI Growth"
+    },
+    "billingUnavailable": "Podrás cambiar de plan cuando la facturación esté configurada.",
+    "testMode": "Modo de prueba: no se hacen cobros reales.",
+    "notice": {
+      "confirmed": "Tu plan se actualizó.",
+      "cancelled": "Se canceló el pago. Tu plan no cambió.",
+      "failed": "No pudimos cambiar tu plan. Inténtalo de nuevo."
     }
   },
   "privacy": {
@@ -1446,5 +1510,31 @@
     "thanks": "Gracias. Si necesitamos más detalles o tenemos una respuesta, te escribiremos por correo.",
     "thanksEmail": "Gracias. Si necesitamos más detalles o tenemos una respuesta, te escribiremos a {{email}}.",
     "done": "Listo"
+  },
+  "seat": {
+    "loading": "Cargando este espacio…",
+    "error": "No pudimos cargar este espacio.",
+    "retry": "Intentar de nuevo",
+    "invalidTitle": "Este enlace no funciona",
+    "invalidBody": "Puede estar mal escrito o ser muy antiguo. Pídele uno nuevo a tu estilista.",
+    "justOpened": "Se abrió para ti",
+    "with": "{{date}} con {{name}}",
+    "when": "Cuándo",
+    "service": "Servicio",
+    "where": "Dónde",
+    "oneSpot": "Un solo espacio. La primera persona en reservar se lo queda.",
+    "claim": "Reservar este espacio",
+    "request": "Solicitar este espacio",
+    "otherTimes": "¿No te funciona? Ver otros horarios",
+    "claimedTitle": "Es tuyo",
+    "claimedBody": "Tienes cita con {{name}} el {{date}}, {{range}}. Pronto recibirás la confirmación.",
+    "requestedTitle": "Solicitado",
+    "requestedBody": "{{name}} confirmará el {{date}}, {{range}}. Te avisaremos cuando esté confirmado.",
+    "justTaken": "Ya reservado",
+    "ended": "Terminó",
+    "takenTitle": "Alguien ya tomó ese espacio",
+    "endedTitle": "Esta oferta terminó",
+    "takenBody": "¡Lo sentimos! Estos son los próximos horarios de {{name}}.",
+    "seeTimes": "Ver todos los horarios"
   }
 }

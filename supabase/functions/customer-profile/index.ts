@@ -89,8 +89,9 @@ Deno.serve(async(request)=>{
       return respond({linked:Boolean(data?.linked)});
     }
     if(body.action==='delete-profile'){
-      const {error:auditError}=await db.from('mova_security_audit_events').insert({actor_user_id:user.id,event_type:'privacy.client_profile_delete_requested',object_type:'customer_account',object_id:account.id});
-      if(auditError)return respond({code:'CLIENT_PROFILE_DELETE_AUDIT_FAILED'},500);
+      // Task 5.10: withdraw marketing consents, audit, remove the account (0050), then the sign-in.
+      const {error:deleteError}=await db.rpc('mova_delete_customer_profile',{p_user_id:user.id});
+      if(deleteError)return respond({code:'CLIENT_PROFILE_DELETE_FAILED'},500);
       const {error}=await db.auth.admin.deleteUser(user.id);
       return error?respond({code:'CLIENT_PROFILE_DELETE_FAILED'},500):respond({deleted:true});
     }
@@ -146,6 +147,7 @@ Deno.serve(async(request)=>{
       const name=typeof body.display_name==='string'?body.display_name.trim():'';const locale=body.preferred_locale;
       if(name.length<1||name.length>160||!['en-US','es-US'].includes(locale))return respond({code:'INVALID_PROFILE'},422);
       const {error}=await db.from('mova_customer_accounts').update({display_name:name,preferred_locale:locale}).eq('id',account.id);
+      if(!error){const {error:auditError}=await db.from('mova_security_audit_events').insert({actor_user_id:user.id,event_type:'privacy.client_profile_updated',object_type:'customer_account',object_id:account.id,metadata:{fields:['display_name','preferred_locale']}});if(auditError)return respond({code:'CLIENT_PROFILE_AUDIT_FAILED'},500);}
       return error?respond({code:'CUSTOMER_PROFILE_SAVE_FAILED'},500):respond({profile:{display_name:name,preferred_locale:locale}});
     }
     if(body.action==='consent'||body.action==='consent-by-handle'){
@@ -159,6 +161,7 @@ Deno.serve(async(request)=>{
       const {data:link}=await db.from('mova_client_customer_links').select('client_id').eq('customer_account_id',account.id).eq('artist_business_id',businessId).is('unlinked_at',null).maybeSingle();if(!link)return respond({code:'CLIENT_LINK_NOT_FOUND'},404);
       const purposes=body.action==='consent-by-handle'?['rebooking_reminders','offers']:[purpose];const rows=purposes.map((consentPurpose:string)=>({artist_business_id:businessId,client_id:link.client_id,purpose:consentPurpose,channel,granted,locale:account.preferred_locale,changed_by:user.id,evidence:{source:'client_profile',verified_contact:true}}));
       const {error}=await db.from('mova_client_consents').insert(rows);
+      if(!error){const {error:auditError}=await db.from('mova_security_audit_events').insert({artist_business_id:businessId,actor_user_id:user.id,event_type:'privacy.client_consent_changed',object_type:'client',object_id:link.client_id,metadata:{purposes,channel,granted}});if(auditError)return respond({code:'CONSENT_AUDIT_FAILED'},500);}
       return error?respond({code:'CONSENT_SAVE_FAILED'},500):respond({saved:true});
     }
     return respond({code:'INVALID_ACTION'},422);

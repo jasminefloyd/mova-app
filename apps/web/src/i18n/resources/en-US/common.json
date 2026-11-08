@@ -947,7 +947,11 @@
     "saveArtistCard": "Save {{name}}’s card to your phone",
     "saveArtistCardDetail": "Rebook in one tap, wherever {{name}} is working.",
     "walletHomeScreenFallback": "Add this page to your home screen to keep it close.",
-    "deleteCodeSent": "Enter the six-digit code sent to your verified contact."
+    "deleteCodeSent": "Enter the six-digit code sent to your verified contact.",
+    "wallet": {
+      "apple": "Add to Apple Wallet",
+      "google": "Save to Google Wallet"
+    }
   },
   "messaging": {
     "settingsTitle": "Language & notifications",
@@ -1090,7 +1094,51 @@
     "rulesSummary": "Up to {{dailyCap}} messages per day, with at least {{frequency}} days between messages per client.",
     "filterActivity": "Filter activity",
     "allActivity": "All activity",
-    "activityEmpty": "No activity matches this filter."
+    "activityEmpty": "No activity matches this filter.",
+    "method": {
+      "title": "How Mova estimates this",
+      "notComputed": "Your first estimate appears after Mova has a full week of bookings to work from.",
+      "intro": "Every figure is calculated from your own bookings and history. Nothing is guessed by AI.",
+      "booked": "Confirmed and requested appointments this month, at their listed prices.",
+      "openTime": "Open time you're likely to fill",
+      "openBucket": "{{hours}} open hours × {{fill}} usually filled × {{ticket}} per hour = {{total}}",
+      "rebooks": "Clients likely to rebook",
+      "rebookLine": "{{due}} clients due × {{conversion}} usually rebook × {{ticket}} average visit",
+      "likelyLine": "Booked + open time + rebooks.",
+      "range": "Likely range",
+      "rangeLine": "Booked plus a low ({{openLow}} open time, {{rebookLow}} rebooks) and a high ({{openHigh}}, {{rebookHigh}}) from your past months.",
+      "usualLine": "Average of your last three complete months: {{months}}."
+    },
+    "seat": {
+      "outboundOff": "Texts are off until the messaging provider is live. You can review campaigns now.",
+      "error": "We couldn't update this campaign. Try again.",
+      "recovered": "Recovered",
+      "liveWave": "Live · wave {{wave}} of {{waves}}",
+      "bookedBy": "{{name}} booked it",
+      "fit_one": "{{count}} client fits this slot",
+      "fit_other": "{{count}} clients fit this slot",
+      "fitDetail": "Due to rebook or lapsed, agreed to texts. Waves of {{waves}}, every {{minutes}} min. Stops when booked.",
+      "textMessage": "Text message · personalized per client",
+      "takenNote": "If it fills first, the rest get: \"{{text}}\"",
+      "timeline": "Campaign timeline",
+      "waveSent_one": "Wave {{wave}} · {{count}} text sent",
+      "waveSent_other": "Wave {{wave}} · {{count}} texts sent",
+      "wavePlanned_one": "Wave {{wave}} · {{count}} client",
+      "wavePlanned_other": "Wave {{wave}} · {{count}} clients",
+      "sendsAt": "sends {{time}} if no one books",
+      "approve": "Approve text & send wave 1",
+      "sendNext": "Send wave {{wave}} now",
+      "stop": "Stop campaign",
+      "details": "Details",
+      "hide": "Hide details",
+      "ends": "Ends 2 hours before the slot if no one books."
+    },
+    "autopilotSwitch": "Rebooking autopilot",
+    "autopilotSwitchDetail": "Texts clients when they're due to rebook, using your approved messages and these rules.",
+    "textsOffPlatform": "Texts are off until the messaging provider is live. Your settings are saved and take effect then.",
+    "autopilotHow": "Only clients who agreed to reminders, are due to rebook and have nothing booked get a text. Quiet hours are 9 AM–8 PM in the client's time zone. Every decision shows in Activity.",
+    "manualTap": "Win-back messages always require your tap.",
+    "sentStatus": "Sent"
   },
   "marketing": {
     "home": "Mova home",
@@ -1253,6 +1301,17 @@
       "missedCall": "Missed call",
       "instagram": "Instagram",
       "unknown": "Other channel"
+    },
+    "chat": {
+      "open": "Ask {{name}}'s assistant",
+      "title": "Chat with {{name}}'s assistant",
+      "subtitle": "Booking assistant (AI) · {{name}} sees every chat",
+      "close": "Close",
+      "messages": "Messages",
+      "intro": "Ask about prices, open times, parking or how to prep. For anything else, {{name}} replies personally.",
+      "assistant": "{{name}}'s assistant · AI",
+      "typing": "Writing…",
+      "placeholder": "Write a message"
     }
   },
   "reports": {
@@ -1376,11 +1435,9 @@
   "plan": {
     "title": "Your plan",
     "back": "Back",
-    "proposed": "Proposed pricing · not final",
     "current": "Current plan",
     "perMonth": "/month",
     "perMovaPayment": "per Mova payment",
-    "featuresPlaceholder": "Pricing details coming soon",
     "choose": "Choose {{plan}}",
     "feeNote": "Percent fees apply only to payments Mova processes. Stripe processing is extra. No Mova fee on cash, other recorded payments, or salon-collected payments.",
     "loading": "Loading plan details…",
@@ -1390,6 +1447,13 @@
       "free": "Free",
       "pro": "Pro",
       "ai_growth": "AI Growth"
+    },
+    "billingUnavailable": "Plan changes open when billing is set up.",
+    "testMode": "Test mode: no real charges are made.",
+    "notice": {
+      "confirmed": "Your plan is updated.",
+      "cancelled": "Checkout was cancelled. Your plan hasn't changed.",
+      "failed": "We couldn't change your plan. Try again."
     }
   },
   "privacy": {
@@ -1446,5 +1510,31 @@
     "thanks": "Thanks. If we need more detail or have an answer, we'll email you.",
     "thanksEmail": "Thanks. If we need more detail or have an answer, we'll email {{email}}.",
     "done": "Done"
+  },
+  "seat": {
+    "loading": "Loading this spot…",
+    "error": "We couldn't load this spot.",
+    "retry": "Try again",
+    "invalidTitle": "This link doesn't work",
+    "invalidBody": "It may be mistyped or very old. Ask your stylist for a new one.",
+    "justOpened": "Just opened for you",
+    "with": "{{date}} with {{name}}",
+    "when": "When",
+    "service": "Service",
+    "where": "Where",
+    "oneSpot": "One spot. First to book gets it.",
+    "claim": "Claim this spot",
+    "request": "Request this spot",
+    "otherTimes": "Doesn't work? See other times",
+    "claimedTitle": "It's yours",
+    "claimedBody": "You're booked with {{name}} on {{date}}, {{range}}. You'll get a confirmation shortly.",
+    "requestedTitle": "Requested",
+    "requestedBody": "{{name}} will confirm {{date}}, {{range}}. You'll get a message when it's confirmed.",
+    "justTaken": "Just taken",
+    "ended": "Ended",
+    "takenTitle": "Someone grabbed that spot",
+    "endedTitle": "This offer has ended",
+    "takenBody": "Sorry! Here are {{name}}'s next openings.",
+    "seeTimes": "See all times"
   }
 }

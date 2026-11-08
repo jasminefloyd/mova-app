@@ -20,12 +20,21 @@ According to `docs/engineering/PHASE_STATUS.md`, production received migrations 
 | 0045 | `20261108033000_mova_0045_stripe_processor_fee.sql` | Queues and posts Stripe's processing fee to the ledger | Money shows $0 Stripe processing; `stripe-webhook` returns 503 after a paid Checkout (it queues the fee job) |
 | 0046 | `20261108034000_mova_0046_job_dead_letters.sql` | Dead-letter view and requeue function for background jobs | Operators query the jobs table directly |
 | 0047 | `20261108035000_mova_0047_messaging_spend_cap.sql` | Shared $50/month hard-stop spend cap for email and SMS (O4) | Every send fails closed (`SPEND_CHECK_UNAVAILABLE`) |
+| 0050 | `20261108040000_mova_0050_client_account_actions.sql` | Client profile deletion withdraws marketing consents and audits (5.10) | Client profile delete returns an error |
+| 0051 | `20261108041000_mova_0051_concierge_web_chat.sql` | Concierge turn intent column and index (5.4) | Concierge channels fail to log turns |
+| 0052 | `20261108042000_mova_0052_concierge_spend_cap.sql` | $25/month platform concierge model spend cap (O8) | Every concierge channel hands off (fails closed) |
+| 0053 | `20261108043000_mova_0053_stylist_feature_defaults.sql` | O11 stylist-level defaults ON; `mova_feature_settings`; `mova_stylist_features()` | Wallet, Google import, autopilot and seat filler refuse (fail closed) |
+| 0054 | `20261108044000_mova_0054_google_review_import.sql` | Google location id and sync time on review settings (5.9) | Google review sync returns an error |
+| 0055 | `20261108045000_mova_0055_plans_confirmed.sql` | O10 prices active; test-mode billing subscriptions (5.8) | Plans show as before; plan changes fail |
+| 0056 | `20261108046000_mova_0056_seat_filler.sql` | Seat filler campaigns, ranking, first-claim-wins (5.1) | `slot.opened` is not consumed; claims fail |
+| 0057 | `20261108047000_mova_0057_autopilot_attribution.sql` | Rebooking attribution for the autopilot (5.2) | Autopilot runs fail at attribution |
+| 0058 | `20261108048000_mova_0058_plan_fee_rate.sql` | Mova fee follows the stylist's plan (O10: Free 1.5%, Pro 1.0%, AI Growth 0.5%); plan recorded and locked on each payment | Every stylist pays 1.5% whatever their plan; `payment-settings` cannot read the fee |
 
 The production project also holds 83 migration records that are not in this repository. Do not run `supabase db push` against it: it would try to reconcile that history. Apply the files individually as below.
 
 ## Order
 
-Apply 0032, 0034, 0038, 0039, 0040, 0041, 0042, 0043, 0044, 0045, 0046, 0047 in that order, then deploy the Edge Functions that depend on them (`availability-search`, `concierge-artist`, `customer-profile`, `waitlist-signup`, `payment-settings`, `stripe-connect-onboard`, `support-feedback`, `messaging-dispatch`, `messaging-events`, `messaging-inbound-sms`, `missed-call-webhook`, `job-dispatch`, `job-worker`, `stripe-webhook`, `messaging-status`). Deploying `availability-search` before 0039 makes booking return 503.
+Apply 0032, 0034, 0038, 0039, 0040, 0041, 0042, 0043, 0044, 0045, 0046, 0047, 0050, 0051, 0052, 0053, 0054, 0055, 0056, 0057, 0058 in that order, then deploy the Edge Functions that depend on them (`availability-search`, `concierge-artist`, `customer-profile`, `waitlist-signup`, `payment-settings`, `stripe-connect-onboard`, `support-feedback`, `messaging-dispatch`, `messaging-events`, `messaging-inbound-sms`, `missed-call-webhook`, `job-dispatch`, `job-worker`, `stripe-webhook`, `messaging-status`, `concierge-web-chat`, `instagram-webhook`, `wallet-pass-create`, `google-reviews-sync`, `plan-management`, `subscription-checkout`, `subscription-portal`, `slot-campaign`, `slot-claim`, `revenue-center`). Phase 5 platform flags (`MOVA_CONCIERGE_WEB_CHAT_ENABLED`, `MOVA_INSTAGRAM_CONCIERGE_ENABLED`, `MOVA_SMS_CONCIERGE_ENABLED`, `MOVA_SEAT_FILLER_ENABLED`, `MOVA_REBOOKING_TEXTS_ENABLED`, `MOVA_WALLET_CLIENT_CARD_ENABLED`, `MOVA_GOOGLE_REVIEWS_ENABLED`) stay off. Deploying `availability-search` before 0039 makes booking return 503.
 
 ## Pre-checks (read-only)
 
@@ -63,6 +72,15 @@ Then, on the deployed app: Book (25) shows times for a no-deposit service; a dep
 - 0034: drop the objects it created, only if no jobs have been enqueued.
 - 0038: no rollback needed (the previous functions failed on every call).
 - 0039: `drop function public.mova_deposit_bookings_enabled();`, after reverting `availability-search`.
+- 0057: `drop function public.mova_autopilot_attribute(uuid, timestamptz);` after reverting `revenue-center` and `job-dispatch`.
+- 0058: revert `payment-settings`, then restore the 0044 versions of `mova_payment_snapshot_platform_fee` and `mova_payment_fee_locked` and `drop function public.mova_business_fee(uuid, timestamptz);`. Keep the `platform_fee_plan_key` column (stored fees stay as charged).
+- 0056: revert `job-worker`, `job-dispatch`, `slot-campaign`, `slot-claim`; drop the five `mova_slot_*` functions; the added columns are nullable/defaulted and can stay.
+- 0055: set the three plan rows back to `status = 'proposed'`; drop `mova_apply_plan_subscription` and `mova_billing_subscriptions` only if empty.
+- 0054: the two added columns can stay; revert `google-reviews-sync`.
+- 0053: `drop function public.mova_stylist_features(uuid); drop table public.mova_feature_settings;` and reset the four column defaults to false (only if no stylist has saved choices).
+- 0052: `drop function public.mova_concierge_month_spend();` after reverting the concierge channels.
+- 0051: the `intent` column and index can stay.
+- 0050: revert `customer-profile`, then `drop function public.mova_delete_customer_profile(uuid);`.
 - 0047: revert the messaging functions first, then drop `mova_messaging_reserve_spend`, `mova_messaging_month_spend_micros`, `mova_messaging_spend_cap_micros`.
 - 0046: `drop view public.mova_background_job_dead_letters; drop function public.mova_requeue_dead_job(uuid);`
 - 0045: revert `stripe-webhook` and `job-worker` first, then drop `mova_stripe_enqueue_processor_fee` and `mova_stripe_record_processor_fee`. Posted fee ledger rows are immutable and stay.

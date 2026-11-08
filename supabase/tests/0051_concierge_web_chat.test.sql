@@ -1,0 +1,14 @@
+begin;
+select plan(4);
+select has_column('public'::name,'mova_concierge_turns'::name,'intent'::name,'TC-D5-TURN-01 turns record the classified intent');
+insert into auth.users(id,aud,role,email,email_confirmed_at) values('e5600000-0000-4000-8000-000000000001','authenticated','authenticated','chat-owner@example.invalid',now());
+insert into public.mova_artist_businesses(id,name,status) values('e5600000-0000-4000-8000-000000000101','Chat fixture','active');
+insert into public.mova_conversations(id,artist_business_id,channel,external_thread_id,status,ai_enabled) values('e5600000-0000-4000-8000-000000000201','e5600000-0000-4000-8000-000000000101','web_chat','e5600000-0000-4000-8000-000000000999','handled',true);
+insert into public.mova_messages(id,artist_business_id,conversation_id,direction,channel,purpose,origin,body,status,idempotency_key) values('e5600000-0000-4000-8000-000000000301','e5600000-0000-4000-8000-000000000101','e5600000-0000-4000-8000-000000000201','inbound','web_chat','concierge','concierge','My scalp burned','received','web_chat:in:fixture');
+select lives_ok($$insert into public.mova_concierge_turns(conversation_id,artist_business_id,inbound_message_id,model,prompt_version,decision,intent,confidence) values('e5600000-0000-4000-8000-000000000201','e5600000-0000-4000-8000-000000000101','e5600000-0000-4000-8000-000000000301','fake-concierge-v1','concierge-v1','handoff','complaint',0.95)$$,'TC-D5-TURN-01 a handoff turn is stored');
+select throws_ok($$insert into public.mova_concierge_turns(conversation_id,artist_business_id,inbound_message_id,prompt_version,decision,intent) values('e5600000-0000-4000-8000-000000000201','e5600000-0000-4000-8000-000000000101','e5600000-0000-4000-8000-000000000301','concierge-v1','replied','gossip')$$,'23514',null,'TC-D5-TURN-01 unknown intents are refused');
+set local role anon;
+select throws_ok($$select * from public.mova_concierge_turns$$,'42501',null,'TC-D5-TURN-02 the public cannot read concierge turns');
+reset role;
+select * from finish();
+rollback;

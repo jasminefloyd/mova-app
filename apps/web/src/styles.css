@@ -960,3 +960,73 @@ select,
 .mova-feedback__screenshot:focus-within { outline: 2px solid var(--forest); outline-offset: 2px; }
 .mova-feedback__screenshot input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .mova-feedback--sent { justify-items: stretch; }
+
+/* 5.6 Forecast method */
+.mova-forecast-method { display: grid; gap: var(--space-3); }
+.mova-forecast-method h2 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-s); }
+.mova-forecast-method p, .mova-forecast-method small, .mova-forecast-method li { margin: 0; color: var(--ink-muted); font-size: var(--fs-caption); line-height: 1.45; }
+.mova-forecast-method dl { display: grid; gap: var(--space-3); margin: 0; }
+.mova-forecast-method dl > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--space-3); border-top: 1px solid var(--line-subtle); padding-top: var(--space-2); }
+.mova-forecast-method dt { font-size: var(--fs-body-s); font-weight: 600; }
+.mova-forecast-method dd { margin: 0; font-weight: 700; text-align: end; }
+.mova-forecast-method small, .mova-forecast-method ul { grid-column: 1 / -1; }
+.mova-forecast-method ul { margin: 0; padding-left: var(--space-4); }
+.mova-forecast-method .is-total dt, .mova-forecast-method .is-total dd { color: var(--forest); font-size: var(--fs-body); }
+
+/* 5.4 Web chat with the booking assistant (style of board 45) */
+.mova-web-chat__launch { display: grid; }
+.mova-web-chat { display: grid; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-2xl); background: var(--surface); }
+.mova-web-chat__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); border-bottom: 1px solid var(--line-subtle); padding: var(--space-3) var(--space-4); }
+.mova-web-chat__head > span { display: grid; min-width: 0; gap: 2px; }
+.mova-web-chat__head small { color: var(--ink-muted); font-size: var(--fs-micro); }
+.mova-web-chat__close { min-height: var(--tap-min); border: 0; background: transparent; color: var(--forest); font-weight: 600; cursor: pointer; }
+.mova-web-chat__log { display: flex; max-height: 420px; flex-direction: column; gap: var(--space-2); overflow-y: auto; padding: var(--space-4); background: var(--surface-page); }
+.mova-web-chat__intro { margin: 0 0 var(--space-2); color: var(--ink-muted); font-size: var(--fs-caption); text-align: center; }
+.mova-web-chat__bubble { max-width: 85%; border-radius: 18px 18px 18px 6px; padding: 10px 14px; background: var(--surface-alt); color: var(--ink-primary); font-size: var(--fs-body-s); line-height: 1.45; overflow-wrap: anywhere; }
+.mova-web-chat__bubble.is-client { align-self: flex-end; border-radius: 18px 18px 6px 18px; background: var(--botanical); color: var(--ivory); }
+.mova-web-chat__bubble.is-typing { color: var(--ink-muted); }
+.mova-web-chat__assistant { display: grid; justify-items: start; gap: 4px; }
+.mova-web-chat__assistant > span { color: var(--ink-muted); font-size: var(--fs-micro); font-weight: 600; }
+.mova-web-chat__error { margin: 0; padding: var(--space-2) var(--space-4); color: var(--danger); font-size: var(--fs-caption); }
+.mova-web-chat__form { display: flex; gap: var(--space-2); border-top: 1px solid var(--line-subtle); padding: var(--space-3); }
+.mova-web-chat__form input { min-width: 0; flex: 1; min-height: 48px; border: 1px solid var(--line-control); border-radius: var(--radius-pill); padding: 0 var(--space-4); background: var(--surface); color: var(--ink-primary); font: inherit; }
+.mova-web-chat__form input:focus-visible { outline: 2px solid var(--forest); outline-offset: 1px; }
+.mova-web-chat__form .mova-button { min-height: 48px; padding-inline: var(--space-4); }
+
+/* 5.8 Plan notices */
+.mova-plan-notice { margin: 0; border-radius: var(--radius-m); padding: 10px var(--space-3); background: var(--status-confirmed-bg); font-size: var(--fs-body-s); }
+.mova-plan-notice.is-failed { background: #F6E3DF; color: var(--danger); }
+.mova-plan-notice.is-cancelled { background: var(--surface-alt); }
+
+/* 5.1 Seat filler: campaigns (31, 31b, 31c) and the client claim page (31d) */
+.mova-slots { display: grid; gap: var(--space-3); }
+.mova-slots__note { margin: 0; border-radius: var(--radius-m); padding: 10px var(--space-3); background: var(--surface-alt); color: var(--ink-secondary); font-size: var(--fs-caption); }
+.mova-slots__list { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.mova-slots__card { display: grid; gap: var(--space-3); }
+.mova-slots__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.mova-slots__head > span { display: grid; min-width: 0; gap: 2px; }
+.mova-slots__head small, .mova-slots__ends { color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-slots__filled { margin: 0; border-radius: var(--radius-m); padding: 10px var(--space-3); background: var(--status-confirmed-bg); font-weight: 600; }
+.mova-slots__fit { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-slots__copy { display: grid; gap: var(--space-1); border-radius: var(--radius-l); padding: var(--space-3); background: var(--surface-page); }
+.mova-slots__copy span, .mova-slots__copy small { color: var(--ink-muted); font-size: var(--fs-micro); font-weight: 600; }
+.mova-slots__copy p { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; overflow-wrap: anywhere; }
+.mova-slots__timeline { display: grid; gap: var(--space-2); margin: 0; padding: 0 0 0 var(--space-4); border-left: 2px solid var(--line); list-style: none; }
+.mova-slots__timeline li { display: grid; gap: 2px; font-size: var(--fs-body-s); }
+.mova-slots__timeline li.is-done strong { color: var(--forest); }
+.mova-slots__timeline small { color: var(--ink-muted); font-size: var(--fs-caption); overflow-wrap: anywhere; }
+.mova-claim { display: grid; gap: var(--space-4); padding-bottom: var(--space-8); }
+.mova-claim h1 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-l); }
+.mova-claim__head { display: grid; gap: var(--space-2); }
+.mova-claim__badge { width: fit-content; border-radius: var(--radius-pill); padding: 4px var(--space-3); background: var(--status-confirmed-bg); color: var(--forest); font-size: var(--fs-caption); font-weight: 700; }
+.mova-claim__badge.is-taken { background: var(--accent-warm); }
+.mova-claim__details dl { display: grid; gap: var(--space-3); margin: 0; }
+.mova-claim__details dl > div { display: grid; gap: 2px; }
+.mova-claim__details dt { color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-claim__details dd { margin: 0; font-weight: 600; }
+.mova-claim__one { margin: var(--space-3) 0 0; color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-claim .mova-button { width: 100%; }
+.mova-claim__other { justify-self: center; color: var(--forest); font-weight: 600; }
+.mova-claim__taken, .mova-claim__done { display: grid; gap: var(--space-3); }
+.mova-claim__taken p, .mova-claim__done p { margin: 0; }
+.mova-claim__taken .mova-button { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }

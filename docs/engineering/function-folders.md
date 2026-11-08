@@ -43,14 +43,20 @@ canonical function, removed as unused, or handed to Phase 5, which owns the feat
 | `sending-identity-provision` | Twilio number and A2P 10DLC registration are owner/ops steps in the Twilio console (O4/O5, spending); the result is a row in `mova_sending_identities`. |
 | `social-share-image` | The share image is drawn in the browser (Show my QR, 21). |
 
-## Handed to Phase 5 (owner of the feature; implement or remove there)
+## Resolved in Phase 5
 
-| Folder | Phase 5 task |
+| Folder | Outcome |
 | --- | --- |
-| `slot-approve`, `slot-claim`, `slot-dispatch`, `slot-draft`, `slot-scan`, `slot-send-next-wave`, `slot-stop` | 5.1 Seat filler (`slot-campaign` already covers approve/cancel/list) |
-| `concierge-turn` | 5.4 Concierge turns |
-| `instagram-webhook` | 5.5 Instagram concierge |
-| `wallet-apple-webservice`, `wallet-card-create`, `wallet-pass-create`, `wallet-pass-refresh` | 5.7 Wallet passes |
-| `subscription-checkout`, `subscription-portal` | 5.8 Plans and billing (waits on O10 pricing) |
+| `slot-claim` | Implemented (5.1): a texted client views and claims an opened spot (board 31d). |
+| `slot-approve`, `slot-send-next-wave`, `slot-stop` | Removed: `slot-campaign` actions `approve`, `send-next-wave` and `cancel`. |
+| `slot-scan`, `slot-draft`, `slot-dispatch` | Removed: `job-worker` consumes `slot.opened` and drafts the campaign (`mova_slot_open_from_event`, `mova_slot_build_campaign`); `job-dispatch` sends due waves and expires campaigns. |
+| `concierge-turn` | Removed: turns run in `_shared/concierge/pipeline.ts`, called by each channel (`concierge-web-chat`, `messaging-inbound-sms`, `instagram-webhook`). |
+| `instagram-webhook` | Implemented (5.5) with the fake Meta provider; real Meta waits on O6. |
+| `wallet-pass-create` | Implemented (5.7) with the fake signer. |
+| `wallet-card-create` | Removed: duplicate of `wallet-pass-create`. |
+| `wallet-apple-webservice`, `wallet-pass-refresh` | Removed: Apple's pass web service and push refresh need live Apple signing (O11 provider set-up); nothing calls them until then. |
+| `subscription-checkout`, `subscription-portal` | Implemented (5.8) in Stripe test mode with O10 prices. |
+
+No empty function folders remain.
 
 Every remaining function passes `deno check` (`pnpm fn:check`).

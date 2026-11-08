@@ -3,6 +3,8 @@ import { resolveInAppNotificationPreference } from '../_shared/notification-pref
 import { eventNotificationPayload, notificationKeys, type OutboxEvent } from '../_shared/jobs.ts';
 import { StripeTestClient } from '../_shared/providers/stripe/client.ts';
 import { sendAppointmentEmail } from '../_shared/appointment-emails.ts';
+import { consumeSlotOpened } from '../_shared/seat-filler.ts';
+import { smsProviderFromEnv } from '../_shared/providers/sms/index.ts';
 import { emailProviderFromEnv, type EmailDb } from '../_shared/providers/email/index.ts';
 
 const equal = (left: string, right: string) => {
@@ -17,6 +19,11 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
     .select('id,artist_business_id,event_type,payload,aggregate_type,aggregate_id').eq('id', eventId).maybeSingle();
   if (error || !event) throw new Error('OUTBOX_EVENT_READ_FAILED');
   const outboxEvent = event as OutboxEvent;
+  // Task 5.1: a cancelled or no-show slot becomes a seat-filler campaign (sending stays behind its flag).
+  if (outboxEvent.event_type === 'slot.opened') {
+    const env = (name: string) => Deno.env.get(name);
+    await consumeSlotOpened(db, smsProviderFromEnv(env), outboxEvent.id, env);
+  }
   if (!outboxEvent.artist_business_id) return;
 
   const { data: members, error: memberError } = await db.from('mova_artist_memberships')
