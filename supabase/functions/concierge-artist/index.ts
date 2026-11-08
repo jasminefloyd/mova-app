@@ -1,6 +1,10 @@
 import {artistClient,corsHeaders,respond,serviceClient} from '../_shared/booking.ts';
 Deno.serve(async(request)=>{
  if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);const actor=await artistClient(request);if(!actor)return respond({code:'UNAUTHENTICATED'},401);const db=serviceClient();const body=await request.json().catch(()=>({}));
+ if(body.action==='home-needs'){
+  const {data,error}=await db.from('mova_quote_requests').select('id,conversation_id,service_category,created_at').eq('artist_business_id',actor.businessId).eq('status','open').order('created_at',{ascending:false}).limit(5);
+  return error?respond({code:'QUOTE_NEEDS_READ_FAILED'},500):respond({quotes:data??[]});
+ }
  if(body.action==='status'){
   const [{data:settings},{data:conversations,error},{data:handoffs},{data:knowledge}]=await Promise.all([
    db.from('mova_concierge_settings').select('enabled,channels,permissions,tone,languages,hours,daily_ai_turn_cap,globally_paused').eq('artist_business_id',actor.businessId).maybeSingle(),
