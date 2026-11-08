@@ -13,12 +13,23 @@ test('operator navigation uses the BID routes and exposes five labelled tabs', a
   }
 });
 
-test('Home Needs you includes quote requests and open slots awaiting approval', async ({ page }) => {
+test('TC-SCR-07-01 Home Needs you loads booking, quote and open-slot requests without failed table reads', async ({ page }) => {
+  const failedResponses: string[] = [];
+  const directNeedsReads: string[] = [];
+  page.on('response', (response) => {
+    if (response.status() >= 400) failedResponses.push(`${response.status()} ${response.url()}`);
+  });
+  page.on('request', (request) => {
+    if (/\/rest\/v1\/(mova_quote_requests|mova_slot_events)(\?|$)/.test(request.url())) directNeedsReads.push(request.url());
+  });
   await openOperatorPage(page, '/');
   const needs = page.locator('.mova-home__needs-list');
+  await expect(needs.getByRole('link', { name: /Booking request.*Jordan Lee/ })).toHaveAttribute('href', '/BID-1/appointments/AID-16');
   await expect(needs.getByRole('link', { name: /Quote request.*Protective style/ })).toHaveAttribute('href', '/BID-1/growth/concierge/e2500000-0000-4000-8000-000000000031');
   await expect(needs.getByRole('link', { name: /Open slot needs approval/ })).toHaveAttribute('href', '/BID-1/growth/slots');
-  await expect(page.getByText('Needs you · 2', { exact: true })).toBeVisible();
+  await expect(page.getByText('Needs you · 3', { exact: true })).toBeVisible();
+  expect(directNeedsReads).toEqual([]);
+  expect(failedResponses).toEqual([]);
 });
 
 test('quote request opens its scoped detail and saves an internal estimate without sending', async ({ page }) => {

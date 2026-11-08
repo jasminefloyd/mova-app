@@ -2,6 +2,11 @@ import {artistClient,corsHeaders,respond,serviceClient} from '../_shared/booking
 Deno.serve(async(request)=>{
  if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
  const actor=await artistClient(request);if(!actor)return respond({code:'UNAUTHENTICATED'},401);const db=serviceClient();const body=await request.json().catch(()=>({}));
+ if(body.action==='home-needs'){
+  const now=new Date().toISOString();
+  const {data,error}=await db.from('mova_slot_events').select('id,location_id,starts_at').eq('artist_business_id',actor.businessId).eq('status','needs_approval').gte('starts_at',now).gte('expires_at',now).order('starts_at').limit(5);
+  return error?respond({code:'SLOT_NEEDS_READ_FAILED'},500):respond({slots:data??[]});
+ }
  if(body.action==='list'){
   const {data,error}=await db.from('mova_slot_events').select('id,location_id,starts_at,ends_at,origin,status,expires_at,value_minor,mova_locations(name),mova_slot_candidates(id,status,wave,rank),mova_slot_campaign_copy(sms_example,taken_message,social_caption,approved_at)').eq('artist_business_id',actor.businessId).order('created_at',{ascending:false}).limit(100);
   return error?respond({code:'SLOT_CAMPAIGNS_READ_FAILED'},500):respond({campaigns:data??[],outboundEnabled:false});

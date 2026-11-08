@@ -28,6 +28,51 @@ function shortDayLabel(date: Date, locale: string, timeZone: string) {
   return `${weekday} ${day}`;
 }
 
+export function HomeNeedsSection({ businessId, needsYou, quoteNeeds, slotNeeds, locationById, now }: {
+  businessId: string;
+  needsYou: Booking[];
+  quoteNeeds: QuoteNeed[];
+  slotNeeds: SlotNeed[];
+  locationById: Map<string, Location>;
+  now: number;
+}) {
+  const { t, i18n } = useTranslation();
+  const needsCount = needsYou.length + quoteNeeds.length + slotNeeds.length;
+  return <section className="mova-home__section">
+    <SectionOverline>{t('homeAppointments.needsYou', { count: needsCount })}</SectionOverline>
+    {needsCount ? <Card tone="warm" className="mova-home__needs-list">
+      {needsYou.map((item) => {
+        const location = locationById.get(item.location_id);
+        const requestDay = new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'short', timeZone: location?.time_zone }).format(new Date(item.starts_at));
+        const requestContext = { service: item.service_name_snapshot, day: requestDay, location: location?.name ?? '' };
+        const requestDetails = item.request_expires_at
+          ? t('homeAppointments.requestDetails', { ...requestContext, count: Math.max(1, Math.ceil((new Date(item.request_expires_at).getTime() - now) / 3_600_000)) })
+          : t('homeAppointments.requestDetailsNoExpiry', requestContext);
+        return <Link key={item.id} className="mova-home__need" to={operatorUrl(businessId, `appointments/${displayId('AID', item.appointment_number)}`)}>
+          <Icon name="clock" size={20} />
+          <span><strong>{t('homeAppointments.bookingRequest', { name: item.client_name })}</strong><small>{requestDetails}</small></span>
+          <Icon name="chevron" size={18} />
+        </Link>;
+      })}
+      {quoteNeeds.map((quote) => <Link key={`quote:${quote.id}`} className="mova-home__need" to={operatorUrl(businessId, `growth/concierge/${quote.conversation_id}`)}>
+        <Icon name="message" size={20} />
+        <span><strong>{t('homeAppointments.quoteRequest')}</strong><small>{quote.service_category}</small></span>
+        <Icon name="chevron" size={18} />
+      </Link>)}
+      {slotNeeds.map((slot) => {
+        const location = locationById.get(slot.location_id);
+        const zone = location?.time_zone ?? 'UTC';
+        const slotTime = new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: zone }).format(new Date(slot.starts_at));
+        return <Link key={`slot:${slot.id}`} className="mova-home__need" to={operatorUrl(businessId, 'growth/slots')}>
+          <Icon name="clock" size={20} />
+          <span><strong>{t('homeAppointments.slotNeedsApproval')}</strong><small>{t('homeAppointments.slotDetails', { time: slotTime, location: location?.name ?? '' })}</small></span>
+          <Icon name="chevron" size={18} />
+        </Link>;
+      })}
+    </Card> : <EmptyState title={t('homeAppointments.noRequests')} />}
+  </section>;
+}
+
 export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => void }) {
   const { t, i18n } = useTranslation();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
@@ -53,10 +98,8 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
         .gte('starts_at', start.toISOString()).lt('starts_at', end.toISOString()).order('starts_at').limit(100),
       client.from('mova_locations').select('id,name,time_zone,display_color_index').eq('artist_business_id', businessId).eq('is_active', true).order('display_color_index'),
       client.from('mova_artist_profiles').select('display_name,handle,is_published').eq('artist_business_id', businessId).maybeSingle(),
-      client.from('mova_quote_requests').select('id,conversation_id,service_category,created_at')
-        .eq('artist_business_id', businessId).eq('status', 'open').order('created_at', { ascending: false }).limit(5),
-      client.from('mova_slot_events').select('id,location_id,starts_at')
-        .eq('artist_business_id', businessId).eq('status', 'needs_approval').gte('starts_at', new Date().toISOString()).gte('expires_at', new Date().toISOString()).order('starts_at').limit(5),
+      client.functions.invoke<{ data?: { quotes?: QuoteNeed[] } }>('concierge-artist', { body: { action: 'home-needs' }, headers: { 'x-mova-artist-business-id': businessId } }),
+      client.functions.invoke<{ data?: { slots?: SlotNeed[] } }>('slot-campaign', { body: { action: 'home-needs' }, headers: { 'x-mova-artist-business-id': businessId } }),
     ]);
     if (bookings.error || locationRows.error || profileRow.error) {
       setError(true);
@@ -64,8 +107,8 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
       return;
     }
     setItems((bookings.data ?? []) as Booking[]);
-    setQuoteNeeds((quoteRows.data ?? []) as QuoteNeed[]);
-    setSlotNeeds((slotRows.data ?? []) as SlotNeed[]);
+    setQuoteNeeds(quoteRows.error ? [] : (quoteRows.data?.data?.quotes ?? []));
+    setSlotNeeds(slotRows.error ? [] : (slotRows.data?.data?.slots ?? []));
     setNeedsError(Boolean(quoteRows.error || slotRows.error));
     setLocations((locationRows.data ?? []) as Location[]);
     setProfile((profileRow.data ?? null) as Profile | null);
@@ -145,39 +188,9 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
       <KPITile label={t('homeAppointments.rating')} value={metrics.rating} delta={metrics.ratingCount} tone="inverse" />
     </Link>
 
-    <section className="mova-home__section">
-      <SectionOverline>{t('homeAppointments.needsYou', { count: needsCount })}</SectionOverline>
-      {needsError ? <ErrorState title={t('homeAppointments.needsError')} retryLabel={t('homeAppointments.retry')} onRetry={() => void load()} /> : needsCount ? <Card tone="warm" className="mova-home__needs-list">
-        {needsYou.map((item) => {
-        const location = locationById.get(item.location_id);
-        const requestDay = new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'short', timeZone: location?.time_zone }).format(new Date(item.starts_at));
-        const requestContext = { service: item.service_name_snapshot, day: requestDay, location: location?.name ?? '' };
-        const requestDetails = item.request_expires_at
-          ? t('homeAppointments.requestDetails', { ...requestContext, count: Math.max(1, Math.ceil((new Date(item.request_expires_at).getTime() - now) / 3_600_000)) })
-          : t('homeAppointments.requestDetailsNoExpiry', requestContext);
-        return <Link key={item.id} className="mova-home__need" to={operatorUrl(businessId, `appointments/${displayId('AID',item.appointment_number)}`)}>
-          <Icon name="clock" size={20} />
-          <span><strong>{t('homeAppointments.bookingRequest', { name: item.client_name })}</strong><small>{requestDetails}</small></span>
-          <Icon name="chevron" size={18} />
-        </Link>;
-      })}
-        {quoteNeeds.map((quote) => <Link key={`quote:${quote.id}`} className="mova-home__need" to={operatorUrl(businessId, `growth/concierge/${quote.conversation_id}`)}>
-          <Icon name="message" size={20} />
-          <span><strong>{t('homeAppointments.quoteRequest')}</strong><small>{quote.service_category}</small></span>
-          <Icon name="chevron" size={18} />
-        </Link>)}
-        {slotNeeds.map((slot) => {
-          const location = locationById.get(slot.location_id);
-          const zone = location?.time_zone ?? 'UTC';
-          const slotTime = new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: zone }).format(new Date(slot.starts_at));
-          return <Link key={`slot:${slot.id}`} className="mova-home__need" to={operatorUrl(businessId, 'growth/slots')}>
-            <Icon name="clock" size={20} />
-            <span><strong>{t('homeAppointments.slotNeedsApproval')}</strong><small>{t('homeAppointments.slotDetails', { time: slotTime, location: location?.name ?? '' })}</small></span>
-            <Icon name="chevron" size={18} />
-          </Link>;
-        })}
-      </Card> : <EmptyState title={t('homeAppointments.noRequests')} />}
-    </section>
+    {needsError
+      ? <section className="mova-home__section"><SectionOverline>{t('homeAppointments.needsYou', { count: needsCount })}</SectionOverline><ErrorState title={t('homeAppointments.needsError')} retryLabel={t('homeAppointments.retry')} onRetry={() => void load()} /></section>
+      : <HomeNeedsSection businessId={businessId} needsYou={needsYou} quoteNeeds={quoteNeeds} slotNeeds={slotNeeds} locationById={locationById} now={now} />}
 
     <section className="mova-home__section">
       <div className="mova-home__section-heading">
