@@ -97,3 +97,5 @@ Phase C5 disposition is limited to these six folders. The remaining empty folder
 | `account-delete-request` | `customer-profile` (`delete-profile`) | Self-service deletion is immediate after audit; artist privacy requests remain in `privacy-management`. |
 
 These aliases close folder duplication only. D7 scheduling and D11 end-to-end identity/tenant-security evidence remain open.
+
+Task 4.5 (Nov 8) removed 21 more empty folders and lists every remaining one with its owner in `docs/engineering/function-folders.md`.
