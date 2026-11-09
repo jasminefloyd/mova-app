@@ -6,7 +6,8 @@ import { Button, Chip, ErrorState, ScreenHeader, TextArea, TextField } from '../
 import { operatorUrl } from '../../app/operator-url';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 
-type Profile = { display_name: string; bio: string; specialties: string[]; handle: string; preferred_locale: 'en-US' | 'es-US'; profile_photo_path: string | null; cover_photo_path: string | null };
+type Profile = { display_name: string; bio: string; specialties: string[]; handle: string; preferred_locale: 'en-US' | 'es-US'; profile_photo_path: string | null; cover_photo_path: string | null; cover_source?: 'upload' | 'unsplash'; cover_image_url?: string | null; cover_credit_name?: string | null; cover_credit_url?: string | null; cover_unsplash_url?: string | null };
+type CoverCredit = { name: string; url: string; unsplashUrl: string };
 type Looks = { total: number; shown: number; thumbs: string[] };
 type Draft = { displayName: string; handle: string; bio: string; specialties: string[] };
 
@@ -44,6 +45,7 @@ export function ProfileSettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [credit, setCredit] = useState<CoverCredit | null>(null);
   const [looks, setLooks] = useState<Looks | null>(null);
   const [draft, setDraft] = useState<Draft>({ displayName: '', handle: '', bio: '', specialties: [] });
   const [photo, setPhoto] = useState<File | null>(null);
@@ -60,7 +62,7 @@ export function ProfileSettingsPage() {
     if (!client || !businessId) return;
     setLoadError(false);
     const [{ data, error }, items] = await Promise.all([
-      client.from('mova_artist_profiles').select('display_name,bio,specialties,handle,preferred_locale,profile_photo_path,cover_photo_path').eq('artist_business_id', businessId).maybeSingle(),
+      client.from('mova_artist_profiles').select('display_name,bio,specialties,handle,preferred_locale,profile_photo_path,cover_photo_path,cover_source,cover_image_url,cover_credit_name,cover_credit_url,cover_unsplash_url').eq('artist_business_id', businessId).maybeSingle(),
       client.from('mova_portfolio_items').select('media_path,is_published,sort_order').eq('artist_business_id', businessId).order('sort_order'),
     ]);
     if (error || !data) { setLoadError(true); return; }
@@ -73,7 +75,10 @@ export function ProfileSettingsPage() {
       signed(client, 'mova_profile_photos', value.cover_photo_path),
       ...rows.slice(0, 3).map((row) => signed(client, 'mova_portfolio_media', row.media_path)),
     ]);
-    setPhotoUrl(photoSigned); setCoverUrl(coverSigned);
+    setPhotoUrl(photoSigned);
+    const unsplashCover = value.cover_source === 'unsplash' && value.cover_image_url && value.cover_credit_name && value.cover_credit_url && value.cover_unsplash_url;
+    setCoverUrl(unsplashCover ? value.cover_image_url! : coverSigned);
+    setCredit(unsplashCover ? { name: value.cover_credit_name!, url: value.cover_credit_url!, unsplashUrl: value.cover_unsplash_url! } : null);
     setLooks({ total: rows.length, shown: rows.filter((row) => row.is_published).length, thumbs: thumbs.filter((url): url is string => Boolean(url)) });
   }, [businessId, client]);
 
@@ -150,8 +155,9 @@ export function ProfileSettingsPage() {
     {profile && <form className="mova-form-stack" onSubmit={(event) => void save(event)}>
       <section className="mova-profile-edit__photos" aria-label={t('settings.photos')}>
         <div className="mova-profile-edit__cover" role="img" aria-label={t('settings.coverPhoto')} style={coverImage ? { backgroundImage: `url("${coverImage}")` } : undefined}>
-          <label className="mova-profile-edit__cover-button">{t('settings.changeCover')}<input type="file" accept={accept} onChange={pick('cover')} /></label>
+          <Link className="mova-profile-edit__cover-button" to={operatorUrl(businessId, 'settings/profile/cover')}>{t('settings.changeCover')}</Link>
         </div>
+        {credit && !coverPreview && <p className="mova-profile-edit__credit">{t('coverPicker.photoCredit')} <a href={credit.url} target="_blank" rel="noopener noreferrer">{credit.name}</a> / <a href={credit.unsplashUrl} target="_blank" rel="noopener noreferrer">{t('coverPicker.unsplash')}</a></p>}
         <div className="mova-profile-edit__avatar-row">
           <span className="mova-profile-edit__avatar">{avatar && <img src={avatar} alt={t('settings.profilePhotoAlt', { name: draft.displayName || profile.display_name })} />}</span>
           <label className="mova-button mova-button--secondary mova-profile-edit__photo-button">{t('settings.changeProfilePhoto')}<input type="file" accept={accept} onChange={pick('profile')} /></label>

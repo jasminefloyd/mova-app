@@ -100,3 +100,15 @@ Conventions: `/functions/v1/<name>`, envelope `{ data, error, request_id }`, `Id
 - `sending-identity-provision`
 
 `_shared/` holds auth, tenant, customer, money, idempotency, ratelimit, i18n, policy, outbox, jobs, log and the provider adapters (stripe, gcal, sms, email, meta, gbp, wallet, ai), each with a sandbox implementation used in CI (§7).
+
+## P6 Google and cover (one Google connection)
+
+- `calendar-google-connect` (name kept for existing clients): actions `status`, `begin`, `disconnect`, `set-toggles`, `calendars`, `set-calendar`, `locations`, `set-business-location`, `save-settings`, `rotate-feed`. Reads and writes `mova_google_connections`.
+- `calendar-google-callback`: OAuth return for the single connection; redirects to `settings/google`.
+- `calendar-sync-run`: cron (CRON_SECRET) one-way sync of appointments to the chosen calendar.
+- `google-business-sync`: listing and services sync. Actions `status`, `push`, `set-auto-send`; cron action `auto-push-all` (CRON_SECRET). Not yet scheduled: wire the cron route when the owner approves it.
+- `google-reviews-sync`: review import through the connection's Business Profile location.
+- `review-management`: adds `reply_google` and `delete_google_reply`.
+- `profile-cover`: Unsplash search and use for the profile cover (`search`, `use`, `clear`).
+- Providers: `_shared/providers/google` and `_shared/providers/unsplash`. Fake when `MOVA_GOOGLE_PROVIDER=fake` / `MOVA_UNSPLASH_PROVIDER=fake`; live code exists but is OFF until both `*_LIVE_ENABLED=true` and the keys are set. The live Business Profile request shapes are unverified against Google's current references.
+

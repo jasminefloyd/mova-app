@@ -1,9 +1,10 @@
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
-import { googleReviewsProviderFromEnv } from '../_shared/providers/gbp/reviews.ts';
+import { accessTokenFor, businessProfileReady, googleProvider, loadConnection } from '../_shared/google-connection.ts';
 
-// Task 5.9: import the stylist's Google reviews. Platform flag MOVA_GOOGLE_REVIEWS_ENABLED stays off
-// until the Google connection is live (O11); the stylist's google_review_import switch (default ON,
-// 0053) and a saved location id are also required. Only the fake provider exists today.
+// Task 5.9 / P6: import the stylist's Google reviews through the one Google connection. Needs the platform
+// flag MOVA_GOOGLE_REVIEWS_ENABLED=true, a provider (MOVA_GOOGLE_PROVIDER), an active connection with the
+// Business Profile permission and a chosen Business Profile location, and the stylist's review-import switch.
+// Nothing here posts to Google.
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
@@ -11,15 +12,15 @@ Deno.serve(async (request) => {
   if (!actor) return respond({ code: 'UNAUTHENTICATED' }, 401);
   // Never imply that Google data was fetched when it was not.
   if (Deno.env.get('MOVA_GOOGLE_REVIEWS_ENABLED') !== 'true') return respond({ code: 'GOOGLE_REVIEWS_NOT_ENABLED', synced: false }, 409);
-  const provider = googleReviewsProviderFromEnv((name) => Deno.env.get(name));
-  if (!provider) return respond({ code: 'GOOGLE_PROVIDER_NOT_CONFIGURED', synced: false }, 503);
+  const provider = googleProvider();
+  if (!provider) return respond({ code: 'GOOGLE_NOT_CONFIGURED', synced: false }, 503);
   const db = serviceClient();
   const { data: features } = await db.rpc('mova_stylist_features', { p_artist_business_id: actor.businessId });
   if (features?.google_review_import !== true) return respond({ code: 'GOOGLE_IMPORT_TURNED_OFF', synced: false }, 409);
-  const { data: settings } = await db.from('mova_review_settings').select('google_location_id').eq('artist_business_id', actor.businessId).maybeSingle();
-  if (!settings?.google_location_id) return respond({ code: 'GOOGLE_LOCATION_NOT_SET', synced: false }, 409);
+  const connection = await loadConnection(db, actor.businessId).catch(() => null);
+  if (!businessProfileReady(connection)) return respond({ code: 'GOOGLE_LOCATION_NOT_SET', synced: false }, 409);
   let reviews;
-  try { reviews = await provider.listReviews(settings.google_location_id); } catch { return respond({ code: 'GOOGLE_FETCH_FAILED', synced: false }, 502); }
+  try { reviews = await provider.listReviews(await accessTokenFor(provider, connection), connection.business_location_id!); } catch { return respond({ code: 'GOOGLE_FETCH_FAILED', synced: false }, 502); }
   const now = new Date().toISOString();
   if (reviews.length) {
     const { error } = await db.from('mova_google_reviews').upsert(reviews.map((review) => ({

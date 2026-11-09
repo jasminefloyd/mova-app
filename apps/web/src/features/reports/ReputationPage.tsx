@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, EmptyState, ErrorState, ScreenHeader, TextArea, TextField, Toggle } from '../../components';
+import { Button, Card, EmptyState, ErrorState, ScreenHeader, Sheet, TextArea, TextField, Toggle } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { operatorUrl } from '../../app/operator-url';
+import { GoogleActionError, invokeGoogle, type GoogleConnection } from '../google/googleApi';
+import '../google/google.css';
 
 type Review = { id: string; rating: number; tags: string[]; body: string; display_name: string; moderation_status: string; artist_reply: string | null; created_at: string; mova_appointments?: { service_name_snapshot: string } | null };
-type GoogleReview = { id: string; rating: number; body: string; display_name: string; provider_created_at: string | null };
+type GoogleReview = { id: string; rating: number; body: string; display_name: string; provider_created_at: string | null; reply_body: string | null; reply_status: 'none' | 'queued' | 'posted' | 'failed' };
 type Settings = { ask_after_visit: boolean; google_review_url: string | null };
 type RatingSummary = { count: number; average: number | null; awaiting_reply: number; stars: Record<string, number>; mova_count: number; mova_average: number | null; google_count: number; google_average: number | null };
 type ReviewResponse = { reviews?: Review[]; google_reviews?: GoogleReview[]; summary?: RatingSummary | null; settings?: Settings; email_delivery_enabled?: boolean };
@@ -30,6 +32,11 @@ export function ReputationPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const [notice, setNotice] = useState('');
+  const [googleConnection, setGoogleConnection] = useState<GoogleConnection | null>(null);
+  const [googleReplyFor, setGoogleReplyFor] = useState<GoogleReview | null>(null);
+  const [googleReplyText, setGoogleReplyText] = useState('');
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const [googleNotice, setGoogleNotice] = useState('');
 
   const call = useCallback(async (payload: Record<string, unknown>): Promise<ReviewResponse> => {
     if (!client || !businessId) throw new Error('IDENTITY_REQUIRED');
@@ -45,7 +52,11 @@ export function ReputationPage() {
     setLoading(true);
     setError(false);
     try {
-      const data = await call({ action: 'get' });
+      const [data, connection] = await Promise.all([
+        call({ action: 'get' }),
+        client && businessId ? invokeGoogle<{ google: GoogleConnection | null }>(client, businessId, 'calendar-google-connect', { action: 'status' }).then((result) => result.google).catch(() => null) : Promise.resolve(null),
+      ]);
+      setGoogleConnection(connection);
       setReviews(data.reviews ?? []);
       setGoogleReviews(data.google_reviews ?? []);
       setSummary(data.summary ?? null);
@@ -58,8 +69,40 @@ export function ReputationPage() {
     } finally {
       setLoading(false);
     }
-  }, [call]);
+  }, [call, client, businessId]);
   useEffect(() => { if (!identityLoading) void load(); }, [identityLoading, load]);
+
+  const googleReady = Boolean(googleConnection?.status === 'active' && googleConnection.business_profile_enabled && googleConnection.has_business_scope && googleConnection.business_location_id);
+  const postGoogleReply = async () => {
+    if (!client || !businessId || !googleReplyFor) return;
+    setGoogleBusy(true);
+    setGoogleNotice('');
+    try {
+      await invokeGoogle(client, businessId, 'review-management', { action: 'reply_google', review_id: googleReplyFor.id, reply: googleReplyText });
+      setGoogleReplyFor(null);
+      setGoogleReplyText('');
+      setGoogleNotice(t('google.reply.posted'));
+      await load();
+    } catch (cause) {
+      setGoogleNotice(cause instanceof GoogleActionError ? t(`google.errors.${cause.code}`, { defaultValue: t('google.reply.failed') }) : t('google.reply.failed'));
+    } finally {
+      setGoogleBusy(false);
+    }
+  };
+  const deleteGoogleReply = async (review: GoogleReview) => {
+    if (!client || !businessId) return;
+    setGoogleBusy(true);
+    setGoogleNotice('');
+    try {
+      await invokeGoogle(client, businessId, 'review-management', { action: 'delete_google_reply', review_id: review.id });
+      setGoogleNotice(t('google.reply.deleted'));
+      await load();
+    } catch (cause) {
+      setGoogleNotice(cause instanceof GoogleActionError ? t(`google.errors.${cause.code}`, { defaultValue: t('google.reply.failed') }) : t('google.reply.failed'));
+    } finally {
+      setGoogleBusy(false);
+    }
+  };
 
   const saveSettings = async (patch: Partial<Settings>) => {
     setBusy(true);
@@ -101,7 +144,7 @@ export function ReputationPage() {
   };
 
   const filteredMova = filter === 'google' ? [] : reviews.filter((review) => filter === 'needs_reply' ? !review.artist_reply : true);
-  const filteredGoogle = filter === 'google' || filter === 'all' ? googleReviews : [];
+  const filteredGoogle = filter === 'mova' ? [] : googleReviews.filter((review) => filter === 'needs_reply' ? review.reply_status === 'none' : true);
   const totalCount = summary?.count ?? 0;
   const startReply = (review: Review) => { setReplyId(review.id); setReply(review.artist_reply ?? ''); };
 
@@ -138,6 +181,10 @@ export function ReputationPage() {
             <p>{t('reviews.googleImportOff')}</p>
             {settings.google_review_url && <a href={settings.google_review_url} target="_blank" rel="noreferrer">{t('reviews.openGoogle')}</a>}
           </Card>}
+          <Link className="mova-google-reputation-link" to={operatorUrl(businessId, 'settings/google')}>
+            <span>{googleConnection?.status === 'active' ? t('google.reply.connectedRow') : t('google.reply.notConnectedRow')}</span><span aria-hidden="true">›</span>
+          </Link>
+          {googleNotice && <p role="status">{googleNotice}</p>}
           <div className="mova-reviews-filters" role="group" aria-label={t('reviews.filter')}>
             {['all', 'mova', 'google', 'needs_reply'].map((key) => <button type="button" key={key} aria-pressed={filter === key} className={filter === key ? 'is-selected' : ''} onClick={() => setFilter(key)}>
               {key === 'needs_reply' ? `${t(`reviews.filters.${key}`)} · ${summary?.awaiting_reply ?? 0}` : t(`reviews.filters.${key}`)}
@@ -150,6 +197,14 @@ export function ReputationPage() {
                 <header><div><strong>{review.display_name || t('reviews.googleReviewer')}</strong><time>{review.provider_created_at ? new Intl.DateTimeFormat(i18n.resolvedLanguage, { dateStyle: 'medium' }).format(new Date(review.provider_created_at)) : ''}</time></div>
                   <span aria-label={t('reviews.stars', { count: review.rating })}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span></header>
                 <p className="mova-review-source">Google</p>{review.body && <p>{review.body}</p>}
+                {review.reply_body && review.reply_status !== 'none'
+                  ? <blockquote><strong>{t('reviews.yourReply')}</strong><p>{review.reply_body}</p>
+                    {review.reply_status === 'failed' && <p role="alert">{t('google.reply.failed')}</p>}
+                    {googleReady && <div className="mova-google-reply-actions"><Button variant="secondary" disabled={googleBusy} onClick={() => { setGoogleReplyFor(review); setGoogleReplyText(review.reply_body ?? ''); }}>{t('google.reply.editReply')}</Button><Button variant="ghost" disabled={googleBusy} onClick={() => void deleteGoogleReply(review)}>{t('google.reply.deleteReply')}</Button></div>}
+                  </blockquote>
+                  : googleReady
+                    ? <Button variant="secondary" disabled={googleBusy} onClick={() => { setGoogleReplyFor(review); setGoogleReplyText(''); }}>{t('google.reply.replyOnGoogle')}</Button>
+                    : <p className="mova-google-reply-note">{t('google.reply.notConnected')}</p>}
               </Card>)}
               {filteredMova.map((review) => <Card key={review.id} className="mova-review-card">
                 <header><div><strong>{review.display_name}</strong><span className="mova-review-stars" aria-label={t('reviews.stars', { count: review.rating })}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span></div>
@@ -166,6 +221,15 @@ export function ReputationPage() {
                 <Button variant="ghost" disabled={busy} onClick={() => void report(review)}>{t('reviews.report')}</Button>
               </Card>)}
             </div>}
+          <Sheet open={googleReplyFor !== null} title={t('google.reply.title')} closeLabel={t('google.reply.close')} onClose={() => setGoogleReplyFor(null)}>
+            {googleReplyFor && <div className="mova-google-reply-form">
+              <blockquote className="mova-google-reply-quote"><div><strong>{googleReplyFor.display_name || t('reviews.googleReviewer')}</strong><span aria-label={t('reviews.stars', { count: googleReplyFor.rating })}>{'★'.repeat(googleReplyFor.rating)}{'☆'.repeat(5 - googleReplyFor.rating)}</span></div>{googleReplyFor.body && <p>{googleReplyFor.body}</p>}</blockquote>
+              <TextArea label={t('google.reply.label')} value={googleReplyText} maxLength={4096} onChange={(event) => setGoogleReplyText(event.currentTarget.value)} />
+              <small>{googleReplyText.length}/4096</small>
+              <p className="mova-google-reply-note">{t('google.reply.posts', { name: googleConnection?.google_account_email ?? '' })}</p>
+              <Button loading={googleBusy} disabled={googleBusy || !googleReplyText.trim()} onClick={() => void postGoogleReply()}>{t('google.reply.post')}</Button>
+            </div>}
+          </Sheet>
           <Card className="mova-review-settings">
             <h2>{t('reviews.requestSettings')}</h2>
             <Toggle label={t('reviews.askAfterVisit')} description={t('reviews.askDescription')} checked={settings.ask_after_visit} disabled={busy || !emailEnabled} onChange={(value) => void saveSettings({ ask_after_visit: value })} />
