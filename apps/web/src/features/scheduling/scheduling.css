@@ -1,0 +1,120 @@
+/* P6 scheduling screens: New location (19a), Calendar add sheet (08b), New appointment (08c),
+   New client (08d), Block time (08e). Colours and spacing come from the design tokens only. */
+
+.mova-scheduling__form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.mova-scheduling__stack {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.mova-scheduling__pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-2);
+}
+
+.mova-scheduling__days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(40px, 1fr));
+  gap: var(--space-1);
+}
+
+.mova-scheduling__day {
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  border: 1px solid var(--line-control);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.mova-scheduling__day[aria-pressed='true'] {
+  background: var(--forest);
+  border-color: var(--forest);
+  color: var(--ivory);
+}
+
+.mova-scheduling__rules,
+.mova-scheduling__when,
+.mova-scheduling__consent {
+  display: grid;
+  gap: var(--space-2);
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.mova-scheduling__consent-hint {
+  margin: 0 0 var(--space-2) calc(var(--space-4) + var(--space-1));
+}
+
+.mova-scheduling__note,
+.mova-scheduling__free {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--fs-body-s);
+}
+
+.mova-scheduling__inline-link {
+  justify-self: start;
+  min-height: var(--tap-min);
+  display: inline-flex;
+  align-items: center;
+  color: var(--forest);
+  font-weight: 600;
+}
+
+.mova-scheduling__choices {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.mova-scheduling__choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 64px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  color: var(--ink-primary);
+  text-decoration: none;
+}
+
+.mova-scheduling__choice-icon {
+  display: inline-flex;
+  color: var(--forest);
+}
+
+.mova-scheduling__choice-copy {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.mova-scheduling__choice-copy small {
+  color: var(--ink-muted);
+}
+
+.mova-scheduling__cancel,
+.mova-scheduling__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  color: var(--forest);
+  font-weight: 600;
+}
+
+@media (max-width: 320px) {
+  .mova-scheduling__days {
+    grid-template-columns: repeat(7, minmax(36px, 1fr));
+  }
+}

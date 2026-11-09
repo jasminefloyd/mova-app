@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { DayStrip, EmptyState, ErrorState, HonestyBanner, IconButton } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { operatorUrl } from '../../app/operator-url';
 import { displayId } from '../../lib/display-ids';
+import { BLOCK_REASONS } from '../scheduling/rules';
 
 type Location = { id: string; name: string; time_zone: string; booking_mode: string; calendar_ownership: string; payment_collector: string; display_color_index: number };
 type Appointment = { id: string; appointment_number:number; location_id: string; service_name_snapshot: string; service_names?:string[]; client_name: string; status: string; starts_at: string; ends_at: string };
-type AvailabilityBlock = { id: string; location_id: string; reason: string; starts_at: string; ends_at: string };
+type AvailabilityBlock = { id: string; location_id: string; reason: string; label: string; starts_at: string; ends_at: string };
 
 function dateKey(date: Date, timeZone?: string) {
   const parts = new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
@@ -35,6 +37,7 @@ function blockPosition(startValue: string, endValue: string, zone: string) {
 
 export function CalendarPage() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
   const [locations, setLocations] = useState<Location[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -59,7 +62,7 @@ export function CalendarPage() {
       client.from('mova_appointments').select('id,appointment_number,location_id,service_name_snapshot,client_name,status,starts_at,ends_at')
         .eq('artist_business_id', businessId).gte('starts_at', start.toISOString()).lt('starts_at', to.toISOString())
         .in('status', ['pending_artist', 'pending_payment', 'confirmed', 'completed']).order('starts_at').limit(300),
-      client.from('mova_availability_blocks').select('id,location_id,reason,starts_at,ends_at')
+      client.from('mova_availability_blocks').select('id,location_id,reason,label,starts_at,ends_at')
         .eq('artist_business_id', businessId).gte('starts_at', start.toISOString()).lt('starts_at', to.toISOString()).order('starts_at').limit(300),
     ]);
     if (locationRows.error || appointmentRows.error || blockRows.error) {
@@ -115,6 +118,7 @@ export function CalendarPage() {
   if (identityLoading || loading) return <main className="mova-page mova-calendar" aria-busy="true"><p role="status">{t('calendar.loading')}</p></main>;
   if (!businessId) return <main className="mova-page mova-calendar"><ErrorState title={t('calendar.identityError')} retryLabel={t('calendar.retry')} onRetry={() => window.location.reload()} /></main>;
 
+  const blockReasonLabel = (reason: string) => (BLOCK_REASONS as readonly string[]).includes(reason) ? t(`scheduling.blockReasons.${reason}`) : t('scheduling.blockReasons.other');
   const hourLabels = Array.from({ length: 9 }, (_, index) => index + 9);
   const timeLabel = (hour: number) => new Intl.DateTimeFormat(i18n.resolvedLanguage, { hour: 'numeric' }).formatToParts(new Date(2000, 0, 1, hour))
     .filter((part) => hour === 9 || hour === 12 || part.type !== 'dayPeriod')
@@ -166,13 +170,13 @@ export function CalendarPage() {
         const zone = locationById.get(block.location_id)?.time_zone ?? 'UTC';
         const position = blockPosition(block.starts_at, block.ends_at, zone);
         return <div key={block.id} className="mova-calendar__block" style={{ top: `${position.top}px`, height: `${position.height}px` }}>
-          <span>{block.reason}</span>
+          <span>{t('scheduling.blockedLabel', { label: block.label || blockReasonLabel(block.reason) })}</span>
         </div>;
       })}
     </div>
 
     {!error && !hasItems && <EmptyState title={t('calendar.empty')} />}
-    <IconButton className="mova-calendar__fab" label={t('calendar.newAppointment')} icon="plus" />
+    <IconButton className="mova-calendar__fab" label={t('calendar.newAppointment')} icon="plus" onClick={() => navigate(operatorUrl(businessId, 'calendar/add'))} />
   </main>;
 }
 

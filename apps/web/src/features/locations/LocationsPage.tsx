@@ -67,10 +67,10 @@ export function LocationsPage() {
   if (identityLoading) return <main className="mova-page"><p role="status">{t('locations.loading')}</p></main>;
   if (!businessId) return <main className="mova-page"><ErrorState title={t('locations.identityError')} retryLabel={t('locations.retry')} onRetry={() => window.location.reload()} /></main>;
   return <main className="mova-page mova-location-settings">
-    <ScreenHeader onBack={()=>navigate(operatorUrl(businessId,'settings'))} trailing={<IconButton label={t('locations.add')} icon="plus" onClick={()=>{reset();setFormOpen(true);}} />} />
+    <ScreenHeader onBack={()=>navigate(operatorUrl(businessId,'settings'))} trailing={<IconButton label={t('locations.add')} icon="plus" onClick={()=>navigate(operatorUrl(businessId,'settings/locations/new'))} />} />
     <h1>{t('locations.title')}</h1>
     {error && <ErrorState title={t('locations.error')} retryLabel={t('locations.retry')} onRetry={() => void load()} />}
-    {locations.length === 0 && !formOpen && <EmptyState title={t('locations.empty')} action={<Button onClick={()=>setFormOpen(true)}>{t('locations.add')}</Button>} />}
+    {locations.length === 0 && !formOpen && <EmptyState title={t('locations.empty')} action={<Button onClick={()=>navigate(operatorUrl(businessId,'settings/locations/new'))}>{t('locations.add')}</Button>} />}
     <div className="mova-location-list">{locations.map((location) => { const summary=summaries[location.id]; return <Card className="mova-location-card" key={location.id}><div><h2>{location.name}</h2><p>{t(`locations.types.${location.location_type}`)} · {location.time_zone}</p></div><span className="mova-location-card__status">{t(location.is_active?'locations.active':'locations.inactive')}</span><p>{t(`locations.mode.${location.booking_mode}`)} · {t(`locations.collector.${location.payment_collector}`)}</p><div className="mova-location-card__hours">{(summary?.hours??[]).slice(0,3).map((row)=><span key={row.weekday}>{t(`locations.weekdaysShort.${row.weekday}`)} {row.opens_at.slice(0,5)}–{row.closes_at.slice(0,5)}</span>)}</div><small>{summary?.policy ? t('locations.noticeSummary',{minutes:summary.policy.lead_time_minutes,days:summary.policy.booking_horizon_days}) : ''}</small><Button type="button" variant="secondary" onClick={() => void edit(location)}>{t('locations.edit')}</Button></Card>; })}</div>
     {formOpen && <Card className="mova-location-form"><form onSubmit={(event) => void save(event)}>
       <h2>{editingId ? t('locations.edit') : t('locations.add')}</h2>
