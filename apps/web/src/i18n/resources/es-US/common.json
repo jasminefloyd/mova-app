@@ -155,29 +155,43 @@
       "statusPaused": "En pausa · las respuestas de IA esperan aprobación",
       "yourAssistant": "tu",
       "handledToday": "Atendidas hoy",
-      "handled24h": "Atendidas (24 horas)",
+      "handled24h": "Atendidas hoy",
       "bookedForYou": "Reservas para ti",
-      "booked30d": "Reservas para ti (30 días)",
+      "booked30d": "Reservas para ti",
       "averageReply": "Respuesta promedio",
-      "averageReply30d": "Respuesta promedio (30 días)",
+      "averageReply30d": "Resp. prom.",
       "averageMinutes": "{{count}} min",
+      "averageSeconds": "{{count}} s",
       "needsYou_one": "Necesita tu atención · {{count}}",
-      "needsYou_other": "Necesita tu atención · {{count}}"
+      "needsYou_other": "Necesita tu atención · {{count}}",
+      "answered": "Respondida",
+      "waitingMinutes": "En espera {{count}} min",
+      "pauseAssistant": "Pausar la conserjería"
     },
     "conciergeSetup": {
       "title": "Enseña a tu conserjería",
       "intro": "Siempre dice que es tu asistente de IA.",
       "whereTitle": "Dónde responde",
+      "channel": {
+        "instagram": "Mensajes de Instagram",
+        "sms": "Número de texto de Mova",
+        "missedCall": "Responder llamadas perdidas",
+        "webChat": "Chat en tu página"
+      },
+      "connected": "Conectado",
+      "notAssigned": "Sin asignar",
       "smsNumber": "El número aparece aquí cuando se asigne",
       "on": "Activo",
       "off": "Apagado",
       "aloneTitle": "Qué puede hacer sin ti",
       "permission": {
         "answer": "Responder preguntas con tu información",
-        "book_instant": "Reservar horarios libres en ubicaciones de reserva inmediata",
-        "request_salon": "Enviar solicitudes para horarios del salón",
+        "book_instant": "Reservar horarios libres en {{location}}",
+        "request_salon": "Enviar solicitudes para horarios de {{location}}",
         "reschedule": "Reprogramar dentro de tu política"
       },
+      "anyInstantLocation": "ubicaciones con reserva inmediata",
+      "anyRequestLocation": "el salón",
       "alwaysYou": "Cotizaciones, excepciones, quejas",
       "alwaysYouValue": "Siempre tú",
       "knowsTitle": "Lo que sabe",
@@ -187,7 +201,8 @@
       "locationDetails": "Detalles de la ubicación",
       "locationDetailsValue": "Estacionamiento, códigos de puerta, quién cobra",
       "tone": "Tono",
-      "toneValue": "Cálido y breve · EN + ES",
+      "toneWarm": "Cálido y breve",
+      "toneValue": "{{tone}} · {{languages}}",
       "editTitle": "Agregar o editar una respuesta",
       "pauseTitle": "Pausa"
     },
@@ -483,7 +498,7 @@
     "chatUnavailable": "El chat aún no está disponible. Contacta a la estilista con las opciones de esta página.",
     "send": "Enviar",
     "conversationStatus": {
-      "handled": "Atendida",
+      "handled": "Respondida",
       "needsYou": "Necesita tu atención",
       "closed": "Cerrada",
       "unknown": "Estado no disponible"

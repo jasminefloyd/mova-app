@@ -33,10 +33,10 @@ export function LocationNewPage() {
     weekdays: current.weekdays.includes(weekday) ? current.weekdays.filter((day) => day !== weekday) : [...current.weekdays, weekday],
     hoursByWeekday: current.weekdays.includes(weekday) ? current.hoursByWeekday : { ...current.hoursByWeekday, [weekday]: { opens: '09:00', closes: '17:00' } },
   }));
-  const updateDayHours = (weekday: number, key: 'opens' | 'closes', value: string) => setDraft((current) => ({
-    ...current,
-    hoursByWeekday: { ...current.hoursByWeekday, [weekday]: { ...current.hoursByWeekday[weekday], [key]: value } },
-  }));
+  const updateDayHours = (weekday: number, key: 'opens' | 'closes', value: string) => setDraft((current) => {
+    const hours = current.hoursByWeekday[weekday] ?? { opens: '09:00', closes: '17:00' };
+    return { ...current, hoursByWeekday: { ...current.hoursByWeekday, [weekday]: { ...hours, [key]: value } } };
+  });
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();

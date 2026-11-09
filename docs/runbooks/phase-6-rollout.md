@@ -1,6 +1,6 @@
 # Phase 6 production rollout commands
 
-Status: **partial production rollout on 2026-11-08.** Commit `19c85bc` was pushed to `main`; 17 changed Edge Functions were deployed to project `yceqvjrsmooqpdsqszvc`; Vercel deployment `dpl_EHgw7BtivBGxeLFmdgK3gTQrRCK4` is READY and aliased to `https://mova-beauty.co`. No database backup was made. Migration history was inspected and the Phase 6 catch-up migrations listed below are still pending; the Management API migration token was unavailable, so none were applied. Do not run `supabase db push` or `supabase migration up` against production because its history contains migrations not present in this repository.
+Status: **partial production rollout on 2026-11-08.** Commit `19c85bc` was pushed to `main`; 17 changed Edge Functions were deployed to project `yceqvjrsmooqpdsqszvc`; Vercel deployment `dpl_EHgw7BtivBGxeLFmdgK3gTQrRCK4` is READY and aliased to `https://mova-beauty.co`. No database backup was made. Migration 0077 (`mova_availability_blocks.label`) was applied through the Management API and version `20261109051000` was marked applied in the linked migration history. The remaining Phase 6 catch-up migrations are pending. Do not run `supabase db push` or `supabase migration up` against production because its history contains migrations not present in this repository.
 
 ## Apply migrations one at a time
 

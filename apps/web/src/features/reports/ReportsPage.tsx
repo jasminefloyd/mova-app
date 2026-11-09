@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Card, ErrorState, ScreenHeader, Segmented } from '../../components';
+import { Card, ErrorState, Segmented } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { operatorUrl } from '../../app/operator-url';
 import './reports-board.css';
@@ -12,7 +12,6 @@ type Summary = { start: string; end: string; current: Record<string, number>; pr
 // not in that summary yet, so they show a dash rather than a guess.
 export function ReportsPage() {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
   const [period, setPeriod] = useState('30');
   const [data, setData] = useState<Summary | null>(null);
@@ -50,11 +49,19 @@ export function ReportsPage() {
   const rating = ratingCount ? ((Number(c.rating_sum ?? 0) + Number(c.google_rating_sum ?? 0)) / ratingCount).toFixed(1) : '—';
   const revenueChange = change('service_value_minor');
   const sources = Object.entries((c.source_counts ?? {}) as Record<string, number>).sort((left, right) => right[1] - left[1]).slice(0, 3);
+  const revenueBuckets = useMemo(() => {
+    const series = data?.series ?? [];
+    return Array.from({ length: 4 }, (_, index) => {
+      const start = Math.floor(index * series.length / 4);
+      const end = Math.floor((index + 1) * series.length / 4);
+      return series.slice(start, end).reduce((total, day) => total + day.service_value_minor, 0);
+    });
+  }, [data?.series]);
+  const maxRevenueBucket = Math.max(1, ...revenueBuckets);
   const periodOptions = [{ key: '7', label: t('reports.days7') }, { key: '30', label: t('reports.days30') }, { key: '90', label: t('reports.days90') }];
   const periodLabel = periodOptions.find((item) => item.key === period)?.label ?? periodOptions[1]!.label;
 
   return <main className="mova-page mova-reports-page">
-    <ScreenHeader title={t('reports.title')} onBack={() => navigate(operatorUrl(businessId, ''))} backLabel={t('reports.back')} />
     <div className="mova-report-heading">
       <h1>{t('reports.title')}</h1>
       <Segmented label={t('reports.period')} options={periodOptions.map((item) => item.label)} value={periodLabel} onChange={(value) => setPeriod(periodOptions.find((item) => item.label === value)?.key ?? '30')} />
@@ -67,6 +74,9 @@ export function ReportsPage() {
           <strong className="mova-report-card__metric">{money(c.service_value_minor ?? 0)}</strong>
           <span className="mova-report-card__detail">
             {t('screens.reports.serviceValueChange', { value: revenueChange ? `${revenueChange.up ? '↑' : '↓'} ${revenueChange.text}` : '—', days: period })}
+          </span>
+          <span className="mova-report-chart" aria-hidden="true">
+            {revenueBuckets.map((value, index) => <span key={index} data-current={index === revenueBuckets.length - 1 || undefined} style={{ height: `${Math.max(14, Math.round(value / maxRevenueBucket * 100))}%` }} />)}
           </span>
         </Link>
 
@@ -83,7 +93,7 @@ export function ReportsPage() {
 
           <Link className="mova-report-card mova-report-card--reputation" to={operatorUrl(businessId, 'reports/reputation')} aria-label={t('screens.reports.reputationLink', { rating, count: ratingCount })}>
             <span className="mova-report-card__label">{t('reports.reputation')}</span>
-            <strong className="mova-report-card__metric">{rating === '—' ? '—' : `${rating} ★`}</strong>
+            <strong className="mova-report-card__metric">{rating === '—' ? '—' : <>{rating} <span className="mova-report-star" aria-hidden="true">★</span></>}</strong>
             <ul className="mova-report-lines">
               <li>{t('reports.ratingCount', { count: ratingCount })}</li>
               <li>{t('reports.ratingSources', { mova: fmt(c.rating_count ?? 0), google: fmt(c.google_rating_count ?? 0) })}</li>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { DayStrip, EmptyState, ErrorState, HonestyBanner, IconButton } from '../../components';
@@ -11,10 +11,17 @@ import { BLOCK_REASONS } from '../scheduling/rules';
 type Location = { id: string; name: string; time_zone: string; booking_mode: string; calendar_ownership: string; payment_collector: string; display_color_index: number };
 type Appointment = { id: string; appointment_number:number; location_id: string; service_name_snapshot: string; service_names?:string[]; client_name: string; status: string; starts_at: string; ends_at: string };
 type AvailabilityBlock = { id: string; location_id: string; reason: string; label: string; starts_at: string; ends_at: string };
+const CALENDAR_HOUR_HEIGHT = 72;
 
 function dateKey(date: Date, timeZone?: string) {
   const parts = new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
   return `${parts.find((part) => part.type === 'year')?.value}-${parts.find((part) => part.type === 'month')?.value}-${parts.find((part) => part.type === 'day')?.value}`;
+}
+
+function isDateKey(value: string | null): value is string {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T12:00:00`);
+  return !Number.isNaN(date.getTime()) && dateKey(date) === value;
 }
 
 function addDays(key: string, amount: number) {
@@ -32,17 +39,20 @@ function blockPosition(startValue: string, endValue: string, zone: string) {
   const hour = Number(parts.find((part) => part.type === 'hour')?.value ?? 9);
   const minute = Number(parts.find((part) => part.type === 'minute')?.value ?? 0);
   const duration = Math.max(15, (new Date(endValue).getTime() - new Date(startValue).getTime()) / 60000);
-  return { top: Math.max(0, (hour - 9 + minute / 60) * 50), height: Math.max(24, duration / 60 * 50) };
+  return { top: Math.max(0, (hour - 9 + minute / 60) * CALENDAR_HOUR_HEIGHT), height: Math.max(24, duration / 60 * CALENDAR_HOUR_HEIGHT) };
 }
 
 export function CalendarPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
   const [locations, setLocations] = useState<Location[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [blocks, setBlocks] = useState<AvailabilityBlock[]>([]);
-  const [day, setDay] = useState(() => dateKey(new Date()));
+  const requestedDay = searchParams.get('day');
+  const day = isDateKey(requestedDay) ? requestedDay : dateKey(new Date());
+  const selectDay = useCallback((value: string) => setSearchParams({ day: value }), [setSearchParams]);
   const [locationId, setLocationId] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -130,12 +140,12 @@ export function CalendarPage() {
       <div className="mova-calendar__month-header">
         <h1>{monthLabel}</h1>
         <div className="mova-calendar__month-actions">
-          <IconButton label={t('calendar.previousWeek')} icon="back" onClick={() => setDay(addDays(day, -7))} />
-          <IconButton label={t('calendar.nextWeek')} icon="chevron" onClick={() => setDay(addDays(day, 7))} />
+          <IconButton label={t('calendar.previousWeek')} icon="back" onClick={() => selectDay(addDays(day, -7))} />
+          <IconButton label={t('calendar.nextWeek')} icon="chevron" onClick={() => selectDay(addDays(day, 7))} />
         </div>
       </div>
 
-      <DayStrip variant="calendar" label={t('calendar.days')} days={days} selected={day} onSelect={setDay} />
+      <DayStrip variant="calendar" label={t('calendar.days')} days={days} selected={day} onSelect={selectDay} />
 
       <div className="mova-calendar__filters" role="group" aria-label={t('calendar.locationFilter')}>
         <button className={`mova-chip${locationId === 'all' ? ' is-selected' : ''}`} type="button" aria-pressed={locationId === 'all'} onClick={() => setLocationId('all')}>{t('calendar.allLocations')}</button>
@@ -148,22 +158,21 @@ export function CalendarPage() {
     {error && <ErrorState title={t('calendar.loadError')} retryLabel={t('calendar.retry')} onRetry={() => void load()} />}
     <HonestyBanner tone="soft">{externalLocation ? t('calendar.externalCalendarNote', { location: externalLocation.name }) : t('calendar.externalCalendarGenericNote')}</HonestyBanner>
 
-    <div className="mova-calendar__timeline" role="group" aria-label={t('calendar.scheduleFor', { day: new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'long', month: 'long', day: 'numeric' }).format(selectedDate) })} style={{ '--calendar-hour-height': '50px' } as CSSProperties}>
-      {hourLabels.map((hour, index) => <div className="mova-calendar__hour" key={hour} style={{ top: `${index * 50}px` }}><time>{timeLabel(hour)}</time></div>)}
+    <div className="mova-calendar__timeline" role="group" aria-label={t('calendar.scheduleFor', { day: new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'long', month: 'long', day: 'numeric' }).format(selectedDate) })} style={{ '--calendar-hour-height': `${CALENDAR_HOUR_HEIGHT}px` } as CSSProperties}>
+      {hourLabels.map((hour, index) => <div className="mova-calendar__hour" key={hour} style={{ top: `${index * CALENDAR_HOUR_HEIGHT}px` }}><time>{timeLabel(hour)}</time></div>)}
       {visibleAppointments.map((item) => {
         const location = locationById.get(item.location_id);
         const zone = location?.time_zone ?? 'UTC';
         const position = blockPosition(item.starts_at, item.ends_at, zone);
-        const compact = position.height < 50;
-        const visibleHeight = compact ? 40 : Math.max(position.height, 70);
+        const compact = position.height < 56;
+        const visibleHeight = Math.max(position.height, 28);
         const color = colorClass(locationIndexById.get(item.location_id) ?? 0);
         const startTime = new Intl.DateTimeFormat(i18n.resolvedLanguage, { hour: 'numeric', minute: '2-digit', timeZone: zone }).format(new Date(item.starts_at));
         const endTime = new Intl.DateTimeFormat(i18n.resolvedLanguage, { hour: 'numeric', minute: '2-digit', timeZone: zone }).format(new Date(item.ends_at));
         const status = t(`booking.status.${item.status}`);
-        return <Link key={item.id} className={`mova-calendar__event ${color}${compact ? ' mova-calendar__event--compact' : ''}`} aria-label={`${item.service_names?.join(' + ')||item.service_name_snapshot}, ${item.client_name}, ${startTime}–${endTime}, ${location?.name ?? ''}, ${status}`} style={{ top: `${position.top}px`, minHeight: `${visibleHeight}px` }} to={operatorUrl(businessId, `appointments/${displayId('AID',item.appointment_number)}`)}>
+        return <Link key={item.id} className={`mova-calendar__event ${color}${compact ? ' mova-calendar__event--compact' : ''}`} aria-label={`${item.service_names?.join(' + ')||item.service_name_snapshot}, ${item.client_name}, ${startTime}–${endTime}, ${location?.name ?? ''}, ${status}`} style={{ top: `${position.top}px`, height: `${visibleHeight}px` }} to={operatorUrl(businessId, `appointments/${displayId('AID',item.appointment_number)}`)}>
           <strong>{item.service_names?.join(' + ')||item.service_name_snapshot} · {item.client_name}</strong>
           <span>{compact ? startTime : `${startTime} – ${endTime}${location ? ` · ${location.name}` : ''}`}</span>
-          {!compact && <small>{location?.payment_collector === 'salon' ? t('calendar.salonCollects') : status}</small>}
         </Link>;
       })}
       {visibleBlocks.map((block) => {

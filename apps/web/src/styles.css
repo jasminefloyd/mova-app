@@ -251,16 +251,17 @@ body {
 .mova-calendar > .mova-honesty { min-height: 54px; margin: 12px 0 0; border-radius: var(--radius-l); padding: 10px 12px; align-items: center; gap: 10px; }
 .mova-calendar > .mova-honesty .mova-icon { width: 18px; height: 18px; }
 .mova-calendar > .mova-honesty p { font-size: var(--fs-micro); line-height: 1.4; }
-.mova-calendar__timeline { position: relative; height: 450px; margin: 12px 0 0; }
-.mova-calendar__hour { position: absolute; right: 0; left: 0; height: 50px; border-top: 1px solid var(--line-subtle); }
+.mova-calendar__timeline { position: relative; height: calc(var(--calendar-hour-height) * 9); margin: 12px 0 0; }
+.mova-calendar__hour { position: absolute; right: 0; left: 0; height: var(--calendar-hour-height); border-top: 1px solid var(--line-subtle); }
 .mova-calendar__hour time { position: absolute; top: 2px; left: 0; color: var(--ink-muted); font-size: var(--fs-tab); font-weight: 600; }
-.mova-calendar__event { position: absolute; right: 0; left: 48px; z-index: 1; display: grid; align-content: start; gap: 2px; overflow: hidden; border-radius: var(--radius-l); padding: var(--space-2) var(--space-3); background: var(--botanical); color: var(--ink-inverse); text-decoration: none; }
+.mova-calendar__event { position: absolute; right: 0; left: 48px; z-index: 1; box-sizing: border-box; display: grid; align-content: start; gap: 2px; overflow: hidden; border-radius: var(--radius-l); padding: 6px 10px; background: var(--botanical); color: var(--ink-inverse); text-decoration: none; }
 .mova-calendar__event.mova-calendar__location-chip--two { background: var(--surface-warm); color: var(--ink-primary); }
-.mova-calendar__event strong { font-size: var(--fs-body-s); font-weight: 700; }
-.mova-calendar__event span, .mova-calendar__event small { color: var(--mint); font-size: var(--fs-caption); }
-.mova-calendar__event.mova-calendar__location-chip--two span, .mova-calendar__event.mova-calendar__location-chip--two small { color: var(--ink-secondary); }
-.mova-calendar__event--compact { gap: 0; padding-block: 6px; }
-.mova-calendar__event--compact strong, .mova-calendar__event--compact span { font-size: var(--fs-micro); line-height: 1.2; }
+.mova-calendar__event strong { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: var(--fs-body-s); font-weight: 700; line-height: 1.15; }
+.mova-calendar__event span { overflow: hidden; color: var(--mint); font-size: var(--fs-caption); line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.mova-calendar__event.mova-calendar__location-chip--two span { color: var(--ink-secondary); }
+.mova-calendar__event--compact { gap: 0; padding: 5px 8px; }
+.mova-calendar__event--compact strong { display: block; -webkit-line-clamp: 1; font-size: var(--fs-micro); line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.mova-calendar__event--compact span { display: none; }
 .mova-calendar__block { position: absolute; right: 0; left: 48px; z-index: 1; display: flex; align-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-m); padding-inline: var(--space-3); background: repeating-linear-gradient(135deg, var(--line-subtle) 0 6px, var(--surface-page) 6px 12px); color: var(--ink-muted); font-size: var(--fs-micro); font-weight: 600; }
 .mova-calendar .mova-calendar__fab { position: fixed; z-index: 3; right: max(var(--gutter), calc((100vw - 680px) / 2 + var(--gutter))); bottom: calc(var(--tab-bar-h) + 18px + env(safe-area-inset-bottom)); width: 58px; height: 58px; border: 0; background: var(--forest); color: var(--ivory); box-shadow: var(--shadow-raised); }
 .mova-calendar .mova-calendar__fab .mova-icon { width: 24px; height: 24px; filter: brightness(0) invert(1); }

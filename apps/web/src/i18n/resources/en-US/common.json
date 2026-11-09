@@ -155,29 +155,43 @@
       "statusPaused": "Paused · AI replies wait for approval",
       "yourAssistant": "your",
       "handledToday": "Handled today",
-      "handled24h": "Handled (24 hours)",
+      "handled24h": "Handled today",
       "bookedForYou": "Booked for you",
-      "booked30d": "Booked for you (30 days)",
+      "booked30d": "Booked for you",
       "averageReply": "Avg. reply",
-      "averageReply30d": "Average reply (30 days)",
+      "averageReply30d": "Avg. reply",
       "averageMinutes": "{{count}} min",
+      "averageSeconds": "{{count}}s",
       "needsYou_one": "Needs you · {{count}}",
-      "needsYou_other": "Needs you · {{count}}"
+      "needsYou_other": "Needs you · {{count}}",
+      "answered": "Answered",
+      "waitingMinutes": "Waiting {{count}} min",
+      "pauseAssistant": "Pause the concierge"
     },
     "conciergeSetup": {
       "title": "Teach your concierge",
       "intro": "It always says it's your AI assistant.",
       "whereTitle": "Where it answers",
+      "channel": {
+        "instagram": "Instagram messages",
+        "sms": "Mova text number",
+        "missedCall": "Text back missed calls",
+        "webChat": "Chat on your page"
+      },
+      "connected": "Connected",
+      "notAssigned": "Not assigned",
       "smsNumber": "Number shows here once it's assigned",
       "on": "On",
       "off": "Off",
       "aloneTitle": "What it can do without you",
       "permission": {
         "answer": "Answer questions from your info",
-        "book_instant": "Book open times at instant-booking locations",
-        "request_salon": "Send requests for salon times",
+        "book_instant": "Book open times at {{location}}",
+        "request_salon": "Send requests for {{location}} times",
         "reschedule": "Reschedule within your policy"
       },
+      "anyInstantLocation": "instant-booking locations",
+      "anyRequestLocation": "salon",
       "alwaysYou": "Quotes, exceptions, complaints",
       "alwaysYouValue": "Always you",
       "knowsTitle": "What it knows",
@@ -187,7 +201,8 @@
       "locationDetails": "Location details",
       "locationDetailsValue": "Parking, door codes, who collects",
       "tone": "Tone",
-      "toneValue": "Warm & brief · EN + ES",
+      "toneWarm": "Warm & brief",
+      "toneValue": "{{tone}} · {{languages}}",
       "editTitle": "Add or edit an answer",
       "pauseTitle": "Pause"
     },
@@ -483,7 +498,7 @@
     "chatUnavailable": "Chat is not available yet. Contact the stylist using the options on this page.",
     "send": "Send",
     "conversationStatus": {
-      "handled": "Handled",
+      "handled": "Answered",
       "needsYou": "Needs you",
       "closed": "Closed",
       "unknown": "Status unavailable"

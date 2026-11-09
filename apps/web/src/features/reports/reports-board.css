@@ -1,4 +1,38 @@
-/* Reports board (37). Colours and spacing come from the design tokens only. */
+/* Reports tab board, matched to Board 37. */
+.mova-reports-page {
+  padding-top: 20px;
+  padding-bottom: calc(var(--tab-bar-h) + var(--space-5) + env(safe-area-inset-bottom));
+}
+
+.mova-report-heading {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-3);
+}
+
+.mova-report-heading h1 {
+  margin: 0;
+  color: var(--forest);
+  font: 700 28px/1.15 var(--font-display);
+}
+
+.mova-report-heading .mova-segmented {
+  display: flex;
+  width: 100%;
+  min-height: 42px;
+  padding: 3px;
+}
+
+.mova-report-heading .mova-segmented button {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  padding-inline: var(--space-2);
+  font-size: var(--fs-caption);
+}
+
+.mova-reports-page .mova-report-heading .mova-segmented { margin-top: 0; }
+
 .mova-reports-board {
   display: grid;
   gap: var(--space-3);
@@ -6,53 +40,171 @@
 
 .mova-reports-board__pair {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
+
+.mova-reports-board > .mova-report-card--revenue,
+.mova-reports-board > .mova-report-card--traffic,
+.mova-reports-board > .mova-report-card--marketing { grid-column: 1 / -1; }
 
 .mova-reports-board .mova-report-card {
   display: grid;
   gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-2xl);
+  background: var(--surface);
   color: var(--ink-primary);
   text-decoration: none;
-  min-width: 0;
 }
 
-.mova-report-card__label {
-  color: var(--ink-muted);
-  font-size: var(--fs-caption);
-  font-weight: 600;
+.mova-reports-board .mova-report-card__label {
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  letter-spacing: .035em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.mova-reports-board .mova-report-card__metric {
+  display: block;
   margin: 0;
 }
 
+.mova-report-card__label {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  letter-spacing: .035em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
 .mova-report-card__metric {
-  font-size: var(--fs-display-s, 2rem);
-  line-height: 1.1;
+  color: var(--forest);
+  font: 800 26px/1.1 var(--font-display);
 }
 
 .mova-report-card__detail,
 .mova-report-note {
-  color: var(--ink-muted);
-  font-size: var(--fs-body-s);
   margin: 0;
+  color: var(--ink-secondary);
+  font-size: var(--fs-micro);
+  line-height: 1.4;
 }
 
-.mova-report-lines {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--space-1);
-  font-size: var(--fs-body-s);
+.mova-report-card--revenue {
+  grid-template-columns: minmax(0, 1fr) 112px;
+  grid-template-rows: auto auto 1fr;
+  column-gap: var(--space-3);
+  min-height: 120px;
 }
+
+.mova-report-card--revenue .mova-report-card__label { grid-column: 1; }
+.mova-report-card--revenue .mova-report-card__metric { grid-column: 1; }
+.mova-report-card--revenue .mova-report-card__detail { grid-column: 1; align-self: end; }
+
+.mova-report-chart {
+  display: flex;
+  grid-column: 2;
+  grid-row: 1 / 4;
+  align-items: end;
+  justify-content: space-between;
+  gap: 8px;
+  align-self: end;
+  height: 66px;
+  padding: 0 3px;
+  border-bottom: 1px solid var(--line);
+}
+
+.mova-report-chart > span {
+  width: 20%;
+  min-height: 8px;
+  border-radius: 4px 4px 0 0;
+  background: var(--sage);
+}
+
+.mova-report-chart > span[data-current] { background: var(--forest); }
+
+.mova-report-card--bookings,
+.mova-report-card--reputation {
+  min-height: 145px;
+  align-content: start;
+}
+
+.mova-reports-board .mova-report-card--reputation {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: var(--ivory);
+}
+
+.mova-report-card--reputation .mova-report-card__label,
+.mova-report-card--reputation .mova-report-lines { color: var(--mint); }
+
+.mova-report-card--reputation .mova-report-card__metric { color: var(--ivory); }
+
+.mova-report-star { color: var(--peach); }
+
+.mova-report-lines {
+  display: grid;
+  gap: 2px;
+  margin: 2px 0 0;
+  padding: 0;
+  color: var(--ink-secondary);
+  font-size: var(--fs-micro);
+  line-height: 1.4;
+  list-style: none;
+}
+
+.mova-report-card--traffic h2,
+.mova-report-card--marketing h2 {
+  margin: 0;
+  color: var(--ink-muted);
+  font: 700 var(--fs-micro)/1.2 var(--font-ui);
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.mova-report-trio {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+}
+
+.mova-report-trio > div { display: grid; gap: 2px; }
+
+.mova-report-trio strong {
+  color: var(--forest);
+  font: 800 20px/1.15 var(--font-display);
+}
+
+.mova-report-trio span {
+  color: var(--ink-secondary);
+  font-size: var(--fs-micro);
+  line-height: 1.3;
+}
+
+.mova-report-note { margin-top: 2px; }
 
 .mova-report-row {
   display: flex;
-  justify-content: space-between;
+  min-height: 32px;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-2);
-  min-height: var(--tap-min);
   color: var(--ink-primary);
+  font-size: var(--fs-caption);
+  line-height: 1.3;
   text-decoration: none;
-  border-top: 1px solid var(--line);
+}
+
+.mova-report-row strong { flex: none; color: var(--forest); font-weight: 700; }
+
+@media (min-width: 700px) {
+  .mova-report-heading { grid-template-columns: 1fr; }
+  .mova-reports-board { gap: var(--space-4); }
 }

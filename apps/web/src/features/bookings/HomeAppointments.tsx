@@ -218,7 +218,7 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
       {upcomingGroups.length ? <Card className="mova-home__coming-list">{upcomingGroups.map((group) => {
         const location = locationById.get(group.locationId);
         const zone = location?.time_zone ?? 'UTC';
-        const destination = operatorUrl(businessId, 'calendar');
+        const destination = operatorUrl(businessId, `calendar?day=${encodeURIComponent(dateKey(group.date, zone))}`);
         const requestCount = group.items.filter((item) => item.status === 'pending_artist').length;
         return <Link className="mova-home__coming-row" to={destination} key={`${zone}:${dateKey(group.date, zone)}:${group.locationId}`}>
           <strong>{shortDayLabel(group.date, i18n.resolvedLanguage ?? 'en-US', zone)}</strong>
