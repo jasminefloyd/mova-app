@@ -2,8 +2,8 @@ import { expect, test } from '@playwright/test';
 import { openOperatorPage } from './operator-session';
 
 test('PWA manifest and service worker are available at the standalone start route', async ({ page }) => {
-  await page.goto('/auth');
-  await expect(page.getByText('Create your account', { exact: true })).toBeVisible();
+  await page.goto('/login');
+  await expect(page.getByRole('heading', { level: 1, name: 'Welcome back' })).toBeVisible();
 
   const manifestPath = await page.locator('link[rel="manifest"]').getAttribute('href');
   expect(manifestPath).toBeTruthy();
@@ -11,7 +11,7 @@ test('PWA manifest and service worker are available at the standalone start rout
     const response = await fetch(path!);
     return response.json() as Promise<{ start_url: string; display: string; icons: { sizes: string }[] }>;
   }, manifestPath);
-  expect(manifest.start_url).toBe('/auth');
+  expect(manifest.start_url).toBe('/login');
   expect(manifest.display).toBe('standalone');
   expect(manifest.icons.map((icon) => icon.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']));
 
@@ -22,26 +22,22 @@ test('PWA manifest and service worker are available at the standalone start rout
 
 });
 
-test('landing page sign-in and sign-up actions open auth', async ({ page }) => {
+test('landing page sign-in and sign-up actions open the stylist pages', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByLabel('Language')).toHaveCount(0);
   await page.getByRole('link', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/auth$/);
-  await expect(page.getByText('Create your account', { exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Welcome back' })).toBeVisible();
   await page.goto('/');
-  await page.getByRole('link', { name: 'Sign up' }).click();
-  await expect(page).toHaveURL(/\/auth$/);
+  await page.getByRole('link', { name: 'Sign up' }).first().click();
+  await expect(page).toHaveURL(/\/signup$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Create your account' })).toBeVisible();
 });
 
-test('waitlist stays closed by default until A-14 launch checks are approved', async ({ page }) => {
-  const submissions: string[] = [];
-  page.on('request', request => {
-    if (request.url().includes('/functions/v1/waitlist-signup')) submissions.push(request.url());
-  });
+test('the temporary home page has no waitlist form', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByLabel('Email', { exact: true })).toHaveCount(0);
-  await expect(page.getByRole('status').filter({ hasText: "Early access registration isn't open yet." })).toHaveCount(2);
-  expect(submissions).toEqual([]);
+  await expect(page.getByText('Join the waitlist')).toHaveCount(0);
 });
 
 test('artist locale is selected in Settings without a landing-page selector', async ({ page }) => {
@@ -92,7 +88,7 @@ test('public guest locale persists across pages and explicit URL locale takes pr
 });
 
 test('service worker does not put private API responses in CacheStorage', async ({ page }) => {
-  await page.goto('/auth');
+  await page.goto('/login');
   await page.evaluate(async () => {
     if (!('serviceWorker' in navigator)) throw new Error('Service workers are unavailable');
     await navigator.serviceWorker.ready;
