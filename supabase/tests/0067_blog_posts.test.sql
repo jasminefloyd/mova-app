@@ -1,5 +1,5 @@
 begin;
-select plan(8);
+select plan(9);
 
 select has_table('public'::name, 'mova_blog_posts'::name);
 select ok((select relrowsecurity from pg_class where oid = 'public.mova_blog_posts'::regclass), 'blog posts have RLS enabled');
@@ -12,8 +12,9 @@ insert into public.mova_blog_posts (slug, title, status, body, category, publish
   ('draft-piece', 'Draft piece', 'draft', '[]'::jsonb, 'Clients', null);
 
 set local role anon;
-select is((select count(*)::int from public.mova_blog_posts), 1, 'anonymous readers see only the live piece');
-select is((select min(slug) from public.mova_blog_posts), 'live-piece', 'the visible piece is the live one');
+select is((select count(*)::int from public.mova_blog_live_posts), 1, 'anonymous readers see only the live piece');
+select is((select min(slug) from public.mova_blog_live_posts), 'live-piece', 'the visible piece is the live one');
+select throws_ok('select count(*) from public.mova_blog_posts', '42501', null, 'anonymous readers cannot read the table directly');
 reset role;
 
 select ok(not has_table_privilege('anon', 'public.mova_blog_posts', 'INSERT'), 'anonymous users cannot write blog posts');

@@ -74,7 +74,7 @@ As of 2026-11-08 every migration through 0059 passes the full pgTAP suite locall
 | Timestamp | Name | File |
 | --- | --- | --- |
 | `20261109030000` | `mova_0066_admin_foundation` | `20261109030000_mova_0066_admin_foundation.sql` (admin roster, aal2 admin check, append-only admin activity) |
-| `20261109031000` | `mova_0067_blog_posts` | `20261109031000_mova_0067_blog_posts.sql` (guides storage and categories; live rule by published_at) |
+| `20261109031000` | `mova_0067_blog_posts` | `20261109031000_mova_0067_blog_posts.sql` (guides storage; clients read only through the mova_blog_live_posts view, live by published_at) |
 | `20261109032000` | `mova_0068_blog_admin_functions` | `20261109032000_mova_0068_blog_admin_functions.sql` (guides writer with server-side validation) |
 | `20261109033000` | `mova_0069_admin_reads` | `20261109033000_mova_0069_admin_reads.sql` (overview, stylists, stylist detail, audit log, admin activity) |
 | `20261109034000` | `mova_0070_admin_operations` | `20261109034000_mova_0070_admin_operations.sql` (stylist fee overrides, platform default, switches, support inbox, unpublish page; mova_business_fee now honours overrides) |

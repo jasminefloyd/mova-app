@@ -117,7 +117,7 @@ select ok((select count(*) from public.mova_admin_activity where action = 'blog.
 
 -- Readers see only the live piece, and anonymous readers see nothing scheduled.
 set local role anon;
-select is((select count(*)::int from public.mova_blog_posts), 0, 'anonymous readers see no live pieces yet');
+select is((select count(*)::int from public.mova_blog_live_posts), 0, 'anonymous readers see no live pieces yet');
 reset role;
 
 select * from finish();

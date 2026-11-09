@@ -58,11 +58,17 @@ create trigger mova_blog_posts_touch before update on public.mova_blog_posts
 
 alter table public.mova_blog_categories enable row level security;
 alter table public.mova_blog_posts enable row level security;
-create policy mova_blog_categories_read on public.mova_blog_categories for select to anon, authenticated using (true);
-create policy mova_blog_posts_live_read on public.mova_blog_posts for select to anon, authenticated
-  using (status = 'published' and published_at <= now());
+-- No client reads the tables directly (the matrix test forbids it). Public readers use this view, which only
+-- ever returns published pieces whose time has come, or the guides-public edge function with the service role.
 revoke all on public.mova_blog_categories from public, anon, authenticated;
 revoke all on public.mova_blog_posts from public, anon, authenticated;
-grant select on public.mova_blog_categories to anon, authenticated;
-grant select on public.mova_blog_posts to anon, authenticated;
 grant select, insert, update, delete on public.mova_blog_categories, public.mova_blog_posts to service_role;
+
+create view public.mova_blog_live_posts with (security_barrier = true) as
+  select slug, title, summary, category, tags, cover_url, cover_alt, cover_credit, author_name, reading_minutes,
+    body, meta_title, meta_description, canonical_url, og_title, og_description, og_image_url, noindex,
+    published_at, updated_at
+  from public.mova_blog_posts
+  where status = 'published' and published_at <= now();
+revoke all on public.mova_blog_live_posts from public, anon, authenticated;
+grant select on public.mova_blog_live_posts to anon, authenticated, service_role;
