@@ -1,12 +1,12 @@
 export function operatorUrl(businessId: string | null | undefined, path = '') {
-  if (!businessId) return '/auth';
+  if (!businessId) return '/login';
   const routeId = /^BID-\d+$/i.test(businessId)
     ? businessId.toUpperCase()
     : typeof window !== 'undefined'
       && window.sessionStorage.getItem('mova_active_artist_business_id') === businessId
       ? window.sessionStorage.getItem('mova_active_artist_business_display_id')
       : null;
-  if (!routeId) return '/auth';
+  if (!routeId) return '/login';
   const suffix = path.replace(/^\/+/, '');
   return `/${encodeURIComponent(routeId)}${suffix ? `/${suffix}` : '/'}`;
 }

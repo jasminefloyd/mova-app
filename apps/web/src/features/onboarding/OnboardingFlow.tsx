@@ -1,16 +1,15 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Chip, StepperProgress, TextArea, TextField } from '../../components';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import { operatorLocation } from '../../app/operator-url';
-import { displayId, parseDisplayId } from '../../lib/display-ids';
+import { displayId } from '../../lib/display-ids';
 import { useLocale } from '../../app/LocaleProvider';
 
-type Step = 'account' | 'profile' | 'photo' | 'services' | 'publish';
-const stepOrder: Step[] = ['account', 'profile', 'photo', 'services', 'publish'];
+type Step = 'profile' | 'photo' | 'services' | 'publish';
+const stepOrder: Step[] = ['profile', 'photo', 'services', 'publish'];
 type ServiceRow = { id: string; name: string; category: string; duration_minutes: number; buffer_minutes: number; base_price_minor: number; deposit_type: 'none' | 'fixed' | 'percent'; deposit_value: number };
-type WorkspaceChoice = { id: string; label: string };
 
 export function OnboardingFlow() {
   const location = useLocation();
@@ -23,13 +22,7 @@ export function OnboardingFlow() {
   const [step, setStep] = useState<Step>(routeStep(location.pathname));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [inviteOnlyError, setInviteOnlyError] = useState(false);
-  const [notice, setNotice] = useState('');
-  const [signIn, setSignIn] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
-  const [workspaces, setWorkspaces] = useState<WorkspaceChoice[]>([]);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [businessId, setBusinessId] = useState('');
   const [originalHandle, setOriginalHandle] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -75,14 +68,14 @@ export function OnboardingFlow() {
   useEffect(() => {
     const nextStep = routeStep(location.pathname);
     setStep(nextStep);
-    if (location.pathname === '/auth' && nextStep === 'account') return;
     if (!supabase) return;
     let active = true;
     void (async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!active || !session) return;
+      if (!active) return;
+      // Onboarding needs a stylist account. Signed-out visitors start at sign-up.
+      if (!session) { navigate('/signup', { replace: true }); return; }
       setSignedIn(true);
-      setEmail(session.user.email ?? '');
       const { data: membership } = await supabase.from('mova_artist_memberships')
         .select('artist_business_id').eq('user_id', session.user.id).eq('status', 'active').limit(1).maybeSingle();
       if (!active || !membership) return;
@@ -136,7 +129,6 @@ export function OnboardingFlow() {
   }, [businessId, supabase]);
 
   useEffect(() => {
-    if (location.pathname === '/auth' && step === 'account') return;
     navigate(`/onboarding/${step}`, { replace: true });
   }, [location.pathname, navigate, step]);
 
@@ -177,79 +169,6 @@ export function OnboardingFlow() {
     if (updateError) throw updateError;
   };
 
-  const submitAccount = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError(''); setNotice('');
-    setInviteOnlyError(false);
-    if (!supabase) { setError(t('onboarding.configurationError')); return; }
-    if (password.length < 9) { setError(t('onboarding.passwordRule')); return; }
-    setLoading(true);
-    try {
-      if (signIn) {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-        if (authError) throw authError;
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          const returnTo = new URLSearchParams(location.search).get('returnTo') ?? '';
-          const requestedId = returnTo.match(/^\/([^/]+)(?:\/|$)/)?.[1];
-          let requestedBusinessId = requestedId ? decodeURIComponent(requestedId) : null;
-          const requestedNumber = parseDisplayId('BID', requestedBusinessId ?? undefined);
-          if (requestedNumber) {
-            const { data: requestedBusiness } = await supabase.from('mova_artist_businesses').select('id').eq('business_number', requestedNumber).maybeSingle();
-            requestedBusinessId = requestedBusiness?.id ?? null;
-          }
-          let membershipQuery = supabase.from('mova_artist_memberships').select('artist_business_id').eq('user_id',session.user.id).eq('status','active');
-          if (requestedId) membershipQuery = membershipQuery.eq('artist_business_id',requestedBusinessId ?? '00000000-0000-0000-0000-000000000000');
-          const { data: memberships, error: membershipError } = await membershipQuery.limit(requestedId ? 1 : 100);
-          if (membershipError) throw membershipError;
-          if (requestedId && !memberships?.length) throw new Error('WORKSPACE_ACCESS_DENIED');
-          if (memberships?.length === 1) {
-            const membership = memberships[0];
-            if (membership) void chooseWorkspace(membership.artist_business_id, returnTo);
-            return;
-          }
-          if ((memberships?.length ?? 0) > 1) {
-            const ids=memberships!.map((item)=>item.artist_business_id);
-            const {data:profiles}=await supabase.from('mova_artist_profiles').select('artist_business_id,display_name').in('artist_business_id',ids);
-            setWorkspaces(ids.map((id)=>({id,label:profiles?.find((profile)=>profile.artist_business_id===id)?.display_name??id})));
-            return;
-          }
-        }
-        setSignedIn(true);
-        setStep('profile');
-      } else {
-        const { data, error: authError } = await supabase.auth.signUp({
-          email, password,
-          options: { emailRedirectTo: `${window.location.origin}/onboarding/profile`, data: { preferred_locale: 'en-US' } },
-        });
-        if (authError?.message === 'Mova is invite-only for now; join the waitlist.') {
-          setError(t('onboarding.inviteOnlyError'));
-          setInviteOnlyError(true);
-          return;
-        }
-        if (authError) throw authError;
-        if (data.session) { setSignedIn(true); setStep('profile'); }
-        else setNotice(t('onboarding.verifyEmail'));
-      }
-    } catch { setError(t('onboarding.accountError')); }
-    finally { setLoading(false); }
-  };
-
-  const chooseWorkspace = async (id: string, returnTo = '') => {
-    if (!supabase) return;
-    const { data: business } = await supabase.from('mova_artist_businesses').select('business_number').eq('id',id).maybeSingle();
-    if (!business?.business_number) { setError(t('onboarding.accountError')); return; }
-    const routeId = displayId('BID', business.business_number);
-    window.sessionStorage.setItem('mova_active_artist_business_id',id);
-    window.sessionStorage.setItem('mova_active_artist_business_display_id',routeId);
-    const prefix=`/${encodeURIComponent(routeId)}`;
-    const legacyPrefix=`/${encodeURIComponent(id)}`;
-    const matchedPrefix=returnTo===prefix||returnTo===`${prefix}/`?prefix:returnTo.startsWith(`${prefix}/`)?prefix:returnTo===legacyPrefix||returnTo===`${legacyPrefix}/`?legacyPrefix:returnTo.startsWith(`${legacyPrefix}/`)?legacyPrefix:'';
-    const path=matchedPrefix?(returnTo===matchedPrefix||returnTo===`${matchedPrefix}/`?'':returnTo.slice(matchedPrefix.length+1)):'';
-    const target=operatorLocation(id,path);
-    if(target.startsWith('https://'))window.location.assign(target);else navigate(target,{replace:true});
-  };
-
   const signOut = async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
@@ -258,7 +177,7 @@ export function OnboardingFlow() {
     window.sessionStorage.removeItem('mova_active_artist_business_id');
     window.sessionStorage.removeItem('mova_active_artist_business_display_id');
     setSignedIn(false); setBusinessId(''); setOriginalHandle('');
-    setStep('account'); setSignIn(false);
+    navigate('/login', { replace: true });
   };
 
   const addSpecialty = () => {
@@ -377,7 +296,8 @@ export function OnboardingFlow() {
     finally { setLoading(false); }
   };
 
-  const current = step === 'publish' ? 6 : stepOrder.indexOf(step) + 1;
+  // Step 1 is the account step, now on /signup, so onboarding starts at 2.
+  const current = step === 'publish' ? 6 : stepOrder.indexOf(step) + 2;
   return <div className="mova-onboarding-page">
     <header className="mova-onboarding-header">
       <span className="mova-wordmark" aria-label="mova">mova</span>
@@ -386,17 +306,6 @@ export function OnboardingFlow() {
     </header>
     <main className="mova-page mova-onboarding-content">
       <StepperProgress current={current} total={6} label={t('onboarding.step')} />
-      {step === 'account' && <form className="mova-form-stack" onSubmit={submitAccount}>
-        <h1>{t(signIn ? 'onboarding.signInTitle' : 'onboarding.accountTitle')}</h1>
-        <TextField label={t('onboarding.email')} type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.currentTarget.value)} />
-        <TextField label={t('onboarding.password')} type="password" autoComplete={signIn ? 'current-password' : 'new-password'} required value={password} onChange={(event) => setPassword(event.currentTarget.value)} hint={t('onboarding.passwordRule')} />
-        {notice && <p role="status">{notice}</p>}{error && <p role="alert">{error}{inviteOnlyError && <> <Link to="/">{t('onboarding.joinWaitlist')}</Link></>}</p>}
-        <Button type="submit" loading={loading}>{t(signIn ? 'onboarding.signIn' : 'onboarding.createAccount')}</Button>
-        {!signIn && <p className="mova-form-note">{t('onboarding.verifyEmail')}</p>}
-        <p className="mova-form-note">{t(signIn ? 'onboarding.noAccount' : 'onboarding.haveAccount')} <button type="button" className="mova-link-button" onClick={() => setSignIn((current) => !current)}>{t(signIn ? 'onboarding.createAccount' : 'onboarding.signIn')}</button></p>
-        {workspaces.length>0&&<section aria-label={t('onboarding.chooseWorkspace')}><h2>{t('onboarding.chooseWorkspace')}</h2>{workspaces.map((workspace)=><Button key={workspace.id} type="button" variant="secondary" onClick={()=>void chooseWorkspace(workspace.id,new URLSearchParams(location.search).get('returnTo')??'')}>{workspace.label}</Button>)}</section>}
-      </form>}
-
       {step === 'profile' && <form className="mova-form-stack" onSubmit={saveProfile}>
         <h1>{t('onboarding.profileTitle')}</h1>
         <p>{t('onboarding.profileDescription')}</p>
@@ -468,7 +377,7 @@ export function OnboardingFlow() {
 
 function routeStep(pathname: string): Step {
   const segment = pathname.split('/').filter(Boolean).at(-1);
-  return segment && stepOrder.includes(segment as Step) ? segment as Step : 'account';
+  return segment && stepOrder.includes(segment as Step) ? segment as Step : 'profile';
 }
 
 function errorMessage(error: unknown, fallback: string): string {

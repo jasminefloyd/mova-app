@@ -67,9 +67,9 @@ export function SettingsPage() {
       window.sessionStorage.removeItem('mova_active_artist_business_id');
       window.sessionStorage.removeItem('mova_active_artist_business_display_id');
       if (window.location.hostname === 'ops.mova-beauty.co') {
-        window.location.assign('https://mova-beauty.co/auth');
+        window.location.assign('https://mova-beauty.co/login');
       } else {
-        navigate('/auth', { replace: true });
+        navigate('/login', { replace: true });
       }
     } catch {
       setSignOutError(true);

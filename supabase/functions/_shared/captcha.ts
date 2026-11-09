@@ -1,4 +1,4 @@
-// O1 (2026-11-08): hCaptcha on public forms (waitlist, booking, review). Off unless
+// O1 (2026-11-08): hCaptcha on public forms (booking, review). Off unless
 // MOVA_CAPTCHA_PROVIDER=hcaptcha. When on, a missing secret fails closed. Only the token and the site key
 // go to hCaptcha; Mova does not forward the visitor's IP address.
 export type CaptchaCheck = { ok: true } | { ok: false; status: 403 | 503; code: 'CAPTCHA_REQUIRED' | 'CAPTCHA_FAILED' | 'CAPTCHA_UNAVAILABLE' };

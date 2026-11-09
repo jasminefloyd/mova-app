@@ -61,6 +61,8 @@ The applied Mova remote migration records are mirrored by these local timestampe
 | `20261108047000` | `mova_0057_autopilot_attribution` | `20261108047000_mova_0057_autopilot_attribution.sql` (local only) |
 | `20261108048000` | `mova_0058_plan_fee_rate` | `20261108048000_mova_0058_plan_fee_rate.sql` (local only) |
 | `20261108050000` | `mova_0059_waitlist_invites` | `20261108050000_mova_0059_waitlist_invites.sql` (local only) |
+| `20261109010000` | `mova_0060_open_signup` | `20261109010000_mova_0060_open_signup.sql` (P6 auth; local only) |
+| `20261109011000` | `mova_0061_retire_waitlist` | `20261109011000_mova_0061_retire_waitlist.sql` (P6 auth; local only) |
 
 The P06 `0007` migration does not reference a `mova_clients` table. P07 migrations were applied in dependency order. The Management API assigned the returned versions above, which are mirrored locally.
 

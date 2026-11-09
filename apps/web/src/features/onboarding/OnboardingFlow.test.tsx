@@ -17,12 +17,11 @@ function renderOnboarding(path: string) {
 
 describe('onboarding', () => {
   beforeAll(async () => { await i18nReady; });
-  it('renders the account step with email verification language and a password rule', () => {
+  it('no longer renders the account form; sign-up lives at /signup', () => {
     const markup = renderOnboarding('/onboarding/account');
-    expect(markup).toContain('Create your account');
-    expect(markup).toContain('type="email"');
-    expect(markup).toContain('Use at least 9 characters.');
-    expect(markup).toContain('Check your email for a verification link.');
+    expect(markup).not.toContain('type="email"');
+    expect(markup).not.toContain('Check your email for a verification link.');
+    expect(markup).toContain('Your artist profile');
   });
 
   it('renders artist-controlled profile fields without hardcoded canvas example data', () => {

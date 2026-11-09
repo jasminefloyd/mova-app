@@ -30,7 +30,7 @@ export default function OperatorShellRoute() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         const returnTo = publicNumber ? location.pathname : `/${encodeURIComponent(businessId)}${location.pathname.slice(`/${businessId}`.length)}`;
-        const authPath = `/auth?returnTo=${encodeURIComponent(returnTo)}`;
+        const authPath = `/login?returnTo=${encodeURIComponent(returnTo)}`;
         if (window.location.hostname === 'ops.mova-beauty.co') window.location.assign(`https://mova-beauty.co${authPath}`);
         else navigate(authPath, { replace: true });
         return;

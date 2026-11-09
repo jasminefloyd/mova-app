@@ -4,7 +4,6 @@ const env = {
   ...process.env,
   VITE_SUPABASE_URL: 'http://127.0.0.1:54321',
   VITE_SUPABASE_ANON_KEY: 'local-test-placeholder',
-  VITE_WAITLIST_ENABLED: 'false',
 };
 
 function run(command, args) {
