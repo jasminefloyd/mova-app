@@ -1,5 +1,6 @@
 // The one Google connection per stylist (P6). Shared by the connection, callback, calendar sync, listing
 // sync, review import and reply functions, so they all read the same row and the same provider.
+import { serviceClient } from './booking.ts';
 import { decryptProviderSecret } from './provider-crypto.ts';
 import { googleProviderFromEnv, GOOGLE_BUSINESS_SCOPE, GOOGLE_CALENDAR_SCOPE, type GoogleProvider } from './providers/google/index.ts';
 
@@ -28,9 +29,7 @@ export const connectionSummary = (row: GoogleConnectionRow | null) => row && {
 
 export const googleProvider = (fetcher?: typeof fetch): GoogleProvider | null => googleProviderFromEnv((name) => Deno.env.get(name), fetcher);
 
-// Structural type so this works with the Supabase client the callers already create.
-// deno-lint-ignore no-explicit-any
-type Db = { from: (table: string) => any };
+type Db = ReturnType<typeof serviceClient>;
 
 export async function loadConnection(db: Db, businessId: string): Promise<GoogleConnectionRow | null> {
   const { data, error } = await db.from('mova_google_connections').select(CONNECTION_COLUMNS).eq('artist_business_id', businessId).maybeSingle();

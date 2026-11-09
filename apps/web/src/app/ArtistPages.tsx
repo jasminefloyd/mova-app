@@ -33,6 +33,7 @@ export function SettingsPage() {
   const [locationCount, setLocationCount] = useState<number|null>(null);
   const [paymentSummary, setPaymentSummary] = useState<string>('—');
   const [calendarSummary, setCalendarSummary] = useState<string>('—');
+  const [googleSummary, setGoogleSummary] = useState<string>('—');
   const [languageExpanded, setLanguageExpanded] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -48,12 +49,13 @@ export function SettingsPage() {
         client.from('mova_locations').select('id',{count:'exact',head:true}).eq('artist_business_id',businessId).eq('is_active',true),
         client.from('mova_payment_method_settings').select('cash_enabled').eq('artist_business_id',businessId).maybeSingle(),
         client.from('mova_stripe_connections').select('status').eq('artist_business_id',businessId).maybeSingle(),
-        client.from('mova_google_calendar_connections').select('status').eq('artist_business_id',businessId).maybeSingle(),
+        client.from('mova_google_connections').select('status,calendar_enabled,business_profile_enabled').eq('artist_business_id',businessId).maybeSingle(),
       ]);
       setProfile(profileData);setServiceCount(services??0);setLocationCount(locations??0);
       const enabled=[stripe?.status==='active'?'Stripe':null,(paymentMethods?.cash_enabled??true)?t('money.methods.cash'):null].filter(Boolean);
       setPaymentSummary(enabled.join(' · ')||t('settings.notConnected'));
-      setCalendarSummary(calendar?.status==='active'?t('settings.connected'):t('settings.notConnected'));
+      setCalendarSummary(calendar?.status==='active'&&calendar.calendar_enabled?t('settings.connected'):t('settings.notConnected'));
+      setGoogleSummary(calendar?.status==='active'?t('settings.connected'):t('settings.notConnected'));
     })();
   }, [client,businessId,t]);
   const signOut = async () => {
@@ -109,6 +111,7 @@ export function SettingsPage() {
       <ListRow title={t('settings.paymentsPayouts')} trailing={paymentSummary} href={operatorUrl(businessId,'settings/payments')} />
       <ListRow title={t('settings.calendarSync')} trailing={calendarSummary} href={operatorUrl(businessId,'settings/calendar-sync')} />
       <ListRow title={t('settings.reviewsGoogle')} trailing={t('settings.notConnected')} href={operatorUrl(businessId,'settings/reviews')} />
+      <ListRow title={t('google.account.settingsRow')} trailing={googleSummary} href={operatorUrl(businessId,'settings/google')} />
       <ListRow title={t('settings.plan')} trailing={t('settings.planNotConfigured')} href={operatorUrl(businessId,'settings/plan')} />
       <button type="button" className="mova-list-row mova-settings-language-row" aria-expanded={languageExpanded} onClick={()=>setLanguageExpanded(value=>!value)}><span className="mova-list-row__copy"><strong>{t('settings.languageNotifications')}</strong></span><span className="mova-list-row__trailing">{localeName}</span></button>
       <ListRow title={t('settings.privacyData')} href={operatorUrl(businessId,'settings/privacy')} />

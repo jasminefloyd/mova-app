@@ -1,0 +1,67 @@
+/* P6 Google screens (boards 38b-38e). Tokens only; every target is at least 44px; no fixed widths so 320px does not scroll. */
+.mova-google-page { display: flex; flex-direction: column; gap: 14px; padding-bottom: 32px; min-width: 0; }
+.mova-google-page > h1 { margin: 6px 0 0; font: 800 clamp(28px, 7vw, 34px)/1.1 var(--font-display); letter-spacing: -.02em; color: var(--forest); }
+.mova-google-card { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); min-width: 0; }
+.mova-google-card h2 { margin: 0; font: 700 17px/1.25 var(--font-display); color: var(--forest); }
+.mova-google-card p, .mova-google-card__head > span > span { margin: 0; font-size: var(--fs-body-s); color: var(--ink-muted); line-height: 1.4; }
+.mova-google-card__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.mova-google-card__head > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mova-google-footnote { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; color: var(--ink-muted); }
+.mova-google-message { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: 16px; background: var(--surface-warm); color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-google-message.is-error { background: #F6E3DE; color: var(--danger); }
+.mova-google-message.is-waiting { background: var(--surface-alt); color: var(--forest); }
+.mova-google-message ul { margin: 0; padding-left: 18px; }
+.mova-google-badge { display: inline-flex; align-items: center; margin-left: 8px; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--mint); color: var(--forest); font-size: 12px; font-weight: 700; }
+.mova-google-badge.is-soft { background: var(--surface-warm); }
+.mova-google-badge:first-child { margin-left: 0; }
+.mova-google-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink-secondary); }
+.mova-google-field select { min-height: 48px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line-control); background: var(--surface); color: var(--ink-primary); font: 600 15px var(--font-body, 'DM Sans', sans-serif); }
+.mova-google-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.mova-google-tile { display: flex; flex-direction: column; gap: 4px; padding: 12px; min-height: 44px; border-radius: 14px; background: var(--surface-page); color: var(--ink-primary); text-decoration: none; min-width: 0; }
+.mova-google-tile > span:first-child { font-size: 12px; color: var(--ink-muted); }
+.mova-google-tile strong { font-size: 14px; line-height: 1.3; overflow-wrap: anywhere; }
+.mova-google-tile__note { font-size: 12px; color: var(--botanical); font-weight: 600; }
+.mova-google-link-row { display: flex; justify-content: space-between; align-items: center; min-height: 44px; font-size: 14px; font-weight: 600; color: var(--forest); text-decoration: none; }
+.mova-google-account__connected { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 20px; background: var(--forest); color: var(--ivory); min-width: 0; }
+.mova-google-account__avatar { flex: none; width: 44px; height: 44px; border-radius: 22px; background: var(--peach); color: var(--forest); display: flex; align-items: center; justify-content: center; font: 800 16px var(--font-display); }
+.mova-google-account__who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mova-google-account__who strong { font-size: 15px; overflow-wrap: anywhere; }
+.mova-google-account__who > span { font-size: 13px; color: var(--mint); }
+.mova-google-account .mova-google-badge { margin-left: 0; background: var(--mint); }
+.mova-google-disconnect { color: var(--danger); }
+.mova-google-listing__intro { margin: 0; font-size: var(--fs-body); color: var(--ink-secondary); line-height: 1.5; }
+.mova-google-rows { margin: 0; display: flex; flex-direction: column; }
+.mova-google-rows > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line-subtle); min-width: 0; }
+.mova-google-rows > div:last-child { border-bottom: 0; }
+.mova-google-rows dt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mova-google-rows dt strong { font-size: 15px; color: var(--ink-primary); }
+.mova-google-rows dt span { font-size: 13px; color: var(--ink-muted); }
+.mova-google-rows dd { margin: 0; font-size: 13px; font-weight: 700; color: var(--ink-secondary); text-align: right; flex: none; }
+.mova-google-menu { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.mova-google-menu li { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; padding: 8px 0; border-bottom: 1px solid var(--line-subtle); font-size: 15px; min-width: 0; }
+.mova-google-menu li > span { min-width: 0; overflow-wrap: anywhere; }
+.mova-google-listing__send { position: sticky; bottom: 0; padding: 12px 0 4px; background: var(--surface-page); }
+.mova-google-listing__send button { width: 100%; }
+.mova-google-connect__intro { display: flex; flex-direction: column; gap: 12px; }
+.mova-google-connect__intro p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink-secondary); }
+.mova-google-connect__points { padding: 4px 16px; }
+.mova-google-connect__point { display: flex; gap: 12px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--line-subtle); }
+.mova-google-connect__point:last-child { border-bottom: 0; }
+.mova-google-connect__point > span:last-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mova-google-connect__point strong { font-size: 15px; color: var(--ink-primary); }
+.mova-google-connect__point > span:last-child > span { font-size: 13px; line-height: 1.4; color: var(--ink-muted); }
+.mova-google-connect__icon { flex: none; width: 36px; height: 36px; border-radius: 18px; background: var(--mint); color: var(--forest); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.mova-google-connect__privacy { margin: 0; padding: 12px 14px; border-radius: 16px; background: var(--surface-warm); font-size: 13px; line-height: 1.45; color: var(--ink-secondary); }
+.mova-google-connect__footer { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.mova-google-connect__footer span { text-align: center; font-size: 12px; color: var(--ink-muted); }
+.mova-google-connect__footer button { width: 100%; min-height: 54px; }
+.mova-google-reply-quote { margin: 0; padding: 12px 14px; border-radius: 16px; background: var(--surface-page); font-size: 14px; line-height: 1.45; color: var(--ink-secondary); }
+.mova-google-reply-quote > div { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--ink-muted); }
+.mova-google-reply-form { display: flex; flex-direction: column; gap: 12px; }
+.mova-google-reply-form small { font-size: 12px; color: var(--ink-muted); text-align: right; }
+.mova-google-reply-note { display: flex; gap: 8px; font-size: 13px; line-height: 1.45; color: var(--ink-muted); }
+.mova-google-reply-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.mova-google-reply-actions > * { flex: 1 1 140px; }
+.mova-google-reputation-link { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 52px; padding: 12px 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); color: var(--ink-primary); text-decoration: none; font-size: 14px; }
+.mova-google-reputation-link strong { color: var(--forest); }
+@media (max-width: 340px) { .mova-google-tiles { grid-template-columns: minmax(0, 1fr); } }

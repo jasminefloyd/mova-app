@@ -1,0 +1,23 @@
+/* P6 cover picker (board 16f). Tokens only; 44px targets; the grid drops to two columns on narrow phones. */
+.mova-cover-picker { display: flex; flex-direction: column; gap: 14px; padding-bottom: 96px; min-width: 0; }
+.mova-cover-picker__upload { position: relative; min-height: 44px; display: inline-flex; align-items: center; }
+.mova-cover-picker__upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.mova-cover-picker__preview { width: 100%; aspect-ratio: 16 / 9; border-radius: 20px; background: var(--mint) center / cover no-repeat; border: 1px solid var(--line); }
+.mova-cover-picker__credit { margin: 0; font-size: var(--fs-body-s); color: var(--ink-muted); overflow-wrap: anywhere; }
+.mova-cover-picker__credit a, .mova-cover-picker__notice + p a { color: var(--forest); font-weight: 600; }
+.mova-cover-picker__search { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
+.mova-cover-picker__search input { flex: 1 1 180px; min-width: 0; min-height: 48px; padding: 0 14px; border-radius: 24px; border: 1px solid var(--line-control); background: var(--surface); font: 500 15px var(--font-body, 'DM Sans', sans-serif); color: var(--ink-primary); }
+.mova-cover-picker__ideas { display: flex; flex-wrap: wrap; gap: 8px; }
+.mova-cover-picker__ideas button { min-height: 44px; padding: 0 14px; border-radius: var(--radius-pill); border: 1px solid var(--line-control); background: var(--surface); color: var(--ink-secondary); font: 600 14px var(--font-body, 'DM Sans', sans-serif); cursor: pointer; }
+.mova-cover-picker__ideas button.is-selected, .mova-cover-picker__ideas button[aria-pressed="true"] { background: var(--forest); border-color: var(--forest); color: var(--ivory); }
+.mova-cover-picker__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.mova-cover-picker__tile { position: relative; display: flex; flex-direction: column; gap: 6px; min-width: 0; cursor: pointer; }
+.mova-cover-picker__tile input { position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; margin: 0; z-index: 1; accent-color: var(--forest); }
+.mova-cover-picker__tile img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 16px; border: 2px solid transparent; background: var(--surface-alt); }
+.mova-cover-picker__tile.is-selected img { border-color: var(--forest); }
+.mova-cover-picker__tile span { font-size: 12px; color: var(--ink-muted); overflow-wrap: anywhere; line-height: 1.3; }
+.mova-cover-picker__notice { margin: 0; padding: 12px 14px; border-radius: 16px; background: var(--surface-warm); color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-cover-picker__notice.is-error { background: #F6E3DE; color: var(--danger); }
+.mova-cover-picker__footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 20px 22px; background: var(--surface-page); border-top: 1px solid var(--line-bar); }
+.mova-cover-picker__footer button { width: 100%; min-height: 54px; }
+@media (max-width: 340px) { .mova-cover-picker__grid { grid-template-columns: minmax(0, 1fr); } }
