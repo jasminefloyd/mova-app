@@ -1899,5 +1899,66 @@
         "locations": "Elige al menos una ubicación."
       }
     }
+  },
+  "screens": {
+    "reports": {
+      "openMoney": "Abrir Dinero",
+      "serviceValueChange": "Valor de servicios · {{value}} frente a los {{days}} días anteriores",
+      "rebookedLine": "{{rate}} reservaron de nuevo",
+      "averageTicketLine": "{{value}} ticket promedio",
+      "noShowsLine": "{{count}} no llegaron",
+      "reputationLink": "Reputación: {{rating}} estrellas de {{count}} reseñas",
+      "topSources": "Principales fuentes: {{sources}}",
+      "noSources": "Aún no hay tráfico en tu perfil.",
+      "seatFillerRow": "Llenado de espacios · {{count}} espacios llenos",
+      "rebookingRow": "Recordatorios para reservar · {{booked}} de {{sent}} reservaron"
+    },
+    "concierge": {
+      "backToRevenue": "Centro de ingresos IA",
+      "backToInbox": "Volver a la bandeja",
+      "teach": "Enséñale",
+      "statusOn": "Activo · respondiendo como asistente de {{name}}",
+      "statusPaused": "En pausa · las respuestas de IA esperan aprobación",
+      "yourAssistant": "tu",
+      "handledToday": "Atendidas hoy",
+      "bookedForYou": "Reservas para ti",
+      "averageReply": "Respuesta promedio",
+      "needsYou_one": "Necesita tu atención · {{count}}",
+      "needsYou_other": "Necesita tu atención · {{count}}"
+    },
+    "conciergeSetup": {
+      "title": "Enseña a tu conserjería",
+      "intro": "Siempre dice que es tu asistente de IA.",
+      "whereTitle": "Dónde responde",
+      "smsNumber": "El número aparece aquí cuando se asigne",
+      "on": "Activo",
+      "off": "Apagado",
+      "aloneTitle": "Qué puede hacer sin ti",
+      "permission": {
+        "answer": "Responder preguntas con tu información",
+        "book_instant": "Reservar horarios libres en ubicaciones de reserva inmediata",
+        "request_salon": "Enviar solicitudes para horarios del salón",
+        "reschedule": "Reprogramar dentro de tu política"
+      },
+      "alwaysYou": "Cotizaciones, excepciones, quejas",
+      "alwaysYouValue": "Siempre tú",
+      "knowsTitle": "Lo que sabe",
+      "faqs": "Preguntas frecuentes y cómo prepararse",
+      "answerCount_one": "{{count}} respuesta",
+      "answerCount_other": "{{count}} respuestas",
+      "locationDetails": "Detalles de la ubicación",
+      "locationDetailsValue": "Estacionamiento, códigos de puerta, quién cobra",
+      "tone": "Tono",
+      "toneValue": "Cálido y breve · EN + ES",
+      "editTitle": "Agregar o editar una respuesta",
+      "pauseTitle": "Pausa"
+    },
+    "locations": {
+      "bookingOn": "Reservas en",
+      "buffer": "Margen",
+      "notice": "Aviso",
+      "bookAhead": "Reservar con anticipación",
+      "editHours": "Editar horario y reglas"
+    }
   }
 }

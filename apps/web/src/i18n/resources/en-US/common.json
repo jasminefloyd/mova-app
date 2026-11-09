@@ -1899,5 +1899,66 @@
         "locations": "Choose at least one location."
       }
     }
+  },
+  "screens": {
+    "reports": {
+      "openMoney": "Open Money",
+      "serviceValueChange": "Service value · {{value}} vs previous {{days}} days",
+      "rebookedLine": "{{rate}} rebooked",
+      "averageTicketLine": "{{value}} avg. ticket",
+      "noShowsLine": "{{count}} no-shows",
+      "reputationLink": "Reputation: {{rating}} stars from {{count}} reviews",
+      "topSources": "Top sources: {{sources}}",
+      "noSources": "No profile traffic yet.",
+      "seatFillerRow": "Seat filler · {{count}} slots filled",
+      "rebookingRow": "Rebooking reminders · {{booked}} of {{sent}} booked"
+    },
+    "concierge": {
+      "backToRevenue": "AI Revenue Center",
+      "backToInbox": "Back to inbox",
+      "teach": "Teach it",
+      "statusOn": "On · replying as {{name}}'s assistant",
+      "statusPaused": "Paused · AI replies wait for approval",
+      "yourAssistant": "your",
+      "handledToday": "Handled today",
+      "bookedForYou": "Booked for you",
+      "averageReply": "Avg. reply",
+      "needsYou_one": "Needs you · {{count}}",
+      "needsYou_other": "Needs you · {{count}}"
+    },
+    "conciergeSetup": {
+      "title": "Teach your concierge",
+      "intro": "It always says it's your AI assistant.",
+      "whereTitle": "Where it answers",
+      "smsNumber": "Number shows here once it's assigned",
+      "on": "On",
+      "off": "Off",
+      "aloneTitle": "What it can do without you",
+      "permission": {
+        "answer": "Answer questions from your info",
+        "book_instant": "Book open times at instant-booking locations",
+        "request_salon": "Send requests for salon times",
+        "reschedule": "Reschedule within your policy"
+      },
+      "alwaysYou": "Quotes, exceptions, complaints",
+      "alwaysYouValue": "Always you",
+      "knowsTitle": "What it knows",
+      "faqs": "FAQs & how to prep",
+      "answerCount_one": "{{count}} answer",
+      "answerCount_other": "{{count}} answers",
+      "locationDetails": "Location details",
+      "locationDetailsValue": "Parking, door codes, who collects",
+      "tone": "Tone",
+      "toneValue": "Warm & brief · EN + ES",
+      "editTitle": "Add or edit an answer",
+      "pauseTitle": "Pause"
+    },
+    "locations": {
+      "bookingOn": "Booking on",
+      "buffer": "Buffer",
+      "notice": "Notice",
+      "bookAhead": "Book ahead",
+      "editHours": "Edit hours & rules"
+    }
   }
 }

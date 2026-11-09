@@ -118,3 +118,32 @@
     grid-template-columns: repeat(7, minmax(36px, 1fr));
   }
 }
+
+/* Location cards (board 19): buffer, notice and book-ahead rows under the hours. */
+.mova-location-card__rules {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.mova-location-card__rules div {
+  display: grid;
+  gap: 2px;
+}
+
+.mova-location-card__rules dt {
+  color: var(--ink-muted);
+  font-size: var(--fs-caption);
+}
+
+.mova-location-card__rules dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+@media (max-width: 320px) {
+  .mova-location-card__rules {
+    grid-template-columns: 1fr;
+  }
+}

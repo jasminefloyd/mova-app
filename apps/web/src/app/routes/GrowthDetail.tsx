@@ -1,7 +1,7 @@
 import { Navigate, useParams } from 'react-router';
 import { operatorUrl } from '../operator-url';
 import { RevenueDetailPage } from '../../features/revenue/RevenuePages';
-import { ConciergeInboxPage } from '../../features/concierge/ConciergePages';
+import { ConciergeInboxPage } from '../../features/concierge/ConciergeBoard';
 
 const detailModes = ['pipeline', 'winback', 'slots', 'autopilot', 'templates', 'activity'] as const;
 type DetailMode = (typeof detailModes)[number];
