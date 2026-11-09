@@ -3,13 +3,46 @@
   "framework": "react-router",
   "installCommand": "corepack pnpm install --frozen-lockfile",
   "buildCommand": "corepack pnpm build",
-  "rewrites": [
-    { "source": "/:path*", "has": [{ "type": "host", "value": "admin.mova-beauty.co" }], "destination": "/__admin" }
-  ],
   "crons": [
-    { "path": "/api/booking-expiry", "schedule": "*/5 * * * *" },
-    { "path": "/api/job-dispatch", "schedule": "* * * * *" },
-    { "path": "/api/calendar-sync", "schedule": "*/5 * * * *" },
-    { "path": "/api/reports-refresh", "schedule": "17 5 * * *" }
+    {
+      "path": "/api/booking-expiry",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/job-dispatch",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/calendar-sync",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/reports-refresh",
+      "schedule": "17 5 * * *"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.mova-beauty.co"
+        }
+      ],
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/:path((?!admin(?:/|$)|assets/|api/|icons/|favicon|robots\\.txt|sitemap\\.xml).+)",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.mova-beauty.co"
+        }
+      ],
+      "destination": "/admin/:path",
+      "permanent": false
+    }
   ]
 }

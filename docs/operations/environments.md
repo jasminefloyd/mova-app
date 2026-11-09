@@ -59,3 +59,21 @@ The waitlist and public booking forms use hCaptcha once it is switched on. It st
 | Vercel | `VITE_HCAPTCHA_SITE_KEY` | the same site key |
 
 Turn it on in this order: set the Vercel key and deploy (the widget appears), then set the three function secrets (the server starts requiring a token). Switching the server on first would reject every waitlist and booking submission. When the provider is on but a key is missing, `waitlist-signup` and `booking-create` fail closed with `CAPTCHA_UNAVAILABLE`. Only the token and site key are sent to hCaptcha; Mova does not forward visitor IP addresses. The Privacy Policy must name hCaptcha as a service provider before this goes live.
+
+## Admin portal (admin.mova-beauty.co)
+
+The platform admin portal is part of the web app and is served only on the admin subdomain. Every route lives under `/admin`, and the server returns 404 for `/admin` on any other host (localhost, 127.0.0.1 and `*.vercel.app` stay open for development and previews).
+
+Routing (`apps/web/vercel.json`): requests on `admin.mova-beauty.co` redirect to `/admin/...` on the same host. Asset, API and icon paths are excluded. Redirects, not rewrites, so the client router sees the real `/admin/...` path and the sign-in return address works.
+
+DNS and Vercel (owner steps; this change does not touch DNS):
+- Add the domain `admin.mova-beauty.co` to the Vercel project for the web app.
+- Create a DNS record for `admin` in the mova-beauty.co zone, using the target Vercel shows for that domain (CNAME to `cname.vercel-dns.com` unless Vercel gives another value).
+- Confirm that `https://admin.mova-beauty.co/` redirects to `/admin` and that `/admin/signin` loads.
+
+Bootstrap (once, after migrations 0066 to 0071 are applied):
+1. Create the staff user in Supabase Auth with a work email and a strong password.
+2. Grant platform admin in SQL (service role): `select public.mova_grant_platform_admin('<auth user uuid>', 'Jasmine F.');`
+3. Sign in at `/admin/signin` with that email. The first sign-in asks the user to scan an authenticator QR code and enter the six-digit code. Admin functions require this two-step session; the database checks it on every call.
+
+Admin actions are written to `mova_admin_activity`, which is append-only.
