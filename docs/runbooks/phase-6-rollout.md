@@ -1,6 +1,6 @@
 # Phase 6 production rollout commands
 
-Status: **runbook only; no production commands were run in this follow-up.** The platform team owns production rollout. The owner explicitly skipped the database backup. Production holds migration records that are not present in this repository, so do not run `supabase db push` or `supabase migration up` against it.
+Status: **partial production rollout on 2026-11-08.** Commit `19c85bc` was pushed to `main`; 17 changed Edge Functions were deployed to project `yceqvjrsmooqpdsqszvc`; Vercel deployment `dpl_EHgw7BtivBGxeLFmdgK3gTQrRCK4` is READY and aliased to `https://mova-beauty.co`. No database backup was made. Migration history was inspected and the Phase 6 catch-up migrations listed below are still pending; the Management API migration token was unavailable, so none were applied. Do not run `supabase db push` or `supabase migration up` against production because its history contains migrations not present in this repository.
 
 ## Apply migrations one at a time
 
