@@ -25,7 +25,7 @@ export function OperatorAlias({ section, titleKey }: { section: 'growth' | 'mone
     <Card>
       <h1>{t(titleKey)}</h1>
       <p>{t('reports.signInRequired')}</p>
-      <Button onClick={() => navigate('/auth')}>{t('onboarding.signIn')}</Button>
+      <Button onClick={() => navigate('/login')}>{t('onboarding.signIn')}</Button>
     </Card>
   </main>;
 }

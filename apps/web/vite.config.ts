@@ -27,7 +27,7 @@ export default defineConfig({
         name: 'mova',
         short_name: 'mova',
         description: 'Your business moves with you.',
-        start_url: '/auth',
+        start_url: '/login',
         scope: '/',
         display: 'standalone',
         background_color: '#F7F5EF',

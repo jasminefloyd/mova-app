@@ -1,3 +1,5 @@
+> **Retired in P6 (2026-11-09).** Sign-up is open to anyone, so the waitlist, the invite email and the `waitlist-admin` and `waitlist-signup` functions are gone. Migrations `20261109010000_mova_0060_open_signup.sql` (hook allows every address) and `20261109011000_mova_0061_retire_waitlist.sql` (drops the waitlist functions) replace this flow. Tables and rows are kept. The text below is kept for history only.
+
 # Early access invites (owner decision O2, 2026-11-08)
 
 Stylists join the waitlist on the marketing page. A super admin approves them, which adds their email to the signup allowlist (`mova_early_access_invites`, enforced by the Before User Created hook) and sends one invite email in the language they used. The first cohort is capped at 10 places, counting every email on the allowlist.

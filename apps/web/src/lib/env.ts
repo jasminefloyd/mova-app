@@ -7,7 +7,6 @@ const publicEnvSchema = z.object({
   VITE_CLIENT_PROFILES_ENABLED: z.enum(['true','false']).optional(),
   VITE_WALLET_CLIENT_CARD_ENABLED: z.enum(['true','false']).optional(),
   VITE_CONCIERGE_WEB_CHAT_ENABLED: z.enum(['true','false']).optional(),
-  VITE_WAITLIST_ENABLED: z.enum(['true','false']).optional(),
   VITE_STRIPE_TEST_MODE: z.enum(['true','false']).optional(),
   VITE_HCAPTCHA_SITE_KEY: z.string().regex(/^[0-9a-f-]{20,64}$/i).optional(),
 });
@@ -18,7 +17,6 @@ const rawEnv = {
   VITE_CLIENT_PROFILES_ENABLED: import.meta.env.VITE_CLIENT_PROFILES_ENABLED || undefined,
   VITE_WALLET_CLIENT_CARD_ENABLED: import.meta.env.VITE_WALLET_CLIENT_CARD_ENABLED || undefined,
   VITE_CONCIERGE_WEB_CHAT_ENABLED: import.meta.env.VITE_CONCIERGE_WEB_CHAT_ENABLED || undefined,
-  VITE_WAITLIST_ENABLED: import.meta.env.VITE_WAITLIST_ENABLED || undefined,
   VITE_STRIPE_TEST_MODE: import.meta.env.VITE_STRIPE_TEST_MODE || undefined,
   VITE_HCAPTCHA_SITE_KEY: import.meta.env.VITE_HCAPTCHA_SITE_KEY || undefined,
 };
@@ -26,7 +24,6 @@ const rawEnv = {
 export const publicEnv = publicEnvSchema.parse(rawEnv);
 export const clientProfilesEnabled = publicEnv.VITE_CLIENT_PROFILES_ENABLED === 'true';
 export const walletClientCardEnabled = publicEnv.VITE_WALLET_CLIENT_CARD_ENABLED === 'true';
-export const waitlistEnabled = publicEnv.VITE_WAITLIST_ENABLED === 'true';
 export const stripeTestModeEnabled = publicEnv.VITE_STRIPE_TEST_MODE === 'true';
 export const webChatEnabled = publicEnv.VITE_CONCIERGE_WEB_CHAT_ENABLED === 'true';
 /** Shown on feedback so the team knows which build a stylist used. */
@@ -39,5 +36,5 @@ export function requireSupabaseEnv(): { url: string; anonKey: string } {
   return { url: publicEnv.VITE_SUPABASE_URL, anonKey: publicEnv.VITE_SUPABASE_ANON_KEY };
 }
 
-/** O1: hCaptcha on the waitlist and booking forms. Shown only when a site key is configured. */
+/** O1: hCaptcha on the booking forms. Shown only when a site key is configured. */
 export const hcaptchaSiteKey = publicEnv.VITE_HCAPTCHA_SITE_KEY ?? null;
