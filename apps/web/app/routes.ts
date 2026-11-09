@@ -1,4 +1,4 @@
-import { index, route, type RouteConfig } from '@react-router/dev/routes';
+import { index, layout, route, type RouteConfig } from '@react-router/dev/routes';
 
 export default [
   route('', '../src/app/PublicShell.tsx', { id: 'public-root-shell' }, [index('../src/app/routes/MarketingHomeRoute.tsx')]),
@@ -56,7 +56,22 @@ export default [
   route('b', '../src/app/PublicShell.tsx', { id: 'booking-manage-shell' }, [route(':token', '../src/features/bookings/BookingManageRoute.tsx')]),
   route('review', '../src/app/PublicShell.tsx', { id: 'public-review-shell' }, [route(':token', '../src/features/reports/ReviewPage.tsx')]),
   route('slot', '../src/app/PublicShell.tsx', { id: 'seat-claim-shell' }, [route(':token', '../src/features/seat/ClaimSlotPage.tsx')]),
-  route('__admin', '../src/routes/admin-not-found.ts'),
+  route('admin', '../src/features/admin/AdminRoot.tsx', [
+    route('signin', '../src/features/admin/AdminSignInPage.tsx'),
+    layout('../src/features/admin/AdminLayout.tsx', [
+      index('../src/features/admin/AdminOverviewPage.tsx'),
+      route('stylists', '../src/features/admin/AdminStylistsPage.tsx'),
+      route('stylists/:businessId', '../src/features/admin/AdminStylistDetailPage.tsx'),
+      route('stylists/:businessId/audit', '../src/features/admin/AdminAuditLogPage.tsx'),
+      route('inbox', '../src/features/admin/AdminInboxPage.tsx'),
+      route('fees', '../src/features/admin/AdminFeesPage.tsx'),
+      route('blog', '../src/features/admin/blog/AdminBlogListPage.tsx'),
+      route('blog/:postId', '../src/features/admin/blog/AdminBlogEditorPage.tsx'),
+      route('flags', '../src/features/admin/AdminFlagsPage.tsx'),
+      route('health', '../src/features/admin/AdminHealthPage.tsx'),
+      route('activity', '../src/features/admin/AdminActivityPage.tsx'),
+    ]),
+  ]),
   route('sitemap.xml', '../src/routes/sitemap.ts'),
   route('robots.txt', '../src/routes/robots.ts'),
   route('api/booking-expiry', '../src/routes/booking-expiry.ts'),

@@ -69,3 +69,13 @@ The migrations above install no PostgreSQL extensions. Every Mova-created table,
 Migrations 0032 and 0034 remain unapplied; 0033, 0035, 0036, and 0037 were history-verified on 2026-11-08. The 0037 catalog/backfill checks and a rollback-scoped two-service booking runtime assertion passed; its pgTAP file is present but was not run because a local PostgreSQL/Supabase test runtime is unavailable. Application-level database behavior is not uniformly validated: tenant-isolation, concurrency, Edge HTTP, and provider integration tests remain incomplete. P09 depends on P08 migration 0009; P10 depends on P08 and P06; P11–P13 also depend on earlier phases. The forecast migration uses version label `0018` for the P12 forecast slice; migrations 0019–0020 and 0022 remain reserved for the roadmap in `docs/product/ENGINEERING_SPEC.md` §4.5. Production waitlist submissions remain blocked by open A-14 until privacy, anti-bot, and domain checks are verified. P07, 0021, and 0023 schema/history application still require behavioral integration verification.
 
 As of 2026-11-08 every migration through 0059 passes the full pgTAP suite locally (`pnpm db:test`: 43/43 files, 890/890 assertions, empty and with the seed, UTC and America/Los_Angeles). Migrations 0032, 0034, 0038–0047 and 0050–0059 are not in production; `docs/runbooks/production-catch-up.md` lists the order, checks and rollback, and needs owner approval (O14) before anything is applied.
+
+## P6 admin stream (2026-11-09, local only; not applied remotely)
+| Timestamp | Name | File |
+| --- | --- | --- |
+| `20261109030000` | `mova_0066_admin_foundation` | `20261109030000_mova_0066_admin_foundation.sql` (admin roster, aal2 admin check, append-only admin activity) |
+| `20261109031000` | `mova_0067_blog_posts` | `20261109031000_mova_0067_blog_posts.sql` (guides storage; clients read only through the mova_blog_live_posts view, live by published_at) |
+| `20261109032000` | `mova_0068_blog_admin_functions` | `20261109032000_mova_0068_blog_admin_functions.sql` (guides writer with server-side validation) |
+| `20261109033000` | `mova_0069_admin_reads` | `20261109033000_mova_0069_admin_reads.sql` (overview, stylists, stylist detail, audit log, admin activity) |
+| `20261109034000` | `mova_0070_admin_operations` | `20261109034000_mova_0070_admin_operations.sql` (stylist fee overrides, platform default, switches, support inbox, unpublish page; mova_business_fee now honours overrides) |
+| `20261109035000` | `mova_0071_admin_health` | `20261109035000_mova_0071_admin_health.sql` (system health and job requeue) |
