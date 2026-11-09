@@ -67,7 +67,7 @@ export default function StylistSignInPage() {
         <div className="stylist-auth__field">
           <div className="stylist-auth__label-row">
             <label htmlFor="stylist-signin-password">{t('stylistAuth.signIn.password')}</label>
-            <span className="stylist-auth__muted-link">{t('stylistAuth.signIn.forgot')}</span>
+            <Link className="stylist-auth__muted-link" to={`/reset-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}>{t('stylistAuth.signIn.forgot')}</Link>
           </div>
           <input id="stylist-signin-password" name="password" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.currentTarget.value)} />
         </div>

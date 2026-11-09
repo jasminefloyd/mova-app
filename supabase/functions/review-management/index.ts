@@ -1,5 +1,6 @@
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { accessTokenFor, businessProfileReady, googleProvider, loadConnection } from '../_shared/google-connection.ts';
+import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -8,6 +9,7 @@ Deno.serve(async (request) => {
   if (!actor) return respond({ code: 'UNAUTHENTICATED' }, 401);
   const body = await request.json().catch(() => null);
   if (!body || typeof body.action !== 'string') return respond({ code: 'REQUEST_INVALID' }, 422);
+  if (!await platformSwitchEnabled('reviews')) return respond({ code: 'REVIEWS_FEATURE_DISABLED' }, 403);
   const db = serviceClient();
   if (body.action === 'get') {
     const googleEnabled = Deno.env.get('MOVA_GOOGLE_REVIEWS_ENABLED') === 'true' && Deno.env.get('MOVA_PUBLIC_REVIEWS_ENABLED') === 'true';

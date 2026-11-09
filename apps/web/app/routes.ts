@@ -16,6 +16,7 @@ export default [
   route('reports', '../src/app/PublicShell.tsx', { id: 'reports-shortcut-shell' }, [index('../src/app/routes/ReportsAlias.tsx')]),
   route('auth', '../src/features/auth/AuthRedirect.tsx'),
   route('login', '../src/app/StylistAuthShell.tsx', { id: 'stylist-signin-shell' }, [index('../src/features/auth/StylistSignInPage.tsx')]),
+  route('reset-password', '../src/app/StylistAuthShell.tsx', { id: 'stylist-password-reset-shell' }, [index('../src/features/auth/StylistPasswordResetPage.tsx')]),
   route('signup', '../src/app/StylistAuthShell.tsx', { id: 'stylist-signup-shell' }, [index('../src/features/auth/StylistSignUpPage.tsx')]),
   route(':businessId', '../src/app/OperatorShellRoute.tsx', [
     index('../src/app/routes/Home.tsx'),

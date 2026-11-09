@@ -12,7 +12,7 @@ type Service = { id: string; name: string; category: string; duration_minutes: n
 type Look = { id: string; image_url: string; alt_text: string; service_ids: string[] };
 type PublicLocation = { id: string; name: string; booking_mode: 'instant' | 'request'; time_zone: string };
 export type PublicArtist = {
-  profile: { display_name: string; handle: string; specialties: string[]; bio: string; preferred_locale: string; search_index_enabled: boolean; photo_urls: Record<string, Record<string, string>> };
+  profile: { display_name: string; handle: string; specialties: string[]; bio: string; preferred_locale: string; search_index_enabled: boolean; photo_urls: Record<string, Record<string, string>>; cover_source?: 'upload' | 'unsplash'; cover_image_url?: string | null; cover_credit_name?: string | null; cover_credit_url?: string | null; cover_unsplash_url?: string | null };
   services: Service[]; looks: Look[]; locations: PublicLocation[]; bookable: boolean;
 };
 
@@ -68,7 +68,7 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
   if (!artist) return <ErrorFallback />;
 
   const servicesById = new Map(artist.services.map((service) => [service.id, service]));
-  const coverUrl = artist.profile.photo_urls.cover?.['512'];
+  const coverUrl = artist.profile.cover_source === 'unsplash' ? artist.profile.cover_image_url : artist.profile.photo_urls.cover?.['512'];
   const bookingUrl = `/a/${encodeURIComponent(handle)}/book?${new URLSearchParams({ locale })}`;
   return <main lang={locale} className="mova-page mova-public-artist">
     {!preview && <PublicLocaleToggle />}
@@ -76,6 +76,7 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
       {artist.profile.photo_urls.profile?.['512'] && <img className="mova-public-artist__avatar" src={artist.profile.photo_urls.profile['512']} alt="" />}
       <div><p className="mova-wordmark">mova</p><h1>{artist.profile.display_name}</h1><p>@{artist.profile.handle}</p>{artist.locations[0] && <p className="mova-public-artist__location">{artist.locations[0].name}</p>}</div>
     </header>
+    {artist.profile.cover_source === 'unsplash' && artist.profile.cover_credit_name && artist.profile.cover_credit_url && artist.profile.cover_unsplash_url && <p className="mova-public-artist__cover-credit">{t('coverPicker.photoCredit')} <a href={artist.profile.cover_credit_url} target="_blank" rel="noopener noreferrer">{artist.profile.cover_credit_name}</a> / <a href={artist.profile.cover_unsplash_url} target="_blank" rel="noopener noreferrer">{t('coverPicker.unsplash')}</a></p>}
     {artist.profile.specialties.length > 0 && <div className="mova-chip-list" aria-label={t('showcase.specialties')}>{artist.profile.specialties.map((specialty) => <span className="mova-chip mova-chip--static" key={specialty}>{specialty}</span>)}</div>}
     {artist.profile.bio && <p className="mova-public-artist__bio">{artist.profile.bio}</p>}
     <p className="sr-only" aria-live="polite">{tab === 'looks' ? t('showcase.looks') : t('showcase.services')}</p>

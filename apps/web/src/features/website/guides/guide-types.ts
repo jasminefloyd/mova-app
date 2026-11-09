@@ -34,5 +34,5 @@ export type Seo = {
 
 export type PostFull = PostSummary & { body: Block[]; updated_at: string; seo: Seo };
 
-export type GuidesListResult = { posts: PostSummary[]; categories: string[]; next_cursor: string | null };
+export type GuidesListResult = { posts: PostSummary[]; categories: string[]; next_cursor: string | null; total: number; limit: number };
 export type GuideResult = { post: PostFull; related: PostSummary[] };

@@ -26,8 +26,10 @@ export type NewLocationDraft = {
   mode: 'instant' | 'request';
   collector: 'artist' | 'salon';
   weekdays: number[];
-  opens: string;
-  closes: string;
+  hoursByWeekday: Record<number, { opens: string; closes: string }>;
+  /** Legacy single-range inputs remain accepted for stored callers; the UI uses hoursByWeekday. */
+  opens?: string;
+  closes?: string;
   bufferMinutes: number;
   noticeHours: number;
   bookAheadWeeks: number;
@@ -40,7 +42,7 @@ export function newLocationDefaults(timeZone: string): NewLocationDraft {
   return {
     kind: '', name: '', address: '', timeZone,
     mode: 'instant', collector: 'artist',
-    weekdays: [2, 4, 5], opens: '09:00', closes: '17:00',
+    weekdays: [2, 4, 5], hoursByWeekday: { 2: { opens: '09:00', closes: '17:00' }, 4: { opens: '09:00', closes: '17:00' }, 5: { opens: '09:00', closes: '17:00' } },
     bufferMinutes: 15, noticeHours: 12, bookAheadWeeks: 8,
   };
 }
@@ -53,7 +55,12 @@ export function validateNewLocation(draft: NewLocationDraft): FieldErrors<NewLoc
   if (draft.address.trim().length < 1 || draft.address.trim().length > 300) errors.address = true;
   if (!draft.timeZone) errors.timeZone = true;
   if (draft.weekdays.length < 1 || draft.weekdays.some((day) => !Number.isInteger(day) || day < 0 || day > 6)) errors.weekdays = true;
-  if (!TIME.test(draft.opens) || !TIME.test(draft.closes) || draft.opens >= draft.closes) errors.hours = true;
+  if (draft.weekdays.some((weekday) => {
+    const hours = draft.opens !== undefined || draft.closes !== undefined
+      ? { opens: draft.opens ?? '', closes: draft.closes ?? '' }
+      : draft.hoursByWeekday[weekday];
+    return !hours || !TIME.test(hours.opens) || !TIME.test(hours.closes) || hours.opens >= hours.closes;
+  })) errors.hours = true;
   return errors;
 }
 
@@ -70,7 +77,12 @@ export function locationSavePayload(draft: NewLocationDraft, displayColorIndex: 
     time_zone: draft.timeZone,
     address: { street: draft.address.trim() },
     display_color_index: displayColorIndex,
-    hours: [...draft.weekdays].sort((a, b) => a - b).map((weekday) => ({ weekday, opens_at: draft.opens, closes_at: draft.closes })),
+    hours: [...draft.weekdays].sort((a, b) => a - b).map((weekday) => {
+      const hours = draft.opens !== undefined || draft.closes !== undefined
+        ? { opens: draft.opens ?? '', closes: draft.closes ?? '' }
+        : draft.hoursByWeekday[weekday]!;
+      return { weekday, opens_at: hours.opens, closes_at: hours.closes };
+    }),
     exceptions: [] as Array<{ exception_date: string; is_closed: boolean; hours: Array<{ opens_at: string; closes_at: string }>; reason: string }>,
     policies: {
       lead_time_minutes: draft.noticeHours * 60,

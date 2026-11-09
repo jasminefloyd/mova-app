@@ -34,7 +34,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     { property: 'og:description', content: description },
     { property: 'og:url', content: canonical },
     { property: 'og:type', content: 'profile' },
-    ...(artist.profile.photo_urls.profile?.['512'] ? [{ property: 'og:image', content: artist.profile.photo_urls.profile['512'] }] : []),
+    ...(artist.profile.cover_source === 'unsplash' && artist.profile.cover_image_url
+      ? [{ property: 'og:image', content: artist.profile.cover_image_url }]
+      : artist.profile.photo_urls.cover?.['512']
+        ? [{ property: 'og:image', content: artist.profile.photo_urls.cover['512'] }]
+        : artist.profile.photo_urls.profile?.['512'] ? [{ property: 'og:image', content: artist.profile.photo_urls.profile['512'] }] : []),
     ...(!artist.profile.search_index_enabled ? [{ name: 'robots', content: 'noindex,follow' }] : []),
     { tagName: 'link', rel: 'canonical', href: canonical },
     { tagName: 'link', rel: 'alternate', hrefLang: 'en-US', href: hrefFor('en-US') },

@@ -1,4 +1,5 @@
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
+import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -14,6 +15,7 @@ Deno.serve(async (request) => {
     return respond({ code: 'INVALID_REQUEST' }, 422);
   }
   if (body.method === 'salon_collected' && body.collector !== 'salon') return respond({ code: 'INVALID_COLLECTOR' }, 422);
+  if (body.method === 'other' && typeof body.recorded_method_label === 'string' && body.recorded_method_label.trim().toLowerCase() === 'zelle' && !await platformSwitchEnabled('zelle')) return respond({ code: 'ZELLE_DISABLED' }, 403);
   if (body.method !== 'other' && body.recorded_method_label != null) return respond({ code: 'INVALID_METHOD_LABEL' }, 422);
   if (body.confirmation_ref != null && (typeof body.confirmation_ref !== 'string' || body.confirmation_ref.length > 120)) return respond({ code: 'INVALID_CONFIRMATION_REF' }, 422);
   const { data, error } = await serviceClient().rpc('mova_payment_record_manual', {

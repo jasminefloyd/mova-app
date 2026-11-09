@@ -1,6 +1,7 @@
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { conciergeModelFromEnv } from '../_shared/providers/ai/live.ts';
 import { availabilityLookup, runConcierge } from '../_shared/concierge/pipeline.ts';
+import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 
 // Task 5.4: public web chat on the stylist's page. Off unless MOVA_CONCIERGE_WEB_CHAT_ENABLED=true and
 // the stylist has the concierge and the web chat channel on. The model vendor waits on O8, so only
@@ -22,6 +23,7 @@ Deno.serve(async (request) => {
   if (!/^[a-z0-9-]{3,30}$/.test(handle) || !UUID.test(threadId) || message.length < 1 || message.length > 1000) return respond({ code: 'INVALID_REQUEST' }, 422);
 
   const db = serviceClient();
+  if (!await platformSwitchEnabled('concierge')) return respond({ code: 'CHAT_NOT_AVAILABLE' }, 503);
   const { data: profile } = await db.from('mova_artist_profiles').select('artist_business_id').eq('handle', handle).eq('is_published', true).maybeSingle();
   if (!profile) return respond({ code: 'ARTIST_NOT_AVAILABLE' }, 404);
   const outcome = await runConcierge(db, model, availabilityLookup(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''), {

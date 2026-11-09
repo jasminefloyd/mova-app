@@ -17,6 +17,9 @@ Deno.serve(async(request)=>{
   const {data:services,error:serviceError}=await db.from('mova_services').select('id,artist_business_id,duration_minutes,buffer_minutes,status,deposit_type,deposit_value').in('id',serviceIds).eq('status','active');
   if(serviceError||!services||services.length!==serviceIds.length||new Set(services.map((service)=>service.artist_business_id)).size!==1)return respond({code:'SERVICE_NOT_BOOKABLE'},404);
   const artistBusinessId=services[0]!.artist_business_id;
+  const {data:business,error:businessError}=await db.from('mova_artist_businesses').select('status').eq('id',artistBusinessId).maybeSingle();
+  if(businessError)return respond({code:'AVAILABILITY_UNAVAILABLE'},503);
+  if(business?.status!=='active')return respond({code:'SERVICE_NOT_BOOKABLE'},404);
   let locationQuery=db.from('mova_locations').select('id,name,time_zone,booking_mode,is_active,artist_business_id,payment_collector').eq('artist_business_id',artistBusinessId).eq('is_active',true);
   if(input.location_id)locationQuery=locationQuery.eq('id',input.location_id);
   const {data:locations,error:locationError}=await locationQuery.order('name');

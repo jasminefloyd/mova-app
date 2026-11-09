@@ -5,10 +5,10 @@ import { Button, Checkbox, ErrorState, RadioCard, ScreenHeader, TextField } from
 import { operatorUrl } from '../../app/operator-url';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { loadBookingOptions, loadBusy, type LocationRow } from './api';
-import { BLOCK_REASONS, blockDefaults, blockWindow, buildBlockRows, overlaps, validateBlockTime, type BlockDraft, type BlockField, type BlockReason } from './rules';
+import { addDays, BLOCK_REASONS, blockDefaults, blockWindow, buildBlockRows, overlaps, validateBlockTime, type BlockDraft, type BlockField, type BlockReason } from './rules';
 import './scheduling.css';
 
-// Board 08e: Block time. Writes one availability block per chosen location. Repeats are not built yet.
+// Board 08e: Block time. Writes one availability block per chosen location and selected week.
 export function BlockTimePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ export function BlockTimePage() {
   const [draft, setDraft] = useState<BlockDraft>(() => blockDefaults(today));
   const [locations, setLocations] = useState<LocationRow[]>([]);
   const [where, setWhere] = useState<'all' | string>('all');
+  const [repeatWeeks, setRepeatWeeks] = useState(1);
   const [errors, setErrors] = useState<Partial<Record<BlockField, true>>>({});
   const [loadError, setLoadError] = useState(false);
   const [conflicts, setConflicts] = useState<number | null>(null);
@@ -39,20 +40,18 @@ export function BlockTimePage() {
     setSaveError(false);
     if (Object.keys(found).length > 0) return;
     const zoneByLocation = Object.fromEntries(locations.map((row) => [row.id, row.time_zone]));
-    const rows = buildBlockRows({ ...draft, locationIds: chosen }, zoneByLocation, businessId);
+    const occurrenceDrafts = Array.from({ length: repeatWeeks }, (_, index) => ({ ...draft, date: addDays(draft.date, index * 7), locationIds: chosen }));
+    const rows = occurrenceDrafts.flatMap((occurrence) => buildBlockRows(occurrence, zoneByLocation, businessId));
     setBusy(true);
     try {
       if (conflicts === null) {
         // Board 08e: if an appointment already falls inside the block, ask before saving.
-        const windowByLocation = Object.fromEntries(chosen.map((locationId) => [locationId, blockWindow({ ...draft, locationIds: [locationId] }, zoneByLocation[locationId] ?? 'UTC')]));
-        const windows = Object.values(windowByLocation);
+        const windowByLocation = Object.fromEntries(chosen.map((locationId) => [locationId, occurrenceDrafts.map((occurrence) => blockWindow({ ...occurrence, locationIds: [locationId] }, zoneByLocation[locationId] ?? 'UTC'))]));
+        const windows = Object.values(windowByLocation).flat();
         const from = windows.reduce((min, window) => (window.startsAt < min ? window.startsAt : min), windows[0]!.startsAt);
         const to = windows.reduce((max, window) => (window.endsAt > max ? window.endsAt : max), windows[0]!.endsAt);
         const busyRows = await loadBusy(client, businessId, chosen, from, to);
-        const hits = busyRows.filter((row) => {
-          const window = windowByLocation[row.location_id];
-          return window !== undefined && overlaps({ startsAt: row.starts_at, endsAt: row.ends_at }, window);
-        });
+        const hits = busyRows.filter((row) => (windowByLocation[row.location_id] ?? []).some((window) => overlaps({ startsAt: row.starts_at, endsAt: row.ends_at }, window)));
         if (hits.length > 0) { setConflicts(hits.length); setBusy(false); return; }
       }
       const { error } = await client.from('mova_availability_blocks').insert(rows);
@@ -94,6 +93,8 @@ export function BlockTimePage() {
         </div>}
         {errors.hours && <p className="mova-field__error" role="alert">{error('hours')}</p>}
       </section>
+
+      <TextField label={t('scheduling.block.repeatWeekly')} type="number" min="1" max="12" value={String(repeatWeeks)} onChange={(event) => { setConflicts(null); setRepeatWeeks(Math.min(12, Math.max(1, Number(event.target.value) || 1))); }} />
 
       <fieldset className="mova-choice-fieldset">
         <legend>{t('scheduling.block.where')}</legend>

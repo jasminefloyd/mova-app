@@ -1,5 +1,6 @@
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { accessTokenFor, businessProfileReady, googleProvider, loadConnection } from '../_shared/google-connection.ts';
+import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 
 // Task 5.9 / P6: import the stylist's Google reviews through the one Google connection. Needs the platform
 // flag MOVA_GOOGLE_REVIEWS_ENABLED=true, a provider (MOVA_GOOGLE_PROVIDER), an active connection with the
@@ -10,6 +11,7 @@ Deno.serve(async (request) => {
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request);
   if (!actor) return respond({ code: 'UNAUTHENTICATED' }, 401);
+  if (!await platformSwitchEnabled('reviews')) return respond({ code: 'REVIEWS_FEATURE_DISABLED', synced: false }, 403);
   // Never imply that Google data was fetched when it was not.
   if (Deno.env.get('MOVA_GOOGLE_REVIEWS_ENABLED') !== 'true') return respond({ code: 'GOOGLE_REVIEWS_NOT_ENABLED', synced: false }, 409);
   const provider = googleProvider();

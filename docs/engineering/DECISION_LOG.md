@@ -74,9 +74,9 @@ Normative source: `docs/product/ENGINEERING_SPEC.md` v2.2. Locked decisions are 
 |---|---|---|---|
 | Stylist signup is limited to an owner-managed email allowlist. | APPROVED | Product owner / 2026-11-07 | Direct reply to invite-policy question |
 
-The allowlist is implemented in source by `mova_early_access_invites` and the Supabase Before User Created hook. Migration `20261107174713` (`mova_early_access_invites`) is applied and present in linked production migration history; the hosted hook is not configured, so hosted sign-up enforcement remains unverified.
+This decision was retired by P6 migrations `20261109010000_mova_0060_open_signup.sql` and `20261109011000_mova_0061_retire_waitlist.sql`. New stylist signup is open; the Before User Created hook must remain disabled. The invite table is retained for historical records, but the signup flow and invite functions were removed. Do not use the SQL or hook setup instructions below; they are preserved only in the historical runbook.
 
-To add or revoke an invite after applying the migration, the owner can use Supabase SQL Editor:
+Historical invite SQL (retired; do not run):
 
 ```sql
 insert into public.mova_early_access_invites (email_normalized)
@@ -87,11 +87,11 @@ delete from public.mova_early_access_invites
 where email_normalized = lower(btrim('stylist@example.com'));
 ```
 
-Configure the hosted Auth **Before User Created** hook to call `pg-functions://postgres/public/mova_before_user_created` after migration. Keep hosted public signups disabled until the migration and hook are both applied and verified. `supabase/config.toml` contains the equivalent local hook configuration.
+The old Before User Created hook configuration is also retired. `supabase/config.toml` is the local reference; production configuration follows the P6 open-signup decision.
 
 ## Owner constraint: database identifier prefix
 
-The product owner instructed that every project-created Supabase database/schema object use the `mova_` prefix. CR-001 was approved on 2026-11-05 and is normative in Engineering Spec v2.2 §§4.1 and 4.6. Owner additionally directed that no unprefixed PostgreSQL extensions be installed; see v2.2 §4.5. The applied invite migration creates only `mova_`-prefixed objects.
+The product owner instructed that every project-created Supabase database/schema object use the `mova_` prefix. CR-001 was approved on 2026-11-05 and is normative in Engineering Spec v2.2 §§4.1 and 4.6. Owner additionally directed that no unprefixed PostgreSQL extensions be installed; see v2.2 §4.5.
 
 ## Approved change requests
 

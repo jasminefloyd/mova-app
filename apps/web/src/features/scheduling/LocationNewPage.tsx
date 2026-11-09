@@ -31,6 +31,11 @@ export function LocationNewPage() {
   const toggleDay = (weekday: number) => setDraft((current) => ({
     ...current,
     weekdays: current.weekdays.includes(weekday) ? current.weekdays.filter((day) => day !== weekday) : [...current.weekdays, weekday],
+    hoursByWeekday: current.weekdays.includes(weekday) ? current.hoursByWeekday : { ...current.hoursByWeekday, [weekday]: { opens: '09:00', closes: '17:00' } },
+  }));
+  const updateDayHours = (weekday: number, key: 'opens' | 'closes', value: string) => setDraft((current) => ({
+    ...current,
+    hoursByWeekday: { ...current.hoursByWeekday, [weekday]: { ...current.hoursByWeekday[weekday], [key]: value } },
   }));
 
   const submit = async (event: FormEvent) => {
@@ -105,10 +110,13 @@ export function LocationNewPage() {
           {dayNames.map((name, weekday) => <button key={name} type="button" className="mova-scheduling__day" aria-pressed={draft.weekdays.includes(weekday)} aria-label={t(`scheduling.days.${name}`)} onClick={() => toggleDay(weekday)}>{t(`scheduling.daysShort.${name}`)}</button>)}
         </div>
         {errors.weekdays && <p className="mova-field__error" role="alert">{fieldError('weekdays')}</p>}
-        <div className="mova-form-grid">
-          <TextField label={t('scheduling.locationNew.opens')} type="time" value={draft.opens} onChange={(event) => update('opens', event.target.value)} />
-          <TextField label={t('scheduling.locationNew.closes')} type="time" value={draft.closes} onChange={(event) => update('closes', event.target.value)} />
-        </div>
+        {draft.weekdays.slice().sort((a, b) => a - b).map((weekday) => <fieldset key={weekday} className="mova-choice-fieldset">
+          <legend>{t(`scheduling.days.${dayNames[weekday]}`)}</legend>
+          <div className="mova-form-grid">
+            <TextField label={t('scheduling.locationNew.opens')} type="time" value={draft.hoursByWeekday[weekday]?.opens ?? '09:00'} onChange={(event) => updateDayHours(weekday, 'opens', event.target.value)} />
+            <TextField label={t('scheduling.locationNew.closes')} type="time" value={draft.hoursByWeekday[weekday]?.closes ?? '17:00'} onChange={(event) => updateDayHours(weekday, 'closes', event.target.value)} />
+          </div>
+        </fieldset>)}
         {errors.hours && <p className="mova-field__error" role="alert">{fieldError('hours')}</p>}
       </fieldset>
 

@@ -1,5 +1,5 @@
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
-import { encryptProviderSecret, sha256Hex } from '../_shared/provider-crypto.ts';
+import { decryptProviderSecret, encryptProviderSecret, sha256Hex } from '../_shared/provider-crypto.ts';
 import { accessTokenFor, connectionSummary, googleProvider, loadConnection, randomToken, s256Challenge } from '../_shared/google-connection.ts';
 import { GOOGLE_BUSINESS_SCOPE, GOOGLE_CALENDAR_SCOPE, GOOGLE_SCOPES } from '../_shared/providers/google/index.ts';
 
@@ -18,7 +18,8 @@ Deno.serve(async (request) => {
       db.from('mova_calendar_sync_settings').select('location_ids,apple_feed_enabled').eq('artist_business_id', actor.businessId).maybeSingle(),
       db.from('mova_locations').select('id,name').eq('artist_business_id', actor.businessId).eq('is_active', true).order('created_at'),
     ]);
-    const connection = await loadConnection(db, actor.businessId).catch(() => null);
+    const connection = await loadConnection(db, actor.businessId).catch(() => undefined);
+    if (connection === undefined) return respond({ code: 'GOOGLE_CONNECTION_READ_FAILED' }, 503);
     if (error) return respond({ code: 'CALENDAR_SETTINGS_FAILED' }, 500);
     const { data: feed } = await db.from('mova_calendar_feed_tokens').select('id,created_at').eq('artist_business_id', actor.businessId).is('revoked_at', null).maybeSingle();
     return respond({ google: connectionSummary(connection), settings: settings ?? { location_ids: [], apple_feed_enabled: true }, locations: locations ?? [], feedConfigured: Boolean(feed), providerConfigured: provider !== null });
@@ -43,6 +44,24 @@ Deno.serve(async (request) => {
   }
 
   if (body.action === 'disconnect') {
+    const connection = await loadConnection(db, actor.businessId).catch(() => null);
+    if (connection?.refresh_token_encrypted && connection.refresh_token_encrypted !== '\\x') {
+      try {
+        const refreshToken = await decryptProviderSecret(connection.refresh_token_encrypted);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        let response: Response;
+        try {
+          response = await fetch('https://oauth2.googleapis.com/revoke', {
+            method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ token: refreshToken }), signal: controller.signal,
+          });
+        } finally { clearTimeout(timeout); }
+        if (!response.ok) return respond({ code: 'GOOGLE_TOKEN_REVOKE_FAILED' }, 502);
+      } catch {
+        return respond({ code: 'GOOGLE_TOKEN_REVOKE_FAILED' }, 502);
+      }
+    }
     const { error } = await db.from('mova_google_connections').update({ status: 'revoked', refresh_token_encrypted: '\\x', calendar_enabled: false, business_profile_enabled: false }).eq('artist_business_id', actor.businessId);
     await db.from('mova_calendar_sync_settings').upsert({ artist_business_id: actor.businessId, google_enabled: false }, { onConflict: 'artist_business_id' });
     return error ? respond({ code: 'GOOGLE_DISCONNECT_FAILED' }, 500) : respond({ disconnected: true });

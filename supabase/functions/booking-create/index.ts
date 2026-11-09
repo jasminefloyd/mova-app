@@ -18,6 +18,12 @@ Deno.serve(async (request) => {
   if(!consentChoices)return respond({code:'BOOKING_CONSENTS_INVALID'},422);
   try {
   const manageToken = body.manage_token; const db=serviceClient();
+    const {data:location,error:locationError}=await db.from('mova_locations').select('artist_business_id,is_active').eq('id',body.location_id).maybeSingle();
+    if(locationError)return respond({code:'BOOKING_CREATE_FAILED'},503);
+    if(!location?.is_active)return respond({code:'LOCATION_NOT_BOOKABLE'},404);
+    const {data:business,error:businessError}=await db.from('mova_artist_businesses').select('status').eq('id',location.artist_business_id).maybeSingle();
+    if(businessError)return respond({code:'BOOKING_CREATE_FAILED'},503);
+    if(business?.status!=='active')return respond({code:'ARTIST_NOT_AVAILABLE'},404);
     const stripeTestMode = Deno.env.get('MOVA_STRIPE_TEST_MODE') === 'true';
     if (stripeTestMode && !Deno.env.get('STRIPE_SECRET_KEY')?.startsWith('sk_test_')) return respond({code:'STRIPE_TEST_CONFIGURATION_MISSING'},503);
     const {data,error}=await db.rpc(stripeTestMode?'mova_booking_create_multi_with_consent_checkout':'mova_booking_create_multi_with_consent',{p_location_id:body.location_id,p_service_ids:serviceIds,p_starts_at:body.starts_at,p_client_name:body.client_name,p_client_email:body.client_email??null,p_client_phone:body.client_phone??null,p_client_locale:body.client_locale,p_idempotency_key:idempotencyKey,p_manage_token_hash:await tokenHash(manageToken),p_alternate_starts_at:body.alternate_starts_at??null,p_client_note:body.client_note??null,p_portfolio_item_id:body.portfolio_item_id??null,p_consent_choices:consentChoices});

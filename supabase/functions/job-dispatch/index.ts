@@ -2,6 +2,7 @@ import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { smsProviderFromEnv } from '../_shared/providers/sms/index.ts';
 import { sendNextWave } from '../_shared/seat-filler.ts';
 import { growthTextsEnabled, runAutopilot } from '../_shared/autopilot.ts';
+import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 
 const equal = (left: string, right: string) => {
   if (left.length !== right.length) return false;
@@ -30,14 +31,14 @@ Deno.serve(async (request) => {
     // Task 5.1: close ended seat-filler campaigns and send waves that are due (flag MOVA_SEAT_FILLER_ENABLED).
     const { data: expired } = await db.rpc('mova_slot_expire', { p_now: new Date().toISOString() });
     let waves = 0;
-    const provider = Deno.env.get('MOVA_SEAT_FILLER_ENABLED') === 'true' ? smsProviderFromEnv((name) => Deno.env.get(name)) : null;
+    const provider = await platformSwitchEnabled('seat_filler') && Deno.env.get('MOVA_SEAT_FILLER_ENABLED') === 'true' ? smsProviderFromEnv((name) => Deno.env.get(name)) : null;
     if (provider) {
       const { data: due } = await db.rpc('mova_slot_due_waves', { p_now: new Date().toISOString() });
       for (const slotId of (due ?? []) as string[]) if (await sendNextWave(db, provider, slotId, Deno.env.get('PUBLIC_SITE_URL') ?? 'https://mova-beauty.co')) waves += 1;
     }
     // Task 5.2: rebooking autopilot for stylists with it on (O11 default ON), behind MOVA_REBOOKING_TEXTS_ENABLED.
     let autopilot = 0;
-    const smsForGrowth = growthTextsEnabled((name) => Deno.env.get(name)) ? smsProviderFromEnv((name) => Deno.env.get(name)) : null;
+    const smsForGrowth = await platformSwitchEnabled('autopilot') && growthTextsEnabled((name) => Deno.env.get(name)) ? smsProviderFromEnv((name) => Deno.env.get(name)) : null;
     if (smsForGrowth) {
       const { data: businesses } = await db.from('mova_growth_opportunities').select('artist_business_id').eq('status', 'due').lte('next_due_at', new Date().toISOString()).limit(500);
       for (const businessId of [...new Set(((businesses ?? []) as Array<{ artist_business_id: string }>).map((row) => row.artist_business_id))].slice(0, 50)) {

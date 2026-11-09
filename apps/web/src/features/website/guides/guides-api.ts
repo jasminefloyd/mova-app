@@ -32,7 +32,7 @@ export async function requestGuides<T>(body: Record<string, unknown>, signal?: A
   return envelope.data;
 }
 
-export function fetchGuidesList(options: { category?: string | undefined; cursor?: string | undefined; limit?: number | undefined }, signal?: AbortSignal) {
+export function fetchGuidesList(options: { category?: string | undefined; cursor?: string | undefined; limit?: number | undefined; q?: string | undefined }, signal?: AbortSignal) {
   return requestGuides<GuidesListResult>({ action: 'list', ...Object.fromEntries(Object.entries(options).filter(([, value]) => value !== undefined)) }, signal);
 }
 

@@ -1,5 +1,6 @@
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { conciergeModelFromEnv } from '../_shared/providers/ai/live.ts';
+import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 import { instagramProviderFromEnv } from '../_shared/providers/meta/fake.ts';
 import { availabilityLookup, runConcierge } from '../_shared/concierge/pipeline.ts';
 
@@ -9,6 +10,7 @@ import { availabilityLookup, runConcierge } from '../_shared/concierge/pipeline.
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
+  if (!await platformSwitchEnabled('concierge')) return respond({ code: 'CHANNEL_NOT_ENABLED' }, 503);
   if (Deno.env.get('MOVA_INSTAGRAM_CONCIERGE_ENABLED') !== 'true') return respond({ code: 'CHANNEL_NOT_ENABLED' }, 503);
   const provider = instagramProviderFromEnv((name) => Deno.env.get(name));
   const model = conciergeModelFromEnv((name) => Deno.env.get(name));

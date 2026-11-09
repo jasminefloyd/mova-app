@@ -1,6 +1,7 @@
 import {artistClient,corsHeaders,respond,serviceClient} from '../_shared/booking.ts';
+import {platformSwitchEnabled} from '../_shared/platform-switch.ts';
 Deno.serve(async(request)=>{
- if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);const actor=await artistClient(request);if(!actor)return respond({code:'UNAUTHENTICATED'},401);const db=serviceClient();const body=await request.json().catch(()=>({}));
+ if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);const actor=await artistClient(request);if(!actor)return respond({code:'UNAUTHENTICATED'},401);if(!await platformSwitchEnabled('concierge'))return respond({code:'CONCIERGE_FEATURE_DISABLED'},403);const db=serviceClient();const body=await request.json().catch(()=>({}));
  if(body.action==='home-needs'){
   const {data,error}=await db.from('mova_quote_requests').select('id,conversation_id,service_category,created_at').eq('artist_business_id',actor.businessId).eq('status','open').order('created_at',{ascending:false}).limit(5);
   return error?respond({code:'QUOTE_NEEDS_READ_FAILED'},500):respond({quotes:data??[]});
@@ -12,7 +13,17 @@ Deno.serve(async(request)=>{
    db.from('mova_handoffs').select('id,conversation_id,type,status,summary,created_at').eq('artist_business_id',actor.businessId).eq('status','open').order('created_at',{ascending:false}).limit(50),
    db.from('mova_concierge_knowledge').select('id,kind,location_id,question,answer_en,answer_es,status,updated_at').eq('artist_business_id',actor.businessId).neq('status','archived').order('updated_at',{ascending:false}),
   ]);if(error)return respond({code:'CONCIERGE_READ_FAILED'},500);
-  return respond({settings:settings??{enabled:false,channels:{instagram:false,sms:false,missed_call:false,web_chat:false},permissions:{answer:true,book_instant:false,request_salon:false,reschedule:false,reply_slot_offers:false},languages:['en-US'],daily_ai_turn_cap:0,globally_paused:true},conversations:conversations??[],handoffs:handoffs??[],knowledge:knowledge??[],aiEnabled:false});
+  const since24h=new Date(Date.now()-24*60*60_000).toISOString();const since30d=new Date(Date.now()-30*24*60*60_000).toISOString();
+  const [handled,bookings,messages]=await Promise.all([
+   db.from('mova_conversations').select('id',{count:'exact',head:true}).eq('artist_business_id',actor.businessId).eq('status','handled').gte('last_message_at',since24h),
+   db.from('mova_appointments').select('id',{count:'exact',head:true}).eq('artist_business_id',actor.businessId).eq('source','concierge').gte('created_at',since30d).in('status',['pending_payment','pending_artist','confirmed','completed']),
+   db.from('mova_messages').select('conversation_id,direction,origin,created_at').eq('artist_business_id',actor.businessId).gte('created_at',since30d).order('created_at',{ascending:false}).limit(5000),
+  ]);
+  if(handled.error||bookings.error||messages.error)return respond({code:'CONCIERGE_METRICS_READ_FAILED'},500);
+  const waiting=new Map<string,number>();const replyMinutes:number[]=[];
+  for(const row of [...(messages.data??[])].reverse()){const time=Date.parse(row.created_at);if(row.direction==='inbound')waiting.set(row.conversation_id,time);else if(row.direction==='outbound'&&['artist','concierge'].includes(row.origin)){const start=waiting.get(row.conversation_id);if(start!==undefined&&time>=start){replyMinutes.push((time-start)/60_000);waiting.delete(row.conversation_id);}}}
+  const metrics={handled_24h:handled.count??0,booked_30d:bookings.count??0,average_reply_minutes:replyMinutes.length?Math.round(replyMinutes.reduce((sum,value)=>sum+value,0)/replyMinutes.length):null};
+  return respond({settings:settings??{enabled:false,channels:{instagram:false,sms:false,missed_call:false,web_chat:false},permissions:{answer:true,book_instant:false,request_salon:false,reschedule:false,reply_slot_offers:false},languages:['en-US'],daily_ai_turn_cap:0,globally_paused:true},conversations:conversations??[],handoffs:handoffs??[],knowledge:knowledge??[],metrics,aiEnabled:false});
  }
  if(body.action==='save-settings'){
   // Channel wishes may be stored, but approval-gated replies cannot be enabled here.

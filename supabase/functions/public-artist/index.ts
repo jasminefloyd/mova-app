@@ -31,13 +31,16 @@ Deno.serve(async (request) => {
   const supabase = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data: profile, error: profileError } = await supabase
     .from('mova_artist_profiles')
-    .select('artist_business_id, display_name, handle, specialties, bio, preferred_locale, photo_variants, profile_photo_path, cover_photo_path, is_published, search_index_enabled')
+    .select('artist_business_id, display_name, handle, specialties, bio, preferred_locale, photo_variants, profile_photo_path, cover_photo_path, cover_source, cover_image_url, cover_credit_name, cover_credit_url, cover_unsplash_url, is_published, search_index_enabled')
     .eq('handle', handle)
     .eq('is_published', true)
     .maybeSingle();
 
   if (profileError) return respond({ code: 'PUBLIC_ARTIST_UNAVAILABLE' }, 503);
   if (!profile) return respond({ code: 'NOT_FOUND' }, 404);
+  const { data: business, error: businessError } = await supabase.from('mova_artist_businesses').select('status').eq('id', profile.artist_business_id).maybeSingle();
+  if (businessError) return respond({ code: 'PUBLIC_ARTIST_UNAVAILABLE' }, 503);
+  if (business?.status !== 'active') return respond({ code: 'NOT_FOUND' }, 404);
 
   const variantGroups = profile.photo_variants && typeof profile.photo_variants === 'object'
     ? Object.entries(profile.photo_variants as Record<string, unknown>)
@@ -106,6 +109,11 @@ Deno.serve(async (request) => {
       preferred_locale: profile.preferred_locale,
       photo_urls: Object.fromEntries(photos),
       search_index_enabled: profile.search_index_enabled,
+      cover_source: profile.cover_source,
+      cover_image_url: profile.cover_image_url,
+      cover_credit_name: profile.cover_credit_name,
+      cover_credit_url: profile.cover_credit_url,
+      cover_unsplash_url: profile.cover_unsplash_url,
     },
     tab,
     locale,

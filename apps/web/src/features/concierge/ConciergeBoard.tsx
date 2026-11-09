@@ -13,7 +13,7 @@ type PermissionKey = 'answer' | 'book_instant' | 'request_salon' | 'reschedule';
 const CHANNELS: ChannelKey[] = ['instagram', 'sms', 'missed_call', 'web_chat'];
 const PERMISSIONS: PermissionKey[] = ['answer', 'book_instant', 'request_salon', 'reschedule'];
 
-// Board 40: Concierge inbox. Metrics are not in the status payload yet, so they show a dash.
+// Board 40: Concierge inbox. Metrics are computed from this artist's stored conversations, bookings and replies.
 export function ConciergeInboxPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -30,6 +30,7 @@ export function ConciergeInboxPage() {
   const conversationStatus = (value: string) => t(`concierge.conversationStatus.${({ handled: 'handled', needs_you: 'needsYou', closed: 'closed' } as Record<string, string>)[value] ?? 'unknown'}`);
   const handoffType = (value: string) => t(`concierge.handoffTypes.${({ quote: 'quote', exception: 'exception', complaint: 'complaint' } as Record<string, string>)[value] ?? 'other'}`);
   const on = Boolean(data?.settings.enabled && !data.settings.globally_paused);
+  const metrics = data?.metrics;
   const handoffs = data?.handoffs ?? [];
   const handled = (data?.conversations ?? []).filter((row) => row.status !== 'needs_you').slice(0, 10);
 
@@ -46,8 +47,8 @@ export function ConciergeInboxPage() {
       : error ? <ErrorState title={t('concierge.error')} retryLabel={t('concierge.retry')} onRetry={() => void load()} />
       : <>
         <div className="mova-concierge-board__stats">
-          {(['handledToday', 'bookedForYou', 'averageReply'] as const).map((key) => <Card key={key} className="mova-concierge-board__stat">
-            <strong>{t('concierge.metricUnavailable')}</strong><span>{t(`screens.concierge.${key}`)}</span>
+          {(['handled24h', 'booked30d', 'averageReply30d'] as const).map((key) => <Card key={key} className="mova-concierge-board__stat">
+            <strong>{key === 'handled24h' ? metrics?.handled_24h ?? 0 : key === 'booked30d' ? metrics?.booked_30d ?? 0 : metrics?.average_reply_minutes == null ? '—' : t('screens.concierge.averageMinutes', { count: metrics.average_reply_minutes })}</strong><span>{t(`screens.concierge.${key}`)}</span>
           </Card>)}
         </div>
 

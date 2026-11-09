@@ -1,6 +1,7 @@
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { smsProviderFromEnv } from '../_shared/providers/sms/index.ts';
 import { claimTokenHash, notifyTaken } from '../_shared/seat-filler.ts';
+import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 
 // Task 5.1 (board 31d): a texted client views and claims an opened spot. The token in the link is the
 // only credential; the database stores its hash and mova_slot_claim (0056) decides who wins.
@@ -12,6 +13,7 @@ Deno.serve(async (request) => {
   const body = await request.json().catch(() => ({}));
   if (typeof body.token !== 'string' || !TOKEN.test(body.token)) return respond({ code: 'INVALID_TOKEN' }, 422);
   const db = serviceClient();
+  if (!await platformSwitchEnabled('seat_filler')) return respond({ code: 'SEAT_FILLER_DISABLED' }, 503);
   const hash = await claimTokenHash(body.token);
   const { data: candidate } = await db.from('mova_slot_candidates').select('id,status,slot_event_id,mova_clients(preferred_locale)').eq('claim_token_hash', hash).maybeSingle();
   if (!candidate) return respond({ status: 'invalid' });

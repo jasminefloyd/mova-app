@@ -1,6 +1,7 @@
 import {artistClient,corsHeaders,respond,serviceClient} from '../_shared/booking.ts';
 import {smsProviderFromEnv} from '../_shared/providers/sms/index.ts';
 import {sendNextWave} from '../_shared/seat-filler.ts';
+import {platformSwitchEnabled} from '../_shared/platform-switch.ts';
 // Task 5.1: sending needs the platform flag MOVA_SEAT_FILLER_ENABLED and an SMS provider (fake until O4/O5 go live).
 const outbound=()=>Deno.env.get('MOVA_SEAT_FILLER_ENABLED')==='true'?smsProviderFromEnv((name)=>Deno.env.get(name)):null;
 const site=()=>Deno.env.get('PUBLIC_SITE_URL')??'https://mova-beauty.co';
@@ -19,11 +20,11 @@ Deno.serve(async(request)=>{
   const ids=[...new Set((data??[]).map((row:{service_id:string|null})=>row.service_id).filter(Boolean))] as string[];
   const {data:services}=ids.length?await db.from('mova_services').select('id,name,base_price_minor').in('id',ids):{data:[]};
   const byId=new Map((services??[]).map((row:{id:string})=>[row.id,row]));
-  return respond({campaigns:(data??[]).map((row:{service_id:string|null})=>({...row,mova_services:row.service_id?byId.get(row.service_id)??null:null})),outboundEnabled:outbound()!==null});
+  return respond({campaigns:(data??[]).map((row:{service_id:string|null})=>({...row,mova_services:row.service_id?byId.get(row.service_id)??null:null})),outboundEnabled:outbound()!==null&&await platformSwitchEnabled('seat_filler')});
  }
  if(body.action==='approve'||body.action==='send-next-wave'){
   if(typeof body.slot_event_id!=='string')return respond({code:'INVALID_SLOT'},422);
-  const provider=outbound();if(!provider)return respond({code:'OUTBOUND_DISABLED',enabled:false},503);
+  const provider=await platformSwitchEnabled('seat_filler')?outbound():null;if(!provider)return respond({code:'OUTBOUND_DISABLED',enabled:false},503);
   const {data:slot}=await db.from('mova_slot_events').select('id,status').eq('id',body.slot_event_id).eq('artist_business_id',actor.businessId).maybeSingle();
   if(!slot)return respond({code:'SLOT_NOT_FOUND'},404);
   if(body.action==='approve'&&slot.status!=='needs_approval')return respond({code:'SLOT_NOT_AWAITING_APPROVAL'},409);

@@ -13,13 +13,14 @@ const FIRST_PAGE = '0';
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const category = url.searchParams.get('category') || undefined;
+  const q = url.searchParams.get('q')?.trim().slice(0, 80) || undefined;
   const cursorParam = url.searchParams.get('cursor') || undefined;
   const trail = url.searchParams.get('trail')?.split('|').filter(Boolean) ?? [];
   try {
-    const data = await fetchGuidesList({ category, cursor: cursorParam });
-    return { ok: true as const, data, category: category ?? null, cursor: cursorParam ?? null, trail };
+    const data = await fetchGuidesList({ category, cursor: cursorParam, q });
+    return { ok: true as const, data, category: category ?? null, q: q ?? '', cursor: cursorParam ?? null, trail };
   } catch {
-    return { ok: false as const, data: null, category: category ?? null, cursor: cursorParam ?? null, trail };
+    return { ok: false as const, data: null, category: category ?? null, q: q ?? '', cursor: cursorParam ?? null, trail };
   }
 }
 
@@ -28,11 +29,12 @@ export const meta: MetaFunction<typeof loader> = () => [
   { name: 'description', content: 'Practical reading on pricing, clients, booking and the business side of independent beauty work.' },
 ];
 
-function listHref(category: string | null, cursor: string | null, trail: string[]) {
+function listHref(category: string | null, cursor: string | null, trail: string[], q = '') {
   const params = new URLSearchParams();
   if (category) params.set('category', category);
   if (cursor) params.set('cursor', cursor);
   if (trail.length) params.set('trail', trail.join('|'));
+  if (q) params.set('q', q);
   const query = params.toString();
   return query ? `/guides?${query}` : '/guides';
 }
@@ -47,10 +49,11 @@ export default function GuidesPage() {
   const featured = isFirstPage ? posts[0] : undefined;
   const listed = isFirstPage ? posts.slice(1) : posts;
   const pageNumber = loaded.trail.length + 1;
+  const pageCount = data ? Math.max(1, Math.ceil(data.total / data.limit)) : 1;
   const previousToken = loaded.trail.at(-1);
   const previousCursor = previousToken && previousToken !== FIRST_PAGE ? previousToken : null;
-  const previousHref = listHref(loaded.category, previousCursor, loaded.trail.slice(0, -1));
-  const nextHref = data?.next_cursor ? listHref(loaded.category, data.next_cursor, [...loaded.trail, loaded.cursor ?? FIRST_PAGE]) : null;
+  const previousHref = listHref(loaded.category, previousCursor, loaded.trail.slice(0, -1), loaded.q);
+  const nextHref = data?.next_cursor ? listHref(loaded.category, data.next_cursor, [...loaded.trail, loaded.cursor ?? FIRST_PAGE], loaded.q) : null;
 
   return <div>
     <section className="mova-site__container" aria-labelledby="guides-h" style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBlock: 'clamp(40px, 6vw, 80px) 24px' }}>
@@ -60,9 +63,15 @@ export default function GuidesPage() {
     </section>
 
     {data && <section className="mova-site__container" aria-label={t('website.guides.topics')} style={{ paddingBottom: 24 }}>
+      <form action="/guides" method="get" role="search" style={{ display: 'flex', gap: 8, marginBottom: 16, maxWidth: 620 }}>
+        {loaded.category && <input type="hidden" name="category" value={loaded.category} />}
+        <label className="mova-visually-hidden" htmlFor="guide-search">{t('website.guides.search')}</label>
+        <input className="mova-site__input" id="guide-search" name="q" type="search" maxLength={80} defaultValue={loaded.q} placeholder={t('website.guides.searchPlaceholder')} />
+        <button className="mova-site__button" type="submit">{t('website.guides.search')}</button>
+      </form>
       <nav aria-label={t('website.guides.topics')} className="mova-site__topics">
-        <Link className="mova-site__chip" to="/guides" aria-current={loaded.category === null ? 'page' : undefined}>{t('website.guides.all')}</Link>
-        {data.categories.map((category) => <Link key={category} className="mova-site__chip" to={listHref(category, null, [])} aria-current={loaded.category === category ? 'page' : undefined}>{category}</Link>)}
+        <Link className="mova-site__chip" to={listHref(null, null, [], loaded.q)} aria-current={loaded.category === null ? 'page' : undefined}>{t('website.guides.all')}</Link>
+        {data.categories.map((category) => <Link key={category} className="mova-site__chip" to={listHref(category, null, [], loaded.q)} aria-current={loaded.category === category ? 'page' : undefined}>{category}</Link>)}
       </nav>
     </section>}
 
@@ -99,7 +108,7 @@ export default function GuidesPage() {
 
       {data && (loaded.trail.length > 0 || nextHref) && <nav aria-label={t('website.guides.pagination')} className="mova-site__pager">
         {loaded.trail.length > 0 ? <Link to={previousHref}>{t('website.guides.previous')}</Link> : <span aria-disabled="true">{t('website.guides.previous')}</span>}
-        <span className="mova-site__meta">{t('website.guides.page', { page: pageNumber })}</span>
+        <span className="mova-site__meta">{t('website.guides.pageOf', { page: pageNumber, total: pageCount })}</span>
         {nextHref ? <Link to={nextHref}>{t('website.guides.next')}</Link> : <span aria-disabled="true">{t('website.guides.next')}</span>}
       </nav>}
     </section>

@@ -21,6 +21,15 @@ function respond(data: unknown, status = 200, extraHeaders: Record<string, strin
 
 const cacheHeaders = { 'Cache-Control': 'public, max-age=60, s-maxage=300' };
 
+async function countGuides(supabase: ReturnType<typeof createClient>, category: string | null, search: string, nowIso: string) {
+  let query = supabase.from(TABLE).select('slug', { count: 'exact', head: true })
+    .eq('status', 'published').lte('published_at', nowIso);
+  if (category) query = query.eq('category', category);
+  if (search) query = query.or(`title.ilike.%${search}%,summary.ilike.%${search}%`);
+  const { count, error } = await query;
+  return { count: count ?? 0, error };
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: publicCorsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
@@ -39,6 +48,7 @@ Deno.serve(async (request) => {
     const category = body.category === undefined || body.category === null || body.category === '' ? null : body.category;
     if (category !== null && (typeof category !== 'string' || category.length > 60)) return respond({ code: 'INVALID_REQUEST' }, 400);
     const limit = clampLimit(body.limit);
+    const search = typeof body.q === 'string' ? body.q.trim().slice(0, 80).replace(/[^\p{L}\p{N}\s-]/gu, ' ').replace(/\s+/g, ' ') : '';
     const offset = decodeCursor(body.cursor);
     if (offset === null) return respond({ code: 'INVALID_CURSOR' }, 400);
 
@@ -47,6 +57,7 @@ Deno.serve(async (request) => {
       .order('published_at', { ascending: false }).order('slug', { ascending: true })
       .range(offset, offset + limit);
     if (category) pageQuery = pageQuery.eq('category', category);
+    if (search) pageQuery = pageQuery.or(`title.ilike.%${search}%,summary.ilike.%${search}%`);
     const { data: pageRows, error: pageError } = await pageQuery;
     if (pageError) return respond({ code: 'GUIDES_UNAVAILABLE' }, 503);
 
@@ -57,10 +68,14 @@ Deno.serve(async (request) => {
     // Re-apply the visibility rule in code so a query mistake can never expose a draft or a future post.
     const visible = sortForList(((pageRows ?? []) as GuideRow[]).filter((row) => isPubliclyVisible(row, now)));
     const hasMore = (pageRows ?? []).length > limit;
+    const countResult = await countGuides(supabase, category, search, nowIso);
+    if (countResult.error) return respond({ code: 'GUIDES_UNAVAILABLE' }, 503);
     return respond({
       posts: visible.slice(0, limit).map(toSummary),
       categories: categoriesOf((categoryRows ?? []) as GuideRow[], now),
       next_cursor: hasMore ? encodeCursor(offset + limit) : null,
+      total: countResult.count,
+      limit,
     }, 200, cacheHeaders);
   }
 

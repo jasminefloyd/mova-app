@@ -1,8 +1,10 @@
 import { corsHeaders, respond, serviceClient, tokenHash } from '../_shared/booking.ts';
+import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
+  if (!await platformSwitchEnabled('reviews')) return respond({ code: 'REVIEWS_FEATURE_DISABLED' }, 503);
   const body = await request.json().catch(() => null);
   if (!body || typeof body.token !== 'string' || body.token.length < 32 || body.token.length > 128
     || !Number.isInteger(body.rating) || body.rating < 1 || body.rating > 5

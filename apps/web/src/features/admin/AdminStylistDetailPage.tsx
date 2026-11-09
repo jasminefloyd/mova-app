@@ -9,6 +9,7 @@ export default function AdminStylistDetailPage() {
   const { businessId = '' } = useParams();
   const queryClient = useQueryClient();
   const [unpublishOpen, setUnpublishOpen] = useState(false);
+  const [suspensionOpen, setSuspensionOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -34,6 +35,24 @@ export default function AdminStylistDetailPage() {
     }
   }
 
+  async function setSuspension(reason: string) {
+    const suspended = detail.data?.business.status !== 'suspended';
+    setBusy(true);
+    setActionError(null);
+    try {
+      await adminRpc('mova_admin_set_stylist_suspension', { p_artist_business_id: businessId, p_suspended: suspended, p_reason: reason });
+      setSuspensionOpen(false);
+      setNotice(suspended ? 'Stylist access suspended.' : 'Stylist access restored.');
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'stylist', businessId] });
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'stylists'] });
+    } catch (error) {
+      setActionError(adminErrorText(error));
+      if (isAdminError(error, 'PLATFORM_ADMIN_REQUIRED')) setSuspensionOpen(false);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (detail.isPending) return <Loading />;
   if (detail.isError || !detail.data) return <ErrorNote message={adminErrorText(detail.error)} />;
   const d = detail.data;
@@ -46,6 +65,7 @@ export default function AdminStylistDetailPage() {
         actions={<>
           <Link className="btn sm ghost" to={`/admin/stylists/${businessId}/audit`}>Audit log</Link>
           <Link className="btn sm ghost" to="/admin/fees">Fees</Link>
+          <button type="button" className="btn sm danger" onClick={() => setSuspensionOpen(true)}>{d.business.status === 'suspended' ? 'Restore stylist' : 'Suspend stylist'}</button>
           <button type="button" className="btn sm danger" onClick={() => setUnpublishOpen(true)} disabled={!d.profile?.is_published}>Unpublish page</button>
         </>}
       />
@@ -108,6 +128,20 @@ export default function AdminStylistDetailPage() {
           )}
         </Card>
       </div>
+      <ConfirmDialog
+        open={suspensionOpen}
+        title={d.business.status === 'suspended' ? 'Restore this stylist?' : 'Suspend this stylist?'}
+        body={d.business.status === 'suspended'
+          ? <>The stylist can use their account again. Their data and public page settings are retained. The reason is kept in the admin log.</>
+          : <>The stylist will lose access to their business data until restored. Their data is retained. The reason is kept in the admin log.</>}
+        confirmLabel={d.business.status === 'suspended' ? 'Restore stylist' : 'Suspend stylist'}
+        danger={d.business.status !== 'suspended'}
+        reasonRequired
+        busy={busy}
+        error={actionError}
+        onCancel={() => setSuspensionOpen(false)}
+        onConfirm={(reason) => void setSuspension(reason)}
+      />
       <ConfirmDialog
         open={unpublishOpen}
         title="Unpublish this public page?"
