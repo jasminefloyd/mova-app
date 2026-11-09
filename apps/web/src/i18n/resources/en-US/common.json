@@ -1742,7 +1742,8 @@
       "block": "Block time",
       "blockHint": "Personal break, holiday or time off",
       "cancel": "Cancel",
-      "close": "Close"
+      "close": "Close",
+      "loading": "Loading…"
     },
     "locationNew": {
       "title": "New location",

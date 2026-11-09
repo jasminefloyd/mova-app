@@ -41,7 +41,7 @@ export function NewAppointmentPage() {
           callFunction<ClientRow[]>(client, businessId, 'client-crud', { action: 'list' }),
         ]);
         if (!active) return;
-        setLocations(options.locations); setServices(options.services); setLinks(options.links); setClients(clientResult);
+        setLocations(options.locations); setServices(options.services); setLinks(options.links); setClients(Array.isArray(clientResult) ? clientResult : []);
         setDraft((current) => ({ ...current, locationId: current.locationId || options.locations[0]?.id || '' }));
       } catch {
         if (active) setLoadError(true);

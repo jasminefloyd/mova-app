@@ -1742,7 +1742,8 @@
       "block": "Bloquear tiempo",
       "blockHint": "Pausa personal, vacaciones o tiempo libre",
       "cancel": "Cancelar",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "loading": "Cargando…"
     },
     "locationNew": {
       "title": "Nueva ubicación",
