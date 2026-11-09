@@ -1,0 +1,85 @@
+/* Concierge boards (40, 43). Colours and spacing come from the design tokens only. */
+.mova-concierge-board__head {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.mova-concierge-board__head p {
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+.mova-concierge-board__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--ink-primary);
+  font-weight: 600;
+}
+
+.mova-concierge-board__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ink-muted);
+}
+
+.mova-concierge-board__dot.is-on {
+  background: var(--forest);
+}
+
+.mova-concierge-board__teach {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  color: var(--forest);
+  font-weight: 600;
+}
+
+.mova-concierge-board__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.mova-concierge-board__stat {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2);
+}
+
+.mova-concierge-board__stat span {
+  color: var(--ink-muted);
+  font-size: var(--fs-caption);
+}
+
+.mova-concierge-board__section {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.mova-concierge-board__rows {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.mova-concierge-board__fixed {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  color: var(--ink-primary);
+}
+
+.mova-concierge-board__fixed span:last-child {
+  color: var(--ink-muted);
+  text-align: right;
+}
+
+@media (max-width: 320px) {
+  .mova-concierge-board__stats {
+    grid-template-columns: 1fr;
+  }
+}

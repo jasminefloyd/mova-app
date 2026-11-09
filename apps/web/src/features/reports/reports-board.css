@@ -1,0 +1,58 @@
+/* Reports board (37). Colours and spacing come from the design tokens only. */
+.mova-reports-board {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.mova-reports-board__pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+
+.mova-reports-board .mova-report-card {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--ink-primary);
+  text-decoration: none;
+  min-width: 0;
+}
+
+.mova-report-card__label {
+  color: var(--ink-muted);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  margin: 0;
+}
+
+.mova-report-card__metric {
+  font-size: var(--fs-display-s, 2rem);
+  line-height: 1.1;
+}
+
+.mova-report-card__detail,
+.mova-report-note {
+  color: var(--ink-muted);
+  font-size: var(--fs-body-s);
+  margin: 0;
+}
+
+.mova-report-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--fs-body-s);
+}
+
+.mova-report-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  color: var(--ink-primary);
+  text-decoration: none;
+  border-top: 1px solid var(--line);
+}
