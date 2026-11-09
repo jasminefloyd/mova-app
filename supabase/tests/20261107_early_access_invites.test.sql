@@ -18,15 +18,14 @@ select is(
 );
 
 select is(
-  public.mova_before_user_created('{"user":{"email":"not-invited@example.invalid"}}'::jsonb) #>> '{error,http_code}',
-  '403',
-  'uninvited address is rejected'
+  public.mova_before_user_created('{"user":{"email":"not-invited@example.invalid"}}'::jsonb),
+  '{}'::jsonb,
+  'uninvited address is allowed since open sign-up (P6 0060)'
 );
 
-select is(
-  public.mova_before_user_created('{"user":{"email":"not-invited@example.invalid"}}'::jsonb) #>> '{error,message}',
-  'Mova is invite-only for now; join the waitlist.',
-  'rejection includes the waitlist instruction'
+select ok(
+  public.mova_before_user_created('{"user":{"email":"not-invited@example.invalid"}}'::jsonb) ->> 'error' is null,
+  'no error is returned for an uninvited address'
 );
 
 select * from finish();

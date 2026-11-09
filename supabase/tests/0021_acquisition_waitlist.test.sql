@@ -1,13 +1,12 @@
 begin;
-select plan(10);
+select plan(9);
 select has_table('public'::name, 'mova_waitlist_signups'::name);
-select has_function('public'::name, 'mova_waitlist_register'::name, array['text','text','text','boolean']::name[]);
+select hasnt_function('public'::name, 'mova_waitlist_register'::name, 'waitlist registration function is retired (P6 open sign-up)');
 select has_trigger('public'::name, 'mova_waitlist_signups'::name, 'mova_waitlist_signups_touch_updated_at'::name);
 select ok((select relrowsecurity from pg_class where oid='public.mova_waitlist_signups'::regclass),'waitlist table has RLS enabled');
 select ok(exists(select 1 from pg_constraint where conrelid='public.mova_waitlist_signups'::regclass and conname='mova_waitlist_signups_email_normalized_uq'),'normalized email is unique');
-select ok(has_function_privilege('service_role','public.mova_waitlist_register(text,text,text,boolean)','EXECUTE'),'waitlist registration is available to service role');
-select ok(not has_function_privilege('anon','public.mova_waitlist_register(text,text,text,boolean)','EXECUTE'),'anonymous users cannot call the table function directly');
-select ok(not has_function_privilege('authenticated','public.mova_waitlist_register(text,text,text,boolean)','EXECUTE'),'authenticated users cannot call the table function directly');
+select ok(not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname like 'mova_waitlist_%'),'no waitlist functions remain after P6 retirement');
+select ok(exists (select 1 from pg_proc where proname = 'mova_before_user_created'),'the sign-up hook still exists after open sign-up');
 select ok(not has_table_privilege('anon','public.mova_waitlist_signups','SELECT'),'anonymous users cannot read waitlist submissions');
 select ok(not has_table_privilege('authenticated','public.mova_waitlist_signups','SELECT'),'authenticated users cannot read waitlist submissions');
 select * from finish();

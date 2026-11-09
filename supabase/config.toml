@@ -1,13 +1,11 @@
 project_id = "mova-app"
 
+# P6 (2026-11-09): open sign-up. The invite gate is retired; the hook function now allows every address.
 [auth.hook.before_user_created]
-enabled = true
+enabled = false
 uri = "pg-functions://postgres/public/mova_before_user_created"
 
 [functions.public-artist]
-verify_jwt = false
-
-[functions.waitlist-signup]
 verify_jwt = false
 
 [functions.artist-data-export]
@@ -80,9 +78,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.support-feedback]
-verify_jwt = false
-
-[functions.waitlist-admin]
 verify_jwt = false
 
 [functions.visit-notes]
