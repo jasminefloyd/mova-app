@@ -5,7 +5,7 @@ import { StripeTestClient } from '../_shared/providers/stripe/client.ts';
 import { sendAppointmentEmail } from '../_shared/appointment-emails.ts';
 import { consumeSlotOpened } from '../_shared/seat-filler.ts';
 import { smsProviderFromEnv } from '../_shared/providers/sms/index.ts';
-import { emailProviderFromEnv, inviteSignupUrl, sendInviteEmail, type EmailDb } from '../_shared/providers/email/index.ts';
+import { emailProviderFromEnv, type EmailDb } from '../_shared/providers/email/index.ts';
 
 const equal = (left: string, right: string) => {
   if (left.length !== right.length) return false;
@@ -135,21 +135,6 @@ Deno.serve(async (request) => {
         if (!emailProvider) throw new Error('EMAIL_PROVIDER_NOT_CONFIGURED');
         const outcome = await sendAppointmentEmail(db as unknown as EmailDb, emailProvider, job.payload.appointment_id, 'appointment.reminder', `email:${job.idempotency_key ?? job.id}`);
         if (outcome?.status === 'failed') throw new Error('APPOINTMENT_EMAIL_FAILED');
-      } else if (job.job_type === 'early_access_invite' && typeof job.payload?.signup_id === 'string') {
-        // O2: one invite email per approved waitlist signup (0059).
-        const { data: invite, error: inviteError } = await db.rpc('mova_waitlist_invite_context', { p_signup_id: job.payload.signup_id });
-        if (inviteError || !invite) throw new Error('INVITE_CONTEXT_FAILED');
-        const context = invite as { email: string; locale: string; invite_status: string; allowlisted: boolean };
-        if (context.invite_status === 'approved' && context.allowlisted) {
-          const emailProvider = emailProviderFromEnv((name) => Deno.env.get(name));
-          if (!emailProvider) throw new Error('EMAIL_PROVIDER_NOT_CONFIGURED');
-          const outcome = await sendInviteEmail(db as unknown as EmailDb, emailProvider, {
-            to: context.email, locale: context.locale === 'es-US' ? 'es-US' : 'en-US',
-            signupUrl: inviteSignupUrl(Deno.env.get('PUBLIC_SITE_URL') ?? 'https://mova-beauty.co'), idempotencyKey: `email:${job.idempotency_key ?? job.id}`,
-          });
-          if (outcome.status === 'failed') throw new Error('INVITE_EMAIL_FAILED');
-          if (outcome.status === 'sent' || outcome.status === 'duplicate') await db.rpc('mova_waitlist_mark_invited', { p_signup_id: job.payload.signup_id });
-        }
       } else {
         throw new Error('JOB_TYPE_UNSUPPORTED');
       }
@@ -157,7 +142,7 @@ Deno.serve(async (request) => {
       if (completeError || completed !== true) throw new Error('JOB_LEASE_LOST');
       succeeded += 1;
     } catch (error) {
-      const code = error instanceof Error && ['JOB_TYPE_UNSUPPORTED','JOB_LEASE_LOST','INVITE_CONTEXT_FAILED','INVITE_EMAIL_FAILED','APPOINTMENT_EMAIL_FAILED','STRIPE_FEE_NOT_SETTLED','STRIPE_FEE_SAVE_FAILED','EMAIL_PROVIDER_NOT_CONFIGURED','APPOINTMENT_EMAIL_CONTEXT_FAILED','STRIPE_TEST_MODE_DISABLED','STRIPE_TEST_CONFIGURATION_MISSING','CHECKOUT_COMPLETED_AWAITING_WEBHOOK','CHECKOUT_EXPIRY_NOT_CONFIRMED','CHECKOUT_SESSION_STATUS_INVALID','CHECKOUT_HOLD_RELEASE_FAILED','STRIPE_REFUND_RESPONSE_INVALID','STRIPE_REFUND_STATUS_SAVE_FAILED','STRIPE_REFUND_FAILED'].includes(error.message)
+      const code = error instanceof Error && ['JOB_TYPE_UNSUPPORTED','JOB_LEASE_LOST','APPOINTMENT_EMAIL_FAILED','STRIPE_FEE_NOT_SETTLED','STRIPE_FEE_SAVE_FAILED','EMAIL_PROVIDER_NOT_CONFIGURED','APPOINTMENT_EMAIL_CONTEXT_FAILED','STRIPE_TEST_MODE_DISABLED','STRIPE_TEST_CONFIGURATION_MISSING','CHECKOUT_COMPLETED_AWAITING_WEBHOOK','CHECKOUT_EXPIRY_NOT_CONFIRMED','CHECKOUT_SESSION_STATUS_INVALID','CHECKOUT_HOLD_RELEASE_FAILED','STRIPE_REFUND_RESPONSE_INVALID','STRIPE_REFUND_STATUS_SAVE_FAILED','STRIPE_REFUND_FAILED'].includes(error.message)
         ? error.message : 'JOB_HANDLER_FAILED';
       const { data: status, error: failError } = await db.rpc('mova_fail_background_job', {
         p_job_id: job.id, p_worker_id: workerId, p_error_code: code,
