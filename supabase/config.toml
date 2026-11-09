@@ -8,6 +8,9 @@ uri = "pg-functions://postgres/public/mova_before_user_created"
 [functions.public-artist]
 verify_jwt = false
 
+[functions.guides-public]
+verify_jwt = false
+
 [functions.artist-data-export]
 verify_jwt = false
 

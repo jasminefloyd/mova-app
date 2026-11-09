@@ -1,0 +1,899 @@
+{
+  "posts": [
+    {
+      "slug": "ai-isnt-what-is-making-beauty-less-personal",
+      "title": "AI isn't what's making beauty less personal",
+      "summary": "We've spent years teaching beauty software to remember clients. The stylist doing the remembering could use a little help.",
+      "category": "Clients",
+      "tags": [
+        "notes",
+        "clients"
+      ],
+      "cover": null,
+      "published_at": "2026-11-05T09:00:00Z",
+      "reading_minutes": 6,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Picture a client who has sat in the same stylist's chair for six years."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "The client remembers. Does the system?"
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Clients are loyal to people, not buildings. "
+            },
+            {
+              "text": "Read the Phorest survey",
+              "href": "https://www.phorest.example/survey"
+            },
+            {
+              "text": "."
+            }
+          ]
+        },
+        {
+          "type": "quote",
+          "content": [
+            {
+              "text": "Remembering clients is the job."
+            }
+          ],
+          "cite": "Jasmine"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            [
+              {
+                "text": "Formulas"
+              }
+            ],
+            [
+              {
+                "text": "Heat limits"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "tone": "tip",
+          "content": [
+            {
+              "text": "Keep sensitive notes on the appointment, not in a DM thread."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "<script>alert('x')</script> stays text."
+            }
+          ]
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Click me",
+              "href": "javascript:alert(1)"
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-11-06T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "keep-your-clients-when-you-change-salons",
+      "title": "Keep your clients when you change salons",
+      "summary": "A short list of what to move first, and what to leave behind.",
+      "category": "Going independent",
+      "tags": [
+        "moving"
+      ],
+      "cover": {
+        "url": "/media/Mova_Walkthrough_poster.jpg",
+        "alt": "Mova walkthrough"
+      },
+      "published_at": "2026-10-22T09:00:00Z",
+      "reading_minutes": 5,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "Move these first"
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Start with contact details and notes."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-10-22T09:00:00Z",
+      "seo": {
+        "meta_title": "Keep your clients when you change salons | Mova guides",
+        "meta_description": "What to move first.",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "manage-appointments-across-salons",
+      "title": "Manage appointments across salons",
+      "summary": "One calendar for a week that spans two suites and a mobile day.",
+      "category": "Booking",
+      "tags": [
+        "calendar"
+      ],
+      "cover": null,
+      "published_at": "2026-10-08T09:00:00Z",
+      "reading_minutes": 4,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "One calendar keeps every location honest."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-10-08T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": true
+      }
+    },
+    {
+      "slug": "practical-note-23",
+      "title": "Practical note 23",
+      "summary": "Summary for practical note 23.",
+      "category": "Money",
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-24T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 23."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-22",
+      "title": "Practical note 22",
+      "summary": "Summary for practical note 22.",
+      "category": null,
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-23T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 22."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-21",
+      "title": "Practical note 21",
+      "summary": "Summary for practical note 21.",
+      "category": "Money",
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-22T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 21."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-20",
+      "title": "Practical note 20",
+      "summary": "Summary for practical note 20.",
+      "category": null,
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-21T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 20."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-19",
+      "title": "Practical note 19",
+      "summary": "Summary for practical note 19.",
+      "category": "Money",
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-20T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 19."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-18",
+      "title": "Practical note 18",
+      "summary": "Summary for practical note 18.",
+      "category": null,
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-19T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 18."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-17",
+      "title": "Practical note 17",
+      "summary": "Summary for practical note 17.",
+      "category": "Money",
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-18T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 17."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-16",
+      "title": "Practical note 16",
+      "summary": "Summary for practical note 16.",
+      "category": null,
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-17T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 16."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-15",
+      "title": "Practical note 15",
+      "summary": "Summary for practical note 15.",
+      "category": "Money",
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-16T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 15."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-14",
+      "title": "Practical note 14",
+      "summary": "Summary for practical note 14.",
+      "category": null,
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-15T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 14."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-13",
+      "title": "Practical note 13",
+      "summary": "Summary for practical note 13.",
+      "category": "Money",
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-14T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 13."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-12",
+      "title": "Practical note 12",
+      "summary": "Summary for practical note 12.",
+      "category": null,
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-13T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 12."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-11",
+      "title": "Practical note 11",
+      "summary": "Summary for practical note 11.",
+      "category": "Money",
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-12T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 11."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-10",
+      "title": "Practical note 10",
+      "summary": "Summary for practical note 10.",
+      "category": null,
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-11T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 10."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-09",
+      "title": "Practical note 09",
+      "summary": "Summary for practical note 09.",
+      "category": "Money",
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-10T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 09."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-08",
+      "title": "Practical note 08",
+      "summary": "Summary for practical note 08.",
+      "category": null,
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-09T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 08."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-07",
+      "title": "Practical note 07",
+      "summary": "Summary for practical note 07.",
+      "category": "Money",
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-08T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 07."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-06",
+      "title": "Practical note 06",
+      "summary": "Summary for practical note 06.",
+      "category": null,
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-07T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 06."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-05",
+      "title": "Practical note 05",
+      "summary": "Summary for practical note 05.",
+      "category": "Money",
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-06T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 05."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-04",
+      "title": "Practical note 04",
+      "summary": "Summary for practical note 04.",
+      "category": null,
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-05T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 04."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-03",
+      "title": "Practical note 03",
+      "summary": "Summary for practical note 03.",
+      "category": "Money",
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-04T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 03."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-02",
+      "title": "Practical note 02",
+      "summary": "Summary for practical note 02.",
+      "category": null,
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-03T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 02."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    },
+    {
+      "slug": "practical-note-01",
+      "title": "Practical note 01",
+      "summary": "Summary for practical note 01.",
+      "category": "Money",
+      "tags": [],
+      "cover": null,
+      "published_at": "2026-09-02T09:00:00Z",
+      "reading_minutes": 3,
+      "author_name": "Jasmine",
+      "body": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "Body of note 01."
+            }
+          ]
+        }
+      ],
+      "updated_at": "2026-09-01T09:00:00Z",
+      "seo": {
+        "meta_title": "",
+        "meta_description": "",
+        "canonical_url": null,
+        "og_title": null,
+        "og_description": null,
+        "og_image_url": null,
+        "noindex": false
+      }
+    }
+  ]
+}

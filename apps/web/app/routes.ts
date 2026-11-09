@@ -1,7 +1,16 @@
 import { index, layout, route, type RouteConfig } from '@react-router/dev/routes';
 
 export default [
-  route('', '../src/app/PublicShell.tsx', { id: 'public-root-shell' }, [index('../src/app/routes/MarketingHomeRoute.tsx')]),
+  route('', '../src/app/PublicShell.tsx', { id: 'public-root-shell' }, [
+    route('', '../src/features/website/WebsiteLayout.tsx', { id: 'website-shell' }, [
+      index('../src/features/website/LandingPage.tsx'),
+      route('features', '../src/features/website/FeaturesPage.tsx'),
+      route('pricing', '../src/features/website/PricingPage.tsx'),
+      route('calculator', '../src/features/website/CalculatorPage.tsx'),
+      route('guides', '../src/features/website/guides/GuidesPage.tsx', { id: 'guides-list' }),
+      route('guides/:slug', '../src/features/website/guides/GuideArticlePage.tsx', { id: 'guide-article' }),
+    ]),
+  ]),
   route('growth', '../src/app/PublicShell.tsx', { id: 'growth-shortcut-shell' }, [index('../src/app/routes/GrowthAlias.tsx')]),
   route('money', '../src/app/PublicShell.tsx', { id: 'money-shortcut-shell' }, [index('../src/app/routes/MoneyAlias.tsx')]),
   route('reports', '../src/app/PublicShell.tsx', { id: 'reports-shortcut-shell' }, [index('../src/app/routes/ReportsAlias.tsx')]),

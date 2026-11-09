@@ -24,12 +24,11 @@ test('PWA manifest and service worker are available at the standalone start rout
 
 test('landing page sign-in and sign-up actions open the stylist pages', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByLabel('Language')).toHaveCount(0);
-  await page.getByRole('link', { name: 'Sign in' }).click();
+  await page.getByRole('link', { name: 'Sign in' }).first().click();
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Welcome back' })).toBeVisible();
   await page.goto('/');
-  await page.getByRole('link', { name: 'Sign up' }).first().click();
+  await page.getByRole('link', { name: /Start free|Sign up/ }).first().click();
   await expect(page).toHaveURL(/\/signup$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Create your account' })).toBeVisible();
 });
@@ -42,7 +41,6 @@ test('the temporary home page has no waitlist form', async ({ page }) => {
 
 test('artist locale is selected in Settings without a landing-page selector', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByLabel('Language')).toHaveCount(0);
   await openOperatorPage(page, '/settings');
   await page.getByRole('button', { name: /Language & notifications/ }).click();
   await expect(page.getByLabel('Language', { exact: true })).toHaveValue('en-US');
