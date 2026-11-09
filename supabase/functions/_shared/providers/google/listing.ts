@@ -7,7 +7,7 @@ export type ServiceRow = { id: string; name: string; status: string; base_price_
 export type HoursRow = { weekday: number; opens_at: string; closes_at: string };
 export type ProfileRow = { display_name: string; bio: string; handle: string };
 export type Snapshot = { item_key: string; payload: Record<string, unknown> };
-export type PendingChange = { key: string; kind: 'profile' | 'hours' | 'service' | 'booking_link' | 'service_removed'; label: string };
+export type PendingChange = { key: string; kind: 'profile' | 'hours' | 'service' | 'service_new' | 'booking_link' | 'service_removed'; label: string };
 
 const DAYS = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'] as const;
 
@@ -49,7 +49,7 @@ export function pendingListing(desired: GoogleListingItem[], snapshots: Snapshot
   const changes: PendingChange[] = [];
   for (const item of desired) {
     if (canonicalJson(sent.get(item.key) ?? null) === canonicalJson(item.payload)) continue;
-    const kind = item.key.startsWith('service:') ? 'service' : item.kind;
+    const kind = item.key.startsWith('service:') ? (sent.has(item.key) ? 'service' : 'service_new') : item.kind;
     changes.push({ key: item.key, kind: kind as PendingChange['kind'], label: names.get(item.key) ?? item.key });
   }
   const desiredKeys = new Set(desired.map((item) => item.key));

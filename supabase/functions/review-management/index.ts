@@ -52,7 +52,7 @@ Deno.serve(async (request) => {
     if (typeof body.review_id !== 'string') return respond({ code: 'REVIEW_REPLY_INVALID' }, 422);
     const isReply = body.action === 'reply_google';
     const text = isReply && typeof body.reply === 'string' ? body.reply.trim() : null;
-    if (isReply && (!text || text.length > 2000)) return respond({ code: 'REVIEW_REPLY_INVALID' }, 422);
+    if (isReply && (!text || text.length > 4096)) return respond({ code: 'REVIEW_REPLY_INVALID' }, 422);
     const provider = googleProvider();
     if (!provider) return respond({ code: 'GOOGLE_NOT_CONFIGURED' }, 503);
     const connection = await loadConnection(db, actor.businessId).catch(() => null);

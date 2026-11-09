@@ -7,6 +7,7 @@ import { desiredListing, pendingListing, servicesMenu, type GoogleProvider, type
 // Actions (stylist): status, push, set-auto-send. Cron (CRON_SECRET): auto-push-all, sends for every
 // connection that has automatic sends on. Nothing is sent when Google is not configured.
 const db = () => serviceClient();
+const isServiceChange = (change: PendingChange) => change.kind.startsWith('service');
 type Db = ReturnType<typeof serviceClient>;
 
 async function desiredFor(client: Db, businessId: string) {
@@ -35,7 +36,7 @@ async function snapshotsFor(client: Db, businessId: string): Promise<Snapshot[]>
 /** What is waiting for Google, grouped the way the listing screen shows it. */
 function summarize(pending: PendingChange[]) {
   const waiting = (key: string) => pending.some((change) => change.key === key);
-  const services = pending.filter((change) => change.kind === 'service' || change.kind === 'service_removed');
+  const services = pending.filter((change) => isServiceChange(change));
   return {
     profile: waiting('profile') ? 'waiting' : 'up_to_date',
     hours: waiting('hours') ? 'waiting' : 'up_to_date',
@@ -55,13 +56,13 @@ async function pushPending(client: Db, provider: GoogleProvider, connection: Goo
   let sent = 0;
   try {
     const accessToken = await accessTokenFor(provider, connection);
-    for (const change of pending.filter((item) => item.kind !== 'service' && item.kind !== 'service_removed')) {
+    for (const change of pending.filter((item) => !isServiceChange(item))) {
       const item = items.find((candidate) => candidate.key === change.key)!;
       await provider.applyListingItem(accessToken, locationId, item);
       await client.from('mova_google_listing_snapshots').upsert({ artist_business_id: businessId, item_key: item.key, payload: item.payload, synced_at: new Date().toISOString() }, { onConflict: 'artist_business_id,item_key' });
       sent++;
     }
-    const menuChanged = pending.some((item) => item.kind === 'service' || item.kind === 'service_removed');
+    const menuChanged = pending.some((item) => isServiceChange(item));
     if (menuChanged) {
       await provider.applyListingItem(accessToken, locationId, servicesMenu(items));
       const serviceItems = items.filter((item) => item.key.startsWith('service:'));

@@ -8,7 +8,7 @@
 -- hold only reply text the stylist wrote; keep them unless owner approves removing them.
 
 alter table public.mova_google_reviews
-  add column if not exists reply_body text check (reply_body is null or length(reply_body) <= 2000),
+  add column if not exists reply_body text check (reply_body is null or length(reply_body) <= 4096),
   add column if not exists reply_status text not null default 'none' check (reply_status in ('none','queued','posted','failed')),
   add column if not exists reply_posted_at timestamptz,
   add column if not exists reply_updated_at timestamptz;

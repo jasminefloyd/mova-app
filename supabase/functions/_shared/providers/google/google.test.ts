@@ -37,7 +37,7 @@ describe('Google listing rules (P6)', () => {
     const pending = pendingListing(desired, snapshots, new Map([['service:s2', 'Knotless braids'], ['service:gone', 'Gone']]));
     expect(pending).toEqual([
       { key: 'profile', kind: 'profile', label: 'profile' }, { key: 'hours', kind: 'hours', label: 'hours' }, { key: 'booking_link', kind: 'booking_link', label: 'booking_link' },
-      { key: 'service:s2', kind: 'service', label: 'Knotless braids' }, { key: 'service:gone', kind: 'service_removed', label: 'Gone' },
+      { key: 'service:s2', kind: 'service_new', label: 'Knotless braids' }, { key: 'service:gone', kind: 'service_removed', label: 'Gone' },
     ]);
   });
   it('the services menu sends every active service as one list', () => {
