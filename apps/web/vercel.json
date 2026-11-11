@@ -23,6 +23,28 @@
   ],
   "redirects": [
     {
+      "source": "/admin/admin",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.mova-beauty.co"
+        }
+      ],
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/admin/admin/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.mova-beauty.co"
+        }
+      ],
+      "destination": "/admin/:path*",
+      "permanent": false
+    },
+    {
       "source": "/admin/__manifest",
       "has": [
         {
