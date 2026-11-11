@@ -149,13 +149,16 @@ export function ReputationPage() {
   const startReply = (review: Review) => { setReplyId(review.id); setReply(review.artist_reply ?? ''); };
 
   return <main className={`mova-page mova-reputation-page${isSettings ? ' is-settings' : ''}`}>
-    <ScreenHeader title={t('reviews.title')} onBack={() => navigate(operatorUrl(businessId, isSettings ? 'settings' : 'reports'))} backLabel={isSettings ? t('privacy.back') : t('reviews.back')} />
-    <div className="mova-reputation-heading"><h1>{t('reviews.title')}</h1>{!isSettings && <p>{t('reviews.verifiedVisitOnly')}</p>}</div>
+    {isSettings && <ScreenHeader title={t('reviews.title')} onBack={() => navigate(operatorUrl(businessId, 'settings'))} backLabel={t('privacy.back')} />}
+    <div className="mova-reputation-heading"><h1>{t('reviews.title')}</h1>{isSettings && <p>{t('reviews.verifiedVisitOnly')}</p>}</div>
     {identityLoading || loading
       ? <p role="status" aria-busy="true">{t('reviews.loading')}</p>
       : error
         ? <ErrorState title={t('reviews.error')} retryLabel={t('reviews.retry')} onRetry={() => void load()} />
         : <>
+          {!isSettings && <Link className="mova-google-reputation-link" to={operatorUrl(businessId, 'settings/google')}>
+            <span><i aria-hidden="true" />{googleConnection?.status === 'active' ? t('google.reply.connectedRow') : t('google.reply.notConnectedRow')}</span><span aria-hidden="true">›</span>
+          </Link>}
           <Card className="mova-reputation-summary">
             <div className="mova-reputation-score">
               <strong>{summary?.average == null ? '—' : summary.average.toFixed(1)}</strong>
@@ -181,9 +184,9 @@ export function ReputationPage() {
             <p>{t('reviews.googleImportOff')}</p>
             {settings.google_review_url && <a href={settings.google_review_url} target="_blank" rel="noreferrer">{t('reviews.openGoogle')}</a>}
           </Card>}
-          <Link className="mova-google-reputation-link" to={operatorUrl(businessId, 'settings/google')}>
+          {isSettings && <Link className="mova-google-reputation-link" to={operatorUrl(businessId, 'settings/google')}>
             <span>{googleConnection?.status === 'active' ? t('google.reply.connectedRow') : t('google.reply.notConnectedRow')}</span><span aria-hidden="true">›</span>
-          </Link>
+          </Link>}
           {googleNotice && <p role="status">{googleNotice}</p>}
           <div className="mova-reviews-filters" role="group" aria-label={t('reviews.filter')}>
             {['all', 'mova', 'google', 'needs_reply'].map((key) => <button type="button" key={key} aria-pressed={filter === key} className={filter === key ? 'is-selected' : ''} onClick={() => setFilter(key)}>

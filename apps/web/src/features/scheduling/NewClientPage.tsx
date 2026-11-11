@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Checkbox, ErrorState, ScreenHeader, TextArea, TextField } from '../../components';
 import { displayId } from '../../lib/display-ids';
@@ -13,6 +13,7 @@ import './scheduling.css';
 export function NewClientPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
   const [draft, setDraft] = useState<NewClientDraft>({ firstName: '', lastName: '', mobile: '', email: '', locale: 'en-US', consent: DEFAULT_CONSENT_CHOICES });
   const [notes, setNotes] = useState('');
@@ -56,7 +57,7 @@ export function NewClientPage() {
         }
       }
       const path = mode === 'book'
-        ? `calendar/new-appointment?client=${created.id}`
+        ? `calendar/new-appointment?client=${created.id}${params.get('day') ? `&day=${encodeURIComponent(params.get('day')!)}` : ''}`
         : `clients/${displayId('CID', created.client_number)}`;
       navigate(operatorUrl(businessId, path));
     } catch (error) {
@@ -71,12 +72,11 @@ export function NewClientPage() {
   if (!businessId) return <main className="mova-page mova-scheduling"><ErrorState title={t('scheduling.identityError')} retryLabel={t('scheduling.retry')} onRetry={() => window.location.reload()} /></main>;
 
   const error = (key: NewClientField) => errors[key] ? t(`scheduling.client.error.${key}`) : '';
-  const closeTo = operatorUrl(businessId, 'clients');
+  const closeTo = params.get('return') === 'calendar' ? `${operatorUrl(businessId, 'calendar')}${params.get('day') ? `?day=${encodeURIComponent(params.get('day')!)}` : ''}` : operatorUrl(businessId, 'clients');
 
-  return <main className="mova-page mova-scheduling">
-    <ScreenHeader title={t('scheduling.client.title')} onBack={() => navigate(closeTo)} backLabel={t('scheduling.client.close')} trailing={<Link to={operatorUrl(businessId, 'clients/import')}>{t('scheduling.client.import')}</Link>} />
-    <h1>{t('scheduling.client.title')}</h1>
-    <form className="mova-scheduling__form" onSubmit={submit} noValidate>
+  return <main className="mova-page mova-scheduling mova-scheduling--screen mova-scheduling--client">
+    <ScreenHeader title={t('scheduling.client.title')} onBack={() => navigate(closeTo)} backLabel={t('scheduling.client.close')} leadingIcon="close" trailing={<Link className="mova-scheduling__header-action" to={operatorUrl(businessId, 'clients/import')}>{t('scheduling.client.import')}</Link>} />
+    <form className="mova-scheduling__form mova-scheduling__form--client" onSubmit={submit} noValidate>
       <div className="mova-form-grid">
         <TextField label={t('scheduling.client.first')} autoComplete="given-name" maxLength={80} value={draft.firstName} error={error('firstName')} onChange={(event) => update('firstName', event.target.value)} />
         <TextField label={t('scheduling.client.last')} autoComplete="family-name" maxLength={80} value={draft.lastName} onChange={(event) => update('lastName', event.target.value)} />
@@ -92,7 +92,7 @@ export function NewClientPage() {
         </div>
       </fieldset>
 
-      <fieldset className="mova-choice-fieldset mova-scheduling__consent">
+      <fieldset className="mova-choice-fieldset mova-scheduling__consent mova-scheduling__consent-card">
         <legend>{t('scheduling.client.consentLegend')}</legend>
         <p className="mova-field__hint">{t('scheduling.client.consentHint')}</p>
         <Checkbox label={t('scheduling.client.consentAppointments')} checked={draft.consent.appointmentUpdates} onChange={(event) => setConsent('appointmentUpdates', event.currentTarget.checked)} />
@@ -107,7 +107,7 @@ export function NewClientPage() {
       {saveError === 'notes' && <p className="mova-field__error" role="alert">{t('scheduling.client.notesError')}</p>}
       {saveError === 'partial' && <p className="mova-field__error" role="alert">{t('scheduling.client.partialError')}</p>}
       {saveError && saveError !== 'notes' && saveError !== 'partial' && <p className="mova-field__error" role="alert">{t('scheduling.client.saveError')}</p>}
-      <div className="mova-actions">
+      <div className="mova-actions mova-scheduling__footer-actions">
         <Button type="submit" loading={busy === 'save'} disabled={busy !== null}>{t('scheduling.client.saveClient')}</Button>
         <Button type="button" variant="secondary" loading={busy === 'book'} disabled={busy !== null} onClick={() => void save('book')}>{t('scheduling.client.saveBook')}</Button>
       </div>

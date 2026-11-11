@@ -20,10 +20,11 @@ export default [
   route('signup', '../src/app/StylistAuthShell.tsx', { id: 'stylist-signup-shell' }, [index('../src/features/auth/StylistSignUpPage.tsx')]),
   route(':businessId', '../src/app/OperatorShellRoute.tsx', [
     index('../src/app/routes/Home.tsx'),
-    route('calendar', '../src/features/bookings/CalendarPage.tsx'),
-    route('calendar/add', '../src/features/scheduling/CalendarAddPage.tsx'),
-    route('calendar/new-appointment', '../src/features/scheduling/NewAppointmentPage.tsx'),
-    route('calendar/block-time', '../src/features/scheduling/BlockTimePage.tsx'),
+    route('calendar', '../src/features/bookings/CalendarPage.tsx', {}, [
+      route('add', '../src/features/scheduling/CalendarAddPage.tsx'),
+      route('new-appointment', '../src/features/scheduling/NewAppointmentPage.tsx'),
+      route('block-time', '../src/features/scheduling/BlockTimePage.tsx'),
+    ]),
     route('clients', '../src/app/routes/Clients.tsx'),
     route('clients/new', '../src/features/scheduling/NewClientPage.tsx'),
     route('clients/import', '../src/features/clients/ClientImportRoute.tsx'),

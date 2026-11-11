@@ -110,7 +110,7 @@
 
 /* Guides & blog writer (A9-A10). */
 .adm .blk { border: 1px dashed var(--line-control); border-radius: 12px; padding: 12px 14px; background: var(--surface); display: flex; flex-direction: column; gap: 6px; }
-.adm .blk .tag { font-size: 11px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.adm .blk .tag { font-size: var(--fs-micro); font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 .adm .blk.h { font-family: Manrope, sans-serif; font-weight: 800; font-size: 20px; }
 .adm .blk-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
 .adm .blk-actions button { height: 30px; padding: 0 10px; border-radius: 15px; border: 1px solid var(--line-control); background: var(--surface); font: 600 12px 'DM Sans', sans-serif; color: var(--forest); cursor: pointer; }
@@ -154,13 +154,13 @@
 .adm .anav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ivory); }
 .adm .anav-brand:hover { color: var(--ivory); }
 .adm .anav-brand b { font-family: Manrope, sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -0.6px; }
-.adm .anav-badge { font-size: 11px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; padding: 3px 7px; border-radius: 8px; background: var(--peach); color: var(--forest); }
+.adm .anav-badge { font-size: var(--fs-micro); font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; padding: 3px 7px; border-radius: 8px; background: var(--peach); color: var(--forest); }
 .adm .anav-me { display: none; width: 34px; height: 34px; border-radius: 17px; background: var(--botanical); align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
 .adm .anav-items { display: flex; flex-direction: column; gap: 2px; }
 .adm .anav-item { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 12px; color: var(--mint); text-decoration: none; font-weight: 600; font-size: 14px; white-space: nowrap; }
 .adm .anav-item:hover { background: color-mix(in srgb, var(--forest), var(--botanical) 50%); color: var(--surface); }
 .adm .anav-item[aria-current='page'] { background: var(--ivory); color: var(--forest); }
-.adm .anav-item .n { margin-left: auto; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 9px; background: var(--peach); color: var(--forest); }
+.adm .anav-item .n { margin-left: auto; font-size: var(--fs-micro); font-weight: 800; padding: 2px 7px; border-radius: 9px; background: var(--peach); color: var(--forest); }
 .adm .anav-item .w { margin-left: auto; width: 8px; height: 8px; border-radius: 4px; background: var(--peach); }
 .adm .anav-foot { margin-top: auto; border-top: 1px solid color-mix(in srgb, var(--botanical), var(--forest) 30%); padding: 14px 8px 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--mint); }
 .adm .anav-foot button { align-self: flex-start; border: 0; background: transparent; color: var(--mint); font-weight: 600; font-size: 13px; padding: 0; cursor: pointer; }

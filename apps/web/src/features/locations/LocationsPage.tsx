@@ -12,6 +12,11 @@ type ExceptionRow = { exception_date: string; is_closed: boolean; opens_at: stri
 const types = ['suite', 'booth', 'commission_salon', 'mobile'] as const;
 const zones = Intl.supportedValuesOf('timeZone');
 const clockLabel = (value: string) => { const [hour = 0, minute = 0] = value.split(':').map(Number); return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date(2000, 0, 1, hour, minute)); };
+function groupHours(rows: HoursRow[], weekday: (value: number) => string) {
+  const groups = new Map<string, { days: number[]; opens_at: string; closes_at: string }>();
+  rows.forEach((row) => { const key = `${row.opens_at}|${row.closes_at}`; const group = groups.get(key) ?? { days: [], opens_at: row.opens_at, closes_at: row.closes_at }; group.days.push(row.weekday); groups.set(key, group); });
+  return [...groups.values()].sort((a, b) => a.days[0]! - b.days[0]!).map((group) => ({ ...group, label: group.days.map(weekday).join(', ') }));
+}
 
 export function LocationsPage() {
   const { t } = useTranslation(); const navigate=useNavigate(); const { client, businessId, loading: identityLoading } = useArtistBusiness();
@@ -72,7 +77,19 @@ export function LocationsPage() {
     <h1>{t('locations.title')}</h1>
     {error && <ErrorState title={t('locations.error')} retryLabel={t('locations.retry')} onRetry={() => void load()} />}
     {locations.length === 0 && !formOpen && <EmptyState title={t('locations.empty')} action={<Button onClick={()=>navigate(operatorUrl(businessId,'settings/locations/new'))}>{t('locations.add')}</Button>} />}
-    <div className="mova-location-list">{locations.map((location) => { const summary=summaries[location.id]; return <Card className="mova-location-card" key={location.id}><div><h2>{location.name}</h2><p>{t(`locations.types.${location.location_type}`)} · {location.time_zone}</p></div><span className="mova-location-card__status">{t(location.is_active?'locations.active':'locations.inactive')}</span><p><span>{t('screens.locations.bookingOn')}</span> {t(`locations.mode.${location.booking_mode}`)} · {t(`locations.collector.${location.payment_collector}`)}</p><div className="mova-location-card__hours">{(summary?.hours??[]).slice(0,3).map((row)=><span key={row.weekday}>{t(`locations.weekdaysShort.${row.weekday}`)} {clockLabel(row.opens_at)} – {clockLabel(row.closes_at)}</span>)}</div>{summary?.policy&&<dl className="mova-location-card__rules"><div><dt>{t('screens.locations.buffer')}</dt><dd>{t('scheduling.minutesShort',{count:Number(summary.policy.buffer_after_minutes??0)})}</dd></div><div><dt>{t('screens.locations.notice')}</dt><dd>{t('scheduling.hoursShort',{count:Math.round(Number(summary.policy.lead_time_minutes??0)/60)})}</dd></div><div><dt>{t('screens.locations.bookAhead')}</dt><dd>{t('scheduling.weeksShort',{count:Math.round(Number(summary.policy.booking_horizon_days??0)/7)})}</dd></div></dl>}<Button type="button" variant="secondary" onClick={() => void edit(location)}>{t('screens.locations.editHours')}</Button></Card>; })}</div>
+    <div className="mova-location-list">{locations.map((location, index) => {
+      const summary = summaries[location.id];
+      const schedule = groupHours(summary?.hours ?? [], (weekday) => t(`locations.weekdaysShort.${weekday}`));
+      const color = location.display_color_index % 2 === 0 ? 'one' : 'two';
+      return <Card className={`mova-location-card${index === 0 ? ' is-featured' : ''}`} key={location.id}>
+        <header className="mova-location-card__heading"><span className={`mova-location-card__dot mova-location-card__dot--${color}`} aria-hidden="true"/><h2>{location.name}</h2><span className={`mova-location-card__status${location.is_active ? '' : ' is-off'}`}>{t(location.is_active ? 'screens.locations.bookingOn' : 'locations.inactive')}</span></header>
+        <p className="mova-location-card__type">{t(`locations.types.${location.location_type}`)} · {location.time_zone}</p>
+        <div className="mova-location-card__chips"><span className={location.booking_mode === 'request' ? 'is-request' : ''}>{t(`locations.cardMode.${location.booking_mode}`)}</span><span>{t(`locations.cardCollector.${location.payment_collector}`)}</span></div>
+        <div className="mova-location-card__hours">{schedule.map((row) => <p key={`${row.opens_at}-${row.closes_at}`}><span>{row.label}</span><strong>{clockLabel(row.opens_at)} – {clockLabel(row.closes_at)}</strong></p>)}</div>
+        {summary?.policy && <dl className="mova-location-card__rules"><div><dt>{t('screens.locations.buffer')}</dt><dd>{t('scheduling.minutesShort', { count: Number(summary.policy.buffer_after_minutes ?? 0) })}</dd></div><div><dt>{t('screens.locations.notice')}</dt><dd>{t('scheduling.hoursShort', { count: Math.round(Number(summary.policy.lead_time_minutes ?? 0) / 60) })}</dd></div><div><dt>{t('screens.locations.bookAhead')}</dt><dd>{t('scheduling.weeksShort', { count: Math.round(Number(summary.policy.booking_horizon_days ?? 0) / 7) })}</dd></div></dl>}
+        <Button type="button" variant="secondary" onClick={() => void edit(location)}>{t('screens.locations.editHours')}</Button>
+      </Card>;
+    })}</div>
     {formOpen && <Card className="mova-location-form"><form onSubmit={(event) => void save(event)}>
       <h2>{editingId ? t('locations.edit') : t('locations.add')}</h2>
       <TextField label={t('locations.name')} value={name} onChange={(event) => setName(event.target.value)} required maxLength={120} />

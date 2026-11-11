@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Button, Checkbox, ErrorState, RadioCard, ScreenHeader, TextField } from '../../components';
+import { Button, ErrorState, RadioCard, ScreenHeader, TextField, Toggle } from '../../components';
 import { operatorUrl } from '../../app/operator-url';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { loadBookingOptions, loadBusy, type LocationRow } from './api';
@@ -12,8 +12,10 @@ import './scheduling.css';
 export function BlockTimePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
-  const today = new Date().toLocaleDateString('en-CA');
+  const requestedDay = params.get('day');
+  const today = requestedDay && /^\d{4}-\d{2}-\d{2}$/.test(requestedDay) ? requestedDay : new Date().toLocaleDateString('en-CA');
   const [draft, setDraft] = useState<BlockDraft>(() => blockDefaults(today));
   const [locations, setLocations] = useState<LocationRow[]>([]);
   const [where, setWhere] = useState<'all' | string>('all');
@@ -56,7 +58,7 @@ export function BlockTimePage() {
       }
       const { error } = await client.from('mova_availability_blocks').insert(rows);
       if (error) throw error;
-      navigate(operatorUrl(businessId, 'calendar'));
+      navigate(`${operatorUrl(businessId, 'calendar')}${requestedDay ? `?day=${encodeURIComponent(requestedDay)}` : ''}`);
     } catch {
       setSaveError(true);
     } finally {
@@ -70,13 +72,12 @@ export function BlockTimePage() {
 
   const error = (key: BlockField) => errors[key] ? t(`scheduling.block.error.${key}`) : '';
 
-  return <main className="mova-page mova-scheduling">
-    <ScreenHeader title={t('scheduling.block.title')} onBack={() => navigate(operatorUrl(businessId, 'calendar'))} backLabel={t('scheduling.block.close')} />
-    <h1>{t('scheduling.block.title')}</h1>
-    <form className="mova-scheduling__form" onSubmit={(event) => void save(event)} noValidate>
+  return <main className="mova-page mova-scheduling mova-scheduling--screen mova-scheduling--block">
+    <ScreenHeader title={t('scheduling.block.title')} onBack={() => navigate(`${operatorUrl(businessId, 'calendar')}${requestedDay ? `?day=${encodeURIComponent(requestedDay)}` : ''}`)} backLabel={t('scheduling.block.close')} leadingIcon="close" />
+    <form className="mova-scheduling__form mova-scheduling__form--block" onSubmit={(event) => void save(event)} noValidate>
       <fieldset className="mova-choice-fieldset">
         <legend>{t('scheduling.block.whatFor')}</legend>
-        <div className="mova-scheduling__stack">
+        <div className="mova-scheduling__pair mova-scheduling__reason-grid">
           {BLOCK_REASONS.map((reason) => <RadioCard key={reason} name="reason" value={reason} label={t(`scheduling.blockReasons.${reason}`)} checked={draft.reason === reason} onChange={(value) => update('reason', value as BlockReason)} />)}
         </div>
         {errors.reason && <p className="mova-field__error" role="alert">{error('reason')}</p>}
@@ -84,21 +85,20 @@ export function BlockTimePage() {
 
       <TextField label={`${t('scheduling.block.label')} ${t('scheduling.block.labelHint')}`} placeholder={t('scheduling.block.labelPlaceholder')} maxLength={120} value={draft.label} error={error('label')} onChange={(event) => update('label', event.target.value)} />
 
-      <section className="mova-scheduling__when" aria-label={t('scheduling.block.when')}>
-        <Checkbox label={t('scheduling.block.allDay')} checked={draft.allDay} onChange={(event) => update('allDay', event.currentTarget.checked)} />
+      <section className="mova-scheduling__when mova-scheduling__when-card" aria-label={t('scheduling.block.when')}>
+        <div className="mova-scheduling__all-day"><Toggle label={t('scheduling.block.allDay')} checked={draft.allDay} onChange={(value) => update('allDay', value)} /></div>
         <TextField label={t('scheduling.block.date')} type="date" value={draft.date} error={error('date')} onChange={(event) => update('date', event.target.value)} />
         {!draft.allDay && <div className="mova-form-grid">
           <TextField label={t('scheduling.block.from')} type="time" value={draft.from} onChange={(event) => update('from', event.target.value)} />
           <TextField label={t('scheduling.block.to')} type="time" value={draft.to} onChange={(event) => update('to', event.target.value)} />
         </div>}
         {errors.hours && <p className="mova-field__error" role="alert">{error('hours')}</p>}
+        <label className="mova-field"><span className="mova-field__label">{t('scheduling.block.repeats')}</span><select className="mova-input" value={repeatWeeks} onChange={(event) => { setConflicts(null); setRepeatWeeks(Number(event.target.value)); }}><option value={1}>{t('scheduling.block.repeatOnce')}</option>{[2,4,8,12].map((count)=><option key={count} value={count}>{t('scheduling.block.repeatWeeklyCount',{count})}</option>)}</select></label>
       </section>
-
-      <TextField label={t('scheduling.block.repeatWeekly')} type="number" min="1" max="12" value={String(repeatWeeks)} onChange={(event) => { setConflicts(null); setRepeatWeeks(Math.min(12, Math.max(1, Number(event.target.value) || 1))); }} />
 
       <fieldset className="mova-choice-fieldset">
         <legend>{t('scheduling.block.where')}</legend>
-        <div className="mova-scheduling__pair">
+        <div className="mova-scheduling__pair mova-scheduling__where-options">
           <RadioCard name="where" value="all" label={t('scheduling.block.allLocations')} checked={where === 'all'} onChange={(value) => setWhere(value)} />
           {locations.map((row) => <RadioCard key={row.id} name="where" value={row.id} label={row.name} checked={where === row.id} onChange={(value) => setWhere(value)} />)}
         </div>
@@ -108,7 +108,7 @@ export function BlockTimePage() {
       <p className="mova-scheduling__note">{t('scheduling.block.note')}</p>
       {conflicts !== null && <p className="mova-field__error" role="alert">{t('scheduling.block.conflicts', { count: conflicts })}</p>}
       {saveError && <p className="mova-field__error" role="alert">{t('scheduling.block.saveError')}</p>}
-      <div className="mova-actions">
+      <div className="mova-actions mova-scheduling__footer-actions">
         <Button type="submit" loading={busy}>{conflicts !== null ? t('scheduling.block.blockAnyway') : t('scheduling.block.submit')}</Button>
       </div>
     </form>

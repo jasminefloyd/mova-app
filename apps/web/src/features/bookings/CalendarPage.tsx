@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { Link, Outlet, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { DayStrip, EmptyState, ErrorState, HonestyBanner, IconButton } from '../../components';
@@ -185,7 +185,8 @@ export function CalendarPage() {
     </div>
 
     {!error && !hasItems && <EmptyState title={t('calendar.empty')} />}
-    <IconButton className="mova-calendar__fab" label={t('calendar.newAppointment')} icon="plus" onClick={() => navigate(operatorUrl(businessId, 'calendar/add'))} />
+    <IconButton className="mova-calendar__fab" label={t('calendar.newAppointment')} icon="plus" onClick={() => navigate(`${operatorUrl(businessId, 'calendar/add')}?day=${encodeURIComponent(day)}`)} />
+    <Outlet />
   </main>;
 }
 

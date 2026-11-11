@@ -86,7 +86,7 @@
 
 .mova-concierge-board__stat span {
   color: var(--ink-secondary);
-  font-size: 11px;
+  font-size: var(--fs-micro);
   line-height: 1.3;
 }
 
@@ -193,7 +193,7 @@
   border-radius: var(--radius-pill);
   padding: 3px 9px;
   color: var(--forest);
-  font-size: 10px;
+  font-size: var(--fs-micro);
   font-weight: 700;
   line-height: 1.25;
 }
@@ -266,7 +266,7 @@
 @media (max-width: 360px) {
   .mova-concierge-board__stats { gap: var(--space-1); }
   .mova-concierge-board__stat { padding: 8px; }
-  .mova-concierge-board__stat span { font-size: 10px; }
+  .mova-concierge-board__stat span { font-size: var(--fs-micro); }
   .mova-concierge-handoff { grid-template-columns: 32px minmax(0, 1fr) auto; gap: var(--space-2); padding-inline: 10px; }
   .mova-concierge-handoff__icon { width: 32px; height: 32px; }
 }

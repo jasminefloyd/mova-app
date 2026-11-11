@@ -296,7 +296,7 @@
 @media (max-width: 359px) {
   .mova-gallery { width: calc(100% - 24px); }
   .mova-button { padding-inline: var(--space-3); }
-  .mova-tab { font-size: 10px; }
+  .mova-tab { font-size: var(--fs-tab); }
 }
 
 @media (prefers-reduced-motion: reduce) {

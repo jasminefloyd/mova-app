@@ -15,7 +15,8 @@ export function ArtistShell() {
   const { t } = useTranslation();
   const basePath = `/${encodeURIComponent(businessId)}`;
   const homePath = operatorUrl(businessId,'');
-  const tabs = [homePath,...['calendar','clients','growth','reports'].map((path) => operatorUrl(businessId,path))];
+  const reviewsPath = operatorUrl(businessId, 'reports/reputation');
+  const tabs = [homePath,...['calendar','clients'].map((path) => operatorUrl(businessId,path)),reviewsPath,operatorUrl(businessId,'reports')];
   const isTabRoot = tabs.includes(location.pathname);
   const active = location.pathname === basePath || location.pathname === `${basePath}/` ? homePath : location.pathname;
   return <ShellFrame queryClient={queryClient} localeStorageKey={ARTIST_LOCALE_KEY} showBrandHeader={false}>
@@ -23,7 +24,7 @@ export function ArtistShell() {
       <Outlet />
       {isTabRoot && <TabBar basePath={basePath} homePath={homePath} active={active} onNavigate={(path) => navigate(path)} labels={{
         home: t('navigation.home'), calendar: t('navigation.calendar'), clients: t('navigation.clients'),
-        growth: t('navigation.growth'), reports: t('navigation.reports'),
+        reviews: t('navigation.reviews'), reports: t('navigation.reports'),
       }} ariaLabel={t('navigation.ariaLabel')} />}
     </div>
   </ShellFrame>;

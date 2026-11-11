@@ -1,6 +1,6 @@
 /* P6 Google screens (boards 38b-38e). Tokens only; every target is at least 44px; no fixed widths so 320px does not scroll. */
 .mova-google-page { display: flex; flex-direction: column; gap: 14px; padding-bottom: 32px; min-width: 0; }
-.mova-google-page > h1 { margin: 6px 0 0; font: 800 clamp(28px, 7vw, 34px)/1.1 var(--font-display); letter-spacing: -.02em; color: var(--forest); }
+.mova-google-page > h1 { margin: 6px 0 0; font: 800 var(--fs-display-xl)/1.1 var(--font-display); letter-spacing: -.4px; color: var(--forest); }
 .mova-google-card { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); min-width: 0; }
 .mova-google-card h2 { margin: 0; font: 700 17px/1.25 var(--font-display); color: var(--forest); }
 .mova-google-card p, .mova-google-card__head > span > span { margin: 0; font-size: var(--fs-body-s); color: var(--ink-muted); line-height: 1.4; }
@@ -64,4 +64,17 @@
 .mova-google-reply-actions > * { flex: 1 1 140px; }
 .mova-google-reputation-link { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 52px; padding: 12px 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); color: var(--ink-primary); text-decoration: none; font-size: 14px; }
 .mova-google-reputation-link strong { color: var(--forest); }
+.mova-google-reputation-link > span:first-child { display: inline-flex; align-items: center; gap: 10px; }
+.mova-google-reputation-link > span:first-child i { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: var(--botanical); }
+.mova-google-page { gap: var(--space-4); padding-bottom: var(--space-8); }
+.mova-google-page > h1 { margin-top: 0; font-size: var(--fs-display-xl); letter-spacing: -.4px; }
+.mova-google-card { gap: var(--space-3); border-radius: var(--radius-2xl); }
+.mova-google-card h2 { font-size: var(--fs-display-s); }
+.mova-google-message { gap: var(--space-2); padding: var(--space-3) var(--space-4); border-radius: var(--radius-xl); }
+.mova-google-field { gap: var(--space-2); font-size: var(--fs-caption); }
+.mova-google-field select { min-height: var(--input-h); padding-inline: var(--space-3); border-radius: var(--radius-l); font-size: var(--fs-body-l); }
+.mova-google-account__connected { gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-2xl); }
+.mova-google-account__avatar { border-radius: 50%; }
+.mova-google-connect__privacy, .mova-google-reply-quote { padding: var(--space-3) var(--space-4); border-radius: var(--radius-xl); }
+.mova-google-reputation-link > span:first-child { gap: var(--space-2); }
 @media (max-width: 340px) { .mova-google-tiles { grid-template-columns: minmax(0, 1fr); } }

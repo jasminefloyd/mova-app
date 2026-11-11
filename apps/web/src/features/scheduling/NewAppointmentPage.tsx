@@ -18,7 +18,9 @@ export function NewAppointmentPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
-  const todayKey = new Date().toLocaleDateString('en-CA');
+  const requestedDay = params.get('day');
+  const todayKey = requestedDay && /^\d{4}-\d{2}-\d{2}$/.test(requestedDay) ? requestedDay : new Date().toLocaleDateString('en-CA');
+  const [choosingClient, setChoosingClient] = useState(false);
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [locations, setLocations] = useState<LocationRow[]>([]);
   const [services, setServices] = useState<ServiceRow[]>([]);
@@ -53,11 +55,13 @@ export function NewAppointmentPage() {
   const location = locations.find((row) => row.id === draft.locationId);
   const zone = location?.time_zone ?? 'UTC';
   const offered = useMemo(() => services.flatMap((service) => {
+    if (!draft.locationId) return [{ ...service, price: service.base_price_minor, duration: service.duration_minutes }];
     const link = links.find((row) => row.service_id === service.id && row.location_id === draft.locationId);
     if (!link) return [];
     return [{ ...service, price: link.price_minor_override ?? service.base_price_minor, duration: link.duration_minutes_override ?? service.duration_minutes }];
   }), [services, links, draft.locationId]);
   const service = offered.find((row) => row.id === draft.serviceId);
+  const selectedClient = clients.find((row) => row.id === draft.clientId);
 
   // Free-time line from board 08c: checks appointments and blocks at the chosen location.
   useEffect(() => {
@@ -109,28 +113,23 @@ export function NewAppointmentPage() {
   if (loadError) return <main className="mova-page mova-scheduling"><ErrorState title={t('scheduling.appt.loadError')} retryLabel={t('scheduling.retry')} onRetry={() => window.location.reload()} /></main>;
 
   const error = (key: AppointmentField) => errors[key] ? t(`scheduling.appt.error.${key}`) : '';
-  const closeTo = operatorUrl(businessId, 'calendar');
+  const closeTo = `${operatorUrl(businessId, 'calendar')}${draft.date ? `?day=${encodeURIComponent(draft.date)}` : ''}`;
 
-  return <main className="mova-page mova-scheduling">
-    <ScreenHeader title={t('scheduling.appt.title')} onBack={() => navigate(closeTo)} backLabel={t('scheduling.appt.close')} />
-    <h1>{t('scheduling.appt.title')}</h1>
-    <form className="mova-scheduling__form" onSubmit={(event) => void submit(event)} noValidate>
+  return <main className="mova-page mova-scheduling mova-scheduling--screen mova-scheduling--appointment">
+    <ScreenHeader title={t('scheduling.appt.title')} onBack={() => navigate(closeTo)} backLabel={t('scheduling.appt.close')} leadingIcon="close" />
+    <form className="mova-scheduling__form mova-scheduling__form--appointment" onSubmit={(event) => void submit(event)} noValidate>
       <label className="mova-field"><span className="mova-field__label">{t('scheduling.appt.client')}</span>
-        <select className="mova-input" value={draft.clientId} aria-invalid={Boolean(errors.client)} onChange={(event) => update('clientId', event.target.value)}>
+        {selectedClient && !choosingClient ? <span className="mova-scheduling__selected-client">
+          <span className="mova-scheduling__client-avatar" aria-hidden="true">{selectedClient.display_name.split(/\s+/).map((part) => part[0]).slice(0,2).join('').toUpperCase()}</span>
+          <span className="mova-scheduling__selected-client-copy"><strong>{selectedClient.display_name}</strong><small>{selectedClient.phone || selectedClient.email || t('scheduling.appt.clientOnList')}</small></span>
+          <button type="button" className="mova-button mova-button--secondary" onClick={()=>setChoosingClient(true)}>{t('scheduling.appt.changeClient')}</button>
+        </span> : <select className="mova-input" value={draft.clientId} aria-invalid={Boolean(errors.client)} onChange={(event) => { update('clientId', event.target.value); setChoosingClient(false); }}>
           <option value="">{t('scheduling.appt.chooseClient')}</option>
           {clients.map((row) => <option key={row.id} value={row.id}>{row.display_name}</option>)}
-        </select>
+        </select>}
         {error('client') && <span className="mova-field__error" role="alert">{error('client')}</span>}
       </label>
-      <Link className="mova-scheduling__inline-link" to={operatorUrl(businessId, 'clients/new')}>{t('scheduling.appt.newClientInstead')}</Link>
-
-      <fieldset className="mova-choice-fieldset">
-        <legend>{t('scheduling.appt.location')}</legend>
-        <div className="mova-scheduling__stack">
-          {locations.map((row) => <RadioCard key={row.id} name="loc" value={row.id} label={row.name} checked={draft.locationId === row.id} onChange={(value) => { update('locationId', value); update('serviceId', ''); }} />)}
-        </div>
-        {locations.length === 0 && <p className="mova-field__hint">{t('scheduling.appt.noLocations')}</p>}
-      </fieldset>
+      <Link className="mova-scheduling__inline-link" to={`${operatorUrl(businessId, 'clients/new')}?return=calendar&day=${encodeURIComponent(draft.date)}`}>{t('scheduling.appt.newClientInstead')}</Link>
 
       <label className="mova-field"><span className="mova-field__label">{t('scheduling.appt.service')}</span>
         <select className="mova-input" value={draft.serviceId} aria-invalid={Boolean(errors.service)} onChange={(event) => update('serviceId', event.target.value)}>
@@ -141,7 +140,15 @@ export function NewAppointmentPage() {
         {draft.locationId && offered.length === 0 && <span className="mova-field__hint">{t('scheduling.appt.noServices')}</span>}
       </label>
 
-      <div className="mova-form-grid">
+      <fieldset className="mova-choice-fieldset">
+        <legend>{t('scheduling.appt.location')}</legend>
+        <div className="mova-scheduling__pair">
+          {locations.map((row) => <RadioCard key={row.id} name="loc" value={row.id} label={row.name} checked={draft.locationId === row.id} onChange={(value) => { update('locationId', value); update('serviceId', ''); }} />)}
+        </div>
+        {locations.length === 0 && <p className="mova-field__hint">{t('scheduling.appt.noLocations')}</p>}
+      </fieldset>
+
+      <div className="mova-form-grid mova-scheduling__date-time">
         <label className="mova-field"><span className="mova-field__label">{t('scheduling.appt.date')}</span>
           <input className="mova-input" type="date" value={draft.date} aria-invalid={Boolean(errors.date)} onChange={(event) => update('date', event.target.value)} />
           {error('date') && <span className="mova-field__error" role="alert">{error('date')}</span>}

@@ -181,9 +181,15 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
   return <main className="mova-page mova-home">
     <header className="mova-home__header">
       <div><p>{dateLabel}</p><h1>{t(greetingKey(currentDate.getHours()), { name })}</h1></div>
-      <button type="button" className="mova-home__settings" onClick={onOpenSettings} aria-label={t('navigation.openSettings')}>
-        <Avatar label={t('navigation.openSettings')} size={44} placeholder />
-      </button>
+      <div className="mova-home__header-actions">
+        <Link className="mova-home__growth" to={operatorUrl(businessId, 'growth')} aria-label={t('navigation.growthTitle')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17.5 9 12l3.5 3.5L20 7.5M14.5 7.5H20v5.5" /></svg>
+          <span />
+        </Link>
+        <button type="button" className="mova-home__settings" onClick={onOpenSettings} aria-label={t('navigation.openSettings')}>
+          <Avatar label={t('navigation.openSettings')} size={44} placeholder />
+        </button>
+      </div>
     </header>
 
     <Link className="mova-home__metrics" to={operatorUrl(businessId, 'reports')} aria-label={t('homeAppointments.openReports')}>

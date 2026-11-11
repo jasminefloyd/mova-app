@@ -9,6 +9,7 @@ import { useArtistBusiness } from '../settings/useArtistBusiness';
 type Profile = { display_name: string; bio: string; specialties: string[]; handle: string; preferred_locale: 'en-US' | 'es-US'; profile_photo_path: string | null; cover_photo_path: string | null; cover_source?: 'upload' | 'unsplash'; cover_image_url?: string | null; cover_credit_name?: string | null; cover_credit_url?: string | null; cover_unsplash_url?: string | null };
 type CoverCredit = { name: string; url: string; unsplashUrl: string };
 type Looks = { total: number; shown: number; thumbs: string[] };
+type ProfileService = { id: string; name: string; duration_minutes: number; base_price_minor: number; deposit_type: string; deposit_value: number };
 type Draft = { displayName: string; handle: string; bio: string; specialties: string[] };
 
 export const BIO_LIMIT = 280;
@@ -47,6 +48,7 @@ export function ProfileSettingsPage() {
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [credit, setCredit] = useState<CoverCredit | null>(null);
   const [looks, setLooks] = useState<Looks | null>(null);
+  const [services, setServices] = useState<ProfileService[]>([]);
   const [draft, setDraft] = useState<Draft>({ displayName: '', handle: '', bio: '', specialties: [] });
   const [photo, setPhoto] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
@@ -61,15 +63,17 @@ export function ProfileSettingsPage() {
   const load = useCallback(async () => {
     if (!client || !businessId) return;
     setLoadError(false);
-    const [{ data, error }, items] = await Promise.all([
+    const [{ data, error }, items, serviceResult] = await Promise.all([
       client.from('mova_artist_profiles').select('display_name,bio,specialties,handle,preferred_locale,profile_photo_path,cover_photo_path,cover_source,cover_image_url,cover_credit_name,cover_credit_url,cover_unsplash_url').eq('artist_business_id', businessId).maybeSingle(),
       client.from('mova_portfolio_items').select('media_path,is_published,sort_order').eq('artist_business_id', businessId).order('sort_order'),
+      client.from('mova_services').select('id,name,duration_minutes,base_price_minor,deposit_type,deposit_value').eq('artist_business_id', businessId).eq('status', 'active').order('created_at'),
     ]);
-    if (error || !data) { setLoadError(true); return; }
+    if (error || serviceResult.error != null || !data) { setLoadError(true); return; }
     const value = data as Profile;
     setProfile(value);
     setDraft({ displayName: value.display_name, handle: value.handle, bio: value.bio ?? '', specialties: value.specialties ?? [] });
     const rows = (items.data ?? []) as { media_path: string; is_published: boolean }[];
+    setServices((serviceResult.data ?? []) as ProfileService[]);
     const [photoSigned, coverSigned, ...thumbs] = await Promise.all([
       signed(client, 'mova_profile_photos', value.profile_photo_path),
       signed(client, 'mova_profile_photos', value.cover_photo_path),
@@ -187,10 +191,15 @@ export function ProfileSettingsPage() {
         })}</div>
       </fieldset>
 
+      <section className="mova-card mova-profile-edit__services">
+        <header><span><strong>{t('settings.services')}</strong><small>{t('settings.profileServicesSummary', { count: services.length })}</small></span><Link className="mova-button mova-button--primary" to={operatorUrl(businessId, 'settings/services')}>{t('settings.addAction')}</Link></header>
+        {services.length > 0 && <ul>{services.map((service) => <li key={service.id}><span><strong>{service.name}</strong><small>{service.duration_minutes >= 60 ? `${Math.floor(service.duration_minutes / 60)} h${service.duration_minutes % 60 ? ` ${service.duration_minutes % 60} min` : ''}` : `${service.duration_minutes} min`} · {service.deposit_type === 'none' ? t('settings.noDeposit') : service.deposit_type === 'fixed' ? `${t('settings.deposit')} ${formatServiceMoney(service.deposit_value)}` : `${service.deposit_value / 100}% ${t('settings.deposit')}`}</small></span><strong>{formatServiceMoney(service.base_price_minor)}</strong><Link aria-label={`${t('settings.editService')}: ${service.name}`} to={operatorUrl(businessId, 'settings/services')}>›</Link></li>)}</ul>}
+      </section>
+
       <Link className="mova-card mova-profile-edit__looks" to={operatorUrl(businessId, 'settings/portfolio')}>
         <span className="mova-profile-edit__looks-head">
           <span><strong>{t('settings.portfolio')}</strong><small>{looks ? t('settings.looksSummary', { count: looks.total, shown: looks.shown }) : ''}</small></span>
-          <span className="mova-profile-edit__manage">{t('settings.manage')}</span>
+          <span className="mova-profile-edit__manage">{t('settings.managePortfolio')}</span>
         </span>
         {looks && looks.total > 0 && <span className="mova-profile-edit__thumbs" aria-hidden="true">
           {looks.thumbs.map((url) => <img key={url} src={url} alt="" />)}
@@ -208,3 +217,7 @@ export function ProfileSettingsPage() {
 }
 
 export default ProfileSettingsPage;
+
+function formatServiceMoney(minor: number) {
+  return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(minor / 100);
+}

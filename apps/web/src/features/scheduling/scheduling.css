@@ -147,3 +147,80 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Calendar plus flow: a real bottom action sheet over the selected calendar day. */
+.mova-scheduling__sheet-layer { position: fixed; z-index: 60; inset: 0; pointer-events: none; }
+.mova-scheduling__scrim { position: absolute; inset: 0; pointer-events: auto; background: color-mix(in srgb, var(--forest) 52%, transparent); }
+.mova-scheduling__sheet { position: absolute; right: 0; bottom: 0; left: 0; display: grid; gap: var(--space-4); max-height: min(82dvh, 760px); overflow-y: auto; pointer-events: auto; border-radius: var(--radius-3xl) var(--radius-3xl) 0 0; padding: var(--space-3) max(var(--gutter), calc((100vw - 700px) / 2 + var(--gutter))) calc(var(--space-4) + env(safe-area-inset-bottom)); background: var(--surface-page); box-shadow: var(--shadow-raised); }
+.mova-scheduling__grabber { justify-self: center; width: 40px; height: 5px; border-radius: var(--radius-pill); background: var(--line-control); }
+.mova-scheduling__sheet h1 { margin: 0; color: var(--forest); font: 800 var(--fs-display-l)/1.1 var(--font-display); }
+.mova-scheduling__choices { display: grid; gap: var(--space-3); }
+.mova-scheduling__choice { min-height: 96px; border: 1px solid var(--line); border-radius: var(--radius-2xl); padding: var(--space-4); }
+.mova-scheduling__choice:first-child { border-color: var(--forest); background: var(--forest); color: var(--ivory); }
+.mova-scheduling__choice:first-child .mova-scheduling__choice-copy small { color: var(--mint); }
+.mova-scheduling__choice-icon { display: grid; width: 52px; height: 52px; flex: none; place-items: center; border-radius: 50%; background: var(--mint); color: var(--forest); }
+.mova-scheduling__choice:nth-child(3) .mova-scheduling__choice-icon { background: var(--surface-warm); }
+.mova-scheduling__choice:first-child .mova-scheduling__choice-icon { background: var(--botanical); color: var(--mint); }
+.mova-scheduling__choice-copy { gap: 2px; }
+.mova-scheduling__choice-copy strong { font-size: var(--fs-display-s); }
+.mova-scheduling__choice-copy small { color: var(--ink-secondary); font-size: var(--fs-body); }
+.mova-scheduling__choice > svg:last-child { flex: none; }
+.mova-scheduling__cancel { font-size: var(--fs-body-l); }
+
+/* New client, appointment and block time are full-height mobile-first editing screens. */
+.mova-page.mova-scheduling--screen { position: fixed; z-index: 61; top: 0; bottom: 0; left: 50%; width: min(100%,780px); height: 100dvh; min-height: 100dvh; overflow-y: auto; overscroll-behavior: contain; margin: 0; padding: calc(var(--space-4) + env(safe-area-inset-top)) var(--gutter) calc(112px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--surface-page); }
+.mova-scheduling--screen .mova-screen-header { display: grid; grid-template-columns: 44px minmax(0,1fr) 88px; align-items: center; min-height: 48px; margin-bottom: var(--space-4); }
+.mova-scheduling--screen .mova-screen-header > strong { justify-self: center; color: var(--forest); font: 700 var(--fs-display-s)/1.2 var(--font-display); text-align: center; }
+.mova-scheduling--screen .mova-screen-header__trailing { justify-self: end; }
+.mova-scheduling__header-action { display: inline-flex; min-height: 44px; align-items: center; border: 1px solid var(--line-control); border-radius: var(--radius-pill); padding: 0 var(--space-3); background: var(--surface); color: var(--forest); font-weight: 700; text-decoration: none; }
+.mova-scheduling--screen .mova-scheduling__form { gap: var(--space-4); }
+.mova-scheduling--screen .mova-field__label, .mova-scheduling--screen .mova-choice-fieldset legend { font-size: var(--fs-body-l); font-weight: 700; }
+.mova-scheduling--screen .mova-input { min-height: 58px; border-color: var(--line-control); border-radius: var(--radius-l); padding-inline: var(--space-4); background: var(--surface); font-size: var(--fs-body-l); }
+.mova-scheduling--screen .mova-choice-fieldset { gap: var(--space-3); border: 0; border-radius: 0; padding: 0; }
+.mova-scheduling--screen .mova-choice-fieldset legend { margin-bottom: var(--space-1); padding: 0; color: var(--forest); }
+.mova-scheduling--screen .mova-scheduling__pair { grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-2); }
+.mova-scheduling--screen .mova-radio-card { min-height: 74px; gap: var(--space-2); border-radius: var(--radius-2xl); padding: var(--space-3); font-size: var(--fs-body-l); }
+.mova-scheduling--screen .mova-radio-card input { width: 20px; height: 20px; flex: none; }
+.mova-scheduling--screen .mova-radio-card strong { font-size: var(--fs-body-l); }
+.mova-scheduling--screen .mova-radio-card__dot { display: none; }
+.mova-scheduling--screen .mova-scheduling__footer-actions { position: fixed; z-index: 62; right: 0; bottom: 0; left: 0; display: flex; flex-wrap: nowrap; gap: var(--space-2); padding: var(--space-3) max(var(--gutter),calc((100vw - 700px)/2 + var(--gutter))) calc(var(--space-4) + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: var(--surface-page); }
+.mova-scheduling--screen .mova-scheduling__footer-actions .mova-button { min-width: 0; min-height: 58px; flex: 1; border-radius: var(--radius-pill); font-size: var(--fs-body-l); }
+
+/* New client */
+.mova-scheduling--client .mova-scheduling__form--client > .mova-form-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-2); }
+.mova-scheduling--client .mova-scheduling__consent-card { display: grid; gap: var(--space-2); border: 1px solid var(--line); border-radius: var(--radius-2xl); padding: var(--space-4); background: var(--surface); }
+.mova-scheduling__consent-card legend { color: var(--forest); }
+.mova-scheduling__consent-card > .mova-field__hint { margin: 0; }
+.mova-scheduling__consent-card .mova-checkbox { min-height: 48px; align-items: flex-start; font-size: var(--fs-body-l); }
+.mova-scheduling__consent-card .mova-scheduling__consent-hint { margin: calc(-1 * var(--space-2)) 0 var(--space-2) 40px; }
+.mova-scheduling--client .mova-textarea { min-height: 120px; }
+.mova-scheduling--client .mova-scheduling__footer-actions .mova-button:first-child { background: var(--surface); color: var(--forest); }
+
+/* New appointment */
+.mova-scheduling__form--appointment { display: grid; gap: var(--space-4); }
+.mova-scheduling__selected-client { display: flex; min-height: 88px; align-items: center; gap: var(--space-3); border: 2px solid var(--forest); border-radius: var(--radius-2xl); padding: var(--space-3); background: var(--surface); }
+.mova-scheduling__client-avatar { display: grid; width: 56px; height: 56px; flex: none; place-items: center; border-radius: 50%; background: var(--mint); color: var(--forest); font-weight: 700; }
+.mova-scheduling__selected-client-copy { display: grid; min-width: 0; flex: 1; }
+.mova-scheduling__selected-client-copy strong { color: var(--forest); font-size: var(--fs-body-l); }
+.mova-scheduling__selected-client-copy small { color: var(--ink-muted); overflow-wrap: anywhere; }
+.mova-scheduling__selected-client .mova-button { min-height: 44px; padding-inline: var(--space-3); }
+.mova-scheduling--appointment .mova-scheduling__date-time { grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-2); }
+.mova-scheduling--appointment .mova-scheduling__free { border-radius: var(--radius-l); padding: var(--space-3) var(--space-4); background: var(--status-confirmed-bg); color: var(--status-confirmed-fg); font-weight: 700; }
+
+/* Block time */
+.mova-scheduling__reason-grid .mova-radio-card { min-height: 74px; }
+.mova-scheduling__when-card { gap: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-2xl); padding: var(--space-4); background: var(--surface); }
+.mova-scheduling__when-card .mova-scheduling__all-day > .mova-toggle { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; font-size: var(--fs-body-l); font-weight: 700; }
+.mova-scheduling__when-card .mova-scheduling__all-day input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.mova-scheduling__when-card .mova-scheduling__all-day .mova-toggle__track { grid-column: 2; grid-row: 1; width: 56px; height: 32px; }
+.mova-scheduling__when-card .mova-scheduling__all-day .mova-toggle__track > span { width: 24px; height: 24px; }
+.mova-scheduling__when-card .mova-toggle input:checked + .mova-toggle__track { background: var(--forest); }
+.mova-scheduling__when-card .mova-field__label { color: var(--ink-muted); }
+.mova-scheduling__where-options { display: flex !important; flex-wrap: wrap; }
+.mova-scheduling__where-options .mova-radio-card { min-height: 58px; flex: 0 1 auto; border-radius: var(--radius-pill); }
+.mova-scheduling__note { border-radius: var(--radius-2xl); padding: var(--space-4); background: var(--surface-warm); color: var(--ink-secondary); font-size: var(--fs-body); line-height: 1.5; }
+@media (max-width: 359px) {
+  .mova-scheduling--screen .mova-scheduling__pair { grid-template-columns: 1fr; }
+  .mova-scheduling__selected-client { flex-wrap: wrap; }
+  .mova-scheduling__selected-client .mova-button { margin-inline-start: auto; }
+}

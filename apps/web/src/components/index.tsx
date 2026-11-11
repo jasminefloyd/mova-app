@@ -1,8 +1,8 @@
 import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type ChangeEvent, type InputHTMLAttributes, type PropsWithChildren, type ReactNode } from 'react';
 import './components.css';
 
-export type IconName = 'home' | 'calendar' | 'clients' | 'growth' | 'reports' | 'back' | 'close' | 'check' | 'clock' | 'plus' | 'chevron' | 'info' | 'sparkle' | 'message' | 'lock' | 'refresh' | 'location' | 'send' | 'user' | 'preview' | 'more' | 'photo' | 'search' | 'globe' | 'qr';
-const iconIds: Record<Exclude<IconName, 'qr'>, string> = {
+export type IconName = 'home' | 'calendar' | 'clients' | 'growth' | 'reviews' | 'reports' | 'back' | 'close' | 'check' | 'clock' | 'plus' | 'chevron' | 'info' | 'sparkle' | 'message' | 'lock' | 'refresh' | 'location' | 'send' | 'user' | 'preview' | 'more' | 'photo' | 'search' | 'globe' | 'qr';
+const iconIds: Record<Exclude<IconName, 'qr' | 'reviews'>, string> = {
   home: '13', calendar: '14', clients: '15', growth: '16', reports: '17', back: '01', close: '06',
   check: '03', clock: '07', plus: '12', chevron: '04', info: '11', sparkle: '16', message: '21',
   lock: '10', refresh: '23', location: '30', send: '05', user: '28', preview: '31', more: '02', photo: '19', search: '20', globe: '25',
@@ -10,6 +10,7 @@ const iconIds: Record<Exclude<IconName, 'qr'>, string> = {
 
 export function Icon({ name, label, size = 22 }: { name: IconName; label?: string; size?: number }) {
   if (name === 'qr') return <svg className="mova-icon" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : true}><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3z"/><path d="M6 6h1v1H6zM17 6h1v1h-1zM6 17h1v1H6zM14 14h3v3h-3zM20 14v2M20 19v2M17 20h-3"/></svg>;
+  if (name === 'reviews') return <svg className="mova-icon" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : true}><path d="m12 2.8 2.75 5.58 6.16.9-4.46 4.35 1.05 6.14L12 16.87l-5.5 2.9 1.05-6.14L3.1 9.28l6.16-.9L12 2.8Z"/></svg>;
   return <img className="mova-icon" src={`/design-icons/icon-${iconIds[name]}.svg`} width={size} height={size} alt={label ?? ''} aria-hidden={label ? undefined : true} />;
 }
 
@@ -220,11 +221,11 @@ export function PhotoCrop({ preview = false, tips = [], children }: PropsWithChi
   </div>;
 }
 
-export function TabBar({ active, onNavigate, labels, ariaLabel = 'Main navigation', basePath = '', homePath = `${basePath}/` }: { active: string; onNavigate: (path: string) => void; labels: { home: string; calendar: string; clients: string; growth: string; reports: string }; ariaLabel?: string; basePath?: string; homePath?: string }) {
+export function TabBar({ active, onNavigate, labels, ariaLabel = 'Main navigation', basePath = '', homePath = `${basePath}/` }: { active: string; onNavigate: (path: string) => void; labels: { home: string; calendar: string; clients: string; reviews: string; reports: string }; ariaLabel?: string; basePath?: string; homePath?: string }) {
   const at = (segment: string) => `${basePath}/${segment}`;
   const tabs: Array<{ path: string; key: keyof typeof labels; icon: IconName }> = [
     { path: homePath, key: 'home', icon: 'home' }, { path: at('calendar'), key: 'calendar', icon: 'calendar' },
-    { path: at('clients'), key: 'clients', icon: 'clients' }, { path: at('growth'), key: 'growth', icon: 'growth' },
+    { path: at('clients'), key: 'clients', icon: 'clients' }, { path: at('reports/reputation'), key: 'reviews', icon: 'reviews' },
     { path: at('reports'), key: 'reports', icon: 'reports' },
   ];
   return <nav className="mova-tab-bar" aria-label={ariaLabel}>{tabs.map((tab) => <button type="button" key={tab.path} className={`mova-tab${active === tab.path ? ' is-active' : ''}`} aria-current={active === tab.path ? 'page' : undefined} onClick={() => onNavigate(tab.path)}><span className="mova-tab__icon"><Icon name={tab.icon} size={22} /></span><span>{labels[tab.key]}</span></button>)}</nav>;
@@ -276,7 +277,7 @@ export function ComponentGallery() {
       <PhotoCrop tips={['Face the light, shoulders up, face centered', 'Just you: no group shots or heavy filters', 'Save your work photos for your looks']}><Button>Take a photo</Button><Button variant="secondary">Choose photo</Button></PhotoCrop>
       <PhotoCrop preview><Button>Use this photo</Button><Button variant="ghost">Retake</Button></PhotoCrop>
       <div className="mova-gallery__row"><Button variant="secondary" onClick={() => setSheetOpen(true)}>Open accessible sheet</Button><Button variant="secondary" onClick={() => setToastVisible(true)}>Show toast</Button></div>
-      <div className="mova-gallery__tabbar"><TabBar active={galleryTab} onNavigate={setGalleryTab} labels={{ home: 'Home', calendar: 'Calendar', clients: 'Clients', growth: 'AI Revenue', reports: 'Reports' }} /></div>
+      <div className="mova-gallery__tabbar"><TabBar active={galleryTab} onNavigate={setGalleryTab} labels={{ home: 'Home', calendar: 'Calendar', clients: 'Clients', reviews: 'Reviews', reports: 'Reports' }} /></div>
     </div></section>
     <Sheet open={sheetOpen} title="Example sheet" onClose={() => setSheetOpen(false)}><p>This sheet traps focus, closes with Escape, and restores focus to its trigger.</p><Button onClick={() => setSheetOpen(false)}>Close sheet</Button></Sheet>
     {toastVisible && <Toast message="Action completed" action="Undo" onAction={() => setToastVisible(false)} />}

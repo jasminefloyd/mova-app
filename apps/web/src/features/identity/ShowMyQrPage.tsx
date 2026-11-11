@@ -20,9 +20,9 @@ export function ShowMyQrPage(){
   return <main className="mova-show-qr">
     <IconButton label={t('identity.close')} icon="close" onClick={()=>navigate(operatorUrl(businessId,'settings'))}/><p className="mova-wordmark">mova</p>
     {loading?<p role="status" aria-busy="true">{t('identity.loading')}</p>:error?<section role="alert"><p>{t('identity.profileLoadError')}</p><Button variant="on-dark" onClick={()=>void load()}>{t('identity.retry')}</Button></section>:!profile?.is_published?<section><h1>{t('identity.publishFirst')}</h1><p>{t('identity.publishFirstDetail')}</p></section>:<>
-      <div className="mova-show-qr__profile">{profile.photoUrl?<img className="mova-show-qr__avatar" src={profile.photoUrl} alt=""/>:<span className="mova-show-qr__avatar" aria-hidden="true">{profile.display_name.split(/\s+/).map(part=>part[0]).slice(0,2).join('').toUpperCase()}</span>}<h1>{profile.display_name}</h1><p>{t('identity.scanToBook')}</p></div>
+      <div className="mova-show-qr__profile">{profile.photoUrl?<img className="mova-show-qr__avatar" src={profile.photoUrl} alt=""/>:<span className="mova-show-qr__avatar" aria-hidden="true"><i/></span>}<h1>{profile.display_name}</h1><p>{t('identity.scanToBook')}</p></div>
       <QrCode value={profileUrl} label={t('identity.artistQr')} size={420} className="mova-show-qr__code"/><p className="mova-show-qr__url">{base}/s/{profile.handle}</p>
-      <footer className="mova-show-qr__actions"><Button variant="on-dark" onClick={()=>void shareLink()}>{t('identity.shareLink')}</Button><Button variant="on-dark" onClick={()=>void shareImage()}>{t('identity.shareImage')}</Button></footer>
+      <footer className="mova-show-qr__actions"><Button variant="on-dark" leadingIcon="send" onClick={()=>void shareLink()}>{t('identity.shareLink')}</Button><Button variant="on-dark" leadingIcon="photo" onClick={()=>void shareImage()}>{t('identity.shareImage')}</Button></footer>
     </>}{notice&&<p role="status" className="mova-show-qr__notice">{notice}</p>}
   </main>;
 }
