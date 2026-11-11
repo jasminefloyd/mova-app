@@ -42,6 +42,13 @@ Deno.serve(async (request) => {
   if (businessError) return respond({ code: 'PUBLIC_ARTIST_UNAVAILABLE' }, 503);
   if (business?.status !== 'active') return respond({ code: 'NOT_FOUND' }, 404);
 
+  // Only expose reviews the stylist has approved for public display. Never infer
+  // a rating from private, pending, or rejected review rows.
+  const { data: publicRatings } = await supabase.from('mova_reviews').select('rating')
+    .eq('artist_business_id', profile.artist_business_id).eq('moderation_status', 'approved').eq('public_display_enabled', true).limit(1000);
+  const ratingCount = publicRatings?.length ?? 0;
+  const ratingAverage = ratingCount ? Math.round(publicRatings!.reduce((sum, review) => sum + review.rating, 0) / ratingCount * 10) / 10 : null;
+
   const variantGroups = profile.photo_variants && typeof profile.photo_variants === 'object'
     ? Object.entries(profile.photo_variants as Record<string, unknown>)
       .filter((entry): entry is [string, Record<string, unknown>] => Boolean(entry[1]) && typeof entry[1] === 'object')
@@ -108,6 +115,8 @@ Deno.serve(async (request) => {
       bio: profile.bio,
       preferred_locale: profile.preferred_locale,
       photo_urls: Object.fromEntries(photos),
+      rating_average: ratingAverage,
+      rating_count: ratingCount,
       search_index_enabled: profile.search_index_enabled,
       cover_source: profile.cover_source,
       cover_image_url: profile.cover_image_url,

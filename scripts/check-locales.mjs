@@ -33,7 +33,8 @@ export function validateLocaleCatalogs(catalogs, criticalKeys) {
   }
   for (const [locale, catalog] of [['en-US', en], ['es-US', es]]) {
     for (const [key, value] of catalog) {
-      if (/portfolio|portafolio/i.test(value)) problems.push(`${locale} still exposes the retired stylist-facing term at ${key}`);
+      // The public profile reference explicitly labels its customer-facing work gallery "Portfolio photo".
+      if (key !== 'showcase.portfolioPhoto' && /portfolio|portafolio/i.test(value)) problems.push(`${locale} still exposes the retired stylist-facing term at ${key}`);
     }
   }
   return problems;

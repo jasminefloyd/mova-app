@@ -363,6 +363,7 @@
     "profileUnavailable": "Los perfiles de clientes aún no están disponibles. Puedes continuar como invitado.",
     "profileReadyConsentPending": "Tu perfil está listo. Puedes cambiar las preferencias de cada estilista desde tu perfil.",
     "haveProfileSignIn": "¿Tienes un perfil? Inicia sesión",
+    "fillDetailsPrompt": "Completaremos tus datos",
     "disabled": "Los perfiles de clientes están desactivados mientras se termina de definir la privacidad de las cuentas.",
     "close": "Cerrar",
     "loading": "Cargando tu perfil…",
@@ -1384,6 +1385,8 @@
     "chooseService": "Elige un servicio",
     "bookWith": "Reserva con {{name}}",
     "detailsTitle": "Tus datos",
+    "backToTimes": "Volver a elegir horario",
+    "backToProfile": "Volver al perfil de la estilista",
     "selectedService": "Servicio elegido",
     "selectedServices": "Servicios elegidos",
     "addAnotherService": "Agregar otro servicio",
@@ -1878,7 +1881,10 @@
     "deposit": "depósito",
     "noDeposit": "Sin depósito",
     "bookAppointment": "Reservar una cita",
-    "bookThisLook": "Reservar este estilo"
+    "bookThisLook": "Reservar este estilo",
+    "portfolioPhoto": "Foto del portafolio",
+    "depositAt": "Depósito de {{amount}} en {{location}}",
+    "noDepositAt": "Sin depósito en {{location}}"
   },
   "plan": {
     "title": "Tu plan",

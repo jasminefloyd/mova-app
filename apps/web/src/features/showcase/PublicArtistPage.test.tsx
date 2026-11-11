@@ -27,7 +27,7 @@ describe('public artist server rendering', () => {
     expect(html).toContain('Nia Flores');
     expect(html).toContain('Color specialist');
     expect(html).toContain('Signature color');
-    expect(html).toContain('North studio: $120.00 · $25.00 deposit');
+    expect(html).toContain('1 h 30 min · $25.00 deposit at North studio');
     expect(html).toContain('Online booking is unavailable for this service');
     expect(html).not.toContain('role="status">Loading');
     expect(html).not.toContain('Book now');

@@ -363,6 +363,7 @@
     "profileUnavailable": "Client profiles are not available yet. You can continue as a guest.",
     "profileReadyConsentPending": "Your profile is ready. You can update stylist preferences from your profile.",
     "haveProfileSignIn": "Have a profile? Sign in",
+    "fillDetailsPrompt": "We'll fill this in for you",
     "disabled": "Client profiles are turned off while the account privacy setup is being finalized.",
     "close": "Close",
     "loading": "Loading your profile…",
@@ -1384,6 +1385,8 @@
     "chooseService": "Choose a service",
     "bookWith": "Book with {{name}}",
     "detailsTitle": "Your details",
+    "backToTimes": "Back to choose a time",
+    "backToProfile": "Back to stylist profile",
     "selectedService": "Selected service",
     "selectedServices": "Selected services",
     "addAnotherService": "Add another service",
@@ -1878,7 +1881,10 @@
     "deposit": "deposit",
     "noDeposit": "No deposit",
     "bookAppointment": "Book an appointment",
-    "bookThisLook": "Book this look"
+    "bookThisLook": "Book this look",
+    "portfolioPhoto": "Portfolio photo",
+    "depositAt": "{{amount}} deposit at {{location}}",
+    "noDepositAt": "No deposit at {{location}}"
   },
   "plan": {
     "title": "Your plan",

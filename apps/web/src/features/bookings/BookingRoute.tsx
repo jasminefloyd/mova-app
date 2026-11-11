@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, EmptyState, ErrorState, TextArea, TextField } from '../../components';
+import { Button, Card, EmptyState, ErrorState, Icon, IconButton, TextArea, TextField } from '../../components';
 import { clientProfilesEnabled, hcaptchaSiteKey, publicEnv, stripeTestModeEnabled } from '../../lib/env';
 import { HCaptcha } from '../../components/HCaptcha';
 import type { PublicArtist } from '../showcase/PublicArtistPage';
@@ -29,6 +29,7 @@ export function BookingRoute() {
   const [slot,setSlot]=useState<Slot|null>(draft?.slot??null);const [locationId,setLocationId]=useState(draft?.locationId??'');const [alternateStartsAt,setAlternateStartsAt]=useState(draft?.alternateStartsAt??'');const [clientNote,setClientNote]=useState('');const [name,setName]=useState('');const [email,setEmail]=useState('');const [phone,setPhone]=useState('');const [consents,setConsents]=useState<ConsentChoices>(emptyConsentChoices);const [showServicePicker,setShowServicePicker]=useState(false);const [step,setStep]=useState<'times'|'details'>('times');const [busy,setBusy]=useState(false);const [error,setError]=useState(false);
   const [captchaToken,setCaptchaToken]=useState<string|null>(null);const [captchaReset,setCaptchaReset]=useState(0);
   const requestIdentity=useRef<{key:string;token:string}|null>(null);
+  const clientPrefillLoaded=useRef(false);
   const trackedBookingStart=useRef('');
   const selectedServices=useMemo(()=>serviceIds.map(id=>artist?.services.find(entry=>entry.id===id)).filter((entry):entry is NonNullable<typeof entry>=>Boolean(entry)),[artist,serviceIds]);
   const service=selectedServices[0];
@@ -48,6 +49,24 @@ export function BookingRoute() {
   const setConsent=(purpose:keyof ConsentChoices,channel:'email'|'sms',value:boolean)=>setConsents((current)=>({...current,[purpose]:{...current[purpose],[channel]:value}}));
 
   useEffect(()=>{void (async()=>{try{const response=await fetch(api('public-artist'),{method:'POST',headers:{'Content-Type':'application/json',apikey:publicEnv.VITE_SUPABASE_ANON_KEY??''},body:JSON.stringify({handle,tab:'services',locale})});const body=await response.json();if(!response.ok||!body.data)throw new Error();setArtist(body.data);setServiceIds(current=>current.length?current:[body.data.services[0]?.id].filter((id):id is string=>Boolean(id)));}catch{setError(true);}})();},[handle,locale]);
+  useEffect(()=>{
+    if(!clientProfilesEnabled||clientPrefillLoaded.current)return;
+    let active=true;
+    void (async()=>{
+      try{
+        const client=createMovaSupabaseClient();const {data:{session}}=await client.auth.getSession();if(!active||!session)return;
+        const response=await fetch(api('customer-profile'),{method:'POST',headers:{'Content-Type':'application/json',apikey:publicEnv.VITE_SUPABASE_ANON_KEY??'',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'profile'})});
+        if(!response.ok)return;
+        const envelope=await response.json();const profile=envelope.data?.profile as {display_name?:string;email?:string|null;phone?:string|null;verified_contacts?:Array<{type:'email'|'phone';value:string}>}|undefined;
+        if(!active||!profile)return;
+        const verifiedEmail=profile.verified_contacts?.find((item)=>item.type==='email')?.value;
+        const verifiedPhone=profile.verified_contacts?.find((item)=>item.type==='phone')?.value;
+        setName((current)=>current||profile.display_name||'');setEmail((current)=>current||profile.email||verifiedEmail||'');setPhone((current)=>current||profile.phone||verifiedPhone||'');
+        clientPrefillLoaded.current=true;
+      }catch{/* Booking remains available if optional profile autofill cannot load. */}
+    })();
+    return()=>{active=false;};
+  },[]);
   useEffect(()=>{if(artist&&trackedBookingStart.current!==handle){trackedBookingStart.current=handle;trackProfileEvent(handle,'booking_started');}},[artist,handle]);
   useEffect(()=>{
     if(!artist||!serviceIds.length)return;
@@ -115,9 +134,8 @@ export function BookingRoute() {
     if(present)return;
     setConsents((current)=>({...current,rebooking_reminders:{...current.rebooking_reminders,[channel]:false},offers:{...current.offers,[channel]:false},...(channel==='email'?{review_requests:{email:false}}:{})}));
   };
-  return <main className="mova-page mova-booking">
-    <div className="mova-booking__brand"><p className="mova-wordmark">mova</p><PublicLocaleToggle /></div>
-    <h1>{step==='details'?i18n.t('booking.detailsTitle'):i18n.t('booking.bookWith',{name:artist?.profile.display_name??''})}</h1>
+  return <main lang={locale} className="mova-page mova-booking">
+    <header className="mova-booking__screen-header"><IconButton icon="back" label={step==='details'?i18n.t('booking.backToTimes'):i18n.t('booking.backToProfile')} onClick={()=>step==='details'?setStep('times'):navigate(`/a/${encodeURIComponent(handle)}?locale=${locale}`)}/><h1>{step==='details'?i18n.t('booking.detailsTitle'):i18n.t('booking.bookWith',{name:artist?.profile.display_name??''})}</h1><PublicLocaleToggle /></header>
     {service&&<Card className="mova-booking__service"><div><small>{selectedLook?i18n.t('booking.fromLook',{look:selectedLook.alt_text}):i18n.t('booking.selectedServices')}</small><strong>{selectedServices.map(item=>item.name).join(' + ')}</strong><p>{i18n.t('booking.serviceDurationPrice',{duration:selectedPricing?.duration_minutes??selectedServices.reduce((sum,item)=>sum+item.duration_minutes+(item.buffer_minutes??0),0),price:new Intl.NumberFormat(locale,{style:'currency',currency:'USD'}).format((selectedPricing?.price_minor??selectedServices.reduce((sum,item)=>sum+item.base_price_minor,0))/100)})}</p></div><Button type="button" variant="ghost" onClick={()=>setShowServicePicker((value)=>!value)}>{i18n.t('booking.addAnotherService')}</Button></Card>}
     {showServicePicker&&<fieldset className="mova-booking__consents"><legend>{i18n.t('booking.chooseServices')}</legend>{artist?.services.map(item=><label key={item.id}><input type="checkbox" checked={serviceIds.includes(item.id)} disabled={!serviceIds.includes(item.id)&&serviceIds.length>=8} onChange={event=>toggleService(item.id,event.currentTarget.checked)}/><span>{item.name} · {item.duration_minutes} {i18n.t('booking.minutes')}</span></label>)}</fieldset>}
     {serviceDepositUnavailable?<div role="alert" className="mova-booking__deposit-block"><Card><h2>{i18n.t('booking.depositUnavailableTitle')}</h2><p>{i18n.t('booking.depositUnavailable')}</p></Card></div>:step==='times'?<>
@@ -132,7 +150,7 @@ export function BookingRoute() {
       <div className="mova-booking__sticky"><p>{slot&&selectedLocation?i18n.t('booking.selectedSlotSummary',{summary:formatSlot(slot),location:selectedLocation.name}):i18n.t('booking.chooseTime')}</p><Button disabled={!slot||!locationId} onClick={()=>setStep('details')}>{i18n.t('booking.continue')}</Button></div>
     </>:<>
       <Card className="mova-booking__details-summary"><Button type="button" variant="ghost" onClick={()=>setStep('times')}>{i18n.t('booking.change')}</Button><strong>{selectedServices.map(item=>item.name).join(' + ')}{artist?.profile.display_name?` ${i18n.t('booking.withArtist',{name:artist.profile.display_name})}`:''}</strong><p>{slot&&selectedLocation?`${formatSlot(slot)} · ${selectedLocation.name}`:''}</p><strong>{selectedPricing?new Intl.NumberFormat(locale,{style:'currency',currency:'USD'}).format(selectedPricing.price_minor/100):''}</strong><small>{selectedPricing?.deposit_amount_minor?i18n.t('booking.depositSummary',{amount:new Intl.NumberFormat(locale,{style:'currency',currency:'USD'}).format(selectedPricing.deposit_amount_minor/100)}):i18n.t('booking.noDeposit')}</small></Card>
-      {clientProfilesEnabled&&<Card className="mova-booking__signin"><Link to={`/signin?artist=${encodeURIComponent(handle)}&returnTo=${encodeURIComponent(`/a/${handle}/book?service_ids=${encodeURIComponent(serviceIds.join(','))}`)}`} onClick={signIn}>{t('identity.haveProfileSignIn')}</Link></Card>}
+      {clientProfilesEnabled&&<Card className="mova-booking__signin"><Icon name="user" size={28}/><Link to={`/signin?artist=${encodeURIComponent(handle)}&returnTo=${encodeURIComponent(`/a/${handle}/book?service_ids=${encodeURIComponent(serviceIds.join(','))}&locale=${locale}`)}`} onClick={signIn}><strong>{t('identity.haveProfileSignIn')}</strong><small>{t('identity.fillDetailsPrompt')}</small></Link><Icon name="chevron" size={24}/></Card>}
       <section className="mova-booking__details"><h2>{i18n.t('booking.yourDetails')}</h2>{slot?.booking_mode==='request'&&<><p className="mova-booking__request-honesty">{i18n.t('booking.requestNotConfirmed')}</p><label className="mova-field"><span>{i18n.t('booking.anotherTimeOptional')}</span><select value={alternateStartsAt} onChange={(event)=>setAlternateStartsAt(event.target.value)}><option value="">{i18n.t('booking.noAlternate')}</option>{alternateSlots.map((item)=><option key={item.starts_at} value={item.starts_at}>{formatSlot(item)}</option>)}</select></label><TextArea label={i18n.t('booking.noteForStylist')} value={clientNote} onChange={(event)=>setClientNote(event.currentTarget.value.slice(0,1000))}/></>}
         <TextField label={i18n.t('booking.name')} autoComplete="name" value={name} onChange={(event)=>setName(event.target.value)} required/>
         <TextField label={i18n.t('booking.email')} type="email" autoComplete="email" value={email} onChange={(event)=>{setEmail(event.target.value);updateConsentContact('email',Boolean(event.target.value));}}/>
