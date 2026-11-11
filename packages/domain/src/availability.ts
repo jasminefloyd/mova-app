@@ -13,40 +13,59 @@ export type AvailabilityService = { active: boolean; durationMinutes: number; bu
 export type BusyRange = { startsAt: string; endsAt: string };
 export type Slot = { startsAt: string; endsAt: string; localDate: string; localTime: string; timeZone: string; utcOffset: string; bookingMode: 'instant' | 'request' };
 
-const formatter = (timeZone: string) => new Intl.DateTimeFormat('en-CA', {
-  timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
-  second: '2-digit', hourCycle: 'h23', timeZoneName: 'longOffset',
-});
+const formatterCache = new Map<string, Intl.DateTimeFormat>();
+const localDateOffsetsCache = new Map<string, number[]>();
+
+function formatter(timeZone: string) {
+  let value = formatterCache.get(timeZone);
+  if (!value) {
+    value = new Intl.DateTimeFormat('en-CA', {
+      timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+      second: '2-digit', hourCycle: 'h23', timeZoneName: 'longOffset',
+    });
+    if (formatterCache.size >= 128) formatterCache.clear();
+    formatterCache.set(timeZone, value);
+  }
+  return value;
+}
 
 function partsAt(instant: Date, timeZone: string) {
   const parts = Object.fromEntries(formatter(timeZone).formatToParts(instant).map(({ type, value }) => [type, value]));
   return { year: parts.year!, month: parts.month!, day: parts.day!, hour: parts.hour!, minute: parts.minute!, second: parts.second!, offset: parts.timeZoneName! };
 }
 
-function localInstants(date: string, time: string, timeZone: string): Date[] {
+function localInstants(date: string, time: string, timeZone: string): Array<{ instant: Date; offset: string }> {
   const [year, month, day] = date.split('-').map(Number);
   const [hour, minute] = time.split(':').map(Number);
   const target = Date.UTC(year!, month! - 1, day!, hour!, minute!);
-  const offsets = new Set<number>();
-  for (let delta = -36; delta <= 36; delta += 3) {
-    const sample = new Date(target + delta * 60 * 60 * 1000);
-    const p = partsAt(sample, timeZone);
-    offsets.add(Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day), Number(p.hour), Number(p.minute), Number(p.second)) - sample.getTime());
+  const cacheKey = `${timeZone}:${date}`;
+  let offsets = localDateOffsetsCache.get(cacheKey);
+  if (!offsets) {
+    const found = new Set<number>();
+    // A local date can contain a daylight-saving transition. Sample its full
+    // surrounding window once per date/time zone, rather than once per slot.
+    const dayAnchor = Date.UTC(year!, month! - 1, day!, 12);
+    for (let delta = -36; delta <= 36; delta += 3) {
+      const sample = new Date(dayAnchor + delta * 60 * 60 * 1000);
+      const p = partsAt(sample, timeZone);
+      found.add(Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day), Number(p.hour), Number(p.minute), Number(p.second)) - sample.getTime());
+    }
+    offsets = [...found];
+    if (localDateOffsetsCache.size >= 512) localDateOffsetsCache.clear();
+    localDateOffsetsCache.set(cacheKey, offsets);
   }
-  return [...offsets].map((offset) => new Date(target - offset)).filter((candidate) => {
-    const p = partsAt(candidate, timeZone);
-    return p.year === String(year).padStart(4, '0') && p.month === String(month).padStart(2, '0') && p.day === String(day).padStart(2, '0') && p.hour === String(hour).padStart(2, '0') && p.minute === String(minute).padStart(2, '0');
-  }).sort((a, b) => a.getTime() - b.getTime());
+  return offsets.flatMap((offset) => {
+    const instant = new Date(target - offset);
+    const parts = partsAt(instant, timeZone);
+    const matches = parts.year === String(year).padStart(4, '0') && parts.month === String(month).padStart(2, '0') && parts.day === String(day).padStart(2, '0') && parts.hour === String(hour).padStart(2, '0') && parts.minute === String(minute).padStart(2, '0');
+    return matches ? [{ instant, offset: parts.offset }] : [];
+  }).sort((a, b) => a.instant.getTime() - b.instant.getTime());
 }
 
 function addDays(date: string, count: number) {
   const value = new Date(`${date}T12:00:00Z`);
   value.setUTCDate(value.getUTCDate() + count);
   return value.toISOString().slice(0, 10);
-}
-
-function offsetAt(date: Date, timeZone: string) {
-  return partsAt(date, timeZone).offset.replace('GMT', 'UTC');
 }
 
 export function searchAvailability(input: {
@@ -90,11 +109,12 @@ export function searchAvailability(input: {
         const startDate = minute >= 1440 ? addDays(date, 1) : date;
         const minuteOfDay = minute % 1440;
         const time = `${String(Math.floor(minuteOfDay / 60)).padStart(2, '0')}:${String(minuteOfDay % 60).padStart(2, '0')}`;
-        for (const start of localInstants(startDate, time, location.timeZone)) {
+        for (const local of localInstants(startDate, time, location.timeZone)) {
+          const start = local.instant;
           const end = new Date(start.getTime() + duration * 60_000);
           if (start.getTime() < earliest || start.getTime() > latest) continue;
           if (blocked.some(([a, b]) => start.getTime() < b && end.getTime() > a)) continue;
-          output.push({ startsAt: start.toISOString(), endsAt: end.toISOString(), localDate: startDate, localTime: time, timeZone: location.timeZone, utcOffset: offsetAt(start, location.timeZone), bookingMode: location.bookingMode });
+          output.push({ startsAt: start.toISOString(), endsAt: end.toISOString(), localDate: startDate, localTime: time, timeZone: location.timeZone, utcOffset: local.offset.replace('GMT', 'UTC'), bookingMode: location.bookingMode });
         }
       }
     }
