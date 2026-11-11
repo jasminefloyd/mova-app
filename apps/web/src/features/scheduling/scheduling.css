@@ -170,7 +170,7 @@
 /* New client, appointment and block time are full-height mobile-first editing screens. */
 .mova-page.mova-scheduling--screen { position: fixed; z-index: 61; top: 0; bottom: 0; left: 50%; width: min(100%,780px); height: 100dvh; min-height: 100dvh; overflow-y: auto; overscroll-behavior: contain; margin: 0; padding: calc(var(--space-4) + env(safe-area-inset-top)) var(--gutter) calc(112px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--surface-page); }
 .mova-scheduling--screen .mova-screen-header { display: grid; grid-template-columns: 44px minmax(0,1fr) 88px; align-items: center; min-height: 48px; margin-bottom: var(--space-4); }
-.mova-scheduling--screen .mova-screen-header > strong { justify-self: center; color: var(--forest); font: 700 var(--fs-display-s)/1.2 var(--font-display); text-align: center; }
+.mova-scheduling--screen .mova-screen-header__title { justify-self: center; color: var(--forest); font: 700 var(--fs-display-s)/1.2 var(--font-display); text-align: center; }
 .mova-scheduling--screen .mova-screen-header__trailing { justify-self: end; }
 .mova-scheduling__header-action { display: inline-flex; min-height: 44px; align-items: center; border: 1px solid var(--line-control); border-radius: var(--radius-pill); padding: 0 var(--space-3); background: var(--surface); color: var(--forest); font-weight: 700; text-decoration: none; }
 .mova-scheduling--screen .mova-scheduling__form { gap: var(--space-4); }

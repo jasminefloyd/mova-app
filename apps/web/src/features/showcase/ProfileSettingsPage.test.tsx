@@ -51,7 +51,7 @@ describe('profile settings edit', () => {
     mocks.profile.current = { display_name: 'Nia Flores', bio: 'Color specialist', specialties: ['Color'], handle: 'nia-flores', preferred_locale: 'en-US', profile_photo_path: null, cover_photo_path: null };
     mocks.maybeSingle.mockImplementation(async () => ({ data: mocks.profile.current, error: null }));
     mocks.order.mockResolvedValue({ data: [], error: null });
-    mocks.eq.mockReturnValue({ maybeSingle: mocks.maybeSingle, order: mocks.order });
+    mocks.eq.mockReturnValue({ eq: mocks.eq, maybeSingle: mocks.maybeSingle, order: mocks.order });
     mocks.select.mockReturnValue({ eq: mocks.eq });
     mocks.from.mockReturnValue({ select: mocks.select });
     mocks.createSignedUrl.mockImplementation(async (path: string) => ({ data: { signedUrl: `https://images.mova.invalid/${path}` }, error: null }));

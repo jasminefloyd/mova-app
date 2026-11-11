@@ -116,7 +116,7 @@ export function NewAppointmentPage() {
   const closeTo = `${operatorUrl(businessId, 'calendar')}${draft.date ? `?day=${encodeURIComponent(draft.date)}` : ''}`;
 
   return <main className="mova-page mova-scheduling mova-scheduling--screen mova-scheduling--appointment">
-    <ScreenHeader title={t('scheduling.appt.title')} onBack={() => navigate(closeTo)} backLabel={t('scheduling.appt.close')} leadingIcon="close" />
+    <ScreenHeader title={t('scheduling.appt.title')} titleAsHeading onBack={() => navigate(closeTo)} backLabel={t('scheduling.appt.close')} leadingIcon="close" />
     <form className="mova-scheduling__form mova-scheduling__form--appointment" onSubmit={(event) => void submit(event)} noValidate>
       <label className="mova-field"><span className="mova-field__label">{t('scheduling.appt.client')}</span>
         {selectedClient && !choosingClient ? <span className="mova-scheduling__selected-client">

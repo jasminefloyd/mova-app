@@ -16,11 +16,12 @@ async function fulfillJson(route: Route, value: unknown, headers: Record<string,
   });
 }
 
-export async function openOperatorPage(page: Page, pathname: string, businessDisplayId = 'BID-1') {
+export async function openOperatorPage(page: Page, pathname: string, businessDisplayId = 'BID-1', clockTime?: Date) {
   const supabaseUrl = projectEnv('VITE_SUPABASE_URL');
   const anonKey = projectEnv('VITE_SUPABASE_ANON_KEY');
   if (!supabaseUrl || !anonKey) throw new Error('Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in the process environment before running operator Playwright checks.');
   const projectRef = new URL(supabaseUrl).hostname.split('.')[0];
+  if (clockTime) await page.clock.install({ time: clockTime });
   const storageKey = `sb-${projectRef}-auth-token`;
   const user = { id: userId, aud: 'authenticated', role: 'authenticated', email: 'playwright@mova.invalid', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: {}, created_at: '2026-01-01T00:00:00.000Z' };
   await page.addInitScript(({ key, testUser }) => {
@@ -39,12 +40,12 @@ export async function openOperatorPage(page: Page, pathname: string, businessDis
     if (table === 'mova_artist_businesses') return fulfillJson(route, accept.includes('vnd.pgrst.object') ? { id: businessId, business_number: 1 } : [{ id: businessId, business_number: 1 }]);
     if (table === 'mova_artist_memberships') return fulfillJson(route, accept.includes('vnd.pgrst.object') ? { artist_business_id: businessId } : [{ artist_business_id: businessId }]);
     if (table === 'mova_appointments') {
-      const now = Date.now();
+      const now = clockTime?.getTime() ?? Date.now();
       const current = { id: 'e2500000-0000-4000-8000-000000000061', appointment_number: 1, client_id: null, status: 'confirmed', starts_at: new Date(now + 30 * 60_000).toISOString(), ends_at: new Date(now + 90 * 60_000).toISOString(), service_id: 'e2500000-0000-4000-8000-000000000062', service_name_snapshot: 'Hydration treatment', client_name: 'Jordan Lee', client_locale: 'en-US', deposit_due_minor: 0, service_price_minor: 9500, balance_due_minor: 9500, location_id: 'e2500000-0000-4000-8000-000000000050', booking_mode: 'instant', payment_collector: 'stylist', reschedule_requested_starts_at: null, reschedule_requested_ends_at: null };
       const next = { client_name: 'Taylor Morgan', service_name_snapshot: 'Protective style', starts_at: new Date(now + 150 * 60_000).toISOString(), location_id: 'e2500000-0000-4000-8000-000000000050' };
       const selection = url.searchParams.get('select');
       const request = { id: 'e2500000-0000-4000-8000-000000000065', appointment_number: 16, location_id: 'e2500000-0000-4000-8000-000000000050', service_name_snapshot: 'Silk Press', client_name: 'Jordan Lee', status: 'pending_artist', starts_at: new Date(now + 4 * 60 * 60_000).toISOString(), ends_at: new Date(now + 5 * 60 * 60_000).toISOString(), request_expires_at: new Date(now + 24 * 60 * 60_000).toISOString() };
-      const result = selection === '*' ? current : selection === 'client_name,service_name_snapshot,starts_at,location_id' ? next : selection?.includes('request_expires_at') ? [request] : [];
+      const result = selection === '*' ? (url.searchParams.has('appointment_number') ? current : []) : selection === 'client_name,service_name_snapshot,starts_at,location_id' ? next : selection?.includes('request_expires_at') ? [request] : [];
       return fulfillJson(route, result, { 'Content-Range': '0-0/1' });
     }
     if (table === 'mova_locations') {

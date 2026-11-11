@@ -37,6 +37,6 @@ describe('public artist server rendering', () => {
     const html = renderPublicPage('/a/nia-flores?locale=es-US&tab=services');
     expect(html).toContain('lang="es-US"');
     expect(html).toContain('Servicios');
-    expect(html).toContain('Color specialist');
+    expect(html).toContain('Signature color');
   });
 });

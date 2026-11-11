@@ -52,7 +52,13 @@ export type GuideRow = {
   reading_minutes: number | null;
   author_name: string;
   body: unknown;
-  seo: unknown;
+  meta_title: string | null;
+  meta_description: string | null;
+  canonical_url: string | null;
+  og_title: string | null;
+  og_description: string | null;
+  og_image_url: string | null;
+  noindex: boolean | null;
   updated_at: string;
 };
 
@@ -228,15 +234,14 @@ function nonEmpty(value: unknown): string | null {
 }
 
 export function toSeo(row: GuideRow): Seo {
-  const raw = row.seo && typeof row.seo === 'object' ? row.seo as Record<string, unknown> : {};
   return {
-    meta_title: nonEmpty(raw.meta_title) ?? row.title,
-    meta_description: nonEmpty(raw.meta_description) ?? row.summary,
-    canonical_url: safeHref(raw.canonical_url) ?? null,
-    og_title: nonEmpty(raw.og_title),
-    og_description: nonEmpty(raw.og_description),
-    og_image_url: safeHref(raw.og_image_url) ?? null,
-    noindex: raw.noindex === true,
+    meta_title: nonEmpty(row.meta_title) ?? row.title,
+    meta_description: nonEmpty(row.meta_description) ?? row.summary,
+    canonical_url: safeHref(row.canonical_url) ?? null,
+    og_title: nonEmpty(row.og_title),
+    og_description: nonEmpty(row.og_description),
+    og_image_url: safeHref(row.og_image_url) ?? null,
+    noindex: row.noindex === true,
   };
 }
 

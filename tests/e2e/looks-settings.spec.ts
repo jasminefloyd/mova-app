@@ -58,8 +58,11 @@ test('TC-LOOKS-16D-02 reorder, link, hide and delete persist', async ({ page }) 
   const cards = page.getByTestId('look-card');
   await cards.nth(0).getByRole('button', { name: 'Move Silk press down' }).click();
   await expect.poll(() => writes.find((w) => w.kind === 'mova_reorder_portfolio_items')?.body).toMatchObject({ p_item_ids: [id(2), id(1)] });
+  // Wait for React to apply the new list order before using the position-based card locator again.
+  await expect(cards.nth(0)).toContainText('Not linked to a service');
 
   await cards.nth(0).locator('.mova-looks__summary-button').click();
+  await expect(cards.nth(0).locator('.mova-looks__summary-button')).toHaveAttribute('aria-expanded', 'true');
   await cards.nth(0).getByRole('button', { name: 'Knotless braids' }).click();
   await expect.poll(() => writes.find((w) => w.kind === 'mova_set_portfolio_service_links')?.body).toMatchObject({ p_portfolio_item_id: id(2), p_service_ids: [id(11)] });
   await expect(cards.nth(0)).toContainText('Book this look → Knotless braids');

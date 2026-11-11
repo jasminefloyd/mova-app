@@ -34,13 +34,13 @@ const clientsList = [{ id: clientId, client_number: 7, display_name: 'Simone A.'
 test('TC-SCR-08B-01 the Calendar + opens the add choice sheet with three choices and Cancel', async ({ page }) => {
   await openOperatorPage(page, '/calendar');
   await page.getByRole('button', { name: 'New appointment' }).click();
-  await expect(page).toHaveURL(/\/BID-1\/calendar\/add$/);
+  await expect(page).toHaveURL(/\/BID-1\/calendar\/add\?day=\d{4}-\d{2}-\d{2}$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Add to your calendar' })).toBeVisible();
-  await expect(page.getByRole('link', { name: /New appointment.*Book a client into a time/ })).toHaveAttribute('href', '/BID-1/calendar/new-appointment');
-  await expect(page.getByRole('link', { name: /New client.*Add someone to your client list/ })).toHaveAttribute('href', '/BID-1/clients/new');
-  await expect(page.getByRole('link', { name: /Block time.*Personal break, holiday or time off/ })).toHaveAttribute('href', '/BID-1/calendar/block-time');
+  await expect(page.getByRole('link', { name: /New appointment.*Book a client into a time/ })).toHaveAttribute('href', /\/BID-1\/calendar\/new-appointment\?day=\d{4}-\d{2}-\d{2}$/);
+  await expect(page.getByRole('link', { name: /New client.*Add someone to your client list/ })).toHaveAttribute('href', /\/BID-1\/clients\/new\?return=calendar&day=\d{4}-\d{2}-\d{2}$/);
+  await expect(page.getByRole('link', { name: /Block time.*Personal break, holiday or time off/ })).toHaveAttribute('href', /\/BID-1\/calendar\/block-time\?day=\d{4}-\d{2}-\d{2}$/);
   await page.getByRole('link', { name: 'Cancel' }).click();
-  await expect(page).toHaveURL(/\/BID-1\/calendar$/);
+  await expect(page).toHaveURL(/\/BID-1\/calendar(?:\?day=\d{4}-\d{2}-\d{2})?$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
 
@@ -64,7 +64,7 @@ test('TC-SCR-08D-01 New client starts with both consent boxes unticked and recor
   await page.getByRole('button', { name: 'Save client' }).click();
 
   await expect(page).toHaveURL(/\/BID-1\/clients\/CID-7$/);
-  expect(sent.filter((item) => item.url.endsWith('/client-crud')).map((item) => item.body)).toEqual([
+  expect(sent.filter((item) => item.url.endsWith('/client-crud')).map((item) => item.body).filter((body) => (body as { action?: string }).action === 'create')).toEqual([
     expect.objectContaining({ action: 'create', display_name: 'Simone A.', phone: '(555) 555-0100', email: '' }),
   ]);
   expect(sent.filter((item) => item.url.endsWith('/client-consents')).map((item) => item.body)).toEqual([
@@ -89,7 +89,7 @@ test('TC-SCR-08C-01 New appointment books a known client into a free time', asyn
   await rows(page, 'mova_services', services);
   await rows(page, 'mova_service_locations', serviceLinks);
   await page.route('**/rest/v1/mova_appointments*', (route) => {
-    if (route.request().url().includes('appointment_number')) return route.fulfill({ status: 200, contentType: 'application/json', headers: { ...cors, 'Content-Range': '0-0/1' }, body: JSON.stringify({ appointment_number: 21 }) });
+    if (new URL(route.request().url()).searchParams.get('select') === 'appointment_number') return route.fulfill({ status: 200, contentType: 'application/json', headers: { ...cors, 'Content-Range': '0-0/1' }, body: JSON.stringify({ appointment_number: 21 }) });
     return route.fallback();
   });
   await functionMock(page, 'client-crud', () => clientsList, sent);
@@ -97,7 +97,7 @@ test('TC-SCR-08C-01 New appointment books a known client into a free time', asyn
   await page.goto(`/BID-1/calendar/new-appointment?client=${clientId}`);
 
   await expect(page.getByRole('heading', { level: 1, name: 'New appointment' })).toBeVisible();
-  await expect(page.getByLabel('Client')).toHaveValue(clientId);
+  await expect(page.getByText('Simone A.', { exact: true })).toBeVisible();
   await page.getByLabel('Service').selectOption({ label: 'Silk press · 90 min · $150' });
   await expect(page.getByRole('status').filter({ hasText: 'is free' })).toBeVisible();
   await page.getByRole('button', { name: 'Book appointment' }).click();

@@ -72,7 +72,7 @@ test('payment settings is reachable from Settings and Money is reachable from Re
 });
 
 test('running-late sheet identifies the same-day appointment receiving the queued update', async ({ page }) => {
-  await openOperatorPage(page, '/appointments/AID-1');
+  await openOperatorPage(page, '/appointments/AID-1', 'BID-1', new Date('2026-11-10T14:00:00.000Z'));
   await page.getByRole('button', { name: 'Running late' }).click();
   await expect(page.getByRole('dialog')).toContainText('Next client: Taylor Morgan');
   await expect(page.getByRole('dialog')).toContainText('Protective style');

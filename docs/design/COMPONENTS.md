@@ -166,7 +166,7 @@ Bottom, above the tab bar, `--surface-inverse` with ivory text, 4 s, `role="stat
 
 ### TabBar
 - Height 82 including the safe area, `--surface`, top border 1px `--line-bar`, padding 8 6 22.
-- Five items, each a 22 px icon over an 11 px label: **Home, Calendar, Clients, AI Revenue, Reports** (D-15). "AI Revenue" comes from a single i18n key.
+- Five items, each a 22 px icon over an 11 px label: **Home, Calendar, Clients, Reviews, Reports**. AI Revenue is opened from the subtle chart action in the Home header, next to the profile image.
 - Active item: mint pill 52 × 30 radius 15 behind the icon, label `--forest` 700, `aria-current="page"`. Inactive: `--ink-tab-inactive` 600.
 - Only shown on the five tab roots.
 

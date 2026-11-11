@@ -8,7 +8,7 @@ import {
 // Public, read-only guides for the website Guides pages. No JWT. Schema and writes belong to the admin stream
 // (GUIDES-CONTRACT.md). Only published rows whose published_at has passed are ever returned.
 const TABLE = 'mova_blog_posts';
-const LIST_COLUMNS = 'slug,title,summary,category,tags,cover_url,cover_alt,status,published_at,reading_minutes,author_name,body,seo,updated_at';
+const LIST_COLUMNS = 'slug,title,summary,category,tags,cover_url,cover_alt,status,published_at,reading_minutes,author_name,body,meta_title,meta_description,canonical_url,og_title,og_description,og_image_url,noindex,updated_at';
 const publicCorsHeaders = { ...corsHeaders, 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
 
 function respond(data: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {

@@ -182,8 +182,8 @@ export function HonestyBanner({ children, tone = 'inverse' }: PropsWithChildren<
   return <aside className={`mova-honesty mova-honesty--${tone}`}><Icon name="info" size={18} /><p>{children}</p></aside>;
 }
 
-export function ScreenHeader({ title, onBack, backLabel = 'Back', leadingIcon = 'back', trailing }: { title?: string; onBack?: () => void; backLabel?: string; leadingIcon?: IconName; trailing?: ReactNode }) {
-  return <header className="mova-screen-header">{onBack ? <IconButton label={backLabel} icon={leadingIcon} onClick={onBack} /> : <span className="mova-screen-header__spacer" />}{title && <strong>{title}</strong>}<span className="mova-screen-header__trailing">{trailing}</span></header>;
+export function ScreenHeader({ title, titleAsHeading = false, onBack, backLabel = 'Back', leadingIcon = 'back', trailing }: { title?: string; titleAsHeading?: boolean; onBack?: () => void; backLabel?: string; leadingIcon?: IconName; trailing?: ReactNode }) {
+  return <header className="mova-screen-header">{onBack ? <IconButton label={backLabel} icon={leadingIcon} onClick={onBack} /> : <span className="mova-screen-header__spacer" />}{title && (titleAsHeading ? <h1 className="mova-screen-header__title">{title}</h1> : <strong>{title}</strong>)}<span className="mova-screen-header__trailing">{trailing}</span></header>;
 }
 
 export function Sheet({ open, title, closeLabel = 'Close', onClose, children }: PropsWithChildren<{ open: boolean; title: string; closeLabel?: string; onClose: () => void }>) {

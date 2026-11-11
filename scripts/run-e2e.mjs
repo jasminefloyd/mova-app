@@ -2,6 +2,10 @@ import { spawn } from 'node:child_process';
 
 const env = {
   ...process.env,
+  // Keep all server-side SSR calls on the local stand-in even when the developer env has production keys.
+  SUPABASE_SERVICE_ROLE_KEY: 'local-test-placeholder',
+  SUPABASE_URL: 'http://127.0.0.1:54321',
+  SUPABASE_ANON_KEY: 'local-test-placeholder',
   VITE_SUPABASE_URL: 'http://127.0.0.1:54321',
   VITE_SUPABASE_ANON_KEY: 'local-test-placeholder',
 };

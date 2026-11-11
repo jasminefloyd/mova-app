@@ -22,7 +22,7 @@ function row(overrides: Partial<GuideRow> & { slug: string }): GuideRow {
     reading_minutes: 4,
     author_name: 'Jasmine',
     body: [],
-    seo: null,
+    meta_title: '', meta_description: '', canonical_url: null, og_title: '', og_description: '', og_image_url: null, noindex: false,
     updated_at: '2026-10-02T10:00:00Z',
     ...overrides,
   };
@@ -127,7 +127,7 @@ Deno.test('GUIDES-PUB-08 body keeps only contract block shapes and drops anythin
 });
 
 Deno.test('GUIDES-PUB-09 SEO fields fall back to title and summary when empty', () => {
-  const full = toFull(row({ slug: 'seo', seo: { meta_title: '  ', meta_description: '', canonical_url: 'javascript:x', noindex: true, og_image_url: 'https://cdn.example/x.jpg' } }));
+  const full = toFull(row({ slug: 'seo', meta_title: '  ', meta_description: '', canonical_url: 'javascript:x', noindex: true, og_image_url: 'https://cdn.example/x.jpg' }));
   same(full.seo, {
     meta_title: 'Title seo', meta_description: 'Summary seo', canonical_url: null, og_title: null, og_description: null,
     og_image_url: 'https://cdn.example/x.jpg', noindex: true,
