@@ -56,7 +56,7 @@
       "permanent": false
     },
     {
-      "source": "/:path((?!admin(?:/|$)|assets/|api/|icons/|favicon|robots\\.txt|sitemap\\.xml).+)",
+      "source": "/:path((?!admin(?:/|$)|assets/|api/|icons/|favicon|__manifest|manifest\\.webmanifest|robots\\.txt|sitemap\\.xml).+)",
       "has": [
         {
           "type": "host",
