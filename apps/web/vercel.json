@@ -21,7 +21,7 @@
       "schedule": "17 5 * * *"
     }
   ],
-  "rewrites": [
+  "redirects": [
     {
       "source": "/admin/__manifest",
       "has": [
@@ -30,7 +30,8 @@
           "value": "admin.mova-beauty.co"
         }
       ],
-      "destination": "/__manifest"
+      "destination": "/__manifest",
+      "permanent": false
     },
     {
       "source": "/admin/manifest.webmanifest",
@@ -40,10 +41,9 @@
           "value": "admin.mova-beauty.co"
         }
       ],
-      "destination": "/manifest.webmanifest"
-    }
-  ],
-  "redirects": [
+      "destination": "/manifest.webmanifest",
+      "permanent": false
+    },
     {
       "source": "/",
       "has": [
