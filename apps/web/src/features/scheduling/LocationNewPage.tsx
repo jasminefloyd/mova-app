@@ -8,11 +8,17 @@ import { callFunction, errorCode } from './api';
 import { BOOK_AHEAD_WEEK_OPTIONS, BUFFER_MINUTE_OPTIONS, LOCATION_KINDS, NOTICE_HOUR_OPTIONS, locationSavePayload, newLocationDefaults, validateNewLocation, type LocationKind, type NewLocationDraft, type NewLocationField } from './rules';
 import './scheduling.css';
 
+// Friendly zone name, e.g. "Eastern Time". Falls back to the zone id.
+function zoneName(timeZone: string, locale: string) {
+  try { return new Intl.DateTimeFormat(locale, { timeZone, timeZoneName: 'longGeneric' }).formatToParts(new Date()).find((part) => part.type === 'timeZoneName')?.value ?? timeZone; } catch { return timeZone; }
+}
+
 // Board 19a: Create new location. Saves through the existing location-save function.
 export function LocationNewPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
+  const [zoneOpen, setZoneOpen] = useState(false);
   const [draft, setDraft] = useState<NewLocationDraft>(() => newLocationDefaults(Intl.DateTimeFormat().resolvedOptions().timeZone));
   const [differentHours, setDifferentHours] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<NewLocationField, true>>>({});
@@ -97,14 +103,15 @@ export function LocationNewPage() {
 
       <TextField label={t('scheduling.locationNew.name')} placeholder={t('scheduling.locationNew.namePlaceholder')} maxLength={120} value={draft.name} error={fieldError('name')} onChange={(event) => update('name', event.target.value)} />
       <div className="mova-location-new__address"><Icon name="location" size={20} /><TextField label={t('scheduling.locationNew.address')} placeholder={t('scheduling.locationNew.addressPlaceholder')} hint={t('scheduling.locationNew.addressHint')} autoComplete="street-address" maxLength={300} value={draft.address} error={fieldError('address')} onChange={(event) => update('address', event.target.value)} /></div>
-      <label className="mova-field"><span className="mova-field__label">{t('scheduling.locationNew.timeZone')}</span>
+      {!zoneOpen && <p className="mova-location-new__zone"><Icon name="clock" size={16} /><span>{t('scheduling.locationNew.timeZoneLine', { zone: zoneName(draft.timeZone, i18n.language) })}</span><button type="button" className="mova-scheduling__inline-link" onClick={() => setZoneOpen(true)}>{t('scheduling.locationNew.timeZoneChange')}</button></p>}
+      {(zoneOpen || errors.timeZone) && <label className="mova-field"><span className="mova-field__label">{t('scheduling.locationNew.timeZone')}</span>
         <select className="mova-input" value={draft.timeZone} aria-invalid={Boolean(errors.timeZone)} onChange={(event) => update('timeZone', event.target.value)}>
           {!zones.includes(draft.timeZone) && draft.timeZone && <option value={draft.timeZone}>{draft.timeZone}</option>}
           {zones.map((zone) => <option key={zone} value={zone}>{zone}</option>)}
         </select>
         <span className="mova-field__hint">{t('scheduling.locationNew.timeZoneHint')}</span>
         {errors.timeZone && <span className="mova-field__error" role="alert">{fieldError('timeZone')}</span>}
-      </label>
+      </label>}
 
       <fieldset className="mova-choice-fieldset">
         <legend>{t('scheduling.locationNew.modeLegend')}</legend>

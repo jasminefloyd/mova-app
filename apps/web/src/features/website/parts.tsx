@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 
 /** Small line icons from the boards. Decorative unless a label is given. */
 export function Check({ size = 20 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#264E3E" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>;
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="var(--botanical)" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>;
 }
 
 export function Bullets({ items }: { items: string[] }) {

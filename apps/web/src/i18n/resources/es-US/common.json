@@ -778,6 +778,8 @@
       "addressHint": "Las clientas ven la dirección completa solo después de reservar. El número de suite o unidad va en su propia línea.",
       "timeZone": "Zona horaria",
       "timeZoneHint": "Las clientas ven las horas de reserva en esta zona.",
+      "timeZoneLine": "Zona horaria: {{zone}}",
+      "timeZoneChange": "Cambiar",
       "modeLegend": "¿Cómo reservan aquí las clientas?",
       "collectorLegend": "¿Quién cobra aquí?",
       "hoursLegend": "Días y horario",
@@ -1652,7 +1654,7 @@
     "save": "Guardar ubicación",
     "cancel": "Cancelar",
     "types": {
-      "suite": "Suite",
+      "suite": "Renta de suite",
       "booth": "Silla o espacio",
       "commission_salon": "Salón con comisión",
       "mobile": "A domicilio o móvil"

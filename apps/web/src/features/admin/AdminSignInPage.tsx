@@ -103,7 +103,7 @@ export default function AdminSignInPage() {
   }
 
   return (
-    <div className="adm-signin">
+    <div className="adm adm-signin">
       <div className="adm-signin-wrap">
         <div className="adm-signin-brand"><b>mova</b><span className="pill">Admin</span></div>
         {step === 'password' ? (

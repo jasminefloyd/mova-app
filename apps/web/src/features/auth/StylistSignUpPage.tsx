@@ -8,7 +8,7 @@ import type { ReactNode } from 'react';
 import './stylist-auth.css';
 
 function FeatureIcon({ children }: { children: ReactNode }) {
-  return <span className="stylist-auth__feature-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9E6D4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{children}</svg></span>;
+  return <span className="stylist-auth__feature-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{children}</svg></span>;
 }
 
 /** W8 · /signup: stylist sign-up. Anyone can create an account; there is no invite or waitlist step. */
@@ -54,10 +54,10 @@ export default function StylistSignUpPage() {
     <div className="stylist-auth__split">
       <section className="stylist-auth__pitch" aria-labelledby="stylist-signup-why">
         <svg className="stylist-auth__leaf" aria-hidden="true" width="260" height="280" viewBox="0 0 210 230" fill="none">
-          <path d="M150 220C150 140 120 80 60 30" stroke="#264E3E" strokeWidth="2" />
-          <path d="M128 150C90 150 62 128 52 92C88 92 116 112 128 150Z" fill="#264E3E" />
-          <path d="M140 110C150 74 176 52 206 48C204 84 180 106 140 110Z" fill="#264E3E" />
-          <circle cx="176" cy="160" r="8" fill="#E7C3AA" />
+          <path d="M150 220C150 140 120 80 60 30" stroke="var(--botanical)" strokeWidth="2" />
+          <path d="M128 150C90 150 62 128 52 92C88 92 116 112 128 150Z" fill="var(--botanical)" />
+          <path d="M140 110C150 74 176 52 206 48C204 84 180 106 140 110Z" fill="var(--botanical)" />
+          <circle cx="176" cy="160" r="8" fill="var(--peach)" />
         </svg>
         <div className="stylist-auth__pitch-copy">
           <span className="stylist-auth__pill">{t('stylistAuth.signUp.forIndependent')}</span>

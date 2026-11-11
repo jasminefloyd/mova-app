@@ -44,11 +44,13 @@ export default function AdminLayout() {
     return <Navigate to={`/admin/signin?returnTo=${returnTo}${idle ? '&reason=idle' : ''}`} replace />;
   }
   return (
-    <div className="adm shell">
-      <AdminNav name={session.data.displayName} />
-      <main className="main">
-        <Outlet />
-      </main>
+    <div className="adm">
+      <div className="shell">
+        <AdminNav name={session.data.displayName} />
+        <main className="main">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

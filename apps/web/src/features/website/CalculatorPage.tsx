@@ -61,11 +61,11 @@ export default function CalculatorPage() {
           <h2>{t('website.calculator.resultsTitle')}</h2>
           <div className="mova-site__meter-row">
             <div className="mova-site__meter-head"><span>{t('website.calculator.resultCommission')}</span><strong>{ok ? formatDollars(ok.commission, locale) : '—'}</strong></div>
-            <div className="mova-site__meter" aria-hidden="true"><div style={{ width: `${ok ? ok.commissionBar : 0}%`, background: '#C9E6D4' }} /></div>
+            <div className="mova-site__meter" aria-hidden="true"><div style={{ width: `${ok ? ok.commissionBar : 0}%`, background: 'var(--mint)' }} /></div>
           </div>
           <div className="mova-site__meter-row">
             <div className="mova-site__meter-head"><span>{t('website.calculator.resultBooth')}</span><strong>{ok ? formatDollars(ok.booth, locale) : '—'}</strong></div>
-            <div className="mova-site__meter" aria-hidden="true"><div style={{ width: `${ok ? ok.boothBar : 0}%`, background: '#E7C3AA' }} /></div>
+            <div className="mova-site__meter" aria-hidden="true"><div style={{ width: `${ok ? ok.boothBar : 0}%`, background: 'var(--peach)' }} /></div>
           </div>
           <div className="mova-site__verdict">
             <strong>{verdict}</strong>

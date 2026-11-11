@@ -778,6 +778,8 @@
       "addressHint": "Clients see the full address only after they book. Suite or unit number goes on its own line.",
       "timeZone": "Time zone",
       "timeZoneHint": "Clients see booking times in this zone.",
+      "timeZoneLine": "Time zone: {{zone}}",
+      "timeZoneChange": "Change",
       "modeLegend": "How do clients book here?",
       "collectorLegend": "Who collects payment here?",
       "hoursLegend": "Days and hours",
@@ -1652,7 +1654,7 @@
     "save": "Save location",
     "cancel": "Cancel",
     "types": {
-      "suite": "Suite",
+      "suite": "Suite rental",
       "booth": "Booth or chair",
       "commission_salon": "Commission salon",
       "mobile": "Mobile or home"

@@ -4,9 +4,9 @@ import { openOperatorPage } from './operator-session';
 test('operator navigation uses the BID routes and exposes five labelled tabs', async ({ page }) => {
   await openOperatorPage(page, '/');
   const navigation = page.getByRole('navigation', { name: 'Main navigation' });
-  await expect(navigation.getByRole('button')).toHaveText(['Home', 'Calendar', 'Clients', 'AI Revenue', 'Reports']);
+  await expect(navigation.getByRole('button')).toHaveText(['Home', 'Calendar', 'Clients', 'Reviews', 'Reports']);
   await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
-  for (const [label, path] of [['Calendar', 'calendar'], ['Clients', 'clients'], ['AI Revenue', 'growth'], ['Reports', 'reports'], ['Home', '']] as const) {
+  for (const [label, path] of [['Calendar', 'calendar'], ['Clients', 'clients'], ['Reviews', 'reports/reputation'], ['Reports', 'reports'], ['Home', '']] as const) {
     await navigation.getByRole('button', { name: label }).click();
     await expect(page).toHaveURL(new RegExp(`/BID-1/${path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/?$`));
     await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
