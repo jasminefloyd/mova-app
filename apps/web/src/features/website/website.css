@@ -21,7 +21,7 @@
   overflow-wrap: anywhere;
 }
 .mova-site h1, .mova-site h2, .mova-site h3, .mova-site__display { font-family: Manrope, system-ui, sans-serif; }
-.mova-site a { color: inherit; }
+.mova-site a:not(.mova-site__button):not(.mova-site__start) { color: inherit; }
 .mova-site__container { width: min(100% - 40px, 1200px); margin-inline: auto; }
 .mova-site__narrow { width: min(100% - 40px, 880px); margin-inline: auto; }
 .mova-site__section { padding-block: clamp(48px, 7vw, 104px); }
@@ -60,6 +60,36 @@
 .mova-site__hero { display: flex; flex-wrap: wrap; align-items: center; gap: 48px; padding-block: clamp(40px, 6vw, 88px) clamp(48px, 6vw, 96px); }
 .mova-site__hero-copy { flex: 1 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 22px; }
 .mova-site__hero-art { flex: 1 1 420px; min-width: 0; display: flex; justify-content: center; align-items: flex-end; position: relative; min-height: 520px; overflow: hidden; padding: 24px 0; }
+.mova-site__landing-hero { gap: clamp(32px, 5vw, 72px); }
+.mova-site__landing-hero .mova-site__hero-copy { flex-basis: 460px; gap: 18px; }
+.mova-site__landing-fine { margin: 0; font-size: 14px; }
+.mova-site__landing-phones { position: relative; flex: 1 1 430px; min-width: 0; min-height: 560px; display: flex; align-items: center; justify-content: center; }
+.mova-site__landing-phone { width: min(100%, 285px); aspect-ratio: 390 / 844; overflow: hidden; box-sizing: border-box; border: 7px solid var(--site-ink); border-radius: 36px; background: var(--site-bg); box-shadow: 0 28px 56px rgba(24, 57, 47, 0.2); }
+.mova-site__landing-phone img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.mova-site__landing-phones > .mova-site__landing-phone { position: absolute; }
+.mova-site__landing-phone--back { width: min(43%, 245px); top: 5%; right: 7%; transform: rotate(7deg); }
+.mova-site__landing-phone--front { width: min(45%, 260px); left: 8%; bottom: 2%; transform: rotate(-6deg); }
+.mova-site__landing-proof-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px 64px; margin-bottom: 28px; }
+.mova-site__landing-proof-head > .mova-site__h2 { flex: 1 1 500px; }
+.mova-site__landing-stat { flex: 0 1 340px; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.mova-site__landing-stat .mova-site__display { font-size: clamp(52px, 6vw, 76px); font-weight: 800; letter-spacing: -2px; line-height: 1; }
+.mova-site__landing-stat figcaption { color: var(--site-body); font-size: 14px; line-height: 1.45; }
+.mova-site__landing-stat figcaption span { color: var(--site-muted); font-size: 12px; }
+.mova-site__landing-problems { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mova-site__landing-problems .mova-site__card { padding: 24px; }
+.mova-site__landing-section-head { margin-bottom: 28px; }
+.mova-site__landing-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mova-site__landing-features { background: var(--site-mist); border: 0; }
+.mova-site__landing-feature-list { display: flex; flex-direction: column; gap: clamp(48px, 7vw, 88px); }
+.mova-site__landing-feature-list .mova-site__split { gap: 40px 72px; }
+.mova-site__landing-feature-list .mova-site__split-copy { flex-basis: 420px; }
+.mova-site__landing-feature-list .mova-site__split-art { flex-basis: 320px; }
+.mova-site__landing-feature-list .mova-site__split-art .mova-site__landing-phone { width: min(100%, 280px); }
+.mova-site__landing-who > .mova-site__h2 { margin-bottom: 24px; }
+.mova-site__landing-resources > .mova-site__h2 { margin-bottom: 24px; font-size: clamp(26px, 3vw, 36px); }
+.mova-site__landing-cta .mova-site__cta { background: var(--site-sage); }
+.mova-site__landing-cta .mova-site__cta-copy p { color: var(--site-mint); }
+.mova-site__landing-cta .mova-site__button { background: var(--site-peach); color: var(--site-ink); }
 .mova-site__badge { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 6px 12px; border-radius: 16px; background: var(--site-blush); border: 1px dashed #C98F66; font-size: 13px; font-weight: 700; }
 .mova-site__ctas { display: flex; flex-wrap: wrap; gap: 12px; }
 .mova-site__split { display: flex; flex-wrap: wrap; align-items: center; gap: 40px 72px; }
@@ -226,11 +256,11 @@
 /* Footer (W11) */
 .mova-site__footer { background: var(--site-ink); color: var(--site-bg); }
 .mova-site__footer-inner { display: flex; flex-direction: column; gap: 40px; padding-block: 56px 36px; }
-.mova-site__footer-top { display: flex; flex-wrap: wrap; gap: 40px 64px; justify-content: space-between; }
-.mova-site__footer-about { flex: 1 1 260px; max-width: 360px; display: flex; flex-direction: column; gap: 12px; }
+.mova-site__footer-top { display: grid; grid-template-columns: minmax(260px, 1.35fr) repeat(3, minmax(0, 1fr)); gap: 32px; }
+.mova-site__footer-about { max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
 .mova-site__footer-brand { font: 800 30px/1 Manrope, system-ui, sans-serif; letter-spacing: -0.6px; }
 .mova-site__footer-about p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--site-mint); }
-.mova-site__footer-cols { flex: 2 1 420px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr)); gap: 28px; }
+.mova-site__footer-cols { display: contents; }
 .mova-site__footer-col { display: flex; flex-direction: column; gap: 4px; }
 .mova-site__footer-col h2 { margin: 0 0 6px; font-size: 13px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--site-mint); font-family: "DM Sans", system-ui, sans-serif; }
 .mova-site__footer-col a, .mova-site__footer-col span { min-height: 44px; display: flex; align-items: center; color: var(--site-bg); text-decoration: none; font-size: 15px; }
@@ -242,6 +272,18 @@
 /* Phone and small screens. Content reflows; nothing scrolls sideways at 320px. */
 @media (max-width: 720px) {
   .mova-site__hero-art { min-height: 0; justify-content: center; }
+  .mova-site__landing-hero { gap: 28px; padding-block: 32px 48px; }
+  .mova-site__landing-hero .mova-site__hero-copy { flex-basis: 100%; }
+  .mova-site__landing-phones { flex: 0 0 100%; min-height: clamp(340px, 92vw, 480px); }
+  .mova-site__landing-phone { border-width: 5px; border-radius: 30px; }
+  .mova-site__landing-phone--back { right: 12%; top: 3%; width: 39%; }
+  .mova-site__landing-phone--front { left: 12%; bottom: 1%; width: 42%; }
+  .mova-site__landing-problems, .mova-site__landing-steps { grid-template-columns: 1fr; }
+  .mova-site__landing-proof-head { align-items: flex-start; }
+  .mova-site__landing-stat { flex-basis: 100%; }
+  .mova-site__landing-feature-list .mova-site__split-art .mova-site__landing-phone { width: min(72%, 280px); }
+  .mova-site__footer-top { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 24px; }
+  .mova-site__footer-about { grid-column: 1 / -1; }
   .mova-site__featured { grid-template-columns: 1fr; padding: 24px; }
   .mova-site__split--reverse { flex-direction: column; }
   .mova-site__prose { font-size: 17px; }

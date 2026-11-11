@@ -32,7 +32,7 @@ export function WebsiteFooter() {
         </div>
       </div>
       <div className="mova-site__footer-bottom">
-        <span>{t('website.footer.copyright', { year: new Date().getFullYear() })}</span>
+        <span>{t('website.footer.copyright')}</span>
         <PublicLocaleToggle />
       </div>
     </div>
