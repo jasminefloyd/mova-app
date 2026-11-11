@@ -2304,6 +2304,36 @@
       "notFoundTitle": "No encontramos esa guía.",
       "notFoundBody": "Puede que se haya movido o que todavía no esté publicada.",
       "backToGuides": "Volver a las guías"
+    },
+    "seo": {
+      "slogan": "Tu negocio se mueve contigo.",
+      "homeCrumb": "Inicio",
+      "imageAlt": "Mova: tu negocio se mueve contigo",
+      "category": "Software de reservas y gestión de clientas para salones",
+      "audience": "Estilistas independientes, que rentan silla o suite, y estilistas a comisión",
+      "organizationDescription": "Mova crea software de reservas, clientas y pagos para estilistas independientes. Cada estilista conserva una página de reservas, un código QR y una lista de clientas cuando cambia de salón o de suite.",
+      "softwareDescription": "Mova es una app de reservas y clientas para estilistas independientes. Le da a cada estilista una página de reservas y un código QR que funcionan en todos sus lugares de trabajo, notas privadas de clientas, depósitos y enlaces de pago, recordatorios para volver a reservar, ayuda para llenar cancelaciones y un asistente de IA que responde a las clientas en inglés o español.",
+      "home": {
+        "title": "Mova: app de reservas para estilistas independientes",
+        "description": "Una página de reservas, un código QR y una lista de clientas que se mueven contigo entre salones y suites. Gratis para empezar, en inglés y español."
+      },
+      "features": {
+        "title": "Funciones: reservas, clientas, pagos e IA | Mova",
+        "description": "Mira cómo Mova maneja tu página de reservas, tu calendario en varios lugares, notas privadas, pagos, recordatorios y un asistente de IA para estilistas."
+      },
+      "pricing": {
+        "title": "Precios: Gratis, Pro $19 y AI Growth $39 | Mova",
+        "description": "Empieza gratis. Pro cuesta $19 al mes y AI Growth $39 al mes. Mova nunca cobra comisión por el efectivo ni por los pagos que cobra el salón."
+      },
+      "calculator": {
+        "title": "Calculadora: renta de silla o comisión | Mova",
+        "name": "Calculadora de renta de silla o comisión",
+        "description": "Calculadora gratis para estilistas: compara cuánto te queda por semana rentando una silla o a comisión. Sin registro; tus números se quedan en tu navegador."
+      },
+      "guides": {
+        "title": "Guías para estilistas independientes | Mova",
+        "description": "Lecturas prácticas sobre precios, clientas, reservas y el lado de negocio del trabajo independiente en belleza."
+      }
     }
   },
   "privacy": {

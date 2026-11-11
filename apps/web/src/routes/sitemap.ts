@@ -19,11 +19,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const staticPaths = ['/', '/features', '/pricing', '/calculator', '/guides'];
   const staticUrls = staticPaths.map((path) => {
     const loc = `${base}${path}`;
-    return `<url><loc>${esc(loc)}</loc><xhtml:link rel="alternate" hreflang="en-US" href="${esc(`${loc}?locale=en-US`)}"/><xhtml:link rel="alternate" hreflang="es-US" href="${esc(`${loc}?locale=es-US`)}"/></url>`;
+    return `<url><loc>${esc(loc)}</loc><xhtml:link rel="alternate" hreflang="en-US" href="${esc(loc)}"/><xhtml:link rel="alternate" hreflang="es-US" href="${esc(`${loc}?locale=es-US`)}"/><xhtml:link rel="alternate" hreflang="x-default" href="${esc(loc)}"/></url>`;
   });
   const profileUrls = rows.map(({ handle, updated_at }) => {
     const loc = `${base}/a/${encodeURIComponent(handle)}`;
-    return `<url><loc>${esc(loc)}</loc><lastmod>${new Date(updated_at).toISOString()}</lastmod><xhtml:link rel="alternate" hreflang="en-US" href="${esc(`${loc}?locale=en-US`)}"/><xhtml:link rel="alternate" hreflang="es-US" href="${esc(`${loc}?locale=es-US`)}"/></url>`;
+    return `<url><loc>${esc(loc)}</loc><lastmod>${new Date(updated_at).toISOString()}</lastmod><xhtml:link rel="alternate" hreflang="en-US" href="${esc(`${loc}?locale=en-US`)}"/><xhtml:link rel="alternate" hreflang="es-US" href="${esc(`${loc}?locale=es-US`)}"/><xhtml:link rel="alternate" hreflang="x-default" href="${esc(`${loc}?locale=en-US`)}"/></url>`;
   });
   const guideUrls = guides.map(({ slug, published_at }) => `<url><loc>${esc(`${base}/guides/${encodeURIComponent(slug)}`)}</loc><lastmod>${new Date(published_at).toISOString()}</lastmod></url>`);
   const urls = [...staticUrls, ...profileUrls, ...guideUrls].join('');

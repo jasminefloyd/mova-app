@@ -96,6 +96,7 @@ export default [
   ]),
   route('sitemap.xml', '../src/routes/sitemap.ts'),
   route('robots.txt', '../src/routes/robots.ts'),
+  route('llms.txt', '../src/routes/llms.ts'),
   route('api/booking-expiry', '../src/routes/booking-expiry.ts'),
   route('api/job-dispatch', '../src/routes/job-dispatch.ts'),
   route('api/calendar-sync', '../src/routes/calendar-sync.ts'),

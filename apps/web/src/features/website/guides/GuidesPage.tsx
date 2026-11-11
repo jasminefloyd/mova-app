@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { Link, useLoaderData } from 'react-router';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
-import { ButtonLink, Eyebrow } from '../parts';
+import { ButtonLink, Eyebrow, JsonLd, useSiteShell } from '../parts';
+import { breadcrumbLd, guidesListLd, pageMeta, shellFromMatches } from '../seo';
 import { fetchGuidesList } from './guides-api';
 import { formatGuideDate } from './guide-format';
 import type { GuidesListResult, PostSummary } from './guide-types';
@@ -24,9 +25,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 }
 
-export const meta: MetaFunction<typeof loader> = () => [
-  { title: 'Guides | mova' },
-  { name: 'description', content: 'Practical reading on pricing, clients, booking and the business side of independent beauty work.' },
+// Filtered, searched and paged views are the same list in a different order, so only the plain list is indexed.
+export const meta: MetaFunction<typeof loader> = ({ matches, data }) => [
+  ...pageMeta('guides', shellFromMatches(matches)),
+  ...(data && (data.category || data.q || data.cursor) ? [{ name: 'robots', content: 'noindex,follow' }] : []),
 ];
 
 function listHref(category: string | null, cursor: string | null, trail: string[], q = '') {
@@ -41,6 +43,7 @@ function listHref(category: string | null, cursor: string | null, trail: string[
 
 export default function GuidesPage() {
   const { t, i18n } = useTranslation();
+  const shell = useSiteShell();
   const loaded = useLoaderData<typeof loader>();
   const locale = i18n.language === 'es-US' ? 'es-US' : 'en-US';
   const data: GuidesListResult | null = loaded.data;
@@ -56,6 +59,8 @@ export default function GuidesPage() {
   const nextHref = data?.next_cursor ? listHref(loaded.category, data.next_cursor, [...loaded.trail, loaded.cursor ?? FIRST_PAGE], loaded.q) : null;
 
   return <div>
+    {data && <JsonLd data={guidesListLd(shell, posts)} />}
+    <JsonLd data={breadcrumbLd(shell, [[t('website.nav.guides'), '/guides']])} />
     <section className="mova-site__container" aria-labelledby="guides-h" style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBlock: 'clamp(40px, 6vw, 80px) 24px' }}>
       <Eyebrow>{t('website.guides.eyebrow')}</Eyebrow>
       <h1 id="guides-h" className="mova-site__h1" style={{ maxWidth: 820, fontSize: 'clamp(36px, 4.6vw, 56px)' }}>{t('website.guides.headline')}</h1>

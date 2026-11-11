@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { isRouteErrorResponse, Link, useLoaderData, useRouteError } from 'react-router';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
-import { ButtonLink } from '../parts';
+import { ButtonLink, JsonLd, useSiteShell } from '../parts';
+import { articleLd, breadcrumbLd, shellFromMatches, socialMeta } from '../seo';
 import { absoluteUrl, formatGuideDate } from './guide-format';
 import { fetchGuide, GuidesRequestError } from './guides-api';
-import type { PostFull } from './guide-types';
 import { GuideBlocks } from './GuideBlocks';
 
 // W5 Guide article. SEO comes from the server's seo fields (with fallbacks already applied there).
@@ -21,7 +21,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
   }
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
+export const meta: MetaFunction<typeof loader> = ({ data, matches }) => {
   if (!data?.post) return [{ title: 'mova' }];
   const { post, publicBaseUrl } = data;
   // The server already applies these fallbacks; repeating them keeps the tags right if a field arrives empty.
@@ -29,38 +29,27 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const canonical = seo.canonical_url ? absoluteUrl(seo.canonical_url, publicBaseUrl) : `${publicBaseUrl}/guides/${encodeURIComponent(post.slug)}`;
   const image = seo.og_image_url ?? post.cover?.url ?? null;
   return [
-    { title: `${seo.meta_title} | mova` },
-    { name: 'description', content: seo.meta_description },
-    { tagName: 'link', rel: 'canonical', href: canonical },
-    { property: 'og:title', content: seo.og_title ?? seo.meta_title },
-    { property: 'og:description', content: seo.og_description ?? seo.meta_description },
-    { property: 'og:type', content: 'article' },
-    { property: 'og:url', content: canonical },
-    ...(image ? [{ property: 'og:image', content: absoluteUrl(image, publicBaseUrl) }] : []),
+    ...socialMeta({
+      title: `${seo.meta_title} | mova`,
+      description: seo.meta_description,
+      canonical,
+      base: publicBaseUrl,
+      locale: shellFromMatches(matches).locale,
+      type: 'article',
+      image: image ? absoluteUrl(image, publicBaseUrl) : null,
+      ...(post.cover?.alt ? { imageAlt: post.cover.alt } : {}),
+    }).map((tag) => tag.property === 'og:title' ? { ...tag, content: seo.og_title ?? seo.meta_title } : tag.property === 'og:description' ? { ...tag, content: seo.og_description ?? seo.meta_description } : tag),
+    { property: 'article:published_time', content: post.published_at },
+    { property: 'article:modified_time', content: post.updated_at },
+    { name: 'author', content: post.author_name },
     ...(seo.noindex ? [{ name: 'robots', content: 'noindex,follow' }] : []),
   ];
 };
 
-/** Article JSON-LD. "<" is escaped so the content cannot close the script tag. */
-function articleJsonLd(post: PostFull, canonical: string) {
-  const value = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: post.title,
-    description: post.seo.meta_description,
-    datePublished: post.published_at,
-    dateModified: post.updated_at,
-    author: { '@type': 'Person', name: post.author_name },
-    publisher: { '@type': 'Organization', name: 'Mova' },
-    mainEntityOfPage: canonical,
-    ...(post.cover ? { image: post.cover.url } : {}),
-  };
-  return JSON.stringify(value).replace(/</g, '\\u003c');
-}
-
 export default function GuideArticlePage() {
   const { t, i18n } = useTranslation();
   const { post, related, publicBaseUrl } = useLoaderData<typeof loader>();
+  const shell = useSiteShell();
   const locale = i18n.language === 'es-US' ? 'es-US' : 'en-US';
   const canonical = post.seo.canonical_url ? absoluteUrl(post.seo.canonical_url, publicBaseUrl) : `${publicBaseUrl}/guides/${encodeURIComponent(post.slug)}`;
   const date = formatGuideDate(post.published_at, locale);
@@ -107,7 +96,8 @@ export default function GuideArticlePage() {
         </aside>
       </div>
     </div>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: articleJsonLd(post, canonical) }} />
+    <JsonLd data={articleLd(publicBaseUrl, post, canonical, post.cover ? absoluteUrl(post.cover.url, publicBaseUrl) : null)} />
+    <JsonLd data={breadcrumbLd(shell, [[t('website.nav.guides'), '/guides'], [post.title, `/guides/${encodeURIComponent(post.slug)}`]])} />
   </article>;
 }
 

@@ -2304,6 +2304,36 @@
       "notFoundTitle": "We couldn't find that guide.",
       "notFoundBody": "It may have moved, or it isn't published yet.",
       "backToGuides": "Back to guides"
+    },
+    "seo": {
+      "slogan": "Your business moves with you.",
+      "homeCrumb": "Home",
+      "imageAlt": "Mova: your business moves with you",
+      "category": "Salon booking and client management software",
+      "audience": "Independent hairstylists, booth renters, suite owners and commission stylists",
+      "organizationDescription": "Mova makes booking, client and payment software for independent hairstylists. A stylist keeps one booking page, one QR code and one client list as they move between salons and suites.",
+      "softwareDescription": "Mova is a booking and client app for independent hairstylists. It gives each stylist a booking page and QR code that work across every location, private client notes, deposits and pay links, rebooking reminders, help filling cancellations and an AI concierge that answers clients in English or Spanish.",
+      "home": {
+        "title": "Mova: Booking app for independent hairstylists",
+        "description": "One booking page, one QR code and one client list that move with you between salons and suites. Free to start, in English and Spanish."
+      },
+      "features": {
+        "title": "Features: booking, clients, payments and AI tools | Mova",
+        "description": "See how Mova handles your booking page, calendar across locations, private client notes, payments, rebooking reminders and an AI concierge for stylists."
+      },
+      "pricing": {
+        "title": "Pricing: Free, Pro $19 and AI Growth $39 | Mova",
+        "description": "Start free. Pro is $19 a month and AI Growth is $39 a month. Mova never charges a fee on cash or on payments the salon collects."
+      },
+      "calculator": {
+        "title": "Booth rent vs. commission calculator | Mova",
+        "name": "Booth rent vs. commission calculator",
+        "description": "Free calculator for hairstylists: compare your weekly take-home pay on booth rent and on commission. No signup, and your numbers stay in your browser."
+      },
+      "guides": {
+        "title": "Guides for independent stylists | Mova",
+        "description": "Practical reading on pricing, clients, booking and the business side of independent beauty work."
+      }
     }
   },
   "privacy": {

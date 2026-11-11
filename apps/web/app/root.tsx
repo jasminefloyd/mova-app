@@ -1,4 +1,4 @@
-import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from 'react-router';
+import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation, useRouteError } from 'react-router';
 import type { LinksFunction } from 'react-router';
 import stylesheet from '../src/styles.css?url';
 import { AppErrorBoundary } from '../src/app/AppErrorBoundary';
@@ -6,7 +6,9 @@ import { AppErrorBoundary } from '../src/app/AppErrorBoundary';
 export const links: LinksFunction = () => [{ rel: 'stylesheet', href: stylesheet }];
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  return <html lang="en-US">
+  // Public pages take their language from ?locale=, so the document language matches the content that was rendered.
+  const lang = new URLSearchParams(useLocation().search).get('locale') === 'es-US' ? 'es-US' : 'en-US';
+  return <html lang={lang}>
     <head><meta charSet="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       <meta name="theme-color" content="#18392F" /><link rel="manifest" href="/manifest.webmanifest" />
       <link rel="icon" href="/icons/mova-192.svg" type="image/svg+xml" /><Meta /><Links /></head>

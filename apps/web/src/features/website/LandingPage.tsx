@@ -1,6 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { ButtonLink, Check, Eyebrow } from './parts';
+import type { MetaFunction } from 'react-router';
+import { ButtonLink, Check, Eyebrow, JsonLd, useSiteShell } from './parts';
+import { pageMeta, shellFromMatches, softwareLd } from './seo';
+
+export const meta: MetaFunction = ({ matches }) => pageMeta('home', shellFromMatches(matches));
 
 function LandingPhone({ screen, alt, className = '' }: { screen: string; alt: string; className?: string }) {
   return <div className={`mova-site__landing-phone ${className}`}>
@@ -11,6 +15,7 @@ function LandingPhone({ screen, alt, className = '' }: { screen: string; alt: st
 // W1 Landing. Account creation is open; every acquisition action leads to sign-up.
 export default function LandingPage() {
   const { t } = useTranslation();
+  const shell = useSiteShell();
   const campaignBullets = ['campaign1', 'campaign2', 'campaign3'] as const;
   const problems = [
     ['problem1Title', 'problem1Body'],
@@ -22,6 +27,7 @@ export default function LandingPage() {
   const rules = ['rule1', 'rule2', 'rule3', 'rule4', 'rule5', 'rule6'] as const;
 
   return <div>
+    <JsonLd data={softwareLd(shell)} />
     <section className="mova-site__container mova-site__hero mova-site__landing-hero" aria-labelledby="hero-h">
       <div className="mova-site__hero-copy">
         <span className="mova-site__badge">{t('website.landing.freeBadge')}</span>

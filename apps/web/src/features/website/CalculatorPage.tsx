@@ -1,13 +1,18 @@
 import { useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ButtonLink, Eyebrow } from './parts';
+import type { MetaFunction } from 'react-router';
+import { ButtonLink, Eyebrow, JsonLd, useSiteShell } from './parts';
+import { breadcrumbLd, calculatorLd, pageMeta, shellFromMatches } from './seo';
 import { calculate, formatDollars, type CalculatorInput } from './calculator';
 
 // W4 Calculator. Free, no signup. Numbers are computed in the browser and never sent anywhere.
 const defaults: CalculatorInput = { revenue: '1500', commissionCut: '40', rent: '300', expenses: '150' };
 
+export const meta: MetaFunction = ({ matches }) => pageMeta('calculator', shellFromMatches(matches));
+
 export default function CalculatorPage() {
   const { t, i18n } = useTranslation();
+  const shell = useSiteShell();
   const [input, setInput] = useState<CalculatorInput>(defaults);
   const result = calculate(input);
   const locale = i18n.language === 'es-US' ? 'es-US' : 'en-US';
@@ -26,6 +31,8 @@ export default function CalculatorPage() {
   const yearly = ok ? t('website.calculator.yearly', { amount: formatDollars(Math.abs(ok.difference) * 52, locale) }) : '';
 
   return <div>
+    <JsonLd data={calculatorLd(shell)} />
+    <JsonLd data={breadcrumbLd(shell, [[t('website.nav.calculator'), '/calculator']])} />
     <section className="mova-site__container" aria-labelledby="calc-h" style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBlock: 'clamp(40px, 6vw, 80px) 24px' }}>
       <Eyebrow>{t('website.calculator.eyebrow')}</Eyebrow>
       <h1 id="calc-h" className="mova-site__h1" style={{ maxWidth: 820, fontSize: 'clamp(36px, 4.6vw, 58px)' }}>{t('website.calculator.headlineA')} <span className="mova-site__accent">{t('website.calculator.headlineB')}</span></h1>

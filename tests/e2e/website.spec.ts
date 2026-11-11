@@ -105,6 +105,33 @@ test.describe('guides', () => {
     await expect(page.getByRole('link', { name: 'Manage appointments across salons' })).toBeVisible();
   });
 
+  test('Spanish pages are rendered in Spanish on the server, with their own canonical and structured data', async ({ page, request }) => {
+    const html = await (await request.get('/pricing?locale=es-US')).text();
+    expect(html).toContain('<html lang="es-US"');
+    expect(html).toContain('Planes sencillos.');
+    expect(html).toMatch(/rel="canonical" href="[^"]+\/pricing\?locale=es-US"/);
+    await page.goto('/pricing?locale=es-US');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Planes sencillos.');
+    await expect(page.locator('link[rel="alternate"][hreflang="en-US"]')).toHaveAttribute('href', /\/pricing$/);
+    const types = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((text) => (JSON.parse(text) as { '@type'?: string })['@type']);
+    expect(types).toEqual(expect.arrayContaining(['SoftwareApplication', 'FAQPage', 'BreadcrumbList']));
+    await expect(page.getByRole('navigation', { name: 'Sitio web' }).getByRole('link', { name: 'Funciones' })).toHaveAttribute('href', '/features?locale=es-US');
+  });
+
+  test('robots.txt and llms.txt describe the public site', async ({ request }) => {
+    const robots = await (await request.get('/robots.txt')).text();
+    expect(robots).toContain('Allow: /');
+    expect(robots).toContain('Disallow: /admin');
+    expect(robots).toContain('User-agent: GPTBot');
+    expect(robots).toMatch(/Sitemap: https?:\/\/\S+\/sitemap\.xml/);
+    const llms = await request.get('/llms.txt');
+    expect(llms.headers()['content-type']).toContain('text/markdown');
+    const text = await llms.text();
+    expect(text.startsWith('# Mova')).toBe(true);
+    expect(text).toContain('## Guides');
+    expect(text).not.toContain('TO BE');
+  });
+
   test('article renders blocks, SEO tags and related guides, and drops unsafe links', async ({ page }) => {
     await page.goto('/guides/ai-isnt-what-is-making-beauty-less-personal');
     await expect(page).toHaveTitle("AI isn't what's making beauty less personal | mova");
@@ -116,7 +143,11 @@ test.describe('guides', () => {
     await expect(page.getByRole('link', { name: 'Click me' })).toHaveCount(0);
     await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /We've spent years teaching beauty software/);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/guides\/ai-isnt-what-is-making-beauty-less-personal$/);
-    await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(1);
+    // Article, breadcrumb trail and the site-wide Organization + WebSite graph.
+    const structured = await page.locator('script[type="application/ld+json"]').allTextContents();
+    const types = structured.map((text) => JSON.parse(text) as { '@type'?: string; '@graph'?: { '@type': string }[] }).map((value) => value['@type'] ?? value['@graph']?.map((node) => node['@type']).join('+'));
+    expect(types.sort()).toEqual(['Article', 'BreadcrumbList', 'Organization+WebSite']);
+    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article');
     await expect(page.getByRole('navigation', { name: 'More guides' }).getByRole('link', { name: 'Practical note 01' })).toHaveCount(0);
   });
 

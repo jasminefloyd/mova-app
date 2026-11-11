@@ -1,6 +1,10 @@
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { ButtonLink } from './parts';
+import type { MetaFunction } from 'react-router';
+import { ButtonLink, JsonLd, useSiteShell } from './parts';
+import { breadcrumbLd, faqLd, pageMeta, shellFromMatches, softwareLd } from './seo';
+
+export const meta: MetaFunction = ({ matches }) => pageMeta('pricing', shellFromMatches(matches));
 
 // W3 Pricing. Prices are $0 / $19 / $39 and the fee column is per the boards. No "proposed" badge.
 const plans = [
@@ -11,6 +15,7 @@ const plans = [
 
 export default function PricingPage() {
   const { t } = useTranslation();
+  const shell = useSiteShell();
   const facts = [
     ['always1Label', 'always1Value'],
     ['always2Label', 'always2Value'],
@@ -19,6 +24,9 @@ export default function PricingPage() {
   const faqs = [1, 2, 3, 4] as const;
 
   return <div>
+    <JsonLd data={softwareLd(shell, { withOffers: true })} />
+    <JsonLd data={faqLd(shell.locale)} />
+    <JsonLd data={breadcrumbLd(shell, [[t('website.nav.pricing'), '/pricing']])} />
     <section className="mova-site__container mova-site__centered" aria-labelledby="price-h" style={{ paddingBlock: 'clamp(40px, 6vw, 80px) 32px' }}>
       <h1 id="price-h" className="mova-site__h1" style={{ maxWidth: 820, fontSize: 'clamp(38px, 5vw, 60px)' }}>{t('website.pricing.headlineA')} <span className="mova-site__accent">{t('website.pricing.headlineB')}</span></h1>
       <p className="mova-site__lead" style={{ maxWidth: 620, fontSize: 'clamp(17px, 1.6vw, 19px)' }}>{t('website.pricing.intro')}</p>

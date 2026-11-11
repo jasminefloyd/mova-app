@@ -1,5 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { ButtonLink, Bullets, Eyebrow, PhoneFrame } from './parts';
+import type { MetaFunction } from 'react-router';
+import { ButtonLink, Bullets, Eyebrow, JsonLd, PhoneFrame, useSiteShell } from './parts';
+import { breadcrumbLd, pageMeta, shellFromMatches, softwareLd } from './seo';
+
+export const meta: MetaFunction = ({ matches }) => pageMeta('features', shellFromMatches(matches));
 
 type FeatureKey = 'showcase' | 'booking' | 'clients' | 'money' | 'revenue' | 'concierge' | 'clientCard' | 'reports';
 
@@ -39,7 +43,10 @@ const titleKeys: Record<FeatureKey, { eyebrow: string; a: string; b: string; bod
 
 export default function FeaturesPage() {
   const { t } = useTranslation();
+  const shell = useSiteShell();
   return <div>
+    <JsonLd data={softwareLd(shell)} />
+    <JsonLd data={breadcrumbLd(shell, [[t('website.nav.features'), '/features']])} />
     <section className="mova-site__container" style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBlock: 'clamp(40px, 6vw, 80px) 24px' }} aria-labelledby="feat-h">
       <Eyebrow>{t('website.features.eyebrow')}</Eyebrow>
       <h1 id="feat-h" className="mova-site__h1" style={{ maxWidth: 860, fontSize: 'clamp(36px, 4.8vw, 60px)' }}>{t('website.features.headlineA')} <span className="mova-site__accent">{t('website.features.headlineB')}</span></h1>
