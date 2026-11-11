@@ -65,7 +65,7 @@
 .mova-site__landing-fine { margin: 0; font-size: var(--fs-body-s); }
 .mova-site__landing-phones { position: relative; flex: 1 1 430px; min-width: 0; min-height: 560px; display: flex; align-items: center; justify-content: center; }
 .mova-site__landing-phone { width: min(100%, 285px); aspect-ratio: 390 / 844; overflow: hidden; box-sizing: border-box; border: 7px solid var(--site-ink); border-radius: 36px; background: var(--site-bg); box-shadow: 0 28px 56px rgba(24, 57, 47, 0.2); }
-.mova-site__landing-phone img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.mova-site__landing-phone img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: top; }
 .mova-site__landing-phones > .mova-site__landing-phone { position: absolute; }
 .mova-site__landing-phone--back { width: min(43%, 245px); top: 5%; right: 7%; transform: rotate(7deg); }
 .mova-site__landing-phone--front { width: min(45%, 260px); left: 8%; bottom: 2%; transform: rotate(-6deg); }
@@ -271,6 +271,15 @@
 
 /* Phone and small screens. Content reflows; nothing scrolls sideways at 320px. */
 @media (max-width: 720px) {
+  .mova-site__nav-inner { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px 12px; min-height: 0; padding-block: 10px; }
+  .mova-site__nav-end { display: contents; }
+  .mova-site__brand { grid-column: 1; grid-row: 1; font-size: 26px; }
+  .mova-site__account { grid-column: 2; grid-row: 1; justify-self: end; gap: 4px; }
+  .mova-site__signin { padding-inline: 8px; }
+  .mova-site__start { height: 42px; padding-inline: 16px; }
+  .mova-site__links { grid-column: 1 / -1; grid-row: 2; display: flex; flex-wrap: nowrap; justify-content: space-between; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  .mova-site__links::-webkit-scrollbar { display: none; }
+  .mova-site__link { flex: 0 0 auto; min-height: 40px; padding-inline: 10px; font-size: 15px; }
   .mova-site__hero-art { min-height: 0; justify-content: center; }
   .mova-site__landing-hero { gap: 28px; padding-block: 32px 48px; }
   .mova-site__landing-hero .mova-site__hero-copy { flex-basis: 100%; }
@@ -293,6 +302,9 @@
 }
 @media (max-width: 380px) {
   .mova-site__ctas .mova-site__button { width: 100%; }
-  .mova-site__nav-end { justify-content: space-between; }
+  .mova-site__nav-inner { column-gap: 6px; }
+  .mova-site__start { padding-inline: 12px; font-size: 14px; }
+  .mova-site__signin { padding-inline: 6px; font-size: 14px; }
+  .mova-site__link { padding-inline: 8px; font-size: 14px; }
   .mova-site__calc-form, .mova-site__calc-result { padding: 22px; }
 }
