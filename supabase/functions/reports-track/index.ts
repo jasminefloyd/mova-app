@@ -1,9 +1,10 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 
 const events = new Set(['page_view', 'qr_scan', 'booking_started', 'booking_completed']);
 const sources = new Set(['instagram', 'qr', 'google', 'direct', 'other']);
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('reports-track', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const body = await request.json().catch(() => null);
@@ -18,4 +19,4 @@ Deno.serve(async (request) => {
   });
   if (error) return respond({ code: 'TRACK_EVENT_FAILED' }, 500);
   return respond({ recorded: data === true });
-});
+}));

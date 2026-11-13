@@ -1,3 +1,4 @@
+import { withSystemRequestLogging, loggedProviderFetch } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { StripeTestClient } from '../_shared/providers/stripe/client.ts';
 import { summarizePayouts } from '../_shared/providers/stripe/payouts.ts';
@@ -6,14 +7,14 @@ const hex = (bytes: Uint8Array) => [...bytes].map((byte) => byte.toString(16).pa
 const digest = async (value: string) => hex(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))));
 const disabled = () => Deno.env.get('MOVA_STRIPE_TEST_MODE') !== 'true';
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('stripe-connect-onboard', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (disabled()) return respond({ code: 'STRIPE_TEST_MODE_DISABLED' }, 503);
   const secret = Deno.env.get('STRIPE_SECRET_KEY');
   const clientId = Deno.env.get('STRIPE_CONNECT_CLIENT_ID');
   const redirectUri = Deno.env.get('STRIPE_CONNECT_REDIRECT_URI');
   if (!secret?.startsWith('sk_test_') || !clientId || !redirectUri) return respond({ code: 'STRIPE_TEST_CONFIGURATION_MISSING' }, 503);
-  const stripe = new StripeTestClient(secret);
+  const stripe = new StripeTestClient(secret, loggedProviderFetch(request, 'stripe'));
   const db = serviceClient();
 
   if (request.method === 'GET') {
@@ -87,4 +88,4 @@ Deno.serve(async (request) => {
     return respond({ connected, payouts, dashboard_url: dashboardUrl, test_mode: true });
   }
   return respond({ code: 'INVALID_ACTION' }, 422);
-});
+}));

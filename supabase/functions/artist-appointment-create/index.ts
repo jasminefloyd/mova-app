@@ -1,10 +1,11 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond } from '../_shared/booking.ts';
 
 // P6 New appointment (board 08c). A signed-in stylist books an existing client into a free time.
 // Deposits and confirmation texts are not sent here; the RPC creates a confirmed, deposit-free booking.
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('artist-appointment-create', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request);
@@ -28,4 +29,4 @@ Deno.serve(async (request) => {
   });
   if (error) return respond({ code: error.message || 'APPOINTMENT_CREATE_FAILED' }, 422);
   return respond({ appointment_id: data }, 201);
-});
+}));

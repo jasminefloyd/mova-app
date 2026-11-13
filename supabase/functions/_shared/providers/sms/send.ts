@@ -34,6 +34,16 @@ export type SendSmsOutcome =
   | { status: 'duplicate' }
   | { status: 'failed'; messageId: string | null; error: string };
 
+async function logSmsProvider(db: SmsDb, input: SendSmsInput, provider: string, status: 'sent' | 'failed', reference?: string) {
+  try {
+    await db.rpc('mova_system_log_append', { p_level: status === 'sent' ? 'info' : 'error', p_source: 'provider',
+      p_event_name: status === 'sent' ? 'provider.sms.sent' : 'provider.sms.failed', p_route_or_function: 'sms.send',
+      p_artist_business_id: input.artistBusinessId, p_client_id: input.clientId, p_error_code: status === 'failed' ? 'SMS_PROVIDER_ERROR' : null,
+      p_message: status === 'sent' ? 'SMS provider accepted message' : 'SMS provider request failed',
+      p_context: { provider, provider_reference: reference ?? null } });
+  } catch { /* Provider logging is best effort. */ }
+}
+
 /**
  * The one way to send a text (task 4.4). Order: policy gate (consent, STOP, quiet hours, daily cap,
  * sending identity) → durable row in mova_messages (unique idempotency key) → provider → status update.
@@ -71,9 +81,11 @@ export async function sendSms(db: SmsDb, provider: SmsProvider, input: SendSmsIn
   try {
     const result = await provider.send(sendInput);
     await db.from('mova_messages').update({ status: 'sent', provider_message_id: result.providerMessageId, sent_at: now.toISOString() }).eq('id', row.id);
+    await logSmsProvider(db, input, provider.name, 'sent', result.providerMessageId);
     return { status: 'sent', messageId: row.id, providerMessageId: result.providerMessageId };
   } catch (caught) {
     await db.from('mova_messages').update({ status: 'failed', error_code: 'PROVIDER_ERROR' }).eq('id', row.id);
+    await logSmsProvider(db, input, provider.name, 'failed');
     return { status: 'failed', messageId: row.id, error: caught instanceof Error ? caught.message : 'PROVIDER_ERROR' };
   }
 }

@@ -1,7 +1,8 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient,corsHeaders,respond,serviceClient } from '../_shared/booking.ts';
 import {resolveNotificationPreferences} from '../_shared/notification-preferences.ts';
 
-Deno.serve(async(request)=>{
+Deno.serve(withSystemRequestLogging('messaging-settings', async(request)=>{
  if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
  const actor=await artistClient(request);if(!actor)return respond({code:'UNAUTHENTICATED'},401);const db=serviceClient();const body=await request.json().catch(()=>({}));
  if(body.action==='status'){
@@ -27,4 +28,4 @@ Deno.serve(async(request)=>{
   if(error||!data)return respond({code:'TEMPLATE_APPROVAL_FAILED'},409);return respond({template:data});
  }
  return respond({code:'INVALID_ACTION'},422);
-});
+}));

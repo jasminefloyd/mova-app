@@ -1,7 +1,8 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { serviceClient, respond, corsHeaders } from '../_shared/booking.ts';
 import { sha256Hex } from '../_shared/provider-crypto.ts';
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('client-card-landing', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (Deno.env.get('MOVA_CLIENT_PROFILES_ENABLED') !== 'true') return respond({ code: 'CLIENT_PROFILES_DISABLED' }, 404);
@@ -35,4 +36,4 @@ Deno.serve(async (request) => {
     card: { client_name: accountResult.data.display_name, artist_name: profileResult.data.display_name, handle: profileResult.data.handle, specialties: profileResult.data.specialties },
     upcoming: appointment ? { service: serviceNames.join(' + '), starts_at: appointment.starts_at, status: appointment.status, location: appointment.mova_locations?.name ?? '' } : null,
   });
-});
+}));

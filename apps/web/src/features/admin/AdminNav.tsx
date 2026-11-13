@@ -14,6 +14,7 @@ const items: NavItem[] = [
   { to: '/admin/blog', label: 'Guides & blog' },
   { to: '/admin/flags', label: 'Feature switches' },
   { to: '/admin/health', label: 'System health', badge: 'health' },
+  { to: '/admin/logs', label: 'System logs' },
   { to: '/admin/activity', label: 'Admin activity' },
 ];
 

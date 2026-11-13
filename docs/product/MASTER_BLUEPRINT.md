@@ -99,7 +99,7 @@ Mandatory additional suites: locale catalog parity, no hardcoded UI strings, gue
 **Organic flywheel hypothesis:** opted-in indexable public artist showcases generate artist-specific consumer discovery and referral exposure; avoid indexing draft/private profiles, doorway pages, thin duplicative content or client data. Validate search traffic and quality rather than assuming automatic ranking.
 
 ## 12. Monetization and sales motion
-**PROPOSED, not approved commercial terms:** Free `$0/month + 1.5%` Mova platform fee; Pro `$19/month + 1.0%`; AI Growth `$39/month + 0.5%`, only on eligible **Mova-processed** payments; Stripe processing extra. No Mova transaction fee on manually tracked cash/Zelle or salon-collected transactions. Exact plan entitlements, caps, billing/refund policy, and payment topology remain OPEN. Do not launch live paid subscriptions or quote final binding terms until approval. Avoid implying all payment methods are available for all artists/devices.
+**Owner-approved 2026-11-13:** Free `$0/month + 1.5%` Mova platform fee; Pro `$19/month + 1.0%`; AI + Growth `$39/month + 0.75%`, only on eligible **Mova-processed** payments; Stripe processing extra. No Mova transaction fee on manually tracked cash/Zelle or salon-collected transactions. Final entitlements and allowances are in `PLANS_FEATURES_FEES.md`. Feature inclusion remains subject to provider, consent, safety and rollout gates; do not imply unfinished integrations are live.
 
 **Sales motion:** digital-first self-serve, not cold-call-heavy. Free public showcase/QR as low-friction entry; early access waitlist and practical calculator lead magnet; product-led invitation to enable booking, payments and growth. Sales enablement focuses on discovery, proof and objections, not pressure. Activation and retention precede paid conversion. For sales conversations, distinguish **planned V1** from **currently available**, and never claim universal salon integrations or automatic two-way calendar sync.
 
@@ -154,7 +154,7 @@ Mandatory additional suites: locale catalog parity, no hardcoded UI strings, gue
 | Decision | Status | Required owner action |
 |---|---|---|
 | Final domain, trademark, logo vector lockup | OPEN | Legal/brand/domain clearance |
-| Free/Pro/AI Growth entitlements and final pricing | OPEN | Approve commercial matrix and billing copy |
+| Free/Pro/AI + Growth entitlements and pricing | APPROVED | Implemented in catalog and bilingual pricing copy; feature/runtime verification remains |
 | Stripe Connect topology, KYC, disputes, tax and merchant of record | OPEN | Financial/compliance architecture approval |
 | Email/SMS provider, cost limits and opt-out semantics | OPEN | Vendor and consent policy signoff |
 | AI vendor, evaluations, accuracy and spend caps | OPEN | Model governance signoff |

@@ -1,13 +1,16 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import {artistClient,corsHeaders,respond,serviceClient} from '../_shared/booking.ts';
 import {smsProviderFromEnv} from '../_shared/providers/sms/index.ts';
 import {sendNextWave} from '../_shared/seat-filler.ts';
 import {platformSwitchEnabled} from '../_shared/platform-switch.ts';
+import {planFeatureEnabled} from '../_shared/plan-feature.ts';
 // Task 5.1: sending needs the platform flag MOVA_SEAT_FILLER_ENABLED and an SMS provider (fake until O4/O5 go live).
 const outbound=()=>Deno.env.get('MOVA_SEAT_FILLER_ENABLED')==='true'?smsProviderFromEnv((name)=>Deno.env.get(name)):null;
 const site=()=>Deno.env.get('PUBLIC_SITE_URL')??'https://mova-beauty.co';
-Deno.serve(async(request)=>{
+Deno.serve(withSystemRequestLogging('slot-campaign', async(request)=>{
  if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
  const actor=await artistClient(request);if(!actor)return respond({code:'UNAUTHENTICATED'},401);const db=serviceClient();const body=await request.json().catch(()=>({}));
+ if(!await planFeatureEnabled(actor.businessId,'seat_filler'))return respond({code:'PLAN_FEATURE_NOT_INCLUDED',feature:'seat_filler'},403);
  if(body.action==='home-needs'){
   const now=new Date().toISOString();
   const {data,error}=await db.from('mova_slot_events').select('id,location_id,starts_at').eq('artist_business_id',actor.businessId).eq('status','needs_approval').gte('starts_at',now).gte('expires_at',now).order('starts_at').limit(5);
@@ -45,4 +48,4 @@ Deno.serve(async(request)=>{
   return error?respond({code:'SHARE_EVENT_SAVE_FAILED'},500):respond({recorded:true});
  }
  return respond({code:'INVALID_ACTION'},422);
-});
+}));

@@ -1,5 +1,6 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient,corsHeaders,respond,serviceClient } from '../_shared/booking.ts';
-Deno.serve(async(request)=>{
+Deno.serve(withSystemRequestLogging('notification-inbox', async(request)=>{
  if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
  const actor=await artistClient(request);if(!actor)return respond({code:'UNAUTHENTICATED'},401);const db=serviceClient();const body=await request.json().catch(()=>({}));
  if(body.action==='list'){
@@ -12,4 +13,4 @@ Deno.serve(async(request)=>{
   return error?respond({code:'INBOX_UPDATE_FAILED'},500):respond({read:true});
  }
  return respond({code:'INVALID_ACTION'},422);
-});
+}));

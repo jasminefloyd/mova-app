@@ -5,6 +5,14 @@ project_id = "mova-app"
 enabled = false
 uri = "pg-functions://postgres/public/mova_before_user_created"
 
+[auth.email.template.confirmation]
+subject = "Confirm your email to finish setting up Mova"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Reset your Mova password"
+content_path = "./supabase/templates/recovery.html"
+
 [functions.public-artist]
 verify_jwt = false
 
@@ -189,4 +197,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.slot-claim]
+verify_jwt = false
+
+[functions.client-log]
+verify_jwt = false
+
+[functions.price-pilot]
 verify_jwt = false

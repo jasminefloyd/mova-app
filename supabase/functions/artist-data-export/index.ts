@@ -1,3 +1,4 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 
 const tenantTables = [
@@ -69,7 +70,7 @@ function redactSecrets(row: Record<string, unknown>) {
   for (const key of Object.keys(safe)) if (/(^|_)(token|secret|ciphertext|encrypted|private_key|access_key|refresh_key)(_|$)/i.test(key)) delete safe[key];
   return safe;
 }
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('artist-data-export', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request);
@@ -121,4 +122,4 @@ Deno.serve(async (request) => {
     const code = error instanceof Error ? error.message.split(':')[0] : 'EXPORT_FAILED';
     return respond({ code }, 500);
   }
-});
+}));

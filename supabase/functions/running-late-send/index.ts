@@ -1,6 +1,7 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 
-Deno.serve(async(request)=>{
+Deno.serve(withSystemRequestLogging('running-late-send', async(request)=>{
   if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
   if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
   const actor=await artistClient(request);if(!actor)return respond({code:'AUTH_REQUIRED'},401);
@@ -20,4 +21,4 @@ Deno.serve(async(request)=>{
   if(insertError)return respond({code:'RUNNING_LATE_QUEUE_FAILED'},503);
   await db.from('mova_appointments').update({running_late_minutes:minutes}).eq('id',current.id).eq('artist_business_id',actor.businessId);
   return respond({message_id:outbox.id,status:'queued',client_locale:next.client_locale,transport:'pending-messaging-provider'});
-});
+}));

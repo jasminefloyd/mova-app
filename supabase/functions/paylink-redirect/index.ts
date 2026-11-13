@@ -1,10 +1,11 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { serviceClient } from '../_shared/booking.ts';
 
 const page = (title: string, message: string, language: 'en' | 'es') => new Response(`<!doctype html><html lang="${language}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><main><h1>${title}</h1><p>${message}</p></main></html>`, {
   status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' },
 });
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('paylink-redirect', async (request) => {
   if (request.method !== 'GET') return new Response('Method not allowed', { status: 405 });
   const url = new URL(request.url);
   const code = url.searchParams.get('code') ?? url.pathname.split('/').filter(Boolean).at(-1) ?? '';
@@ -29,4 +30,4 @@ Deno.serve(async (request) => {
   } catch {
     return new Response('Payment link temporarily unavailable', { status: 503, headers: { 'Cache-Control': 'no-store' } });
   }
-});
+}));

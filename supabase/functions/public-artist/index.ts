@@ -1,3 +1,4 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 import { corsHeaders } from '../_shared/cors.ts';
 
@@ -13,7 +14,7 @@ function computeDepositMinor(priceMinor: number, depositType: string, depositVal
   return Math.min(priceMinor, Math.floor((priceMinor * depositValue + 5_000) / 10_000));
 }
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: publicCorsHeaders });
   if (!['GET', 'POST'].includes(request.method)) return respond(null, 405);
   const query = request.method === 'GET' ? Object.fromEntries(new URL(request.url).searchParams) : await request.json().catch(() => ({}));
@@ -44,8 +45,12 @@ Deno.serve(async (request) => {
 
   // Only expose reviews the stylist has approved for public display. Never infer
   // a rating from private, pending, or rejected review rows.
-  const { data: publicRatings } = await supabase.from('mova_reviews').select('rating')
-    .eq('artist_business_id', profile.artist_business_id).eq('moderation_status', 'approved').eq('public_display_enabled', true).limit(1000);
+  const { data: publicReviewGate } = await supabase.rpc('mova_feature_gate', {
+    p_artist_business_id: profile.artist_business_id, p_feature_key: 'reviews_public', p_customer_account_id: null,
+  });
+  const { data: publicRatings } = publicReviewGate?.enabled === true
+    ? await supabase.from('mova_reviews').select('rating').eq('artist_business_id', profile.artist_business_id).eq('moderation_status', 'approved').eq('public_display_enabled', true).limit(1000)
+    : { data: [] };
   const ratingCount = publicRatings?.length ?? 0;
   const ratingAverage = ratingCount ? Math.round(publicRatings!.reduce((sum, review) => sum + review.rating, 0) / ratingCount * 10) / 10 : null;
 
@@ -131,4 +136,4 @@ Deno.serve(async (request) => {
     looks: publishedPortfolio.filter((item): item is NonNullable<typeof item> => item !== null),
     bookable: Boolean(services?.length && locations?.some((location) => openLocations?.some((entry) => entry.location_id === location.id))),
   });
-});
+}));

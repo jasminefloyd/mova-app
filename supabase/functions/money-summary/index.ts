@@ -1,6 +1,7 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('money-summary', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request);
@@ -14,4 +15,4 @@ Deno.serve(async (request) => {
   });
   if (error) return respond({ code: error.message || 'MONEY_SUMMARY_FAILED' }, 500);
   return respond(data);
-});
+}));

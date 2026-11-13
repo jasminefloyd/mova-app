@@ -1,7 +1,8 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient, tokenHash } from '../_shared/booking.ts';
 import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('review-submit', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (!await platformSwitchEnabled('reviews')) return respond({ code: 'REVIEWS_FEATURE_DISABLED' }, 503);
@@ -21,4 +22,4 @@ Deno.serve(async (request) => {
   });
   if (error) return respond({ code: error.message || 'REVIEW_SUBMISSION_FAILED' }, error.code === '23505' ? 409 : error.code === 'P0002' ? 404 : 422);
   return respond(data);
-});
+}));

@@ -12,6 +12,11 @@ const plans = [
   { key: 'pro', price: '$19', fee: 'feePro', featured: true },
   { key: 'growth', price: '$39', fee: 'feeGrowth', featured: false },
 ] as const;
+const includedFeatures = {
+  free: ['page', 'calendar', 'unlimited', 'clientNotes', 'guestBooking', 'payments', 'bookingEmail', 'languages', 'basicReports', 'privateReviews'],
+  pro: ['publicReviews', 'advancedReports', 'seatFiller', 'textAutopilot', 'textReminders', 'rebookingAssist', 'googleCalendar', 'customCover'],
+  growth: ['rebookingAutopilot', 'concierge', 'instagramConcierge', 'walletCard', 'revenueCenter', 'missedCallTextback'],
+} as const;
 
 export default function PricingPage() {
   const { t } = useTranslation();
@@ -41,11 +46,16 @@ export default function PricingPage() {
           </div>
           <p className="mova-site__price"><strong>{price}</strong><span>{t('website.pricing.perMonth')}</span></p>
           <p><strong>{t(`website.pricing.${fee}`)}</strong></p>
-          <p className="mova-site__placeholder">{t('website.pricing.included')}</p>
+          <div className="mova-site__plan-features">
+            <p className="mova-site__feature-heading">{t('website.pricing.includedTitle')}</p>
+            <ul>{includedFeatures[key].map((feature) => <li key={feature}>{t(`website.pricing.features.${feature}`)}</li>)}</ul>
+            {key === 'growth' && <p className="mova-site__coming-soon"><span>{t('website.pricing.comingSoon')}</span> {t('website.pricing.features.aiPricePilot')}</p>}
+          </div>
           <ButtonLink to="/signup" variant={featured ? 'peach' : 'plan'}>{t('website.pricing.startFree')}</ButtonLink>
         </article>)}
       </div>
       <p className="mova-site__fine">{t('website.pricing.processing')}</p>
+      <p className="mova-site__fine">{t('website.pricing.rollout')}</p>
     </section>
 
     <section className="mova-site__band" aria-labelledby="always-h">

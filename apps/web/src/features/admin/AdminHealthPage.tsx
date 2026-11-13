@@ -33,7 +33,7 @@ export default function AdminHealthPage() {
 
   return (
     <>
-      <PageHead title="System health" sub={`Checked ${formatDateTime(h.checked_at)} (refreshes every minute). Counts cover the last 24 hours.`} />
+      <PageHead title="System health" sub={`Checked ${formatDateTime(h.checked_at)} (refreshes every minute). Counts cover the last 24 hours.`} actions={<Link className="btn sm ghost" to="/admin/logs?range=24h&level=error">View recent error logs</Link>} />
       {notice ? <p className="notice" role="status">{notice}</p> : null}
       <div className="kpi-grid">
         <Kpi label="Stripe webhooks" value={formatCount(h.stripe_webhooks.received_24h)} note={`${formatCount(h.stripe_webhooks.failed_24h)} failed`} />

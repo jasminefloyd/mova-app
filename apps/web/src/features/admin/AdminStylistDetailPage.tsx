@@ -64,6 +64,7 @@ export default function AdminStylistDetailPage() {
         sub={`${d.business.name} · B${d.business.bid} · ${d.owner_email ?? 'No owner email on file'}`}
         actions={<>
           <Link className="btn sm ghost" to={`/admin/stylists/${businessId}/audit`}>Audit log</Link>
+          <Link className="btn sm ghost" to={`/admin/logs?stylist=${businessId}`}>System logs</Link>
           <Link className="btn sm ghost" to="/admin/fees">Fees</Link>
           <button type="button" className="btn sm danger" onClick={() => setSuspensionOpen(true)}>{d.business.status === 'suspended' ? 'Restore stylist' : 'Suspend stylist'}</button>
           <button type="button" className="btn sm danger" onClick={() => setUnpublishOpen(true)} disabled={!d.profile?.is_published}>Unpublish page</button>

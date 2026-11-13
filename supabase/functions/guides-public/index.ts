@@ -1,3 +1,4 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 import { corsHeaders } from '../_shared/cors.ts';
 import {
@@ -30,7 +31,7 @@ async function countGuides(supabase: ReturnType<typeof createClient>, category: 
   return { count: count ?? 0, error };
 }
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('guides-public', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: publicCorsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
 
@@ -100,4 +101,4 @@ Deno.serve(async (request) => {
   }
 
   return respond({ code: 'INVALID_ACTION' }, 400);
-});
+}));

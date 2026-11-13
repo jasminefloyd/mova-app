@@ -1,3 +1,4 @@
+import { withSystemRequestLogging, loggedProviderFetch } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { StripeTestClient } from '../_shared/providers/stripe/client.ts';
 
@@ -6,7 +7,7 @@ const randomCode = () => {
   return btoa(String.fromCharCode(...bytes)).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
 };
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('paylink-create', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (Deno.env.get('MOVA_STRIPE_TEST_MODE') !== 'true') return respond({ code: 'STRIPE_TEST_MODE_DISABLED' }, 503);
@@ -27,7 +28,7 @@ Deno.serve(async (request) => {
   const payUrl = `${base}/pay/${encodeURIComponent(link.short_code)}`;
   if (link.checkout_url) return respond({ pay_url: payUrl, checkout_url: link.checkout_url, expires_at: link.expires_at, reused: true });
   try {
-    const session = await new StripeTestClient(key).createCheckoutSession({
+    const session = await new StripeTestClient(key, loggedProviderFetch(request, 'stripe')).createCheckoutSession({
       accountId: link.stripe_account_id,
       amountMinor: Number(link.amount_minor), applicationFeeMinor: Number(link.fee_minor), currency: 'usd',
       expiresAt: Math.floor(Date.parse(link.expires_at) / 1000),
@@ -49,4 +50,4 @@ Deno.serve(async (request) => {
   } catch {
     return respond({ code: 'STRIPE_PAYLINK_CREATE_FAILED' }, 502);
   }
-});
+}));

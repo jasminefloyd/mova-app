@@ -1,3 +1,4 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { parseResendEvent, parseTwilioStatus, verifyResendSignature, type StatusUpdate } from '../_shared/providers/status.ts';
 
@@ -25,7 +26,7 @@ async function apply(update: StatusUpdate) {
   return true;
 }
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('messaging-status', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const raw = await request.text();
@@ -48,4 +49,4 @@ Deno.serve(async (request) => {
     return respond({ accepted: true, applied: update && await apply(update) ? 1 : 0 });
   }
   return respond({ code: 'PROVIDER_UNKNOWN' }, 422);
-});
+}));

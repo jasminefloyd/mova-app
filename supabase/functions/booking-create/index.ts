@@ -1,8 +1,9 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient, tokenHash } from '../_shared/booking.ts';
 import { normalizeBookingConsentChoices } from '../_shared/booking-consent.ts';
 import { checkCaptcha } from '../_shared/captcha.ts';
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('booking-create', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok',{headers:corsHeaders});
   if (request.method !== 'POST') return respond({code:'METHOD_NOT_ALLOWED'},405);
   const body = await request.json().catch(()=>null); const idempotencyKey = request.headers.get('Idempotency-Key') ?? body?.idempotency_key;
@@ -31,4 +32,4 @@ Deno.serve(async (request) => {
     const origin=(Deno.env.get('PUBLIC_BASE_URL')??'https://mova-beauty.co').replace(/\/$/,'');
     return respond({...data,manage_url:`${origin}/b/${encodeURIComponent(manageToken)}`},data.replayed?200:201);
   } catch { return respond({code:'BOOKING_CREATE_FAILED'},500); }
-});
+}));

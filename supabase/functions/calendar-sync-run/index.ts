@@ -1,20 +1,23 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { accessTokenFor, googleProvider, CONNECTION_COLUMNS, type GoogleConnectionRow } from '../_shared/google-connection.ts';
 import { GOOGLE_CALENDAR_SCOPE } from '../_shared/providers/google/index.ts';
+import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 
 // One-way sync (P6): Mova appointments -> the stylist's chosen Google calendar. Runs from the cron route with
 // CRON_SECRET. Reads the single connection row; writes go through the Google provider adapter.
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('calendar-sync-run', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const secret = Deno.env.get('CRON_SECRET'); if (!secret || request.headers.get('Authorization') !== `Bearer ${secret}`) return respond({ code: 'UNAUTHORIZED' }, 401);
-  const provider = googleProvider();
+  const provider = googleProvider(request);
   if (!provider) return respond({ code: 'GOOGLE_NOT_CONFIGURED', synced: 0, failed: 0 }, 503);
   const db = serviceClient();
   const { data: connections, error } = await db.from('mova_google_connections').select(CONNECTION_COLUMNS).eq('status', 'active').eq('calendar_enabled', true).limit(100);
   if (error) return respond({ code: 'CALENDAR_CONNECTIONS_FAILED' }, 500);
   let synced = 0; let failed = 0;
   for (const connection of (connections ?? []) as GoogleConnectionRow[]) {
+    if (!await planFeatureEnabled(connection.artist_business_id, 'google_calendar_sync')) continue;
     if (!connection.granted_scopes.includes(GOOGLE_CALENDAR_SCOPE)) { failed++; continue; }
     try {
       const accessToken = await accessTokenFor(provider, connection).catch(async (cause) => {
@@ -40,4 +43,4 @@ Deno.serve(async (request) => {
     } catch { failed++; }
   }
   return respond({ synced, failed });
-});
+}));

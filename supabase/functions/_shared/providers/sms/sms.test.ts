@@ -133,7 +133,7 @@ describe('O4 spend cap and Twilio (Nov 8)', () => {
   it('reserves the estimated cost before every send', async () => {
     const { db, calls } = stubDb(allowed);
     await sendSms(db, new FakeSmsProvider(null, 8300), input);
-    expect(calls.map((c) => c.name)).toEqual(['mova_sms_send_gate', 'mova_messaging_reserve_spend']);
+    expect(calls.map((c) => c.name)).toEqual(['mova_sms_send_gate', 'mova_messaging_reserve_spend', 'mova_system_log_append']);
   });
   it('counts SMS segments for the estimate', () => {
     expect(smsSegments('a'.repeat(160))).toBe(1);

@@ -1,3 +1,4 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 import { corsHeaders } from '../_shared/cors.ts';
 
@@ -5,7 +6,7 @@ const maxBytes = 10 * 1024 * 1024;
 const allowedMime = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
 const json = (data: unknown, status = 200) => Response.json({ data, error: null, request_id: crypto.randomUUID() }, { status, headers: corsHeaders });
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('photo-upload-url', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return json({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const authorization = request.headers.get('Authorization');
@@ -41,4 +42,4 @@ Deno.serve(async (request) => {
   const { data: signedUpload, error: signedUploadError } = await admin.storage.from(bucket).createSignedUploadUrl(path);
   if (signedUploadError || !signedUpload) return json({ code: 'UPLOAD_URL_FAILED' }, 500);
   return json({ uploadUrl: signedUpload.signedUrl, token: signedUpload.token, path, bucket });
-});
+}));

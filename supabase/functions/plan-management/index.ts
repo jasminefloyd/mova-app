@@ -1,3 +1,4 @@
+import { withSystemRequestLogging, loggedProviderFetch } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { verifiedSubscription } from '../_shared/providers/stripe/billing.ts';
 import { billingClientFromEnv } from '../_shared/billing-env.ts';
@@ -5,7 +6,7 @@ import { billingClientFromEnv } from '../_shared/billing-env.ts';
 // Plans (O10 confirmed prices). 'get' returns the summary; 'confirm' applies a completed Stripe
 // test-mode subscription checkout after verifying it with Stripe (task 5.8). Plans never change from
 // what the browser claims.
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('plan-management', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request);
@@ -13,7 +14,7 @@ Deno.serve(async (request) => {
   const body = await request.json().catch(() => ({}));
   const db = serviceClient();
   if (body.action === 'confirm') {
-    const stripe = billingClientFromEnv((name) => Deno.env.get(name));
+    const stripe = billingClientFromEnv((name) => Deno.env.get(name), loggedProviderFetch(request, 'stripe'));
     if (!stripe) return respond({ code: 'BILLING_NOT_CONFIGURED' }, 503);
     if (typeof body.session_id !== 'string') return respond({ code: 'INVALID_SESSION' }, 422);
     let session: Record<string, unknown>;
@@ -29,5 +30,7 @@ Deno.serve(async (request) => {
     db.from('mova_billing_subscriptions').select('plan_key,status').eq('artist_business_id', actor.businessId).maybeSingle(),
   ]);
   if (error) return respond({ code: 'PLAN_SUMMARY_UNAVAILABLE' }, 500);
-  return respond({ ...data, subscription: subscription ?? null, billing_available: billingClientFromEnv((name) => Deno.env.get(name)) !== null });
-});
+  const { data: features, error: featureError } = await db.rpc('mova_business_features', { p_artist_business_id: actor.businessId });
+  if (featureError) return respond({ code: 'PLAN_FEATURES_UNAVAILABLE' }, 500);
+  return respond({ ...data, features: features ?? {}, subscription: subscription ?? null, billing_available: billingClientFromEnv((name) => Deno.env.get(name), loggedProviderFetch(request, 'stripe')) !== null });
+}));

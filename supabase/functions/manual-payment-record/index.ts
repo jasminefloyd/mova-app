@@ -1,7 +1,8 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('manual-payment-record', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request);
@@ -34,4 +35,4 @@ Deno.serve(async (request) => {
     return respond({ code: error.message || 'PAYMENT_RECORD_FAILED' }, status);
   }
   return respond(data, data?.replayed ? 200 : 201);
-});
+}));

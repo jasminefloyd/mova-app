@@ -1,12 +1,15 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import {artistClient,corsHeaders,respond,serviceClient} from '../_shared/booking.ts';
 import {estimateCadence,rebookingWindow} from '../../../packages/domain/src/rebooking.ts';
 import {smsProviderFromEnv} from '../_shared/providers/sms/index.ts';
 import {growthTextsEnabled,runAutopilot,sendWinback} from '../_shared/autopilot.ts';
+import {planFeatureEnabled} from '../_shared/plan-feature.ts';
 const env=(name:string)=>Deno.env.get(name);const outbound=()=>growthTextsEnabled(env)?smsProviderFromEnv(env):null;const site=()=>env('PUBLIC_SITE_URL')??'https://mova-beauty.co';
 const day=86400000;
-Deno.serve(async(request)=>{
+Deno.serve(withSystemRequestLogging('revenue-center', async(request)=>{
  if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
  const actor=await artistClient(request);if(!actor)return respond({code:'UNAUTHENTICATED'},401);const db=serviceClient();const body=await request.json().catch(()=>({}));
+ if(['status','pipeline','winback','refresh-pipeline','save-rules'].includes(body.action)&&!await planFeatureEnabled(actor.businessId,'rebooking_assist'))return respond({code:'PLAN_FEATURE_NOT_INCLUDED',feature:'rebooking_assist'},403);
  if(body.action==='refresh-pipeline'){
   const {data:appointments,error}=await db.from('mova_appointments').select('id,client_id,service_id,starts_at,status').eq('artist_business_id',actor.businessId).eq('status','completed').not('client_id','is',null).order('starts_at',{ascending:true}).limit(20000);
   if(error)return respond({code:'PIPELINE_SOURCE_FAILED'},500);
@@ -45,10 +48,12 @@ Deno.serve(async(request)=>{
   return error?respond({code:'AUTOPILOT_SAVE_FAILED'},500):respond({settings:{enabled,slot_texts_autopilot:slots,rules}});
  }
  if(body.action==='run-autopilot'){
+  if(!await planFeatureEnabled(actor.businessId,'rebooking_autopilot'))return respond({code:'PLAN_FEATURE_NOT_INCLUDED',feature:'rebooking_autopilot'},403);
   const provider=outbound();if(!provider)return respond({code:'OUTBOUND_DISABLED',enabled:false},503);
   return respond({run:await runAutopilot(db,provider,actor.businessId,site())});
  }
  if(body.action==='send-winback'){
+  if(!await planFeatureEnabled(actor.businessId,'rebooking_assist'))return respond({code:'PLAN_FEATURE_NOT_INCLUDED',feature:'rebooking_assist'},403);
   if(typeof body.opportunity_id!=='string')return respond({code:'INVALID_OPPORTUNITY'},422);
   const provider=outbound();if(!provider)return respond({code:'OUTBOUND_DISABLED',enabled:false},503);
   const result=await sendWinback(db,provider,actor.businessId,body.opportunity_id,actor.user.id,site());
@@ -57,4 +62,4 @@ Deno.serve(async(request)=>{
   return respond(result);
  }
  return respond({code:'INVALID_ACTION'},422);
-});
+}));

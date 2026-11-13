@@ -1,13 +1,15 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { smsProviderFromEnv } from '../_shared/providers/sms/index.ts';
 import { claimTokenHash, notifyTaken } from '../_shared/seat-filler.ts';
 import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
+import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 
 // Task 5.1 (board 31d): a texted client views and claims an opened spot. The token in the link is the
 // only credential; the database stores its hash and mova_slot_claim (0056) decides who wins.
 const TOKEN = /^[0-9a-f]{48}$/;
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('slot-claim', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const body = await request.json().catch(() => ({}));
@@ -19,6 +21,7 @@ Deno.serve(async (request) => {
   if (!candidate) return respond({ status: 'invalid' });
   const { data: slot } = await db.from('mova_slot_events').select('id,artist_business_id,starts_at,ends_at,status,expires_at,service_id,location_id').eq('id', candidate.slot_event_id).maybeSingle();
   if (!slot) return respond({ status: 'invalid' });
+  if (!await planFeatureEnabled(slot.artist_business_id, 'seat_filler')) return respond({ status: 'unavailable' });
   const [{ data: profile }, { data: location }, { data: service }] = await Promise.all([
     db.from('mova_artist_profiles').select('display_name,handle').eq('artist_business_id', slot.artist_business_id).maybeSingle(),
     db.from('mova_locations').select('name,time_zone,booking_mode').eq('id', slot.location_id).maybeSingle(),
@@ -40,4 +43,4 @@ Deno.serve(async (request) => {
     if (provider) await notifyTaken(db, provider, slot.id, Deno.env.get('PUBLIC_SITE_URL') ?? 'https://mova-beauty.co').catch(() => 0);
   }
   return respond({ status: result.status, slot: view, appointment_status: result.appointment_status ?? null, manage_token: result.manage_token ?? null });
-});
+}));

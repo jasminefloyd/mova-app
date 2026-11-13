@@ -1,14 +1,16 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { conciergeModelFromEnv } from '../_shared/providers/ai/live.ts';
 import { availabilityLookup, runConcierge } from '../_shared/concierge/pipeline.ts';
 import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
+import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 
 // Task 5.4: public web chat on the stylist's page. Off unless MOVA_CONCIERGE_WEB_CHAT_ENABLED=true and
 // the stylist has the concierge and the web chat channel on. The model vendor waits on O8, so only
 // MOVA_CONCIERGE_MODEL=fake is accepted; any other value refuses rather than calling a vendor.
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('concierge-web-chat', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (Deno.env.get('MOVA_CONCIERGE_WEB_CHAT_ENABLED') !== 'true') return respond({ code: 'CHAT_NOT_AVAILABLE' }, 503);
@@ -26,6 +28,7 @@ Deno.serve(async (request) => {
   if (!await platformSwitchEnabled('concierge')) return respond({ code: 'CHAT_NOT_AVAILABLE' }, 503);
   const { data: profile } = await db.from('mova_artist_profiles').select('artist_business_id').eq('handle', handle).eq('is_published', true).maybeSingle();
   if (!profile) return respond({ code: 'ARTIST_NOT_AVAILABLE' }, 404);
+  if (!await planFeatureEnabled(profile.artist_business_id, 'concierge')) return respond({ code: 'CHAT_NOT_AVAILABLE' }, 503);
   const outcome = await runConcierge(db, model, availabilityLookup(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''), {
     businessId: profile.artist_business_id, threadId, message, locale, site: Deno.env.get('PUBLIC_SITE_URL') ?? 'https://mova-beauty.co',
     // The client reads the reply from this response, so delivery is immediate.
@@ -36,4 +39,4 @@ Deno.serve(async (request) => {
   if (outcome.status === 'failed') return respond({ code: 'CHAT_SAVE_FAILED' }, 500);
   if (!('reply' in outcome)) return respond({ code: 'CHAT_SAVE_FAILED' }, 500);
   return respond({ reply: outcome.reply, needs_you: outcome.status === 'needs_you' });
-});
+}));

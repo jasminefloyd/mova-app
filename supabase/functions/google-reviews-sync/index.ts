@@ -1,3 +1,4 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { accessTokenFor, businessProfileReady, googleProvider, loadConnection } from '../_shared/google-connection.ts';
 import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
@@ -6,7 +7,7 @@ import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 // flag MOVA_GOOGLE_REVIEWS_ENABLED=true, a provider (MOVA_GOOGLE_PROVIDER), an active connection with the
 // Business Profile permission and a chosen Business Profile location, and the stylist's review-import switch.
 // Nothing here posts to Google.
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('google-reviews-sync', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request);
@@ -14,7 +15,7 @@ Deno.serve(async (request) => {
   if (!await platformSwitchEnabled('reviews')) return respond({ code: 'REVIEWS_FEATURE_DISABLED', synced: false }, 403);
   // Never imply that Google data was fetched when it was not.
   if (Deno.env.get('MOVA_GOOGLE_REVIEWS_ENABLED') !== 'true') return respond({ code: 'GOOGLE_REVIEWS_NOT_ENABLED', synced: false }, 409);
-  const provider = googleProvider();
+  const provider = googleProvider(request);
   if (!provider) return respond({ code: 'GOOGLE_NOT_CONFIGURED', synced: false }, 503);
   const db = serviceClient();
   const { data: features } = await db.rpc('mova_stylist_features', { p_artist_business_id: actor.businessId });
@@ -33,4 +34,4 @@ Deno.serve(async (request) => {
   }
   await db.from('mova_review_settings').update({ google_synced_at: now }).eq('artist_business_id', actor.businessId);
   return respond({ synced: true, imported: reviews.length, provider: provider.name, live: provider.live });
-});
+}));

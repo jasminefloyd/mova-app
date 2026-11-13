@@ -1,8 +1,10 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { deriveClientCardToken, sha256Hex } from '../_shared/provider-crypto.ts';
+import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('client-card-token', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (Deno.env.get('MOVA_CLIENT_PROFILES_ENABLED') !== 'true') return respond({ code: 'CLIENT_PROFILES_DISABLED' }, 403);
@@ -21,6 +23,7 @@ Deno.serve(async (request) => {
     const db = serviceClient();
     const { data: account } = await db.from('mova_customer_accounts').select('id').eq('user_id', user.id).eq('status', 'active').maybeSingle();
     if (!account) return respond({ code: 'CLIENT_PROFILE_NOT_FOUND' }, 404);
+    if (!await planFeatureEnabled(body.artist_business_id, 'wallet_client_card', account.id)) return respond({ code: 'PLAN_FEATURE_NOT_INCLUDED', feature: 'wallet_client_card' }, 403);
     const { data: link } = await db.from('mova_client_customer_links').select('client_id').eq('artist_business_id', body.artist_business_id).eq('customer_account_id', account.id).is('unlinked_at', null).maybeSingle();
     if (!link) return respond({ code: 'CLIENT_LINK_NOT_FOUND' }, 404);
 
@@ -51,4 +54,4 @@ Deno.serve(async (request) => {
     const code = error instanceof Error ? error.message : 'CLIENT_CARD_TOKEN_FAILED';
     return respond({ code }, code === 'CLIENT_CARD_TOKEN_KEY_UNAVAILABLE' ? 503 : 500);
   }
-});
+}));

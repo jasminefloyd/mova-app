@@ -1,9 +1,10 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { serviceClient } from '../_shared/booking.ts';
 import { sha256Hex } from '../_shared/provider-crypto.ts';
 import { buildIcsFeed } from '../_shared/ics.ts';
 
 const response=(body:string,status=200)=>new Response(body,{status,headers:{'Content-Type':'text/calendar; charset=utf-8','Cache-Control':'no-store','Content-Disposition':'attachment; filename="mova-calendar.ics"','X-Content-Type-Options':'nosniff'}});
-Deno.serve(async(request)=>{
+Deno.serve(withSystemRequestLogging('calendar-ics-feed', async(request)=>{
   if(request.method!=='GET')return new Response('Method not allowed',{status:405});
   const token=new URL(request.url).pathname.split('/').filter(Boolean).at(-1)??'';
   if(!/^[A-Za-z0-9_-]{40,}$/.test(token))return new Response('Not found',{status:404});
@@ -18,4 +19,4 @@ Deno.serve(async(request)=>{
   const sequence=new Map((mappings??[]).map((item:{appointment_id:string;event_sequence:number})=>[item.appointment_id,item.event_sequence]));
   const now=new Date().toISOString();const events=(appointments??[]).map((appointment:{id:string;service_name_snapshot:string;starts_at:string;ends_at:string;status:string;updated_at:string})=>({id:appointment.id,summary:appointment.service_name_snapshot,startsAt:appointment.starts_at,endsAt:appointment.ends_at,updatedAt:appointment.updated_at,status:appointment.status,sequence:Math.max(sequence.get(appointment.id)??0,Math.floor(new Date(appointment.updated_at).getTime()/1000))}));
   return response(buildIcsFeed(events,now));
-});
+}));

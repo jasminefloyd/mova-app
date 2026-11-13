@@ -1,3 +1,4 @@
+import { withSystemRequestLogging, loggedProviderFetch } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { resolveInAppNotificationPreference } from '../_shared/notification-preferences.ts';
 import { eventNotificationPayload, notificationKeys, type OutboxEvent } from '../_shared/jobs.ts';
@@ -5,7 +6,7 @@ import { StripeTestClient } from '../_shared/providers/stripe/client.ts';
 import { sendAppointmentEmail } from '../_shared/appointment-emails.ts';
 import { consumeSlotOpened } from '../_shared/seat-filler.ts';
 import { smsProviderFromEnv } from '../_shared/providers/sms/index.ts';
-import { emailProviderFromEnv, type EmailDb } from '../_shared/providers/email/index.ts';
+import { emailProviderFromEnv, sendEmail, type AppointmentEmailVars, type EmailDb, type EmailTemplateId } from '../_shared/providers/email/index.ts';
 
 const equal = (left: string, right: string) => {
   if (left.length !== right.length) return false;
@@ -52,12 +53,51 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
   const emailProvider = emailProviderFromEnv((name) => Deno.env.get(name));
   const aggregate = event as { aggregate_type?: string; aggregate_id?: string };
   if (emailProvider && outboxEvent.event_type.startsWith('appointment.') && aggregate.aggregate_type === 'appointment' && aggregate.aggregate_id) {
-    const outcome = await sendAppointmentEmail(db as unknown as EmailDb, emailProvider, aggregate.aggregate_id, outboxEvent.event_type, `email:${outboxEvent.id}`);
+    const templateForEvent: Record<string, EmailTemplateId> = { 'appointment.rescheduled': 'appointment_moved', 'appointment.cancelled': 'appointment_cancelled', 'appointment.review_request': 'review_request' };
+    const template = templateForEvent[outboxEvent.event_type];
+    const proposedEnabled = Deno.env.get('MOVA_EMAIL_PROPOSED_ENABLED') === 'true';
+    const reviewEnabled = proposedEnabled && Deno.env.get('MOVA_EMAIL_REVIEW_REQUESTS_ENABLED') === 'true'
+      && Boolean(Deno.env.get('MOVA_EMAIL_POSTAL_ADDRESS'));
+    if (template && !proposedEnabled) return;
+    if (template === 'review_request' && !reviewEnabled) return;
+    const outcome = await sendAppointmentEmail(db as unknown as EmailDb, emailProvider, aggregate.aggregate_id, outboxEvent.event_type, `email:${outboxEvent.id}`, new Date(), outboxEvent.payload, Deno.env.get('MOVA_EMAIL_POSTAL_ADDRESS'));
     if (outcome?.status === 'failed') throw new Error('APPOINTMENT_EMAIL_FAILED');
+
+    if (outboxEvent.event_type === 'appointment.pending_artist' && proposedEnabled) {
+      const { data: context, error } = await db.rpc('mova_appointment_stylist_email_context', { p_appointment_id: aggregate.aggregate_id });
+      if (error) throw new Error('STYLIST_EMAIL_CONTEXT_FAILED');
+      const value = context as { recipients?: Array<{ email: string; name: string }>; vars?: AppointmentEmailVars; artist_business_id?: string; locale?: string } | null;
+      for (const recipient of value?.recipients ?? []) {
+        const sent = await sendEmail(db as unknown as EmailDb, emailProvider, {
+          artistBusinessId: value?.artist_business_id ?? outboxEvent.artist_business_id!, clientId: null,
+          to: recipient.email, templateId: 'stylist_new_request', locale: value?.locale === 'es-US' ? 'es-US' : 'en-US',
+          vars: { ...(value?.vars as AppointmentEmailVars), stylistName: recipient.name, stylistUrl: `${Deno.env.get('MOVA_EMAIL_PUBLIC_BASE_URL') ?? 'https://mova-beauty.co'}/calendar`, postalAddress: Deno.env.get('MOVA_EMAIL_POSTAL_ADDRESS') },
+          idempotencyKey: `email:${outboxEvent.id}:stylist:${recipient.email.toLowerCase()}`,
+        });
+        if (sent.status === 'failed') throw new Error('APPOINTMENT_EMAIL_FAILED');
+      }
+    }
+  }
+
+  if (emailProvider && outboxEvent.event_type === 'artist.welcome' && Deno.env.get('MOVA_EMAIL_PROPOSED_ENABLED') === 'true') {
+    const { data: context, error } = await db.rpc('mova_stylist_welcome_email_context', { p_artist_business_id: outboxEvent.artist_business_id });
+    if (error) throw new Error('STYLIST_EMAIL_CONTEXT_FAILED');
+    const value = context as { recipients?: Array<{ email: string; name: string }>; vars?: AppointmentEmailVars; artist_business_id?: string; locale?: string } | null;
+    for (const recipient of value?.recipients ?? []) {
+      const sent = await sendEmail(db as unknown as EmailDb, emailProvider, {
+        artistBusinessId: value?.artist_business_id ?? outboxEvent.artist_business_id!, clientId: null,
+        to: recipient.email, templateId: 'stylist_welcome', locale: value?.locale === 'es-US' ? 'es-US' : 'en-US',
+        vars: { ...(value?.vars as AppointmentEmailVars), clientName: recipient.name, stylistName: recipient.name,
+          bookingUrl: `${Deno.env.get('MOVA_EMAIL_PUBLIC_BASE_URL') ?? 'https://mova-beauty.co'}/onboarding/profile`,
+          postalAddress: Deno.env.get('MOVA_EMAIL_POSTAL_ADDRESS') },
+        idempotencyKey: `email:${outboxEvent.id}:stylist:${recipient.email.toLowerCase()}`,
+      });
+      if (sent.status === 'failed') throw new Error('APPOINTMENT_EMAIL_FAILED');
+    }
   }
 }
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('job-worker', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const secret = Deno.env.get('MOVA_JOB_WORKER_SECRET');
@@ -86,7 +126,7 @@ Deno.serve(async (request) => {
         if (Deno.env.get('MOVA_STRIPE_TEST_MODE') !== 'true') throw new Error('STRIPE_TEST_MODE_DISABLED');
         const key = Deno.env.get('STRIPE_SECRET_KEY');
         if (!key?.startsWith('sk_test_')) throw new Error('STRIPE_TEST_CONFIGURATION_MISSING');
-        const stripe = new StripeTestClient(key);
+        const stripe = new StripeTestClient(key, loggedProviderFetch(request, 'stripe'));
         const session = await stripe.retrieveCheckoutSession(job.payload.session_id, job.payload.account_id);
         if (session.status === 'complete') throw new Error('CHECKOUT_COMPLETED_AWAITING_WEBHOOK');
         if (session.status === 'open') {
@@ -105,7 +145,7 @@ Deno.serve(async (request) => {
         if (Deno.env.get('MOVA_STRIPE_TEST_MODE') !== 'true') throw new Error('STRIPE_TEST_MODE_DISABLED');
         const key = Deno.env.get('STRIPE_SECRET_KEY');
         if (!key?.startsWith('sk_test_')) throw new Error('STRIPE_TEST_CONFIGURATION_MISSING');
-        const result = await new StripeTestClient(key).createRefund({
+        const result = await new StripeTestClient(key, loggedProviderFetch(request, 'stripe')).createRefund({
           paymentIntentId: job.payload.payment_intent_id,
           amountMinor: Number(job.payload.amount_minor),
           accountId: job.payload.account_id,
@@ -126,7 +166,7 @@ Deno.serve(async (request) => {
         if (Deno.env.get('MOVA_STRIPE_TEST_MODE') !== 'true') throw new Error('STRIPE_TEST_MODE_DISABLED');
         const key = Deno.env.get('STRIPE_SECRET_KEY');
         if (!key?.startsWith('sk_test_')) throw new Error('STRIPE_TEST_CONFIGURATION_MISSING');
-        const fee = await new StripeTestClient(key).retrieveProcessorFee(job.payload.payment_intent_id, job.payload.account_id);
+        const fee = await new StripeTestClient(key, loggedProviderFetch(request, 'stripe')).retrieveProcessorFee(job.payload.payment_intent_id, job.payload.account_id);
         if (!fee) throw new Error('STRIPE_FEE_NOT_SETTLED');
         const { error: feeError } = await db.rpc('mova_stripe_record_processor_fee', { p_payment_id: job.payload.payment_id, p_fee_minor: fee.feeMinor });
         if (feeError) throw new Error('STRIPE_FEE_SAVE_FAILED');
@@ -153,4 +193,4 @@ Deno.serve(async (request) => {
     }
   }
   return respond({ leased: jobs?.length ?? 0, succeeded, retried, dead });
-});
+}));

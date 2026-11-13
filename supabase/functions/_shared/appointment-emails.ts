@@ -9,7 +9,7 @@ type Context = {
  * Task 4.3: the client email for an appointment outbox event or reminder. Returns null when the event
  * has no email (other event types, no client email). Idempotent on `key`.
  */
-export async function sendAppointmentEmail(db: EmailDb, provider: EmailProvider, appointmentId: string, eventType: string, key: string, now = new Date()): Promise<SendEmailOutcome | null> {
+export async function sendAppointmentEmail(db: EmailDb, provider: EmailProvider, appointmentId: string, eventType: string, key: string, now = new Date(), payload: Record<string, unknown> = {}, postalAddress?: string | null): Promise<SendEmailOutcome | null> {
   const { data, error } = await db.rpc('mova_appointment_email_context', { p_appointment_id: appointmentId, p_event_type: eventType });
   if (error) throw new Error('APPOINTMENT_EMAIL_CONTEXT_FAILED');
   const context = data as unknown as Context | null;
@@ -17,6 +17,6 @@ export async function sendAppointmentEmail(db: EmailDb, provider: EmailProvider,
   return sendEmail(db, provider, {
     artistBusinessId: context.artist_business_id, clientId: context.client_id, to: context.to, templateId: context.template_id,
     locale: context.locale === 'es-US' ? 'es-US' : 'en-US', idempotencyKey: key, now,
-    vars: { clientName: context.client_name, businessName: context.business_name, serviceName: context.service_name, startsAt: context.starts_at, timeZone: context.time_zone, locationName: context.location_name },
+    vars: { clientName: context.client_name, businessName: context.business_name, serviceName: context.service_name, startsAt: typeof payload.starts_at === 'string' ? payload.starts_at : context.starts_at, previousStartsAt: typeof payload.previous_starts_at === 'string' ? payload.previous_starts_at : null, manageUrl: typeof payload.review_url === 'string' ? payload.review_url : null, timeZone: context.time_zone, locationName: context.location_name, postalAddress },
   });
 }

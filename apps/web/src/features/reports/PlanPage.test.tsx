@@ -10,7 +10,7 @@ const calls: Array<{ name: string; body: Record<string, unknown> }> = [];
 const plans = [
   { plan_key: 'free', display_name: 'Free', monthly_price_minor: 0, mova_fee_basis_points: 150, status: 'active', entitlements: {} },
   { plan_key: 'pro', display_name: 'Pro', monthly_price_minor: 1900, mova_fee_basis_points: 100, status: 'active', entitlements: {} },
-  { plan_key: 'ai_growth', display_name: 'AI Growth', monthly_price_minor: 3900, mova_fee_basis_points: 50, status: 'active', entitlements: {} },
+  { plan_key: 'ai_growth', display_name: 'AI + Growth', monthly_price_minor: 3900, mova_fee_basis_points: 75, status: 'active', entitlements: {} },
 ];
 let billing = true;
 const invoke = vi.fn(async (name: string, options: { body: Record<string, unknown> }) => {
@@ -25,13 +25,13 @@ const mount = (path: string) => { const host = document.createElement('div'); ac
 
 describe('PlanPage (task 5.8)', () => {
   beforeAll(async () => { await i18nReady; });
-  it('formats fees as percentages', () => { expect(formatFee(150, 'en-US')).toBe('1.5%'); expect(formatFee(50, 'en-US')).toBe('0.5%'); expect(formatFee(100, 'en-US')).toBe('1.0%'); });
+  it('formats fees as percentages', () => { expect(formatFee(150, 'en-US')).toBe('1.5%'); expect(formatFee(75, 'en-US')).toBe('0.75%'); expect(formatFee(100, 'en-US')).toBe('1.0%'); });
   it('shows the confirmed prices without the placeholder copy', async () => {
     const host = mount('/BID-1/settings/plan'); await flush();
     const text = host.textContent ?? '';
     expect(text).toContain('$0/month + 1.5% per Mova payment');
     expect(text).toContain('$19/month + 1.0% per Mova payment');
-    expect(text).toContain('$39/month + 0.5% per Mova payment');
+    expect(text).toContain('$39/month + 0.75% per Mova payment');
     expect(text).not.toContain('Pricing details coming soon');
     expect(text).not.toContain('Proposed pricing');
   });

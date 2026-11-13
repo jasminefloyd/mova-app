@@ -1,4 +1,6 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
+import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 import { unsplashProviderFromEnv, type UnsplashPhoto } from '../_shared/providers/unsplash/index.ts';
 
 // Profile cover from Unsplash (P6). The browser only sends a search or a photo id. The photo is looked up
@@ -13,11 +15,12 @@ function publicPhoto(photo: UnsplashPhoto) {
   return { id: photo.id, alt: photo.alt, thumbUrl: photo.thumbUrl, imageUrl: photo.imageUrl, photographerName: photo.photographerName, photographerUrl: photo.photographerUrl, photoUrl: photo.photoUrl };
 }
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('profile-cover', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request);
   if (!actor) return respond({ code: 'UNAUTHENTICATED' }, 401);
+  if (!await planFeatureEnabled(actor.businessId, 'custom_cover')) return respond({ code: 'PLAN_FEATURE_NOT_INCLUDED', feature: 'custom_cover' }, 403);
   const body = await request.json().catch(() => null);
   if (!body || typeof body.action !== 'string') return respond({ code: 'REQUEST_INVALID' }, 422);
   const provider = unsplashProviderFromEnv((name) => Deno.env.get(name));
@@ -61,4 +64,4 @@ Deno.serve(async (request) => {
     return error ? respond({ code: 'COVER_SAVE_FAILED' }, 500) : respond({ cover: { source: 'upload' } });
   }
   return respond({ code: 'ACTION_INVALID' }, 422);
-});
+}));

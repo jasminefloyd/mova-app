@@ -1,13 +1,15 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { conciergeModelFromEnv } from '../_shared/providers/ai/live.ts';
 import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 import { instagramProviderFromEnv } from '../_shared/providers/meta/fake.ts';
 import { availabilityLookup, runConcierge } from '../_shared/concierge/pipeline.ts';
+import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 
 // Task 5.5: Instagram direct messages into the concierge. Only the fake provider exists (Meta waits on
 // O6) with the O8 model adapter. The Instagram account is matched to a stylist through an active
 // mova_sending_identities row (channel 'instagram', address = page id).
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('instagram-webhook', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (!await platformSwitchEnabled('concierge')) return respond({ code: 'CHANNEL_NOT_ENABLED' }, 503);
@@ -21,6 +23,7 @@ Deno.serve(async (request) => {
   const db = serviceClient();
   const { data: identity } = await db.from('mova_sending_identities').select('artist_business_id').eq('channel', 'instagram').eq('address', inbound.pageId).eq('status', 'active').maybeSingle();
   if (!identity) return respond({ accepted: true, routed: false });
+  if (!await planFeatureEnabled(identity.artist_business_id, 'concierge_instagram')) return respond({ accepted: true, routed: false });
   const outcome = await runConcierge(db, model, availabilityLookup(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''), {
     businessId: identity.artist_business_id, threadId: inbound.senderId, message: inbound.text, locale: /[¿¡ñáéíóú]/i.test(inbound.text) ? 'es-US' : 'en-US',
     inboundProvider: provider.name, inboundProviderMessageId: inbound.messageId, site: Deno.env.get('PUBLIC_SITE_URL') ?? 'https://mova-beauty.co',
@@ -33,4 +36,4 @@ Deno.serve(async (request) => {
     },
   });
   return respond({ accepted: true, routed: true, status: outcome.status });
-});
+}));

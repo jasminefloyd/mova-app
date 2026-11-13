@@ -1,3 +1,4 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 import { searchAvailability } from '../../../packages/domain/src/availability.ts';
 import { corsHeaders, respond } from '../_shared/booking.ts';
@@ -6,7 +7,7 @@ import { combinedDurationMinutes, requiresCardDeposit, type ServiceRule } from '
 type Row={id:string;name:string;time_zone:string;booking_mode:'instant'|'request';is_active:boolean;artist_business_id:string;payment_collector:string|null};
 const plusDays=(date:string,days:number)=>{const d=new Date(`${date}T12:00:00Z`);d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10);};
 
-Deno.serve(async(request)=>{
+Deno.serve(withSystemRequestLogging('availability-search', async(request)=>{
   if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
   if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
   const input=await request.json().catch(()=>null);
@@ -49,4 +50,4 @@ Deno.serve(async(request)=>{
   if(!groups)return respond({code:'AVAILABILITY_UNAVAILABLE'},503);
   const days=Array.from({length:input.days},(_,index)=>{const date=plusDays(input.from_date,index);return {date,open_count:groups.reduce((sum,group)=>sum+group.slots.filter((slot)=>slot.local_date===date).length,0)};});
   return respond({days,groups});
-});
+}));

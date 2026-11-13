@@ -39,4 +39,34 @@ The canvas stays the design source of truth. After an approved canvas change, re
 - update `design-manifest.json`;
 - re-run `SCREEN_MAP.md`.
 
+## Email design system (EM0)
+
+Email templates use the Mova app colors, rounded panels, status chips, date tiles and pill buttons. Render a 600px max-width, single-column email with a header, one state-led hero, appointment details, one primary action and a footer. Use inline styles and table layout for mail client compatibility; retain plain-text alternatives and escape interpolated values. Minimum body text is 15px and CTA targets are at least 44px. Spanish strings must not truncate.
+
+Voice is warm and direct: lead with the event (“You’re booked, Simone.”), use the stylist’s name in client emails, describe who acts next, and state what was paid, is due, refunded or not charged. No emoji, urgency tricks or exclamation marks. Subject stays concise; preview supplies date/time.
+
+| State | Visual treatment | Templates |
+|---|---|---|
+| Confirmed | Forest hero, ivory date tile and mint status chip | Booking confirmed, request accepted, reminder, moved, stylist welcome |
+| Not confirmed | Warm dashed panel, explicit pending language | Request sent, stylist new request |
+| Closed | White hero | Declined, cancelled, password reset |
+| Review | Forest hero with warm stars | Review request (A-29 approval and real postal address required) |
+
+| Template | Recipient | Language | State |
+|---|---|---|---|
+| Booking confirmed | Client | EN/ES | Built; existing provider gate |
+| Request sent | Client | EN/ES | Built; existing provider gate |
+| Request accepted | Client | EN/ES | Built; existing provider gate |
+| Request declined | Client | EN/ES | Built; existing provider gate |
+| Reminder | Client | EN/ES | Built; existing provider gate |
+| Appointment moved | Client | EN/ES | Built; proposed-template gate defaults off |
+| Appointment cancelled | Client | EN/ES | Built; proposed-template gate defaults off |
+| Review request | Client | EN/ES | Branded renderer built; delivery awaits A-29 and postal address |
+| Confirm email | Stylist | EN/ES | Supabase Auth template files/config added; hosted dashboard setup required |
+| Reset password | Stylist | EN/ES | Supabase Auth template files/config added; hosted dashboard setup required |
+| Welcome | Stylist | EN/ES | Branded renderer and profile-created event; proposed-template gate defaults off |
+| New request to answer | Stylist | EN/ES | Built; proposed-template gate defaults off |
+
+Never send with the `[MAILING ADDRESS]` placeholder. Proposed delivery is off unless `MOVA_EMAIL_PROPOSED_ENABLED=true`; review requests require the extra `MOVA_EMAIL_REVIEW_REQUESTS_ENABLED=true` gate and an actual `MOVA_EMAIL_POSTAL_ADDRESS`. Provider sending also requires its existing explicit live configuration. See `supabase/functions/_shared/providers/email/README.md` for secrets and rollout details.
+
 Visual baselines in `tests/visual/` are updated in the same PR, with owner approval (gate G2a).

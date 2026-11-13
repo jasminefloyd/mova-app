@@ -1,6 +1,7 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient, tokenHash } from '../_shared/booking.ts';
 import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('review-public-context', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (!await platformSwitchEnabled('reviews')) return respond({ code: 'REVIEWS_FEATURE_DISABLED' }, 503);
@@ -17,4 +18,4 @@ Deno.serve(async (request) => {
     if (photo?.signedUrl) context.artist_photo_url = photo.signedUrl;
   }
   return respond(context);
-});
+}));

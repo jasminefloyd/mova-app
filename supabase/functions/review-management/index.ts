@@ -1,8 +1,9 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { accessTokenFor, businessProfileReady, googleProvider, loadConnection } from '../_shared/google-connection.ts';
 import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('review-management', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request);
@@ -55,7 +56,7 @@ Deno.serve(async (request) => {
     const isReply = body.action === 'reply_google';
     const text = isReply && typeof body.reply === 'string' ? body.reply.trim() : null;
     if (isReply && (!text || text.length > 4096)) return respond({ code: 'REVIEW_REPLY_INVALID' }, 422);
-    const provider = googleProvider();
+    const provider = googleProvider(request);
     if (!provider) return respond({ code: 'GOOGLE_NOT_CONFIGURED' }, 503);
     const connection = await loadConnection(db, actor.businessId).catch(() => null);
     if (!businessProfileReady(connection)) return respond({ code: 'GOOGLE_NOT_CONNECTED' }, 409);
@@ -81,4 +82,4 @@ Deno.serve(async (request) => {
     return respond({ saved: true, reply_status: 'posted' });
   }
   return respond({ code: 'ACTION_INVALID' }, 422);
-});
+}));

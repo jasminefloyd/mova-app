@@ -1,13 +1,15 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { deriveClientCardToken, sha256Hex } from '../_shared/provider-crypto.ts';
 import { buildClientCardPass, type WalletPlatform } from '../_shared/providers/wallet/pass.ts';
 import { walletSignerFromEnv } from '../_shared/providers/wallet/fake.ts';
+import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 
 // Task 5.7: a signed-in client saves their client card for one stylist to Apple or Google Wallet.
 // Platform flag MOVA_WALLET_CLIENT_CARD_ENABLED stays off until signing is live (O11); the stylist's
 // wallet_card switch (default ON, 0053) must also be on. Only the fake signer exists today.
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('wallet-pass-create', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (Deno.env.get('MOVA_WALLET_CLIENT_CARD_ENABLED') !== 'true') return respond({ code: 'WALLET_NOT_ENABLED' }, 503);
@@ -26,6 +28,7 @@ Deno.serve(async (request) => {
   if (features?.wallet_card !== true) return respond({ code: 'WALLET_NOT_OFFERED' }, 409);
   const { data: account } = await db.from('mova_customer_accounts').select('id,display_name,preferred_locale').eq('user_id', user.id).eq('status', 'active').maybeSingle();
   if (!account) return respond({ code: 'CLIENT_PROFILE_NOT_FOUND' }, 404);
+  if (!await planFeatureEnabled(body.artist_business_id, 'wallet_client_card', account.id)) return respond({ code: 'PLAN_FEATURE_NOT_INCLUDED', feature: 'wallet_client_card' }, 403);
   const { data: link } = await db.from('mova_client_customer_links').select('client_id').eq('artist_business_id', body.artist_business_id).eq('customer_account_id', account.id).is('unlinked_at', null).maybeSingle();
   if (!link) return respond({ code: 'CLIENT_LINK_NOT_FOUND' }, 404);
   // The pass carries the same client card link the profile shows; the profile creates it first.
@@ -55,4 +58,4 @@ Deno.serve(async (request) => {
   });
   if (error) return respond({ code: 'WALLET_PASS_SAVE_FAILED' }, 500);
   return respond({ platform, signer: signer.name, live: signed.live, content_type: signed.contentType, file_name: signed.fileName, pass_base64: signed.base64 });
-});
+}));

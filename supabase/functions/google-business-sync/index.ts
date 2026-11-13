@@ -1,3 +1,4 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { accessTokenFor, businessProfileReady, googleProvider, loadConnection, type GoogleConnectionRow } from '../_shared/google-connection.ts';
 import { desiredListing, pendingListing, servicesMenu, type GoogleProvider, type HoursRow, type PendingChange, type ProfileRow, type ServiceRow, type Snapshot } from '../_shared/providers/google/index.ts';
@@ -79,11 +80,11 @@ async function pushPending(client: Db, provider: GoogleProvider, connection: Goo
   return { sent };
 }
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('google-business-sync', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const client = db();
-  const provider = googleProvider();
+  const provider = googleProvider(request);
 
   const cronSecret = Deno.env.get('CRON_SECRET');
   if (cronSecret && request.headers.get('Authorization') === `Bearer ${cronSecret}`) {
@@ -138,4 +139,4 @@ Deno.serve(async (request) => {
     }
   }
   return respond({ code: 'INVALID_ACTION' }, 422);
-});
+}));

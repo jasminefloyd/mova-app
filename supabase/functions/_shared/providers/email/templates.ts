@@ -1,61 +1,80 @@
 import type { EmailLocale, EmailTemplateId } from './types.ts';
 
 export const EMAIL_TEMPLATES: EmailTemplateId[] = ['booking_confirmation', 'request_received', 'request_accepted', 'request_declined', 'appointment_reminder'];
+export const PROPOSED_EMAIL_TEMPLATES: EmailTemplateId[] = ['appointment_moved', 'appointment_cancelled', 'review_request', 'stylist_welcome', 'stylist_new_request'];
 
 export type AppointmentEmailVars = {
-  clientName: string;
-  businessName: string;
-  serviceName: string;
-  startsAt: string;      // ISO timestamp
-  timeZone: string;      // IANA, the location's
-  locationName: string;
-  manageUrl?: string | null;
+  clientName: string; businessName: string; serviceName: string; startsAt: string; timeZone: string;
+  locationName: string; manageUrl?: string | null; previousStartsAt?: string | null; stylistName?: string | null;
+  clientCount?: number; clientLastVisit?: string | null; clientNote?: string | null; postalAddress?: string | null;
+  bookingUrl?: string | null; stylistUrl?: string | null; duration?: string | null; amount?: string | null;
 };
 
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
 const firstName = (name: string) => name.trim().split(/\s+/)[0]?.slice(0, 40) || '';
+const safeLink = (value?: string | null) => value && /^https:\/\//i.test(value) ? value : null;
+const dateParts = (startsAt: string, timeZone: string, locale: EmailLocale) => {
+  const date = new Date(startsAt);
+  const fmt = new Intl.DateTimeFormat(locale, { timeZone, weekday: 'short', month: 'short', day: 'numeric' });
+  const parts = fmt.formatToParts(date);
+  return { day: parts.find((p) => p.type === 'day')?.value ?? '', month: (parts.find((p) => p.type === 'month')?.value ?? '').toUpperCase(), weekday: (parts.find((p) => p.type === 'weekday')?.value ?? '').toUpperCase(), time: new Intl.DateTimeFormat(locale, { timeZone, hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(date), full: new Intl.DateTimeFormat(locale, { timeZone, weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(date) };
+};
+export function formatWhen(startsAt: string, timeZone: string, locale: EmailLocale) { return dateParts(startsAt, timeZone, locale).full; }
 
-export function formatWhen(startsAt: string, timeZone: string, locale: EmailLocale) {
-  return new Intl.DateTimeFormat(locale, { timeZone, weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(new Date(startsAt));
-}
+type Copy = { subject: string; preview: string; headline: string; lead: string; action: string; footer: string; state: 'forest' | 'request' | 'white' | 'review' };
+const COPY: Record<EmailLocale, Record<EmailTemplateId, (v: AppointmentEmailVars, date: ReturnType<typeof dateParts>) => Copy>> = {
+  'en-US': {
+    booking_confirmation: (v,d) => ({ subject: `You're booked with ${v.businessName}`, preview: `${v.serviceName} on ${d.full}. Add it to your calendar.`, headline: `You're booked, ${firstName(v.clientName)}.`, lead: `Your ${v.serviceName} with ${v.businessName} is confirmed.`, action: 'View or change your appointment', footer: 'Running late or need to move it? Use the button above, any time up to 24 hours before.', state: 'forest' }),
+    request_received: (v,d) => ({ subject: `Request sent to ${v.businessName}`, preview: `This is not confirmed yet. ${v.businessName} will reply within 24 hours.`, headline: `Your request is with ${v.businessName}.`, lead: `${v.businessName} will check the salon's book and reply within 24 hours. This is not confirmed yet, and no payment has been taken.`, action: 'View your request', footer: 'You will get another email when the stylist replies. Only then is the time yours.', state: 'request' }),
+    request_accepted: (v,d) => ({ subject: `${v.businessName} accepted your request`, preview: `${v.serviceName} on ${d.full} is confirmed.`, headline: 'Good news. Your stylist said yes.', lead: `${v.businessName} accepted your request. Your ${v.serviceName} is confirmed.`, action: 'View or change your appointment', footer: 'Need to change it? Use the button above.', state: 'forest' }),
+    request_declined: (v,d) => ({ subject: `${v.businessName} couldn't take this request`, preview: `That time did not work. See the next open times.`, headline: `That time didn't work out.`, lead: `${v.businessName} can't take your ${v.serviceName} request for ${d.full}. Nothing was charged.`, action: 'Pick another time', footer: 'You can choose another time on the stylist’s booking page.', state: 'white' }),
+    appointment_reminder: (v,d) => ({ subject: `Reminder: ${v.serviceName} with ${v.businessName} tomorrow`, preview: `Tomorrow at ${d.time} at ${v.locationName}.`, headline: `See you tomorrow, ${firstName(v.clientName)}.`, lead: `A reminder that your ${v.serviceName} with ${v.businessName} is coming up.`, action: 'Get directions', footer: 'Need to reschedule or cancel? Use the buttons above.', state: 'forest' }),
+    appointment_moved: (v,d) => ({ subject: `${v.businessName} moved your appointment`, preview: `New time: ${d.full}. Your deposit carries over.`, headline: 'Your appointment has a new time.', lead: `${v.businessName} moved your ${v.serviceName}. Your deposit carries over.`, action: 'This works for me', footer: 'If the new time does not work, choose another time or cancel from your appointment page.', state: 'forest' }),
+    appointment_cancelled: (v,d) => ({ subject: `Your appointment with ${v.businessName} is cancelled`, preview: `${v.serviceName} on ${d.full} is cancelled.`, headline: 'Your appointment is cancelled.', lead: `${v.serviceName} with ${v.businessName} on ${d.full} is cancelled.`, action: 'Book again', footer: 'If you think this was a mistake, contact the stylist.', state: 'white' }),
+    review_request: (v,d) => ({ subject: `How was your visit with ${v.businessName}?`, preview: `Tell us how your ${v.serviceName} went. It takes less than a minute.`, headline: `How was your ${v.serviceName}?`, lead: `Your visit with ${v.businessName} on ${d.full} is ready for a review.`, action: 'Write a review', footer: 'Reviews come only from real visits. You can opt out of review requests below.', state: 'review' }),
+    stylist_welcome: (v) => ({ subject: `Welcome to Mova · ${v.businessName}`, preview: 'Your business moves with you. Three steps to your first booking.', headline: `Welcome to Mova, ${firstName(v.stylistName || v.businessName)}.`, lead: 'Your clients follow you. Now your business can too.', action: 'Finish setting up', footer: 'You are on the Free plan. No Mova fee on cash or payments the salon collects.', state: 'forest' }),
+    stylist_new_request: (v,d) => ({ subject: `New request for ${v.businessName}: ${v.clientName} · ${d.full}`, preview: `${v.serviceName} at ${v.locationName}. Reply within 24 hours.`, headline: `${firstName(v.clientName)} wants a time at the salon.`, lead: `Check the salon's book, then accept or suggest another time. The request expires in 24 hours.`, action: 'Open request', footer: v.clientNote ? `Client note: “${v.clientNote}”` : 'Open Mova to answer this request.', state: 'request' }),
+  },
+  'es-US': {
+    booking_confirmation: (v,d) => ({ subject: `Tu cita con ${v.businessName} está reservada`, preview: `${v.serviceName} el ${d.full}. Agrégala a tu calendario.`, headline: `Tu cita está reservada, ${firstName(v.clientName)}.`, lead: `Tu cita de ${v.serviceName} con ${v.businessName} está confirmada.`, action: 'Ver o cambiar tu cita', footer: '¿Vas tarde o necesitas cambiarla? Usa el botón de arriba.', state: 'forest' }),
+    request_received: (v) => ({ subject: `Solicitud enviada a ${v.businessName}`, preview: `Todavía no está confirmada. Recibirás una respuesta en 24 horas.`, headline: `Tu solicitud está con ${v.businessName}.`, lead: `${v.businessName} revisará su agenda y responderá en 24 horas. Todavía no está confirmada y no se ha cobrado nada.`, action: 'Ver tu solicitud', footer: 'Recibirás otro correo cuando responda. Solo entonces la cita será tuya.', state: 'request' }),
+    request_accepted: (v,d) => ({ subject: `${v.businessName} aceptó tu solicitud`, preview: `${v.serviceName} el ${d.full} está confirmada.`, headline: 'Buenas noticias. Tu estilista aceptó.', lead: `${v.businessName} aceptó tu solicitud. Tu cita de ${v.serviceName} está confirmada.`, action: 'Ver o cambiar tu cita', footer: '¿Necesitas cambiarla? Usa el botón de arriba.', state: 'forest' }),
+    request_declined: (v,d) => ({ subject: `${v.businessName} no pudo aceptar esta solicitud`, preview: `Ese horario no funcionó. Mira los próximos horarios disponibles.`, headline: 'Ese horario no funcionó.', lead: `${v.businessName} no puede aceptar tu solicitud de ${v.serviceName} para ${d.full}. No se cobró nada.`, action: 'Elegir otro horario', footer: 'Puedes elegir otro horario en la página de reservas.', state: 'white' }),
+    appointment_reminder: (v,d) => ({ subject: `Recordatorio: ${v.serviceName} con ${v.businessName} mañana`, preview: `Mañana a las ${d.time} en ${v.locationName}.`, headline: `Nos vemos mañana, ${firstName(v.clientName)}.`, lead: `Te recordamos que tu cita de ${v.serviceName} con ${v.businessName} se acerca.`, action: 'Cómo llegar', footer: '¿Necesitas cambiar o cancelar? Usa los botones de arriba.', state: 'forest' }),
+    appointment_moved: (v,d) => ({ subject: `${v.businessName} cambió tu cita`, preview: `Nuevo horario: ${d.full}. Tu depósito se conserva.`, headline: 'Tu cita tiene un nuevo horario.', lead: `${v.businessName} cambió tu cita de ${v.serviceName}. Tu depósito se conserva.`, action: 'Este horario me funciona', footer: 'Si el nuevo horario no te funciona, elige otro o cancela desde tu cita.', state: 'forest' }),
+    appointment_cancelled: (v,d) => ({ subject: `Tu cita con ${v.businessName} fue cancelada`, preview: `${v.serviceName} el ${d.full} fue cancelada.`, headline: 'Tu cita fue cancelada.', lead: `Tu cita de ${v.serviceName} con ${v.businessName} para ${d.full} fue cancelada.`, action: 'Reservar otra vez', footer: 'Si crees que fue un error, comunícate con tu estilista.', state: 'white' }),
+    review_request: (v,d) => ({ subject: `¿Cómo fue tu visita con ${v.businessName}?`, preview: `Cuéntanos cómo te fue con ${v.serviceName}.`, headline: `¿Cómo estuvo tu ${v.serviceName}?`, lead: `Tu visita con ${v.businessName} el ${d.full} está lista para una reseña.`, action: 'Escribir una reseña', footer: 'Las reseñas son solo de visitas reales. Puedes dejar de recibir estas solicitudes abajo.', state: 'review' }),
+    stylist_welcome: (v) => ({ subject: `Te damos la bienvenida a Mova · ${v.businessName}`, preview: 'Tu negocio se mueve contigo. Tres pasos para tu primera reserva.', headline: `Te damos la bienvenida a Mova, ${firstName(v.stylistName || v.businessName)}.`, lead: 'Tus clientes te siguen. Ahora tu negocio también.', action: 'Terminar configuración', footer: 'Estás en el plan Gratis. Mova no cobra por efectivo ni pagos que cobre el salón.', state: 'forest' }),
+    stylist_new_request: (v,d) => ({ subject: `Nueva solicitud para ${v.businessName}: ${v.clientName} · ${d.full}`, preview: `${v.serviceName} en ${v.locationName}. Responde en 24 horas.`, headline: `${firstName(v.clientName)} quiere una cita en el salón.`, lead: 'Revisa la agenda del salón y acepta o sugiere otro horario. La solicitud vence en 24 horas.', action: 'Abrir solicitud', footer: v.clientNote ? `Nota del cliente: “${v.clientNote}”` : 'Abre Mova para responder.', state: 'request' }),
+  },
+};
 
-type Copy = { subject: string; lead: string; footer: string };
-
-function copyFor(id: EmailTemplateId, locale: EmailLocale, v: AppointmentEmailVars, when: string): Copy {
-  const b = v.businessName, s = v.serviceName;
-  const en: Record<EmailTemplateId, Copy> = {
-    booking_confirmation: { subject: `You're booked with ${b}`, lead: `Your ${s} with ${b} is confirmed.`, footer: 'Need to change it? Use the link below.' },
-    request_received: { subject: `Request sent to ${b}`, lead: `${b} got your request for ${s}. You'll hear back once they accept or suggest another time.`, footer: 'This is not confirmed yet.' },
-    request_accepted: { subject: `${b} accepted your request`, lead: `Good news: ${b} accepted your request. Your ${s} is confirmed.`, footer: 'Need to change it? Use the link below.' },
-    request_declined: { subject: `${b} couldn't take this request`, lead: `${b} can't take your ${s} request at this time.`, footer: 'You can pick another time on their booking page.' },
-    appointment_reminder: { subject: `Reminder: ${s} with ${b} tomorrow`, lead: `A reminder that your ${s} with ${b} is coming up.`, footer: 'Need to change it? Use the link below.' },
-  };
-  const es: Record<EmailTemplateId, Copy> = {
-    booking_confirmation: { subject: `Tu cita con ${b} está reservada`, lead: `Tu cita de ${s} con ${b} está confirmada.`, footer: '¿Necesitas cambiarla? Usa el enlace de abajo.' },
-    request_received: { subject: `Solicitud enviada a ${b}`, lead: `${b} recibió tu solicitud de ${s}. Te avisaremos cuando la acepte o sugiera otro horario.`, footer: 'Todavía no está confirmada.' },
-    request_accepted: { subject: `${b} aceptó tu solicitud`, lead: `Buenas noticias: ${b} aceptó tu solicitud. Tu cita de ${s} está confirmada.`, footer: '¿Necesitas cambiarla? Usa el enlace de abajo.' },
-    request_declined: { subject: `${b} no pudo aceptar esta solicitud`, lead: `${b} no puede aceptar tu solicitud de ${s} en este momento.`, footer: 'Puedes elegir otro horario en su página de reservas.' },
-    appointment_reminder: { subject: `Recordatorio: ${s} con ${b} mañana`, lead: `Te recordamos que tu cita de ${s} con ${b} es pronto.`, footer: '¿Necesitas cambiarla? Usa el enlace de abajo.' },
-  };
-  void when;
-  return (locale === 'es-US' ? es : en)[id];
-}
-
-/** Renders one transactional email. Every variable is escaped in the HTML part. */
 export function renderEmail(id: EmailTemplateId, locale: EmailLocale, vars: AppointmentEmailVars) {
-  const when = formatWhen(vars.startsAt, vars.timeZone, locale);
-  const copy = { ...copyFor(id, locale, vars, when) };
-  const greeting = locale === 'es-US' ? `Hola ${firstName(vars.clientName)},` : `Hi ${firstName(vars.clientName)},`;
-  const whenLabel = locale === 'es-US' ? 'Cuándo' : 'When';
-  const whereLabel = locale === 'es-US' ? 'Dónde' : 'Where';
-  const manageLabel = locale === 'es-US' ? 'Ver o cambiar tu cita' : 'View or change your appointment';
-  const link = vars.manageUrl && /^https:\/\//.test(vars.manageUrl) ? vars.manageUrl : null;
-  if (!link && /link below|enlace de abajo/.test(copy.footer)) copy.footer = locale === 'es-US' ? `Para cambiarla, contacta a ${vars.businessName}.` : `To change it, contact ${vars.businessName}.`;
-  const text = [greeting, '', copy.lead, '', `${whenLabel}: ${when}`, `${whereLabel}: ${vars.locationName}`, '', copy.footer, link ? `${manageLabel}: ${link}` : '', '', '— Mova']
-    .filter((line, index, all) => !(line === '' && all[index - 1] === '')).join('\n').trim();
-  const html = `<!doctype html><html lang="${locale === 'es-US' ? 'es' : 'en'}"><body style="font-family:Arial,sans-serif;color:#18392F">`
-    + `<p>${escapeHtml(greeting)}</p><p>${escapeHtml(copy.lead)}</p>`
-    + `<p><strong>${escapeHtml(whenLabel)}:</strong> ${escapeHtml(when)}<br><strong>${escapeHtml(whereLabel)}:</strong> ${escapeHtml(vars.locationName)}</p>`
-    + `<p>${escapeHtml(copy.footer)}</p>${link ? `<p><a href="${escapeHtml(link)}">${escapeHtml(manageLabel)}</a></p>` : ''}<p>— Mova</p></body></html>`;
-  return { subject: copy.subject, text, html };
+  const lang = locale === 'es-US' ? 'es-US' : 'en-US';
+  const d = dateParts(vars.startsAt, vars.timeZone || 'UTC', lang);
+  const copy = COPY[lang][id](vars, d);
+  const link = safeLink(id.startsWith('stylist_') ? vars.stylistUrl ?? vars.bookingUrl ?? vars.manageUrl : id === 'review_request' ? vars.manageUrl : vars.manageUrl ?? vars.bookingUrl);
+  if (!link && ['booking_confirmation', 'request_accepted', 'appointment_reminder', 'appointment_moved'].includes(id)) {
+    copy.footer = lang === 'es-US' ? `Para cambiarla, comunícate con ${vars.businessName}.` : `To change it, contact ${vars.businessName}.`;
+  }
+  const forest = copy.state === 'forest' || copy.state === 'review';
+  const tileText = forest ? '#f7f5f0' : '#18392f';
+  const requestStatus = id === 'stylist_new_request' ? (lang === 'es-US' ? 'Necesita tu respuesta' : 'Needs your answer') : (lang === 'es-US' ? 'Solicitud · sin confirmar' : 'Request sent · not confirmed');
+  const closedStatus = id === 'appointment_cancelled' ? (lang === 'es-US' ? 'Cancelada' : 'Cancelled') : (lang === 'es-US' ? 'No aceptada' : 'Not accepted');
+  const statusText = copy.state === 'request' ? requestStatus : copy.state === 'white' ? closedStatus : (lang === 'es-US' ? 'Confirmada' : 'Confirmed');
+  const chipStyle = copy.state === 'request' ? 'background:#f4e3d4;border:1px dashed #d08c61' : copy.state === 'white' ? 'background:#fff;border:1px solid #d9dfd8' : 'background:#c7e6d4';
+  const dayTile = `<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td style="width:70px;height:76px;text-align:center;background:#f7f5f0;border-radius:16px;color:#18392f"><span style="font-size:11px;font-weight:bold">${escapeHtml(d.weekday)}</span><br><strong style="font-size:30px;line-height:34px">${escapeHtml(d.day)}</strong><br><span style="font-size:11px;font-weight:bold">${escapeHtml(d.month)}</span></td><td style="padding-left:16px;color:${tileText}"><span style="display:inline-block;padding:5px 10px;border-radius:99px;color:#18392f;font-size:12px;font-weight:bold;${chipStyle}">${statusText}</span><br><strong style="font-size:17px">${escapeHtml(d.time)} · ${escapeHtml(vars.serviceName)}</strong><br><span style="font-size:14px">${escapeHtml(vars.locationName)}</span></td></tr></table>`;
+  const heroStyle = copy.state === 'request' ? 'background:#f4e3d4;border:1px dashed #d08c61' : forest ? 'background:#18392f;color:#f7f5f0' : 'background:#fff;border:1px solid #d9dfd8';
+  const stateContent = id === 'stylist_welcome' ? '' : id === 'review_request' ? `<div style="font-size:30px;color:#d08c61;text-align:center">★　★　★　★　★</div>` : `<div style="background:${forest ? '#244d40' : '#fff'};border-radius:18px;padding:16px">${dayTile}</div>`;
+  const hero = `<div style="${heroStyle};border-radius:22px;padding:26px;overflow:hidden"><div style="color:${forest ? '#f7f5f0' : '#18392f'};font-size:34px;line-height:1.12;font-weight:800;letter-spacing:-.5px">${escapeHtml(copy.headline)}</div><p style="margin:12px 0 20px;font-size:16px;line-height:1.5;color:${forest ? '#d5e8dc' : '#43564e'}">${escapeHtml(copy.lead)}</p>${stateContent}</div>`;
+  const extraRows: [string, string][] = id.startsWith('stylist_') ? [] : [[lang === 'es-US' ? 'Servicio' : 'Service', vars.serviceName], [lang === 'es-US' ? 'Dónde' : 'Where', vars.locationName], [lang === 'es-US' ? 'Estilista' : 'Stylist', vars.businessName]];
+  const details = extraRows.length ? `<div style="margin:18px 16px;background:#fff;border:1px solid #d9dfd8;border-radius:18px;padding:8px 20px">${extraRows.map(([k,v]) => `<div style="padding:12px 0;border-bottom:1px solid #e8ebe5;font-size:14px"><span style="display:inline-block;width:82px;color:#52655c">${escapeHtml(k)}</span><strong>${escapeHtml(v)}</strong></div>`).join('')}</div>` : '';
+  const cta = link ? `<a href="${escapeHtml(link)}" style="display:block;margin:20px 16px;padding:17px 24px;border-radius:999px;background:#18392f;color:#fff;text-align:center;text-decoration:none;font-weight:bold;font-size:16px">${escapeHtml(copy.action)}</a>` : '';
+  const greeting = id.startsWith('stylist_') ? (lang === 'es-US' ? `Para ${escapeHtml(firstName(vars.stylistName || vars.businessName))}` : `For ${escapeHtml(firstName(vars.stylistName || vars.businessName))}`) : `${lang === 'es-US' ? 'Para' : 'For'} ${escapeHtml(firstName(vars.clientName))}`;
+  const address = vars.postalAddress ? escapeHtml(vars.postalAddress).replace(/\n/g, '<br>') : '[MAILING ADDRESS]';
+  const footer = `${lang === 'es-US' ? 'Recibiste este correo porque tienes una cuenta o reservaste a través de Mova. ¿Tienes preguntas? Responde a este correo y una persona te ayudará.' : 'You got this email because you have a Mova account or booked through Mova. Questions? Reply to this email and a person will help.'}<br><br><strong>mova</strong> · ${lang === 'es-US' ? 'Tu negocio se mueve contigo.' : 'Your business moves with you.'} · mova-beauty.co<br>${address}`;
+  const html = `<!doctype html><html lang="${lang === 'es-US' ? 'es' : 'en'}"><head><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"></head><body style="margin:0;background:#e9eee8;color:#18392f;font-family:Arial,sans-serif"><div style="display:none;max-height:0;overflow:hidden">${escapeHtml(copy.preview)}</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e9eee8;padding:24px 12px"><tr><td align="center"><table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#f7f5f0;border:1px solid #d9dfd8;border-radius:28px;overflow:hidden"><tr><td style="padding:24px 32px 12px"><strong style="font-size:24px;letter-spacing:-1px">mova</strong><span style="float:right;font-size:13px;color:#43564e">${greeting}</span></td></tr><tr><td style="padding:8px 16px 18px">${hero}${details}${cta}<p style="margin:0 32px 22px;color:#43564e;font-size:14px;line-height:1.6">${escapeHtml(copy.footer)}</p></td></tr><tr><td style="border-top:1px solid #d9dfd8;padding:22px 32px 28px;color:#43564e;font-size:12px;line-height:1.6">${footer}</td></tr></table></td></tr></table></body></html>`;
+  const greetingText = id.startsWith('stylist_') ? (lang === 'es-US' ? `Para ${firstName(vars.stylistName || vars.businessName)},` : `For ${firstName(vars.stylistName || vars.businessName)},`) : `${lang === 'es-US' ? 'Hola' : 'Hi'} ${firstName(vars.clientName)},`;
+  const text = `${greetingText}\n\n${copy.headline}\n\n${copy.lead}\n\n${d.full} · ${vars.locationName}\n${copy.action}${link ? `: ${link}` : ''}\n\n${copy.footer}\n\nMova · ${vars.postalAddress || '[MAILING ADDRESS]'}`;
+  return { subject: copy.subject, preview: copy.preview, text, html };
 }

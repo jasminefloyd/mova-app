@@ -1,6 +1,7 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('reports-summary', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request);
@@ -33,4 +34,4 @@ Deno.serve(async (request) => {
     data.previous.google_rating_count = 0;
   }
   return respond({ ...data, period: days, range: weekToDate ? 'week_to_date' : 'rolling', time_zone: timeZone });
-});
+}));

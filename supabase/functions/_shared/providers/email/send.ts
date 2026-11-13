@@ -30,6 +30,16 @@ export type SendEmailOutcome =
   | { status: 'duplicate' }
   | { status: 'failed'; messageId: string | null; error: string };
 
+async function logEmailProvider(db: EmailDb, input: SendEmailInput, provider: string, status: 'sent' | 'failed', reference?: string) {
+  try {
+    await db.rpc('mova_system_log_append', { p_level: status === 'sent' ? 'info' : 'error', p_source: 'provider',
+      p_event_name: status === 'sent' ? 'provider.email.sent' : 'provider.email.failed', p_route_or_function: 'email.send',
+      p_artist_business_id: input.artistBusinessId, p_client_id: input.clientId, p_error_code: status === 'failed' ? 'EMAIL_PROVIDER_ERROR' : null,
+      p_message: status === 'sent' ? 'Email provider accepted message' : 'Email provider request failed',
+      p_context: { provider, provider_reference: reference ?? null } });
+  } catch { /* Provider logging is best effort. */ }
+}
+
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
@@ -52,7 +62,8 @@ export async function sendEmail(db: EmailDb, provider: EmailProvider, input: Sen
   }).select('id').single();
   if (insertError && /duplicate|23505/i.test(insertError.message)) return { status: 'duplicate' };
   if (insertError || !row) return { status: 'failed', messageId: null, error: 'MESSAGE_SAVE_FAILED' };
-  const sendInput = { to, from: 'Mova <bookings@mova-beauty.co>', ...rendered, templateId: input.templateId, locale: input.locale, idempotencyKey: input.idempotencyKey };
+  const fromName = input.templateId.startsWith('stylist_') ? 'Mova' : `${input.vars.businessName} via Mova`;
+  const sendInput = { to, from: `${fromName.replace(/[<>\r\n]/g, '')} <bookings@mova-beauty.co>`, ...rendered, templateId: input.templateId, locale: input.locale, idempotencyKey: input.idempotencyKey };
   const spend = await reserveSpend(db, row.id, provider.estimateCostMicros?.(sendInput) ?? 0, now);
   if (!spend.allowed) {
     if (spend.reason === 'spend_cap_reached') return { status: 'suppressed', reason: 'spend_cap_reached' };
@@ -62,9 +73,11 @@ export async function sendEmail(db: EmailDb, provider: EmailProvider, input: Sen
   try {
     const sent = await provider.send(sendInput);
     await db.from('mova_messages').update({ status: 'sent', provider_message_id: sent.providerMessageId, sent_at: now.toISOString() }).eq('id', row.id);
+    await logEmailProvider(db, input, provider.name, 'sent', sent.providerMessageId);
     return { status: 'sent', messageId: row.id, providerMessageId: sent.providerMessageId };
   } catch {
     await db.from('mova_messages').update({ status: 'failed', error_code: 'PROVIDER_ERROR' }).eq('id', row.id);
+    await logEmailProvider(db, input, provider.name, 'failed');
     return { status: 'failed', messageId: row.id, error: 'PROVIDER_ERROR' };
   }
 }

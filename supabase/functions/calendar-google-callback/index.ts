@@ -1,3 +1,4 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, serviceClient } from '../_shared/booking.ts';
 import { decryptProviderSecret, encryptProviderSecret, sha256Hex } from '../_shared/provider-crypto.ts';
 import { googleProvider, loadConnection } from '../_shared/google-connection.ts';
@@ -6,7 +7,7 @@ import { GOOGLE_BUSINESS_SCOPE, GOOGLE_CALENDAR_SCOPE } from '../_shared/provide
 // OAuth callback for the one Google connection (P6). Saves or refreshes the single row in
 // mova_google_connections. An existing row keeps its chosen calendar and Business Profile location.
 const redirect = (path: string) => Response.redirect(`${Deno.env.get('OPERATOR_BASE_URL') ?? 'https://ops.mova-beauty.co'}${path}`, 303);
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('calendar-google-callback', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   const url = new URL(request.url); const code = url.searchParams.get('code'); const state = url.searchParams.get('state');
   if (!code || !state) return redirect('/auth?google=connect_error');
@@ -18,7 +19,7 @@ Deno.serve(async (request) => {
   const businessId = stateRow.artist_business_id as string;
   const failed = () => redirect(`/${encodeURIComponent(businessId)}/settings/google?google=connect_error`);
   try {
-    const provider = googleProvider();
+    const provider = googleProvider(request);
     const redirectUri = Deno.env.get('GOOGLE_OAUTH_REDIRECT_URI');
     if (!provider || !redirectUri) return failed();
     const token = await provider.exchangeCode({ code, codeVerifier: await decryptProviderSecret(stateRow.verifier_encrypted), redirectUri });
@@ -41,4 +42,4 @@ Deno.serve(async (request) => {
   } catch {
     return failed();
   }
-});
+}));

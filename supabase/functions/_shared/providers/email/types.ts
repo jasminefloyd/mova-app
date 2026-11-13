@@ -1,6 +1,6 @@
 // Email provider interface (task 4.3). Providers: the fake, and Resend (owner decision, Nov 13; approval A-03).
 
-export type EmailTemplateId = 'booking_confirmation' | 'request_received' | 'request_accepted' | 'request_declined' | 'appointment_reminder';
+export type EmailTemplateId = 'booking_confirmation' | 'request_received' | 'request_accepted' | 'request_declined' | 'appointment_reminder' | 'appointment_moved' | 'appointment_cancelled' | 'review_request' | 'stylist_welcome' | 'stylist_new_request';
 export type EmailLocale = 'en-US' | 'es-US';
 
 export type EmailSendInput = {

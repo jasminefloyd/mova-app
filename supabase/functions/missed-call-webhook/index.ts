@@ -1,4 +1,6 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
+import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 import { fakeSignature, smsProviderFromEnv } from '../_shared/providers/sms/index.ts';
 import { missedCallText } from './copy.ts';
 import { reserveSpend, type SpendDb } from '../_shared/providers/spend.ts';
@@ -6,7 +8,7 @@ import { reserveSpend, type SpendDb } from '../_shared/providers/spend.ts';
 // Task 4.4: missed-call text-back. Off unless MOVA_MISSED_CALL_TEXTBACK_ENABLED=true and the stylist
 // turned on the concierge missed_call channel. mova_missed_call_gate (0042) applies STOP, quiet hours and
 // one text-back per caller per day. Webhook payload {from,to,call_id}, signed like the fake SMS webhook.
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('missed-call-webhook', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (Deno.env.get('MOVA_MISSED_CALL_TEXTBACK_ENABLED') !== 'true') return respond({ code: 'MISSED_CALL_TEXTBACK_DISABLED' }, 503);
@@ -27,6 +29,7 @@ Deno.serve(async (request) => {
   const results: { artist_business_id: string; status: string }[] = [];
   for (const business of businesses) {
     if (!business.allowed) { results.push({ artist_business_id: business.artist_business_id, status: business.reason }); continue; }
+    if (!await planFeatureEnabled(business.artist_business_id, 'missed_call_textback')) { results.push({ artist_business_id: business.artist_business_id, status: 'plan_feature_not_included' }); continue; }
     const text = missedCallText(business.locale === 'es-US' ? 'es-US' : 'en-US', business.business_name, business.handle);
     const key = `missed-call:${body.call_id}:${business.artist_business_id}`;
     const { data: row, error: insertError } = await db.from('mova_messages').insert({
@@ -51,4 +54,4 @@ Deno.serve(async (request) => {
     }
   }
   return respond({ accepted: true, results });
-});
+}));

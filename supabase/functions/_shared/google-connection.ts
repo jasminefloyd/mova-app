@@ -2,6 +2,7 @@
 // sync, review import and reply functions, so they all read the same row and the same provider.
 import { serviceClient } from './booking.ts';
 import { decryptProviderSecret } from './provider-crypto.ts';
+import { loggedProviderFetch } from './system-log.ts';
 import { googleProviderFromEnv, GOOGLE_BUSINESS_SCOPE, GOOGLE_CALENDAR_SCOPE, type GoogleProvider } from './providers/google/index.ts';
 
 export type GoogleConnectionRow = {
@@ -27,7 +28,9 @@ export const connectionSummary = (row: GoogleConnectionRow | null) => row && {
   has_business_scope: row.granted_scopes.includes(GOOGLE_BUSINESS_SCOPE), has_calendar_scope: row.granted_scopes.includes(GOOGLE_CALENDAR_SCOPE),
 };
 
-export const googleProvider = (fetcher?: typeof fetch): GoogleProvider | null => googleProviderFromEnv((name) => Deno.env.get(name), fetcher);
+export const googleProvider = (request?: Request, fetcher?: typeof fetch): GoogleProvider | null => googleProviderFromEnv(
+  (name) => Deno.env.get(name), request ? loggedProviderFetch(request, 'google', fetcher) : fetcher,
+);
 
 type Db = ReturnType<typeof serviceClient>;
 

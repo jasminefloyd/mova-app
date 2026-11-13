@@ -1,3 +1,4 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { deviceFromUserAgent, HOURLY_LIMIT, parseFeedback, SCREENSHOT_MAX_BYTES, SCREENSHOT_TYPES } from './rules.ts';
 
@@ -6,7 +7,7 @@ import { deviceFromUserAgent, HOURLY_LIMIT, parseFeedback, SCREENSHOT_MAX_BYTES,
 // Never attaches client data: only what the stylist typed, the screen path, device and app version.
 const BUCKET = 'mova_support_screenshots';
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('support-feedback', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (Number(request.headers.get('content-length') ?? '0') > 16384) return respond({ code: 'REQUEST_TOO_LARGE' }, 413);
@@ -39,4 +40,4 @@ Deno.serve(async (request) => {
   }).select('id,created_at').single();
   if (error || !data) return respond({ code: 'FEEDBACK_SAVE_FAILED' }, 500);
   return respond({ id: data.id, created_at: data.created_at, reply_to: actor.user.email ?? null });
-});
+}));

@@ -1,3 +1,4 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 import { corsHeaders, respond, serviceClient, tokenHash } from '../_shared/booking.ts';
 
@@ -38,7 +39,7 @@ async function allExportPages<T=Record<string,unknown>>(load:(from:number,to:num
   for(let offset=0;offset<maxRows;offset+=pageSize){const page=await load(offset,offset+pageSize-1);if(page.error)throw new Error('CLIENT_EXPORT_FAILED');const rows=page.data??[];result.push(...rows);if(rows.length<pageSize)return result;}
   throw new Error('CLIENT_EXPORT_LIMIT_REACHED');
 }
-Deno.serve(async(request)=>{
+Deno.serve(withSystemRequestLogging('customer-profile', async(request)=>{
   if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
   if(Deno.env.get('MOVA_CLIENT_PROFILES_ENABLED')!=='true')return respond({code:'CLIENT_PROFILES_DISABLED'},403);
   const user=await getUser(request);if(!user)return respond({code:'UNAUTHENTICATED'},401);const body=await request.json().catch(()=>({}));const db=serviceClient();
@@ -166,4 +167,4 @@ Deno.serve(async(request)=>{
     }
     return respond({code:'INVALID_ACTION'},422);
   }catch(error){const code=error instanceof Error?error.message:'CUSTOMER_PROFILE_FAILED';return respond({code},code==='VERIFIED_CONTACT_REQUIRED'?403:code==='CUSTOMER_ACCOUNT_DELETED'?410:500);}
-});
+}));

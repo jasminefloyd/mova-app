@@ -1,16 +1,17 @@
+import { withSystemRequestLogging, loggedProviderFetch } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { planPriceId, type PlanKey } from '../_shared/providers/stripe/billing.ts';
 import { billingClientFromEnv, operatorReturnUrl } from '../_shared/billing-env.ts';
 
-// Task 5.8: start a Pro or AI Growth subscription in Stripe test mode (O10 prices; price IDs from
+// Task 5.8: start a Pro or AI + Growth subscription in Stripe test mode (approved prices; price IDs from
 // config). The plan only changes after plan-management 'confirm' verifies the completed checkout.
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('subscription-checkout', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request);
   if (!actor) return respond({ code: 'UNAUTHENTICATED' }, 401);
   const env = (name: string) => Deno.env.get(name);
-  const stripe = billingClientFromEnv(env);
+  const stripe = billingClientFromEnv(env, loggedProviderFetch(request, 'stripe'));
   if (!stripe) return respond({ code: 'BILLING_NOT_CONFIGURED' }, 503);
   const body = await request.json().catch(() => ({}));
   const plan = body.plan_key as PlanKey;
@@ -28,4 +29,4 @@ Deno.serve(async (request) => {
     if (typeof session.url !== 'string') throw new Error('NO_URL');
     return respond({ checkout_url: session.url, test_mode: true });
   } catch { return respond({ code: 'BILLING_CHECKOUT_FAILED' }, 502); }
-});
+}));

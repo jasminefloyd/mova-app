@@ -1174,3 +1174,52 @@ select,
 /* O1 hCaptcha: the widget is 303 px wide; keep it inside 320 px screens. */
 .mova-hcaptcha { min-height: 78px; max-width: 100%; overflow: hidden; }
 .mova-slots .mova-revenue-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.mova-revenue-kpis .mova-card.is-highlight{border-color:transparent;background:var(--status-confirmed-bg)}
+ .mova-request-reference { position: fixed; z-index: 1000; inset: auto 16px 16px auto; max-width: min(480px, calc(100vw - 32px)); padding: 12px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--forest); box-shadow: 0 8px 28px rgb(24 57 47 / 18%); font-size: 14px; }
+.mova-request-reference code { font-size: 12px; overflow-wrap: anywhere; }
+.mova-request-reference button { margin-left: 12px; border: 0; background: transparent; color: inherit; font-size: 18px; }
+
+.mova-price-pilot { padding-bottom: var(--space-8); }
+.mova-price-pilot__hero { display: grid; gap: var(--space-3); padding: var(--space-5); }
+.mova-price-pilot__hero-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.mova-price-pilot__hero .mova-price-pilot__eyebrow { margin: 0; color: var(--mint); font-size: var(--fs-micro); font-weight: 700; letter-spacing: .06em; }
+.mova-price-pilot__hero h2 { margin: 0; color: var(--ink-inverse); font: 700 var(--fs-display-s)/1.2 var(--font-display); }
+.mova-price-pilot__hero > p:last-child { margin: 0; color: var(--ink-inverse); font-size: var(--fs-body-s); line-height: 1.5; }
+.mova-price-pilot__section { display: grid; gap: var(--space-3); }
+.mova-price-pilot__section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-2); }
+.mova-price-pilot__section-heading h2, .mova-price-pilot__method h2 { margin: 0; font: 700 var(--fs-display-s)/1.2 var(--font-display); }
+.mova-price-pilot__section-heading .mova-section-overline, .mova-price-pilot__method .mova-section-overline { margin: 0 0 var(--space-1); color: var(--ink-muted); font-size: var(--fs-micro); font-weight: 700; letter-spacing: .06em; }
+.mova-price-pilot__current { display: grid; gap: var(--space-2); }
+.mova-price-pilot__current > div { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.mova-price-pilot__current > div span { font-weight: 600; }
+.mova-price-pilot__current > div strong { color: var(--forest); font: 800 var(--fs-display-m)/1.1 var(--font-display); }
+.mova-price-pilot__current p { margin: 0; color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-price-pilot__empty-evidence { display: grid; min-height: 140px; place-items: center; }
+.mova-price-pilot__empty-evidence .mova-state { padding: var(--space-4); }
+.mova-price-pilot__source-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-2); }
+.mova-price-pilot__source-grid .mova-card { display: grid; align-content: start; gap: var(--space-2); }
+.mova-price-pilot__source-grid p { margin: 0; color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.45; }
+.mova-price-pilot__source-grid small { color: var(--ink-muted); font-size: var(--fs-micro); font-weight: 600; }
+.mova-price-pilot__method { display: grid; gap: var(--space-3); }
+.mova-price-pilot__method ol { display: grid; gap: var(--space-2); margin: 0; padding-left: 1.4em; color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-price-pilot__method > p:last-child, .mova-price-pilot__gate-note { margin: 0; color: var(--ink-muted); font-size: var(--fs-caption); line-height: 1.45; }
+.mova-price-pilot__source-form { display: grid; gap: var(--space-3); }
+.mova-price-pilot__source-form h3, .mova-price-pilot__source-form p { margin: 0; }
+.mova-price-pilot__source-form > p:not(.mova-section-overline) { color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.45; }
+.mova-price-pilot__consent { display: flex; align-items: flex-start; gap: var(--space-2); color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.4; }
+.mova-price-pilot__consent input { flex: 0 0 auto; width: 20px; height: 20px; accent-color: var(--forest); }
+.mova-price-pilot__observations { display: grid; gap: var(--space-2); }
+.mova-price-pilot__observation { display: grid; gap: var(--space-2); }
+.mova-price-pilot__observation > div { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.mova-price-pilot__observation > strong { color: var(--forest); font: 700 var(--fs-display-s)/1.2 var(--font-display); }
+.mova-price-pilot__observation p, .mova-price-pilot__observation small { margin: 0; color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-price-pilot__insight { display: grid; gap: var(--space-2); padding: var(--space-5); }
+.mova-price-pilot__insight .mova-price-pilot__eyebrow { margin: 0; color: var(--mint); font-size: var(--fs-micro); font-weight: 700; letter-spacing: .06em; }
+.mova-price-pilot__insight h3, .mova-price-pilot__insight p, .mova-price-pilot__insight small { margin: 0; }
+.mova-price-pilot__insight h3 { color: var(--ink-inverse); font: 700 var(--fs-display-s)/1.2 var(--font-display); }
+.mova-price-pilot__insight > strong { color: var(--ink-inverse); font: 800 var(--fs-display-m)/1.1 var(--font-display); }
+.mova-price-pilot__insight > p:not(.mova-price-pilot__eyebrow), .mova-price-pilot__insight small { color: var(--ink-inverse); font-size: var(--fs-caption); line-height: 1.45; }
+.mova-price-pilot__discovery { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.mova-price-pilot__discovery li { display: grid; gap: var(--space-1); border-top: 1px solid var(--line-subtle); padding: var(--space-2) 0; }
+.mova-price-pilot__discovery span, .mova-price-pilot__discovery small { color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-price-pilot__discovery a { color: var(--forest); font-weight: 600; }
+@media (min-width: 560px) { .mova-price-pilot__source-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }

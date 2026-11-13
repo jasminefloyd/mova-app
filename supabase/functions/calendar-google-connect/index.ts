@@ -1,17 +1,19 @@
+import { withSystemRequestLogging, loggedProviderFetch } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { decryptProviderSecret, encryptProviderSecret, sha256Hex } from '../_shared/provider-crypto.ts';
 import { accessTokenFor, connectionSummary, googleProvider, loadConnection, randomToken, s256Challenge } from '../_shared/google-connection.ts';
 import { GOOGLE_BUSINESS_SCOPE, GOOGLE_CALENDAR_SCOPE, GOOGLE_SCOPES } from '../_shared/providers/google/index.ts';
+import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 
 // One Google connection per stylist (P6). It powers Business Profile and Google Calendar. The function keeps
 // its original name so existing clients keep working. Actions: status, begin, disconnect, set-toggles,
 // calendars, set-calendar, locations, set-business-location, save-settings, rotate-feed.
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('calendar-google-connect', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request); if (!actor) return respond({ code: 'UNAUTHENTICATED' }, 401);
   const body = await request.json().catch(() => ({})); const db = serviceClient();
-  const provider = googleProvider();
+  const provider = googleProvider(request);
 
   if (body.action === 'status') {
     const [{ data: settings, error }, { data: locations }] = await Promise.all([
@@ -52,7 +54,7 @@ Deno.serve(async (request) => {
         const timeout = setTimeout(() => controller.abort(), 8000);
         let response: Response;
         try {
-          response = await fetch('https://oauth2.googleapis.com/revoke', {
+          response = await loggedProviderFetch(request, 'google')('https://oauth2.googleapis.com/revoke', {
             method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ token: refreshToken }), signal: controller.signal,
           });
@@ -74,6 +76,7 @@ Deno.serve(async (request) => {
     if (body.calendar_enabled !== undefined) { if (typeof body.calendar_enabled !== 'boolean') return respond({ code: 'INVALID_REQUEST' }, 422); patch.calendar_enabled = body.calendar_enabled; }
     if (body.business_profile_enabled !== undefined) { if (typeof body.business_profile_enabled !== 'boolean') return respond({ code: 'INVALID_REQUEST' }, 422); patch.business_profile_enabled = body.business_profile_enabled; }
     if (!Object.keys(patch).length) return respond({ code: 'INVALID_REQUEST' }, 422);
+    if (patch.calendar_enabled && !await planFeatureEnabled(actor.businessId, 'google_calendar_sync')) return respond({ code: 'PLAN_FEATURE_NOT_INCLUDED', feature: 'google_calendar_sync' }, 403);
     if (patch.calendar_enabled && !connection.granted_scopes.includes(GOOGLE_CALENDAR_SCOPE)) return respond({ code: 'GOOGLE_PERMISSION_MISSING', permission: 'calendar' }, 409);
     if (patch.business_profile_enabled && !connection.granted_scopes.includes(GOOGLE_BUSINESS_SCOPE)) return respond({ code: 'GOOGLE_PERMISSION_MISSING', permission: 'business_profile' }, 409);
     const { error } = await db.from('mova_google_connections').update(patch).eq('artist_business_id', actor.businessId);
@@ -112,5 +115,5 @@ Deno.serve(async (request) => {
     return respond({ feedUrl: `${publicBase.replace(/^https?:/, 'webcal:').replace(/\/$/, '')}/feed/${token}` });
   }
   return respond({ code: 'INVALID_ACTION' }, 422);
-});
+}));
 

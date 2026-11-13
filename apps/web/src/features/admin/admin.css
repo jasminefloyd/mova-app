@@ -213,6 +213,15 @@
 .adm .dialog { position: fixed; inset: 0; background: color-mix(in srgb, var(--forest) 45%, transparent); display: grid; place-items: center; padding: 16px; z-index: 50; }
 .adm .dialog-card { background: var(--ivory); border-radius: 16px; padding: 24px; width: min(480px, 100%); display: flex; flex-direction: column; gap: 14px; }
 .adm .error-text { color: var(--danger); font-size: var(--fs-caption); margin: 0; }
+.adm .logs-filters { justify-content: flex-start; align-items: end; }
+.adm .logs-filters label { display: flex; flex-direction: column; gap: 5px; min-width: 150px; }
+.adm .logs-filters .logs-search { flex: 1 1 220px; }
+.adm .logs-filters .input { min-width: 0; }
+.adm .logs-table-wrap { overflow-x: auto; border: 1px solid var(--line-subtle); border-radius: var(--radius-m); background: var(--surface); }
+.adm .logs-table { min-width: 980px; margin: 0; }
+.adm .logs-table .row { gap: 6px; }
+.adm .logs-detail { overflow-wrap: anywhere; color: var(--text-muted); font-size: var(--fs-caption); }
+.adm .logs-detail code { white-space: pre-wrap; }
 
 /* Sign-in (Admin-SignIn board): forest page, ivory card. */
 .adm-signin { min-height: 100vh; background: var(--forest); color: var(--forest); font-family: 'DM Sans', sans-serif; display: flex; align-items: center; justify-content: center; padding: 48px 16px; container-type: inline-size; }

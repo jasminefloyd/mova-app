@@ -1,7 +1,9 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import {artistClient,corsHeaders,respond,serviceClient} from '../_shared/booking.ts';
 import {platformSwitchEnabled} from '../_shared/platform-switch.ts';
-Deno.serve(async(request)=>{
- if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);const actor=await artistClient(request);if(!actor)return respond({code:'UNAUTHENTICATED'},401);if(!await platformSwitchEnabled('concierge'))return respond({code:'CONCIERGE_FEATURE_DISABLED'},403);const db=serviceClient();const body=await request.json().catch(()=>({}));
+import {planFeatureEnabled} from '../_shared/plan-feature.ts';
+Deno.serve(withSystemRequestLogging('concierge-artist', async(request)=>{
+ if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);const actor=await artistClient(request);if(!actor)return respond({code:'UNAUTHENTICATED'},401);if(!await platformSwitchEnabled('concierge'))return respond({code:'CONCIERGE_FEATURE_DISABLED'},403);if(!await planFeatureEnabled(actor.businessId,'concierge'))return respond({code:'PLAN_FEATURE_NOT_INCLUDED',feature:'concierge'},403);const db=serviceClient();const body=await request.json().catch(()=>({}));
  if(body.action==='home-needs'){
   const {data,error}=await db.from('mova_quote_requests').select('id,conversation_id,service_category,created_at').eq('artist_business_id',actor.businessId).eq('status','open').order('created_at',{ascending:false}).limit(5);
   return error?respond({code:'QUOTE_NEEDS_READ_FAILED'},500):respond({quotes:data??[]});
@@ -116,4 +118,4 @@ Deno.serve(async(request)=>{
   return respond({saved:true,message_sent:false});
  }
  return respond({code:'INVALID_ACTION'},422);
-});
+}));

@@ -171,6 +171,12 @@
 .mova-site__placeholder { padding: 14px; border-radius: var(--radius-l); background: var(--site-mist); font-size: var(--fs-caption); font-weight: 600; letter-spacing: 0.3px; color: var(--site-body); }
 .mova-site__plan--featured .mova-site__placeholder { background: var(--site-sage); color: var(--site-mint); }
 .mova-site__plan .mova-site__button { margin-top: auto; }
+.mova-site__plan-features { padding: 14px; border-radius: var(--radius-l); background: var(--site-mist); color: var(--site-body); }
+.mova-site__feature-heading { margin: 0 0 8px !important; font-size: var(--fs-caption) !important; font-weight: 800; }
+.mova-site__plan-features ul { margin: 0; padding-left: 20px; display: grid; gap: 7px; font-size: var(--fs-caption); line-height: 1.45; }
+.mova-site__plan--featured .mova-site__plan-features { background: color-mix(in srgb, var(--site-sage) 40%, var(--site-ink)); color: var(--site-bg); }
+.mova-site__coming-soon { margin: 12px 0 0 !important; padding-top: 10px; border-top: 1px solid var(--site-line); font-size: var(--fs-caption) !important; line-height: 1.45; }
+.mova-site__coming-soon span { display: inline-block; margin-right: 5px; padding: 2px 7px; border-radius: var(--radius-m); background: var(--site-peach); color: var(--site-ink); font-weight: 800; }
 .mova-site__fine { margin: 18px 0 0; text-align: center; font-size: var(--fs-body-s); line-height: 1.5; color: var(--site-muted); }
 .mova-site__fact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 12px; }
 .mova-site__fact { padding: 20px; border-radius: var(--radius-xl); background: var(--site-bg); display: flex; flex-direction: column; gap: 6px; }

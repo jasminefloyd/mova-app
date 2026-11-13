@@ -1,6 +1,7 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient, tokenHash } from '../_shared/booking.ts';
 
-Deno.serve(async(request)=>{
+Deno.serve(withSystemRequestLogging('booking-reschedule', async(request)=>{
   if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
   if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
   const body=await request.json().catch(()=>null);
@@ -11,4 +12,4 @@ Deno.serve(async(request)=>{
   const {data,error}=await db.rpc('mova_booking_reschedule',{p_appointment_id:booking.id,p_manage_token_hash:hash,p_new_starts_at:body.new_starts_at,p_idempotency_key:idempotencyKey});
   if(error)return respond({code:error.message||'RESCHEDULE_FAILED'},error.message==='SLOT_TAKEN'?409:422);
   return respond(data);
-});
+}));

@@ -1,7 +1,8 @@
+import { withSystemRequestLogging, loggedProviderFetch } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient, tokenHash } from '../_shared/booking.ts';
 import { StripeTestClient } from '../_shared/providers/stripe/client.ts';
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('payment-intent-create', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (Deno.env.get('MOVA_STRIPE_TEST_MODE') !== 'true') return respond({ code: 'STRIPE_TEST_MODE_DISABLED' }, 503);
@@ -26,7 +27,7 @@ Deno.serve(async (request) => {
   const now = Math.floor(Date.now() / 1000);
   const sessionExpiry = Math.max(now + 1800, Math.min(now + 86400, Math.floor(Date.parse(checkout.hold_expires_at) / 1000) + 1800));
   try {
-    const session = await new StripeTestClient(key).createCheckoutSession({
+    const session = await new StripeTestClient(key, loggedProviderFetch(request, 'stripe')).createCheckoutSession({
       accountId: checkout.stripe_account_id,
       amountMinor: Number(checkout.amount_minor), applicationFeeMinor: Number(checkout.fee_minor), currency: 'usd', expiresAt: sessionExpiry,
       successUrl: `${origin}/b/${encodeURIComponent(body.manage_token)}?checkout=return`,
@@ -45,7 +46,7 @@ Deno.serve(async (request) => {
     });
     if (attachError || attached !== true) {
       try {
-        const expired = await new StripeTestClient(key).expireCheckoutSession(session.id, checkout.stripe_account_id);
+        const expired = await new StripeTestClient(key, loggedProviderFetch(request, 'stripe')).expireCheckoutSession(session.id, checkout.stripe_account_id);
         if (expired.status === 'expired') await db.rpc('mova_stripe_checkout_fail', { p_payment_id: checkout.payment_id });
       } catch { /* Do not release the hold unless Stripe confirms expiration; the signed webhook remains authoritative. */ }
       return respond({ code: 'CHECKOUT_ATTACH_FAILED' }, 503);
@@ -62,4 +63,4 @@ Deno.serve(async (request) => {
     // can recover the same Stripe Session; the expiry job/late-payment refund is authoritative.
     return respond({ code: 'STRIPE_CHECKOUT_CREATE_FAILED' }, 502);
   }
-});
+}));

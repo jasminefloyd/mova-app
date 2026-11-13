@@ -25,8 +25,10 @@ export class ResendEmailProvider implements EmailProvider {
   estimateCostMicros() { return this.config.costMicros ?? 1000; }
 
   async send(input: EmailSendInput): Promise<EmailSendResult> {
+    const requestedName = input.from.match(/^\s*(.*?)\s*</)?.[1]?.replace(/[<>"\r\n]/g, '').trim();
     const payload = {
-      from: `${(this.config.fromName ?? 'Mova').replace(/[<>"\r\n]/g, '')} <${this.config.fromAddress}>`,
+      // Preserve the approved display name while always using the verified Resend sender address.
+      from: `${requestedName || this.config.fromName || 'Mova'} <${this.config.fromAddress}>`,
       to: [input.to],
       subject: input.subject,
       text: input.text,

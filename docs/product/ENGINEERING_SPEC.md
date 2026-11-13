@@ -51,7 +51,7 @@ D-01–D-14 from v1 remain locked except where amended below (amendments are mar
 | D-05 | V1 pillars: showcase; multi-location calendar; booking and payment orchestration; client relationships and notes; AI Revenue Center (rebooking, seat filler, win-back, forecast); AI Concierge; reports and reputation; Google presence; wallet cards; bilingual acquisition. |
 | D-06 | Instant booking only where Mova controls the inventory; request-to-book where a salon must verify. A request is never shown as confirmed. |
 | D-07 | **Amended.** V1 payments: Stripe-processed card / Apple Pay / Google Pay / other Stripe-supported wallets via online checkout and **pay links** (sent by text or shown as a QR code); manually recorded **cash** and **other**; **Zelle** conditional (A-16); salon-collected tracked only. No Mova fee on non-Mova-processed money. |
-| D-08 | Proposed plans unchanged (Free $0 + 1.5%, Pro $19 + 1.0%, AI Growth $39 + 0.5%, Stripe processing extra) and **not approved**. Pricing competitiveness review is open (A-26). |
+| D-08 | **Amended 2026-11-13:** Free $0 + 1.5%, Pro $19 + 1.0%, AI + Growth $39 + 0.75% on Mova-processed payments; Stripe processing extra. No Mova fee on cash, Zelle or salon-collected payments. |
 | D-09 | Google Calendar outbound sync and Apple private subscribed `.ics` feed. No inbound availability blocking in V1. |
 | D-10 | Locked visual identity: forest `#18392F`, botanical `#264E3E`, sage `#8BA990`, mint `#C9E6D4`, peach `#E7C3AA`, ivory `#F7F5EF`; Manrope (display) + DM Sans (UI). |
 | D-11 | No production launch without the product owner's written GO. |
@@ -80,7 +80,7 @@ No agent may resolve these. Each lives in `docs/engineering/DECISION_LOG.md` wit
 
 | ID | Decision needed | Blocks | Safe default until approved |
 |---|---|---|---|
-| A-01 | Plan entitlements, quotas (incl. message credits, concierge volume) | F12, F18, F22 | Configurable entitlement matrix; available in local integration fixtures; no live paywall. |
+| A-01 | Plan entitlements, quotas (incl. message credits, concierge volume) | F12, F18, F22 | Owner-approved plan matrix and allowances: `docs/product/PLANS_FEATURES_FEES.md`; feature flags remain subject to platform/provider/safety gates. |
 | A-02 | Stripe Connect account type, charge topology, merchant of record, refunds, disputes, negative balances, tax | F06, F23 | Adapter + sandbox only; live processing flag OFF. |
 | A-03 | Email and SMS providers, sending limits, cost caps | F11, F08, F18, F22 | Provider adapter with sandbox transport; no live sends. |
 | A-04 | AI model vendor(s), evaluation thresholds, spend caps | F08, F18, F22 | Provider-agnostic interface; deterministic baselines; LLM features OFF until eval passes. |
@@ -105,7 +105,7 @@ No agent may resolve these. Each lives in `docs/engineering/DECISION_LOG.md` wit
 | A-23 | **Instagram messaging**: Meta app review, permissions, messaging-window policy | F22 | Instagram channel OFF; other channels work. |
 | A-24 | **US business texting registration** (A2P 10DLC or toll-free verification), per-artist vs shared numbers, number porting | F11, F18, F22 | Sandbox numbers only; no live texting. |
 | A-25 | **AI Concierge** safety review, evaluation set, escalation rules, disclosure copy | F22 | Concierge OFF in production; local integration with provider test numbers only. |
-| A-26 | **Pricing competitiveness** vs incumbents (e.g., flat all-in processing offers) | F12 | Plan prices remain configurable PROPOSED values. |
+| A-26 | **Pricing competitiveness** vs incumbents (e.g., flat all-in processing offers) | F12 | Owner approved Free $0 + 1.5%, Pro $19 + 1.0%, AI + Growth $39 + 0.75% on Mova-processed payments; Stripe processing extra. |
 | A-27 | **Sensitive client notes** (allergies, sensitivities, photos): retention, export, deletion, encryption | F17 | Encrypt sensitive note fields; default retention TBD; exportable/deletable. |
 | A-28 | **Social posting**: V1 = device share sheet only; any direct platform posting later | F18 | Share sheet + image download only. |
 | A-29 | **Review request messaging** (purpose classification and frequency) | F21 | Email only, one request per completed visit, opt-out honoured. |
@@ -318,7 +318,7 @@ v1 F09 unchanged. Settings row "Reviews & Google profile" (16) shows connection 
 v1 F11 plus: unified **messaging service** (§7.4) used by transactional notices, autopilot, seat filler, review requests and concierge; inbound message routing; STOP/HELP handling; per-artist sending identity; delivery receipts; quiet hours; cost metering per artist (for A-01/A-22).
 
 ### F12. Plans and entitlements
-v1 F12 unchanged; entitlement keys added: `autopilot`, `seat_filler`, `seat_filler_autopilot`, `concierge`, `concierge_instagram`, `reports_advanced`, `reviews_public`, `wallet_client_card`, `message_credits_monthly`. Values per A-01. Screen 22 shows "Proposed pricing · not final" and `[INCLUDED FEATURES · TO BE FINALIZED]` until approved.
+v1 F12: approved tier names, pricing, fee rates, feature allocation and monthly message allowances live in `docs/product/PLANS_FEATURES_FEES.md`. Migration 0084 stores boolean entitlements and stylist/client overrides. Feature gates fail closed; platform/provider/safety switches remain independent. AI Price Pilot is false by default and shown as a coming-soon teaser until explicitly granted. Its authenticated `price-pilot` Edge Function provides transient Google Places/Yelp/SerpAPI discovery and Firecrawl structured extraction from stylist-submitted HTTPS menu URLs with an explicit authorization confirmation. Only normalized service names, categories, durations, prices, confidence, source host and observation time are retained; raw page content and directory payloads are not. Comparisons require five distinct recent source hosts with matching category, duration and currency; the result is an observed middle-price band, not an automatic price change. Every request uses the shared request-ID logger; Price Pilot events record action/outcome/result counts and provider status/duration without page contents or submitted payloads. Provider credentials remain server-side. Screen 22 and public pricing use the approved allocation.
 
 ### F13. Internationalization
 v1 F13 unchanged and extended to every new surface: client profile, sign-in codes, wallet pass text, claim page, review request and form, concierge replies (in the client's language, detected per conversation and confirmable), templates (EN/ES pairs), reports labels. Spanish templates and concierge system copy require human review (A-12).
@@ -1090,6 +1090,9 @@ Data export (artist: full tenant export incl. notes; client: own profile, appoin
 
 ### 10.3 Checklist
 All v1 §6.2 items remain. Add: CSP allowing Stripe, wallet and chosen providers only; storage policies for `visit-media` and `quote-media` private buckets; secrets for SMS, Meta, wallet certificates and AI keys in secret manager with rotation runbooks.
+
+### 10.4 System logs (owner-approved 2026-11-13)
+`mova_system_logs` is an append-only operational stream for Edge Function requests, browser errors and provider outcomes. Only service-role writers can append. System Admin reads go through `mova_admin_logs_search`, which enforces the existing platform-admin and AAL2 guard; direct table access is revoked and RLS is enabled. Keep log context allowlisted and bounded. Never store passwords, tokens, API keys, card data, message bodies, client notes, raw provider payloads, email addresses or full phone numbers. Browser reporting is rate-limited by an ephemeral IP digest. The admin view filters by time, level, source, stylist, user, request ID and text; row and bulk copy/export actions are audited. Retention: info 30 days; warnings and errors 90 days, approved by the product owner. The scheduled job-dispatch invokes a once-daily retention cleanup. Request IDs are returned as `x-request-id` and shown as references for caught render errors. Supabase Auth audit events are read-only in the admin query. Resend alert email is opt-in via `MOVA_LOG_ALERT_EMAIL` and triggers on ≥20 errors in 15 minutes or any dead background job, deduplicated to one alert per hour.
 
 ---
 

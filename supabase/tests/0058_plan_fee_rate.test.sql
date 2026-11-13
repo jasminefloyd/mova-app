@@ -29,11 +29,11 @@ select is((select platform_fee_plan_key from public.mova_payments where id = 'e5
 select is((select platform_fee_bps from public.mova_payments where id = 'e5800000-0000-4000-8000-000000000502'), 150, 'TC-PLANFEE-02 a stylist with no plan pays the platform rate');
 select ok((select platform_fee_version is not null and platform_fee_plan_key is null from public.mova_payments where id = 'e5800000-0000-4000-8000-000000000502'), 'TC-PLANFEE-02 and records the platform fee version');
 
--- The stylist moves to AI Growth: new payments take 0.5%, the earlier one keeps 1.0%.
+-- The stylist moves to AI + Growth: new payments take 0.75%, the earlier one keeps 1.0%.
 update public.mova_business_plan_assignments set plan_key = 'ai_growth' where artist_business_id = 'e5800000-0000-4000-8000-000000000001';
 insert into public.mova_payments(id, artist_business_id, appointment_id, method, collector, status, amount_minor, provider, provider_payment_id, idempotency_key)
 values ('e5800000-0000-4000-8000-000000000503', 'e5800000-0000-4000-8000-000000000001', 'e5800000-0000-4000-8000-000000000401', 'card_paylink_sms', 'mova_processed', 'succeeded', 10000, 'stripe', 'pi_plan_fee_3', 'plan-fee-pay-3');
-select is((select platform_fee_bps from public.mova_payments where id = 'e5800000-0000-4000-8000-000000000503'), 50, 'TC-PLANFEE-03 after upgrading to AI Growth, new payments take 0.5%');
+select is((select platform_fee_bps from public.mova_payments where id = 'e5800000-0000-4000-8000-000000000503'), 75, 'TC-PLANFEE-03 after upgrading to AI + Growth, new payments take 0.75%');
 select is((select platform_fee_bps from public.mova_payments where id = 'e5800000-0000-4000-8000-000000000501'), 100, 'TC-PLANFEE-03 the earlier payment keeps 1.0%');
 select throws_ok($$update public.mova_payments set platform_fee_plan_key = 'free' where id = 'e5800000-0000-4000-8000-000000000501'$$, '42501', 'PAYMENT_FEE_LOCKED', 'TC-PLANFEE-04 the plan on a payment cannot be rewritten');
 select ok(not has_function_privilege('authenticated', 'public.mova_business_fee(uuid, timestamptz)', 'EXECUTE'), 'TC-PLANFEE-05 stylists cannot call the fee lookup directly');

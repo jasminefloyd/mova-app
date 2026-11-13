@@ -1,6 +1,8 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { ImageMagick, initializeImageMagick, MagickFormat, Gravity } from 'npm:@imagemagick/magick-wasm@0.0.44';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 import { corsHeaders } from '../_shared/cors.ts';
+import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 
 const wasmModule = 'npm:@imagemagick/magick-wasm@0.0.44';
 const wasmBytes = await Deno.readFile(new URL('magick.wasm', import.meta.resolve(wasmModule)));
@@ -19,7 +21,7 @@ function supportedImage(bytes: Uint8Array): boolean {
   return false;
 }
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('photo-process', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return json({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const authorization = request.headers.get('Authorization');
@@ -41,6 +43,7 @@ Deno.serve(async (request) => {
   const { data: membership } = await userClient.from('mova_artist_memberships').select('artist_business_id,role')
     .eq('user_id', user.id).eq('artist_business_id', path.split('/')[0]).eq('status', 'active').maybeSingle();
   if (!membership) return json({ code: 'ARTIST_MEMBERSHIP_REQUIRED' }, 403);
+  if (kind === 'cover' && !await planFeatureEnabled(membership.artist_business_id, 'custom_cover')) return json({ code: 'PLAN_FEATURE_NOT_INCLUDED', feature: 'custom_cover' }, 403);
   if ((kind === 'profile' || kind === 'cover') && membership.role !== 'owner') return json({ code: 'OWNER_PROFILE_REQUIRED' }, 403);
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const bucket = kind === 'portfolio' ? 'mova_portfolio_media' : kind === 'visit' ? 'mova_visit_private' : 'mova_profile_photos';
@@ -133,4 +136,4 @@ Deno.serve(async (request) => {
     await admin.storage.from(bucket).remove([path]);
     return json({ code: 'IMAGE_PROCESSING_FAILED' }, 422);
   }
-});
+}));

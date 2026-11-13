@@ -1,7 +1,8 @@
+import { withSystemRequestLogging, loggedProviderFetch } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { StripeTestClient } from '../_shared/providers/stripe/client.ts';
 
-Deno.serve(async (request) => {
+Deno.serve(withSystemRequestLogging('refund-request', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   if (Deno.env.get('MOVA_STRIPE_TEST_MODE') !== 'true') return respond({ code: 'STRIPE_TEST_MODE_DISABLED' }, 503);
@@ -20,7 +21,7 @@ Deno.serve(async (request) => {
   if (error || !refund) return respond({ code: error?.message ?? 'REFUND_PREPARE_FAILED' }, error?.message === 'REFUND_AMOUNT_EXCEEDS_REMAINING' ? 409 : 422);
   if (refund.status === 'succeeded') return respond({ refund_id: refund.refund_id, status: 'succeeded', reused: true });
   try {
-    const result = await new StripeTestClient(key).createRefund({
+    const result = await new StripeTestClient(key, loggedProviderFetch(request, 'stripe')).createRefund({
       paymentIntentId: refund.payment_intent_id,
       amountMinor: Number(refund.amount_minor),
       accountId: refund.account_id,
@@ -39,4 +40,4 @@ Deno.serve(async (request) => {
     await db.rpc('mova_stripe_refund_finish', { p_refund_id: refund.refund_id, p_provider_refund_id: null, p_status: 'failed' });
     return respond({ code: 'STRIPE_REFUND_FAILED' }, 502);
   }
-});
+}));

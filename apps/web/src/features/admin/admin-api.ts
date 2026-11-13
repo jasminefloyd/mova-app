@@ -78,6 +78,8 @@ const messages: Record<string, string> = {
   BACKGROUND_JOB_NOT_FOUND: 'That job no longer exists.',
   JOB_NOT_REQUEUEABLE: 'Only dead, failed or stuck jobs can be requeued.',
   UNKNOWN: 'Something went wrong. Try again.',
+  LOG_LEVEL_INVALID: 'Choose a valid log level.',
+  LOG_SOURCE_INVALID: 'Choose a valid log source.',
 };
 
 export function adminErrorText(error: unknown): string {
@@ -136,6 +138,14 @@ export type StylistDetail = {
 
 export type AuditEvent = { occurred_at: string; category: string; actor: string; event: string; reference: string; summary: string };
 export type AuditPage = { events: AuditEvent[]; has_more: boolean };
+
+export type SystemLogRow = {
+  id: string; occurred_at: string; level: 'info' | 'warning' | 'error'; source: string; event_name: string;
+  request_id: string | null; route_or_function: string | null; http_status: number | null; duration_ms: number | null;
+  user_id: string | null; artist_business_id: string | null; bid: number | null; business_name: string | null;
+  client_id: string | null; error_code: string | null; message: string; context: Record<string, unknown>;
+};
+export type SystemLogPage = { rows: SystemLogRow[]; has_more: boolean };
 
 export type FeeOverride = {
   id: string; bid: number; business_name: string; name: string; fee_bps: number; starts_at: string; ends_at: string | null;

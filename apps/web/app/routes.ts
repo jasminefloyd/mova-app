@@ -91,6 +91,7 @@ export default [
       route('blog/:postId', '../src/features/admin/blog/AdminBlogEditorPage.tsx'),
       route('flags', '../src/features/admin/AdminFlagsPage.tsx'),
       route('health', '../src/features/admin/AdminHealthPage.tsx'),
+      route('logs', '../src/features/admin/AdminLogsPage.tsx'),
       route('activity', '../src/features/admin/AdminActivityPage.tsx'),
     ]),
   ]),

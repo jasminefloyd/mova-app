@@ -1,6 +1,7 @@
+import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient, tokenHash } from '../_shared/booking.ts';
 
-Deno.serve(async(request)=>{
+Deno.serve(withSystemRequestLogging('booking-transition', async(request)=>{
   if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
   if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
   const body=await request.json().catch(()=>null);
@@ -21,4 +22,4 @@ Deno.serve(async(request)=>{
   const {data,error}=await db.rpc('mova_booking_transition',{p_appointment_id:booking.id,p_manage_token_hash:hash,p_to_status:body.to_status,p_actor_type:actorType,p_reason:body.reason??`${actorType}_request`,p_idempotency_key:idempotencyKey,p_actor_id:actorType==='artist'?actor?.user.id:null});
   if(error)return respond({code:error.message||'BOOKING_TRANSITION_FAILED'},error.message==='CANCELLATION_WINDOW_CLOSED'?409:422);
   return respond(data);
-});
+}));

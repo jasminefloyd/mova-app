@@ -1,0 +1,34 @@
+import { describe, expect, it } from 'vitest';
+import { buildPriceEvidence, type PricePilotObservation } from './price-pilot-model';
+
+const now = Date.parse('2026-11-13T12:00:00Z');
+function observation(index: number, price: number, overrides: Partial<PricePilotObservation> = {}): PricePilotObservation {
+  return {
+    id: `item-${index}`, source_id: `source-${index}`, service_name: `Silk service ${index}`, category: 'Silk press', duration_minutes: 90,
+    price_min_minor: price, price_max_minor: price, currency: 'USD', extraction_confidence: 0.9,
+    observed_at: '2026-11-01T12:00:00Z', mova_price_pilot_sources: { normalized_host: `salon-${index}.example`, submitted_url: `https://salon-${index}.example/menu` }, ...overrides,
+  };
+}
+
+describe('Price Pilot evidence band', () => {
+  it('returns the middle half and median from five distinct recent matching menus', () => {
+    const rows = [50, 60, 70, 80, 90].map((price, index) => observation(index, price * 100));
+    expect(buildPriceEvidence(rows, { name: 'silk', category: 'silk press', durationMinutes: 90, currency: 'USD' }, now)).toEqual({ count: 5, low: 6000, median: 7000, high: 8000 });
+  });
+
+  it('withholds a comparison below five independent hosts and ignores duplicate hosts', () => {
+    const rows = [50, 60, 70, 80, 90].map((price, index) => observation(index, price * 100));
+    rows[4] = observation(4, 9000, { mova_price_pilot_sources: { normalized_host: 'salon-3.example', submitted_url: 'https://salon-3.example/another-menu' } });
+    expect(buildPriceEvidence(rows, { name: 'silk', category: 'silk press', durationMinutes: 90, currency: 'USD' }, now)).toBeNull();
+  });
+
+  it('excludes mismatched duration, category, currency, low confidence and stale data', () => {
+    const rows = [50, 60, 70, 80, 90].map((price, index) => observation(index, price * 100));
+    rows[0] = observation(0, 5000, { duration_minutes: 60 });
+    rows[1] = observation(1, 6000, { category: 'Color' });
+    rows[2] = observation(2, 7000, { currency: 'CAD' });
+    rows[3] = observation(3, 8000, { extraction_confidence: 0.6 });
+    rows[4] = observation(4, 9000, { observed_at: '2026-08-01T12:00:00Z' });
+    expect(buildPriceEvidence(rows, { name: 'silk', category: 'silk press', durationMinutes: 90, currency: 'USD' }, now)).toBeNull();
+  });
+});
