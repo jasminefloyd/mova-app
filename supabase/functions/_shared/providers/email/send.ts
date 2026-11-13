@@ -1,6 +1,6 @@
 import { FakeEmailProvider } from './fake.ts';
 import { reserveSpend } from '../spend.ts';
-import { SendGridEmailProvider } from './sendgrid.ts';
+import { ResendEmailProvider } from './resend.ts';
 import { renderEmail, type AppointmentEmailVars } from './templates.ts';
 import type { EmailLocale, EmailProvider, EmailTemplateId } from './types.ts';
 
@@ -69,17 +69,16 @@ export async function sendEmail(db: EmailDb, provider: EmailProvider, input: Sen
   }
 }
 
-/** The fake, or SendGrid (O4) only with an explicit live switch and complete configuration; else null. */
+/** The fake, or Resend only with an explicit live switch and complete configuration; else null. */
 export function emailProviderFromEnv(env: (name: string) => string | undefined, fetcher: typeof fetch = fetch): EmailProvider | null {
   const choice = env('MOVA_EMAIL_PROVIDER');
   if (choice === 'fake') return new FakeEmailProvider();
-  if (choice === 'sendgrid' && env('MOVA_MESSAGING_LIVE_EMAIL') === 'true') {
-    const apiKey = env('SENDGRID_API_KEY'), fromAddress = env('MOVA_EMAIL_FROM');
+  if (choice === 'resend' && env('MOVA_MESSAGING_LIVE_EMAIL') === 'true') {
+    const apiKey = env('RESEND_API_KEY'), fromAddress = env('MOVA_EMAIL_FROM');
     if (!apiKey || !fromAddress) return null;
     const cost = Number(env('MOVA_EMAIL_COST_MICROS'));
     try {
-      return new SendGridEmailProvider({ apiKey, fromAddress, sandbox: env('MOVA_SENDGRID_SANDBOX') === 'true',
-        costMicros: Number.isSafeInteger(cost) && cost > 0 ? cost : undefined }, fetcher);
+      return new ResendEmailProvider({ apiKey, fromAddress, costMicros: Number.isSafeInteger(cost) && cost > 0 ? cost : undefined }, fetcher);
     } catch { return null; }
   }
   return null;

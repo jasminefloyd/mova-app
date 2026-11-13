@@ -1,10 +1,10 @@
 import { twilioSignature } from './sms/twilio.ts';
 
-// Delivery receipts from the O4 providers (Nov 8): Twilio status callbacks and the SendGrid Event Webhook.
+// Delivery receipts from the providers: Twilio status callbacks and Resend webhooks (email; owner decision Nov 13).
 // They update mova_messages (status, real cost) and add suppressions for bounces and complaints.
 
 export type StatusUpdate = {
-  provider: 'twilio' | 'sendgrid';
+  provider: 'twilio' | 'resend';
   providerMessageId: string | null;
   idempotencyKey: string | null;
   status: 'sent' | 'delivered' | 'failed' | null;
@@ -34,46 +34,36 @@ export async function parseTwilioStatus(raw: string, signature: string, authToke
   };
 }
 
-/** DER-encoded ECDSA signature → raw r||s (64 bytes), as WebCrypto expects. */
-export function derToRaw(der: Uint8Array): Uint8Array {
-  if (der[0] !== 0x30) throw new Error('SIGNATURE_INVALID');
-  let offset = 2;
-  const read = () => {
-    if (der[offset] !== 0x02) throw new Error('SIGNATURE_INVALID');
-    const length = der[offset + 1]!;
-    let value = der.slice(offset + 2, offset + 2 + length);
-    offset += 2 + length;
-    while (value.length > 32 && value[0] === 0) value = value.slice(1);
-    const out = new Uint8Array(32); out.set(value, 32 - value.length); return out;
-  };
-  const r = read(), s = read();
-  const raw = new Uint8Array(64); raw.set(r); raw.set(s, 32); return raw;
-}
-
 const fromBase64 = (value: string) => Uint8Array.from(atob(value), (c) => c.charCodeAt(0));
+const toBase64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
 
-/** SendGrid signed Event Webhook: ECDSA P-256 / SHA-256 over timestamp + raw payload. */
-export async function verifySendGridSignature(publicKeyBase64: string, raw: string, timestamp: string, signatureBase64: string, nowSeconds = Math.floor(Date.now() / 1000)) {
+/**
+ * Resend webhooks are signed by Svix: HMAC-SHA256 over "<svix-id>.<svix-timestamp>.<raw body>" with the
+ * endpoint's signing secret (whsec_…, base64). The svix-signature header holds one or more "v1,<base64>" values.
+ */
+export async function verifyResendSignature(secret: string, raw: string, headers: { id: string; timestamp: string; signature: string }, nowSeconds = Math.floor(Date.now() / 1000)) {
   try {
-    if (!/^\d{1,12}$/.test(timestamp) || Math.abs(nowSeconds - Number(timestamp)) > 600) return false;
-    const key = await crypto.subtle.importKey('spki', fromBase64(publicKeyBase64), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
-    return await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, key, new Uint8Array(derToRaw(fromBase64(signatureBase64))), new TextEncoder().encode(timestamp + raw));
+    if (!/^[A-Za-z0-9_-]{1,100}$/.test(headers.id) || !/^\d{1,12}$/.test(headers.timestamp) || Math.abs(nowSeconds - Number(headers.timestamp)) > 300) return false;
+    if (!secret.startsWith('whsec_')) return false;
+    const key = await crypto.subtle.importKey('raw', fromBase64(secret.slice('whsec_'.length)), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const expected = toBase64(new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${headers.id}.${headers.timestamp}.${raw}`))));
+    return headers.signature.split(' ').some((part) => { const [version, value] = part.split(','); return version === 'v1' && typeof value === 'string' && timingSafeEqual(value, expected); });
   } catch { return false; }
 }
 
-export function parseSendGridEvents(raw: string): StatusUpdate[] {
-  let events: unknown;
-  try { events = JSON.parse(raw); } catch { return []; }
-  if (!Array.isArray(events)) return [];
-  return events.slice(0, 1000).flatMap((item) => {
-    if (!item || typeof item !== 'object') return [];
-    const e = item as Record<string, unknown>;
-    const key = typeof e.mova_idempotency_key === 'string' ? e.mova_idempotency_key : null;
-    const id = typeof e.sg_message_id === 'string' ? e.sg_message_id.split('.')[0]! : null;
-    const email = typeof e.email === 'string' ? e.email.trim().toLowerCase() : null;
-    const status: StatusUpdate['status'] = e.event === 'delivered' ? 'delivered' : ['bounce', 'dropped'].includes(String(e.event)) ? 'failed' : e.event === 'processed' ? 'sent' : null;
-    const reason = e.event === 'bounce' ? 'bounce' : e.event === 'spamreport' ? 'complaint' : ['unsubscribe', 'group_unsubscribe'].includes(String(e.event)) ? 'manual' : null;
-    if (!key && !id) return [];
-    return [{ provider: 'sendgrid' as const, providerMessageId: id, idempotencyKey: key, status, costMicros: null, suppress: reason && email ? { address: email, reason } : null }];
-  });
+/** One Resend event per request. Rows are matched on the email id Resend returned when we sent it. */
+export function parseResendEvent(raw: string): StatusUpdate | null {
+  let event: unknown;
+  try { event = JSON.parse(raw); } catch { return null; }
+  if (!event || typeof event !== 'object') return null;
+  const { type, data } = event as { type?: unknown; data?: unknown };
+  if (typeof type !== 'string' || !data || typeof data !== 'object') return null;
+  const { email_id: emailId, to } = data as { email_id?: unknown; to?: unknown };
+  if (typeof emailId !== 'string' || !/^[A-Za-z0-9-]{8,100}$/.test(emailId)) return null;
+  const first = Array.isArray(to) ? to[0] : to;
+  const address = typeof first === 'string' ? first.trim().toLowerCase() : null;
+  const status: StatusUpdate['status'] = type === 'email.delivered' ? 'delivered' : type === 'email.sent' ? 'sent' : ['email.bounced', 'email.failed', 'email.suppressed'].includes(type) ? 'failed' : null;
+  const reason = type === 'email.bounced' ? 'bounce' as const : type === 'email.complained' ? 'complaint' as const : null;
+  if (!status && !reason) return null;
+  return { provider: 'resend', providerMessageId: emailId, idempotencyKey: null, status, costMicros: null, suppress: reason && address ? { address, reason } : null };
 }

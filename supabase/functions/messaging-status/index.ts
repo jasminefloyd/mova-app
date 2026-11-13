@@ -1,7 +1,7 @@
 import { corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
-import { parseSendGridEvents, parseTwilioStatus, verifySendGridSignature, type StatusUpdate } from '../_shared/providers/status.ts';
+import { parseResendEvent, parseTwilioStatus, verifyResendSignature, type StatusUpdate } from '../_shared/providers/status.ts';
 
-// Delivery receipts from Twilio (?provider=twilio) and SendGrid (?provider=sendgrid), O4 (Nov 8).
+// Delivery receipts from Twilio (?provider=twilio) and Resend (?provider=resend).
 // Updates message status and the real cost, and suppresses bounced / complaining addresses.
 const hash = async (value: string) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map((b) => b.toString(16).padStart(2, '0')).join('');
 const normalizePhone = (value: string) => { const d = value.replace(/\D/g, ''); return d.length === 10 ? `1${d}` : d; };
@@ -38,14 +38,14 @@ Deno.serve(async (request) => {
     if (!update) return respond({ code: 'INVALID_WEBHOOK_SIGNATURE' }, 401);
     return respond({ accepted: await apply(update) });
   }
-  if (provider === 'sendgrid') {
-    const key = Deno.env.get('SENDGRID_WEBHOOK_PUBLIC_KEY');
-    if (!key) return respond({ code: 'PROVIDER_NOT_CONFIGURED' }, 503);
-    const ok = await verifySendGridSignature(key, raw, request.headers.get('x-twilio-email-event-webhook-timestamp') ?? '', request.headers.get('x-twilio-email-event-webhook-signature') ?? '');
+  if (provider === 'resend') {
+    const secret = Deno.env.get('RESEND_WEBHOOK_SECRET');
+    if (!secret) return respond({ code: 'PROVIDER_NOT_CONFIGURED' }, 503);
+    const ok = await verifyResendSignature(secret, raw, { id: request.headers.get('svix-id') ?? '', timestamp: request.headers.get('svix-timestamp') ?? '', signature: request.headers.get('svix-signature') ?? '' });
     if (!ok) return respond({ code: 'INVALID_WEBHOOK_SIGNATURE' }, 401);
-    let applied = 0;
-    for (const update of parseSendGridEvents(raw)) if (await apply(update)) applied += 1;
-    return respond({ accepted: true, applied });
+    const update = parseResendEvent(raw);
+    // Events we do not act on (opened, clicked, delayed) are acknowledged so Resend does not retry them.
+    return respond({ accepted: true, applied: update && await apply(update) ? 1 : 0 });
   }
   return respond({ code: 'PROVIDER_UNKNOWN' }, 422);
 });

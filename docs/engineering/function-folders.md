@@ -11,7 +11,7 @@ canonical function, removed as unused, or handed to Phase 5, which owns the feat
 | --- | --- | --- |
 | `messaging-inbound-sms` | SMS provider inbound webhook (fake now, Twilio once live) | 4.4 |
 | `missed-call-webhook` | Telephony missed-call webhook (off unless `MOVA_MISSED_CALL_TEXTBACK_ENABLED`) | 4.4 |
-| `messaging-status` | Twilio status callbacks, SendGrid Event Webhook | 4.4 / O4 |
+| `messaging-status` | Twilio status callbacks, Resend webhooks | 4.4 / O4 |
 
 ## Removed: covered by a canonical function (use these, do not add duplicates)
 

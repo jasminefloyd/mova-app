@@ -1,13 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { derToRaw, parseSendGridEvents, parseTwilioStatus, verifySendGridSignature } from './status.ts';
+import { parseResendEvent, parseTwilioStatus, verifyResendSignature } from './status.ts';
 import { twilioSignature } from './sms/twilio.ts';
 
 const b64 = (bytes: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Uint8Array(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes))));
-function rawToDer(raw: Uint8Array) {
-  const part = (bytes: Uint8Array) => { let v = bytes; while (v.length > 1 && v[0] === 0 && v[1]! < 0x80) v = v.slice(1); if (v[0]! >= 0x80) v = Uint8Array.of(0, ...v); return Uint8Array.of(0x02, v.length, ...v); };
-  const r = part(raw.slice(0, 32)), s = part(raw.slice(32));
-  return Uint8Array.of(0x30, r.length + s.length, ...r, ...s);
-}
 
 describe('Twilio status callbacks (O4)', () => {
   const sid = 'AC' + '0'.repeat(32), token = 'twilio-test-token-0000', url = 'https://project.supabase.invalid/functions/v1/messaging-status?provider=twilio';
@@ -25,27 +20,33 @@ describe('Twilio status callbacks (O4)', () => {
   });
 });
 
-describe('SendGrid event webhook (O4)', () => {
-  it('verifies the ECDSA signature over timestamp + payload', async () => {
-    const pair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']) as CryptoKeyPair;
-    const publicKey = b64(await crypto.subtle.exportKey('spki', pair.publicKey));
-    const raw = JSON.stringify([{ email: 'a@b.co', event: 'delivered', sg_message_id: 'abc.filter', mova_idempotency_key: 'email:evt-1' }]);
-    const timestamp = '1762617600';
-    const signature = new Uint8Array(await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, pair.privateKey, new TextEncoder().encode(timestamp + raw)));
-    expect(derToRaw(rawToDer(signature))).toEqual(signature);
-    expect(await verifySendGridSignature(publicKey, raw, timestamp, b64(rawToDer(signature)), 1762617600)).toBe(true);
-    expect(await verifySendGridSignature(publicKey, raw + ' ', timestamp, b64(rawToDer(signature)), 1762617600)).toBe(false);
-    expect(await verifySendGridSignature(publicKey, raw, timestamp, b64(rawToDer(signature)), 1762617600 + 3600)).toBe(false);
+describe('Resend webhook (Svix signature)', () => {
+  const secretBytes = new Uint8Array(32).map((_, i) => i + 1);
+  const secret = `whsec_${b64(secretBytes)}`;
+  const sign = async (id: string, timestamp: string, raw: string) => {
+    const key = await crypto.subtle.importKey('raw', secretBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    return `v1,${b64(new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${id}.${timestamp}.${raw}`))))}`;
+  };
+  it('verifies the signature over id, timestamp and payload, within five minutes', async () => {
+    const raw = JSON.stringify({ type: 'email.delivered', data: { email_id: '4ef9a417-02e9-4d39-ad75-9611e0fcc33c', to: ['a@b.co'] } });
+    const id = 'msg_2abc', timestamp = '1762617600';
+    const signature = await sign(id, timestamp, raw);
+    expect(await verifyResendSignature(secret, raw, { id, timestamp, signature }, 1762617600)).toBe(true);
+    // A rotated secret sends several signatures; any valid one passes.
+    expect(await verifyResendSignature(secret, raw, { id, timestamp, signature: `v1,AAAA ${signature}` }, 1762617600)).toBe(true);
+    expect(await verifyResendSignature(secret, raw + ' ', { id, timestamp, signature }, 1762617600)).toBe(false);
+    expect(await verifyResendSignature(secret, raw, { id: 'msg_other', timestamp, signature }, 1762617600)).toBe(false);
+    expect(await verifyResendSignature(secret, raw, { id, timestamp, signature }, 1762617600 + 301)).toBe(false);
+    expect(await verifyResendSignature('not-a-secret', raw, { id, timestamp, signature }, 1762617600)).toBe(false);
   });
-  it('maps delivery, bounces, complaints and unsubscribes', () => {
-    const updates = parseSendGridEvents(JSON.stringify([
-      { email: 'A@B.co', event: 'delivered', sg_message_id: 'm1.x', mova_idempotency_key: 'k1' },
-      { email: 'a@b.co', event: 'bounce', sg_message_id: 'm2.x', mova_idempotency_key: 'k2' },
-      { email: 'a@b.co', event: 'spamreport', sg_message_id: 'm3.x' },
-      { email: 'a@b.co', event: 'open' },
-    ]));
-    expect(updates.map((u) => [u.status, u.suppress?.reason ?? null])).toEqual([['delivered', null], ['failed', 'bounce'], [null, 'complaint']]);
-    expect(updates[0]).toMatchObject({ idempotencyKey: 'k1', providerMessageId: 'm1' });
-    expect(parseSendGridEvents('not json')).toEqual([]);
+  it('maps delivery, bounces and complaints, and ignores other events', () => {
+    const event = (type: string, extra: Record<string, unknown> = {}) => JSON.stringify({ type, data: { email_id: '4ef9a417-02e9-4d39-ad75-9611e0fcc33c', to: ['A@B.co'], ...extra } });
+    expect(parseResendEvent(event('email.delivered'))).toMatchObject({ provider: 'resend', providerMessageId: '4ef9a417-02e9-4d39-ad75-9611e0fcc33c', idempotencyKey: null, status: 'delivered', suppress: null });
+    expect(parseResendEvent(event('email.sent'))).toMatchObject({ status: 'sent' });
+    expect(parseResendEvent(event('email.bounced'))).toMatchObject({ status: 'failed', suppress: { address: 'a@b.co', reason: 'bounce' } });
+    expect(parseResendEvent(event('email.complained'))).toMatchObject({ status: null, suppress: { address: 'a@b.co', reason: 'complaint' } });
+    expect(parseResendEvent(event('email.opened'))).toBeNull();
+    expect(parseResendEvent(JSON.stringify({ type: 'email.delivered', data: { to: ['a@b.co'] } }))).toBeNull();
+    expect(parseResendEvent('not json')).toBeNull();
   });
 });

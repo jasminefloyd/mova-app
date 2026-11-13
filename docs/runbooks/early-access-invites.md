@@ -14,7 +14,7 @@ Until the admin portal exists, approvals go through the `waitlist-admin` Edge Fu
 | Supabase function secrets | `PUBLIC_SITE_URL` | `https://mova-beauty.co` (the invite links to `/auth` here) |
 | Database (optional) | `mova.early_access_cap` | defaults to 10; change with `alter database postgres set mova.early_access_cap = '25'` only when the owner decides |
 
-Invite emails go through the email adapter (SendGrid, O4) and count toward the shared $50/month cap. They are only sent once email is live (`MOVA_EMAIL_PROVIDER=sendgrid`, `MOVA_MESSAGING_LIVE_EMAIL=true`). Before that, approving still adds the email to the allowlist, and the job retries the email until it gives up; use `resend` once email is live. Replies to the invite go to the `MOVA_EMAIL_FROM` address, so someone needs to watch that inbox.
+Invite emails go through the email adapter (Resend since 2026-11-13; SendGrid was retired) and count toward the shared $50/month cap. They are only sent once email is live (`MOVA_EMAIL_PROVIDER=resend`, `MOVA_MESSAGING_LIVE_EMAIL=true`). Before that, approving still adds the email to the allowlist, and the job retries the email until it gives up; use `resend` once email is live. Replies to the invite go to the `MOVA_EMAIL_FROM` address, so someone needs to watch that inbox.
 
 ## Calls
 

@@ -35,6 +35,10 @@ Calendar provider credentials are Edge Function secrets. Set `MOVA_PROVIDER_TOKE
 
 Client-card QR tokens are derived with HMAC-SHA-256 from a random token-row ID and its client × stylist scope; the database stores only the token hash. Set `MOVA_CLIENT_CARD_TOKENS_HMAC_HEX` to its own deployment-specific 32-byte key encoded as 64 hexadecimal characters. Keep it separate from both the notes and calendar keys. A key change rotates a client's active card link on their next signed-in profile load, so previously saved QR images for that client stop working. The card flow fails closed if the key is missing or invalid; profile and wallet rollout flags remain off until the identity decision and local integration review are complete.
 
+## Email (Resend)
+
+Email goes through Resend (owner decision, 2026-11-13; approval A-03). `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET`, `MOVA_EMAIL_FROM`, `MOVA_EMAIL_PROVIDER=resend` and `MOVA_MESSAGING_LIVE_EMAIL=true` are Supabase Edge Function secrets; none is read by the browser. Supabase Auth email uses Resend through Auth's custom SMTP settings, configured in the Supabase dashboard. Setup and the delivery-receipt webhook are in `supabase/functions/_shared/providers/email/README.md`. `SENDGRID_API_KEY`, `SENDGRID_WEBHOOK_PUBLIC_KEY` and `MOVA_SENDGRID_SANDBOX` are no longer read; remove them from production if they were ever set.
+
 ## Environment-specific encryption keys
 
 Generate each key independently for development and production; do not reuse a key across environments or purposes. For each environment, generate 32 random bytes as hex with `openssl rand -hex 32` for `MOVA_NOTES_KEK_HEX`, `MOVA_DOOR_CODE_KEK_HEX`, `MOVA_PROVIDER_TOKENS_KEK_HEX`, and `MOVA_CLIENT_CARD_TOKENS_HMAC_HEX`. Store development values only in the local development Supabase function secret store and production values only in the production Supabase function secret store. Never commit or print values. Before rotating a key, use the feature's documented key-version/rotation process so existing ciphertext or derived tokens remain readable.

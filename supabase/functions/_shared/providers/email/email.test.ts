@@ -3,7 +3,7 @@ import { FakeEmailProvider } from './fake.ts';
 import { emailProviderFromEnv, sendEmail, type EmailDb } from './send.ts';
 import { EMAIL_TEMPLATES, renderEmail } from './templates.ts';
 import { sendAppointmentEmail } from '../../appointment-emails.ts';
-import { SendGridEmailProvider } from './sendgrid.ts';
+import { ResendEmailProvider } from './resend.ts';
 import { vi } from 'vitest';
 
 const vars = { clientName: 'Jordan Lee', businessName: 'Rooted Beauty', serviceName: 'Silk press', startsAt: '2026-11-12T20:00:00.000Z', timeZone: 'America/New_York', locationName: 'Rooted Beauty Studio' };
@@ -75,7 +75,7 @@ describe('sendEmail with the fake (task 4.3)', () => {
   });
   it('only the fake can be configured', () => {
     expect(emailProviderFromEnv((n) => (n === 'MOVA_EMAIL_PROVIDER' ? 'fake' : undefined))?.live).toBe(false);
-    expect(emailProviderFromEnv((n) => (n === 'MOVA_EMAIL_PROVIDER' ? 'sendgrid' : undefined))).toBeNull();
+    expect(emailProviderFromEnv((n) => (n === 'MOVA_EMAIL_PROVIDER' ? 'resend' : undefined))).toBeNull();
   });
 });
 
@@ -95,38 +95,46 @@ describe('appointment emails from events (task 4.3)', () => {
   });
 });
 
-describe('O4 SendGrid and the spend cap (Nov 8)', () => {
+describe('Resend and the spend cap', () => {
   const input = { artistBusinessId: 'b1', clientId: null, to: 'guest@example.com', templateId: 'booking_confirmation' as const, locale: 'en-US' as const, vars, idempotencyKey: 'email:cap' };
   it('pauses email at the shared monthly cap', async () => {
     const fake = new FakeEmailProvider(1000);
     expect(await sendEmail(stubDb({ allowed: true }, null, true).db, fake, input)).toEqual({ status: 'suppressed', reason: 'spend_cap_reached' });
     expect(fake.outbox).toHaveLength(0);
   });
-  const config = { apiKey: 'SG.test_key_0000000.secret_part_00000000', fromAddress: 'bookings@mova-beauty.co' };
-  it('SendGrid posts the rendered email through a fake fetcher, tracking off', async () => {
-    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 202, headers: { 'x-message-id': 'sg-msg-123456' } }));
-    const sendgrid = new SendGridEmailProvider(config, fetcher);
+  const config = { apiKey: 're_test_0000000000000000', fromAddress: 'bookings@mova-beauty.co' };
+  it('Resend posts the rendered email through a fake fetcher with an idempotency key', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify({ id: '4ef9a417-02e9-4d39-ad75-9611e0fcc33c' }), { status: 200 }));
+    const resend = new ResendEmailProvider(config, fetcher);
     const email = renderEmail('request_received', 'es-US', vars);
-    expect(await sendgrid.send({ to: 'guest@example.com', from: 'x', ...email, templateId: 'request_received', locale: 'es-US', idempotencyKey: 'email:evt-9' }))
-      .toEqual({ providerMessageId: 'sg-msg-123456', status: 'queued' });
+    expect(await resend.send({ to: 'guest@example.com', from: 'x', ...email, templateId: 'request_received', locale: 'es-US', idempotencyKey: 'email:evt-9' }))
+      .toEqual({ providerMessageId: '4ef9a417-02e9-4d39-ad75-9611e0fcc33c', status: 'queued' });
     const [url, init] = fetcher.mock.calls[0]!;
-    expect(String(url)).toBe('https://api.sendgrid.com/v3/mail/send');
-    expect((init?.headers as Record<string, string>).Authorization).toBe(`Bearer ${config.apiKey}`);
-    const body = JSON.parse(String(init?.body));
-    expect(body).toMatchObject({ personalizations: [{ to: [{ email: 'guest@example.com' }] }], from: { email: 'bookings@mova-beauty.co' }, subject: email.subject,
-      custom_args: { mova_idempotency_key: 'email:evt-9', mova_template: 'request_received' }, tracking_settings: { click_tracking: { enable: false }, open_tracking: { enable: false } } });
-    expect(body.content.map((c: { type: string }) => c.type)).toEqual(['text/plain', 'text/html']);
-    expect(sendgrid.estimateCostMicros()).toBe(1000);
+    expect(String(url)).toBe('https://api.resend.com/emails');
+    const headers = init?.headers as Record<string, string>;
+    expect(headers.Authorization).toBe(`Bearer ${config.apiKey}`);
+    expect(headers['Idempotency-Key']).toBe('email:evt-9');
+    expect(JSON.parse(String(init?.body))).toEqual({ from: 'Mova <bookings@mova-beauty.co>', to: ['guest@example.com'], subject: email.subject, text: email.text, html: email.html,
+      tags: [{ name: 'mova_template', value: 'request_received' }, { name: 'mova_locale', value: 'es-US' }] });
+    expect(resend.estimateCostMicros()).toBe(1000);
   });
-  it('SendGrid failures throw', async () => {
-    const sendgrid = new SendGridEmailProvider(config, vi.fn<typeof fetch>().mockResolvedValue(new Response('{}', { status: 401 })));
-    await expect(sendgrid.send({ to: 'a@b.co', from: 'x', subject: 's', text: 't', html: 'h', templateId: 'booking_confirmation', locale: 'en-US', idempotencyKey: 'k' })).rejects.toThrow('SENDGRID_SEND_FAILED_401');
+  it('Resend failures and replies without an id throw', async () => {
+    const send = (response: Response) => new ResendEmailProvider(config, vi.fn<typeof fetch>().mockResolvedValue(response))
+      .send({ to: 'a@b.co', from: 'x', subject: 's', text: 't', html: 'h', templateId: 'booking_confirmation', locale: 'en-US', idempotencyKey: 'k' });
+    await expect(send(new Response('{}', { status: 401 }))).rejects.toThrow('RESEND_SEND_FAILED_401');
+    await expect(send(new Response('{}', { status: 200 }))).rejects.toThrow('RESEND_SEND_NO_ID');
   });
-  it('SendGrid is wired only with the live switch and complete configuration', () => {
+  it('rejects a malformed key or sender', () => {
+    expect(() => new ResendEmailProvider({ ...config, apiKey: 'SG.old' })).toThrow('RESEND_CONFIG_INVALID');
+    expect(() => new ResendEmailProvider({ ...config, fromAddress: 'Mova <bookings@mova-beauty.co>' })).toThrow('RESEND_CONFIG_INVALID');
+  });
+  it('Resend is wired only with the live switch and complete configuration', () => {
     const env = (values: Record<string, string>) => (name: string) => values[name];
-    const full = { MOVA_EMAIL_PROVIDER: 'sendgrid', SENDGRID_API_KEY: config.apiKey, MOVA_EMAIL_FROM: config.fromAddress };
+    const full = { MOVA_EMAIL_PROVIDER: 'resend', RESEND_API_KEY: config.apiKey, MOVA_EMAIL_FROM: config.fromAddress };
     expect(emailProviderFromEnv(env(full))).toBeNull();
-    expect(emailProviderFromEnv(env({ ...full, MOVA_MESSAGING_LIVE_EMAIL: 'true' }))?.name).toBe('sendgrid');
-    expect(emailProviderFromEnv(env({ ...full, MOVA_MESSAGING_LIVE_EMAIL: 'true', SENDGRID_API_KEY: 'nope' }))).toBeNull();
+    expect(emailProviderFromEnv(env({ ...full, MOVA_MESSAGING_LIVE_EMAIL: 'true' }))?.name).toBe('resend');
+    expect(emailProviderFromEnv(env({ ...full, MOVA_MESSAGING_LIVE_EMAIL: 'true', RESEND_API_KEY: 'nope' }))).toBeNull();
+    // The retired provider name no longer selects anything.
+    expect(emailProviderFromEnv(env({ ...full, MOVA_EMAIL_PROVIDER: 'sendgrid', MOVA_MESSAGING_LIVE_EMAIL: 'true' }))).toBeNull();
   });
 });

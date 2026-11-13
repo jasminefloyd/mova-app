@@ -1,4 +1,4 @@
-// Email provider interface (task 4.3). Only the fake exists; the vendor waits on owner decision O4.
+// Email provider interface (task 4.3). Providers: the fake, and Resend (owner decision, Nov 13; approval A-03).
 
 export type EmailTemplateId = 'booking_confirmation' | 'request_received' | 'request_accepted' | 'request_declined' | 'appointment_reminder';
 export type EmailLocale = 'en-US' | 'es-US';
