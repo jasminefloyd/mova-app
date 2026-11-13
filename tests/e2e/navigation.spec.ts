@@ -85,6 +85,29 @@ test('running-late sheet identifies the same-day appointment receiving the queue
   await expect(page.getByText('The transactional message is queued. The salon is not notified.', { exact: true })).toBeVisible();
 });
 
+test('artist can reschedule a confirmed appointment into an available slot immediately', async ({ page }) => {
+  await openOperatorPage(page, '/appointments/AID-1', 'BID-1', new Date('2026-11-10T14:00:00.000Z'));
+  await page.route('**/functions/v1/availability-search', async (route) => {
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' } });
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { groups: [{ slots: [{ starts_at: '2026-11-11T18:00:00.000Z', local_date: '2026-11-11', local_time: '1:00 PM', utc_offset: 'GMT-5' }] }] }, error: null, request_id: 'reschedule-test' }) });
+  });
+  const requests: Record<string, unknown>[] = [];
+  await page.route('**/functions/v1/booking-transition', async (route) => {
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-mova-artist-business-id, idempotency-key', 'Access-Control-Allow-Methods': 'POST, OPTIONS' } });
+    requests.push(route.request().postDataJSON() as Record<string, unknown>);
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { status: 'confirmed', starts_at: '2026-11-11T18:00:00.000Z' }, error: null, request_id: 'reschedule-test' }) });
+  });
+
+  await page.getByRole('button', { name: 'Reschedule' }).click();
+  await expect(page.getByRole('dialog')).toContainText('Choose an available time. The appointment updates as soon as you save.');
+  await page.getByRole('button', { name: /2026-11-11 · 1:00 PM/ }).click();
+  await page.getByRole('button', { name: 'Save new time' }).click();
+
+  await expect.poll(() => requests.length).toBe(1);
+  expect(requests[0]).toMatchObject({ appointment_id: 'e2500000-0000-4000-8000-000000000061', artist_reschedule_starts_at: '2026-11-11T18:00:00.000Z' });
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
 test('operator tab shell has no horizontal overflow from 320 to 430 px', async ({ page }) => {
   await openOperatorPage(page, '/');
   for (const width of [320, 360, 390, 430]) {

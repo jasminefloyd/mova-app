@@ -1032,9 +1032,10 @@
     "markComplete": "Mark complete",
     "recordPay": "Record pay",
     "reschedule": "Reschedule",
+    "rescheduleIntro": "Choose an available time. The appointment updates as soon as you save.",
+    "saveReschedule": "Save new time",
     "cancel": "Cancel",
     "bookedInstantly": "booked instantly",
-    "actionsUnavailable": "Rescheduling is not available yet.",
     "runningLateUnavailable": "Running-late messages are not available yet."
   },
   "clientDetails": {

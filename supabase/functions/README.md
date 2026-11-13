@@ -2,6 +2,8 @@
 
 Conventions: `/functions/v1/<name>`, envelope `{ data, error, request_id }`, `Idempotency-Key` on every mutation, caller class `artist | client | guest | worker | provider`, Zod schema in `packages/contracts/src/functions/<name>.ts`. Each function has the contract test suite `TC-CT-<name>` (docs/qa).
 
+`booking-transition` also accepts artist-only `{ appointment_id, artist_reschedule_starts_at }` for a future confirmed appointment. It revalidates location hours, lead time, horizon, blocks and overlapping appointments under a location lock, updates the time immediately, and writes one appointment event plus the transactional outbox event. The client-facing manage-token flow remains separate.
+
 ## Retained from v1 (§6.2)
 - `publish-showcase`
 - `public-artist`

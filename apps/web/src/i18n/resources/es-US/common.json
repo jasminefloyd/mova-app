@@ -1032,9 +1032,10 @@
     "markComplete": "Marcar como completada",
     "recordPay": "Registrar pago",
     "reschedule": "Reagendar",
+    "rescheduleIntro": "Elige un horario disponible. La cita se actualizará al guardar.",
+    "saveReschedule": "Guardar nuevo horario",
     "cancel": "Cancelar",
     "bookedInstantly": "confirmada al instante",
-    "actionsUnavailable": "Los cambios de horario aún no están disponibles.",
     "runningLateUnavailable": "Los avisos de retraso aún no están disponibles."
   },
   "clientDetails": {

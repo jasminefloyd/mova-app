@@ -66,11 +66,12 @@ Every screen must also implement the states the canvas does not draw: **loading 
 
 These are required for V1. The phase that needs them cannot be accepted until the product owner approves a design (QA cases `TC-SCR-TBD-01…10`).
 
-**P06 derived interaction flows (engineering lead approval, 2026-11-05):** the owner authorized the engineering lead to resolve phase gates while implementation proceeds. The following small interactions use the already approved Sheet, Card, Button, DayStrip, and TimeSlot components; they do not introduce new visual components or business rules:
+**P06 derived interaction flows (engineering lead approval, 2026-11-05; owner-confirmed artist reschedule, 2026-11-12):** the owner authorized the engineering lead to resolve phase gates while implementation proceeds and explicitly requested the confirmed-appointment reschedule flow. The following interactions use the already approved Sheet, Card, Button, DayStrip, and TimeSlot components; they do not introduce new visual components:
 
 | Flow | Existing screen | Derived layout |
 |---|---|---|
 | Artist request review and time suggestion | 10 | Request details and expiry, with Accept, Suggest a time, and Decline. Suggest opens available slots grouped by date; sending a slot keeps the booking pending until the client accepts. |
+| Artist reschedule of a confirmed appointment | 09 | The appointment action opens a Sheet with available slots at the same location. Saving updates the appointment immediately and creates the standard appointment-rescheduled event. |
 | Client cancellation confirmation | 28 | The manage card opens the standard confirmation Sheet before the cancellation request. The cancellation cutoff is shown from the location policy. |
 | Client reschedule picker | 28 | The manage card opens available location slots grouped by date; request locations retain artist review before the existing time changes. |
 

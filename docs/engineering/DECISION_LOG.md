@@ -54,7 +54,7 @@ Normative source: `docs/product/ENGINEERING_SPEC.md` v2.2. Locked decisions are 
 | A-15 | Final logo vector and usage | Brand | Concept asset only. | OPEN | Product owner approval required | — |
 | A-16 | **Zelle integration feasibility** (bank/processor partner, verification method, cost) | F23 | Owner-directed safe default: Zelle is recorded-only and labelled; no transfer processing or verification. Remove Zelle if feasibility is not approved by P17. | OPEN | Product owner approval required | 2026-11-06; ADR-0007 |
 | A-17 | **Tap to Pay (V1.1)**: native shell approach, Stripe Terminal, Apple Tap to Pay entitlement | F23 (V1.1) | Not built in V1. Pay-link QR is the in-person path. | OPEN | Product owner approval required | — |
-| A-18 | **Mova-wide client identity**: legal model for a platform-level customer account alongside each stylist's client list; data-sharing boundaries | F15, F16 | Build per §5.3 with strict separation; launch flag OFF until approved. | OPEN | Product owner approval required | — |
+| A-18 | **Mova-wide client identity**: legal model for a platform-level customer account alongside each stylist's client list; data-sharing boundaries | F15, F16 | Owner approved rollout on 2026-11-12, conditional on OTP controls and delivery being verified. Keep both launch flags OFF until those prerequisites are satisfied. | APPROVED — activation pending Auth readiness | Product owner | 2026-11-12 |
 | A-19 | **Client wallet card** pass design and issuance (extends A-06) | F16 | Save-as-image + QR fallback. | OPEN | Product owner approval required | — |
 | A-20 | **Reviews policy**: verified-visit rules, moderation, fake-review policy, display rules (incl. FTC rules on reviews), Google reviews display rights | F21 | Mova reviews collected but hidden from public until approved; Google ingest OFF. | OPEN | Product owner approval required | — |
 | A-21 | **Rebooking autopilot** (sending approved templates without per-message approval) | F08 | Autopilot master switch hidden; per-message approval mode only. | OPEN | Product owner approval required | — |
@@ -68,11 +68,13 @@ Normative source: `docs/product/ENGINEERING_SPEC.md` v2.2. Locked decisions are 
 | A-29 | **Review request messaging** (purpose classification and frequency) | F21 | Email only, one request per completed visit, opt-out honoured. | OPEN | Product owner approval required | — |
 | A-30 | **Concierge business hours / response promises** shown to clients | F22 | No response-time promises in client copy. | OPEN | Product owner approval required | — |
 
-## Owner decisions from the Nov 7 engineering checklist
+## Owner decisions
 
 | Decision | Status | Owner / date | Source |
 |---|---|---|---|
 | Stylist signup is limited to an owner-managed email allowlist. | APPROVED | Product owner / 2026-11-07 | Direct reply to invite-policy question |
+| Client Profiles / A-18 rollout | APPROVED AFTER AUTH CHECKS | Product owner / 2026-11-12 | Direct reply: “Approve A-18 rollout after checks.” Production Auth readiness check found incompatible OTP shape/expiry/template and no custom email delivery. Keep browser and server rollout gates off until corrected and verified. |
+| Stylist rescheduling of a confirmed appointment | APPROVED — APPLY IMMEDIATELY | Product owner / 2026-11-12 | Direct reply to reschedule behavior question. |
 
 This decision was retired by P6 migrations `20261109010000_mova_0060_open_signup.sql` and `20261109011000_mova_0061_retire_waitlist.sql`. New stylist signup is open; the Before User Created hook must remain disabled. The invite table is retained for historical records, but the signup flow and invite functions were removed. Do not use the SQL or hook setup instructions below; they are preserved only in the historical runbook.
 
