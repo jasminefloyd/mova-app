@@ -73,6 +73,7 @@ Normative source: `docs/product/ENGINEERING_SPEC.md` v2.2. Locked decisions are 
 
 | Decision | Status | Owner / date | Source |
 |---|---|---|---|
+| AI Price Pilot web-search providers | APPROVED: Claude Haiku 5.5 primary; OpenAI API fallback using the least expensive model that supports the web-search tool (currently GPT-6 Luna by listed token rates). Yelp discovery is not to be used. Provider web search is for finding candidate businesses and source pages only; menu prices must still be extracted from cited source pages and pass existing evidence checks. | Product owner / 2026-11-13 | Direct owner instruction |
 | Stylist signup is limited to an owner-managed email allowlist. | APPROVED | Product owner / 2026-11-07 | Direct reply to invite-policy question |
 | Client Profiles / A-18 rollout | APPROVED AFTER AUTH CHECKS | Product owner / 2026-11-12 | Direct reply: “Approve A-18 rollout after checks.” Production Auth readiness check found incompatible OTP shape/expiry/template and no custom email delivery. Keep browser and server rollout gates off until corrected and verified. |
 | Stylist rescheduling of a confirmed appointment | APPROVED — APPLY IMMEDIATELY | Product owner / 2026-11-12 | Direct reply to reschedule behavior question. |

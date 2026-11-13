@@ -3,7 +3,8 @@ import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 import { redactSystemText, withSystemRequestLogging, writeSystemLog } from '../_shared/system-log.ts';
 
 type MenuItem = { name?: unknown; category?: unknown; duration_minutes?: unknown; price_min?: unknown; price_max?: unknown; currency?: unknown; pricing_basis?: unknown; confidence?: unknown };
-type DirectoryProvider = 'google_places' | 'yelp' | 'serpapi';
+type SearchProvider = 'anthropic' | 'openai';
+type SearchSource = { name: string; address: string; website: string; url: string; provider: SearchProvider; attribution: string };
 const allowedOrigins = /^https:\/\/(?:mova-beauty\.co|www\.mova-beauty\.co|[a-z0-9-]+\.vercel\.app)$/;
 const cors = { ...corsHeaders, 'access-control-allow-headers': `${corsHeaders['access-control-allow-headers'] ?? 'authorization, x-client-info, apikey, content-type'}, x-mova-artist-business-id, x-request-id` };
 
@@ -21,40 +22,99 @@ function normalizeUrl(value: unknown): URL | null {
 }
 function text(value: unknown, max: number) { return typeof value === 'string' ? value.trim().slice(0, max) : ''; }
 function minor(value: unknown) { const number = Number(value); return Number.isFinite(number) && number >= 0 && number <= 1000000 ? Math.round(number * 100) : null; }
-
-async function providerLog(request: Request, businessId: string, userId: string, provider: string, outcome: 'completed' | 'failed', status: number | null, started: number, count?: number) {
-  await writeSystemLog({ level: outcome === 'failed' ? 'warning' : 'info', source: 'provider', eventName: 'price_pilot.provider_call', requestId: request.headers.get('x-request-id'), routeOrFunction: 'price-pilot', httpStatus: status, durationMs: Math.round(performance.now() - started), userId, artistBusinessId: businessId, errorCode: outcome === 'failed' ? 'PRICE_PILOT_PROVIDER_FAILED' : null, message: outcome === 'failed' ? 'Price Pilot provider request failed' : 'Price Pilot provider request completed', context: { provider, outcome, result_count: count ?? 0 } });
+function providerFromEnv(name: string, fallback: SearchProvider): SearchProvider {
+  const value = Deno.env.get(name);
+  return value === 'anthropic' || value === 'openai' ? value : fallback;
 }
 
-async function directorySearch(request: Request, businessId: string, userId: string, provider: DirectoryProvider, query: string) {
-  const config: Record<DirectoryProvider, { key: string; url: string; headers?: Record<string, string> }> = {
-    google_places: { key: 'GOOGLE_PLACES_API_KEY', url: 'https://places.googleapis.com/v1/places:searchText' },
-    yelp: { key: 'YELP_API_KEY', url: `https://api.yelp.com/v3/businesses/search?${new URLSearchParams({ term: 'hair stylist salon', location: query, limit: '10' })}` },
-    serpapi: { key: 'SERPAPI_API_KEY', url: `https://serpapi.com/search.json?${new URLSearchParams({ engine: 'google_maps', q: `hair stylist salon ${query}`, api_key: Deno.env.get('SERPAPI_API_KEY') ?? '' })}` },
-  };
-  const setup = config[provider]; const key = Deno.env.get(setup.key);
-  if (!key) return { configured: false, results: [] };
+async function providerLog(request: Request, businessId: string, userId: string, provider: string, outcome: 'completed' | 'failed', status: number | null, started: number, count?: number, searchCalls?: number) {
+  await writeSystemLog({ level: outcome === 'failed' ? 'warning' : 'info', source: 'provider', eventName: 'price_pilot.provider_call', requestId: request.headers.get('x-request-id'), routeOrFunction: 'price-pilot', httpStatus: status, durationMs: Math.round(performance.now() - started), userId, artistBusinessId: businessId, errorCode: outcome === 'failed' ? 'PRICE_PILOT_PROVIDER_FAILED' : null, message: outcome === 'failed' ? 'Price Pilot provider request failed' : 'Price Pilot provider request completed', context: { provider, outcome, result_count: count ?? 0, search_calls: searchCalls ?? 0 } });
+}
+
+function getSearchSources(payload: Record<string, unknown>, provider: SearchProvider): SearchSource[] {
+  const raw: Record<string, unknown>[] = [];
+  if (provider === 'anthropic' && Array.isArray(payload.content)) {
+    for (const block of payload.content as Record<string, unknown>[]) {
+      if (block.type === 'web_search_tool_result' && Array.isArray(block.content)) raw.push(...block.content as Record<string, unknown>[]);
+    }
+  }
+  if (provider === 'openai' && Array.isArray(payload.output)) {
+    for (const item of payload.output as Record<string, unknown>[]) {
+      const action = item.action as Record<string, unknown> | undefined;
+      if (item.type === 'web_search_call' && Array.isArray(action?.sources)) raw.push(...action.sources as Record<string, unknown>[]);
+    }
+  }
+
+  const seen = new Set<string>();
+  return raw.flatMap((item) => {
+    const title = text(item.title, 160);
+    const rawUrl = text(item.url, 500);
+    try {
+      const url = new URL(rawUrl);
+      if (!title || url.protocol !== 'https:' || !url.hostname.includes('.') || seen.has(url.hostname)) return [];
+      seen.add(url.hostname);
+      return [{ name: title, address: '', website: url.toString(), url: url.toString(), provider, attribution: provider === 'anthropic' ? 'Claude web search' : 'OpenAI web search' }];
+    } catch { return []; }
+  }).slice(0, 10);
+}
+
+async function searchWithProvider(request: Request, businessId: string, userId: string, provider: SearchProvider, query: string, maxSearchCalls: number): Promise<SearchSource[]> {
   const started = performance.now();
+  const prompt = `Find real independent hairstylists, salons, or beauty studios near ${query} that publish their own service menu online. Search for business websites and public service-menu pages. Return and cite source pages; do not estimate or invent prices, names, addresses, or URLs. This is candidate discovery only: Mova will verify prices directly from the linked menu pages.`;
+  const key = Deno.env.get(provider === 'anthropic' ? 'MOVA_ANTHROPIC_API_KEY' : 'MOVA_OPENAI_API_KEY');
+  if (!key) throw new Error('PROVIDER_NOT_CONFIGURED');
+  const primaryProvider = providerFromEnv('MOVA_PRICE_PILOT_PRIMARY_PROVIDER', 'anthropic');
+  const modelSetting = provider === primaryProvider ? 'MOVA_PRICE_PILOT_PRIMARY_MODEL' : 'MOVA_PRICE_PILOT_FALLBACK_MODEL';
+  const defaultModel = provider === 'anthropic' ? 'claude-haiku-5-5' : 'gpt-6-luna';
+  const model = Deno.env.get(modelSetting) || defaultModel;
+
   try {
-    const response = provider === 'google_places'
-      ? await fetch(setup.url, { method: 'POST', headers: { 'content-type': 'application/json', 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.websiteUri' }, body: JSON.stringify({ textQuery: `hair stylist salon ${query}`, pageSize: 10 }) })
-      : await fetch(setup.url, { headers: provider === 'yelp' ? { authorization: `Bearer ${key}` } : {} });
-    if (!response.ok) { await providerLog(request, businessId, userId, provider, 'failed', response.status, started); return { configured: true, results: [] }; }
-    const data = await response.json();
-    const raw = provider === 'google_places' ? data.places ?? [] : provider === 'yelp' ? data.businesses ?? [] : data.local_results ?? [];
-    const results = raw.slice(0, 10).map((item: Record<string, unknown>) => ({
-      name: text((item.displayName as Record<string, unknown> | undefined)?.text ?? item.name ?? item.title, 120),
-      address: text(item.formattedAddress ?? ((item.location as Record<string, unknown> | undefined)?.display_address && Array.isArray((item.location as Record<string, unknown>).display_address) ? ((item.location as Record<string, unknown>).display_address as string[]).join(', ') : item.address), 180),
-      website: text(item.websiteUri ?? item.website, 400),
-      url: text(item.url ?? item.place_id ?? item.data_id ?? item.id, 500),
-      provider,
-      attribution: provider === 'google_places' || provider === 'serpapi' ? 'Google' : 'Yelp',
-    })).filter((item: { name: string }) => item.name);
-    await providerLog(request, businessId, userId, provider, 'completed', response.status, started, results.length);
-    return { configured: true, results };
+    const response = provider === 'anthropic'
+      ? await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST', signal: AbortSignal.timeout(20_000),
+        headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model, max_tokens: 1200, messages: [{ role: 'user', content: prompt }], tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: maxSearchCalls, user_location: { type: 'approximate', country: 'US' } }] }),
+      })
+      : await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST', signal: AbortSignal.timeout(20_000),
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
+        body: JSON.stringify({ model, max_output_tokens: 1200, max_tool_calls: maxSearchCalls, tools: [{ type: 'web_search', search_context_size: 'low', user_location: { type: 'approximate', country: 'US' } }], include: ['web_search_call.action.sources'], input: prompt }),
+      });
+    if (!response.ok) {
+      await providerLog(request, businessId, userId, provider, 'failed', response.status, started);
+      throw new Error('PROVIDER_REQUEST_FAILED');
+    }
+    const payload = await response.json() as Record<string, unknown>;
+    const results = getSearchSources(payload, provider);
+    if (results.length === 0) {
+      await providerLog(request, businessId, userId, provider, 'failed', response.status, started);
+      throw new Error('PROVIDER_NO_SOURCES');
+    }
+    const toolCalls = provider === 'anthropic'
+      ? Number((payload.usage as Record<string, unknown> | undefined)?.server_tool_use && ((payload.usage as Record<string, unknown>).server_tool_use as Record<string, unknown>).web_search_requests) || 0
+      : Array.isArray(payload.output) ? (payload.output as Record<string, unknown>[]).filter((item) => item.type === 'web_search_call').length : 0;
+    await providerLog(request, businessId, userId, provider, 'completed', response.status, started, results.length, toolCalls);
+    return results;
+  } catch (error) {
+    if (!(error instanceof Error && ['PROVIDER_REQUEST_FAILED', 'PROVIDER_NO_SOURCES'].includes(error.message))) {
+      await providerLog(request, businessId, userId, provider, 'failed', null, started);
+    }
+    throw error;
+  }
+}
+
+async function discoverCompetitors(request: Request, businessId: string, userId: string, query: string) {
+  const primaryProvider = providerFromEnv('MOVA_PRICE_PILOT_PRIMARY_PROVIDER', 'anthropic');
+  const fallbackProvider = providerFromEnv('MOVA_PRICE_PILOT_FALLBACK_PROVIDER', 'openai');
+  const totalSearchCalls = Math.max(2, Math.min(5, Number(Deno.env.get('MOVA_PRICE_PILOT_MAX_SEARCH_CALLS')) || 5));
+  const primarySearchCalls = Math.ceil(totalSearchCalls / 2);
+  const fallbackSearchCalls = totalSearchCalls - primarySearchCalls;
+  try {
+    const results = await searchWithProvider(request, businessId, userId, primaryProvider, query, primarySearchCalls);
+    return { provider: primaryProvider, results };
   } catch {
-    await providerLog(request, businessId, userId, provider, 'failed', null, started);
-    return { configured: true, results: [] };
+    const results = await searchWithProvider(request, businessId, userId, fallbackProvider, query, fallbackSearchCalls);
+    return { provider: fallbackProvider, results };
   }
 }
 
@@ -110,11 +170,13 @@ async function handle(request: Request): Promise<Response> {
   if (action === 'discover') {
     const query = text(body.location, 100);
     if (query.length < 2) return actionFailure('discover', 'LOCATION_REQUIRED', 400);
-    const requested = Array.isArray(body.providers) ? body.providers : ['google_places', 'yelp', 'serpapi'];
-    const providers = requested.filter((p): p is DirectoryProvider => ['google_places', 'yelp', 'serpapi'].includes(String(p)));
-    const results = await Promise.all(providers.slice(0, 3).map(async (provider) => ({ provider, ...await directorySearch(request, businessId, user.id, provider, query) })));
-    await writeSystemLog({ level: 'info', source: 'function', eventName: 'price_pilot.discovery.completed', requestId, routeOrFunction: 'price-pilot', httpStatus: 200, userId: user.id, artistBusinessId: businessId, message: 'Price Pilot competitor discovery completed', context: { action, outcome: 'completed', result_count: results.reduce((n, result) => n + result.results.length, 0) } });
-    return Response.json({ data: { results, note: 'Directory results are transient discovery context. They are not stored or used as comparable menu prices.' } }, { headers: cors });
+    try {
+      const result = await discoverCompetitors(request, businessId, user.id, query);
+      await writeSystemLog({ level: 'info', source: 'function', eventName: 'price_pilot.discovery.completed', requestId, routeOrFunction: 'price-pilot', httpStatus: 200, userId: user.id, artistBusinessId: businessId, message: 'Price Pilot competitor discovery completed', context: { action, provider: result.provider, outcome: 'completed', result_count: result.results.length } });
+      return Response.json({ data: { results: [{ provider: result.provider, configured: true, results: result.results }], note: 'Web search results are candidate discovery context only. They are not stored or used as comparable menu prices; prices must be extracted and verified from linked menus.' } }, { headers: cors });
+    } catch {
+      return actionFailure('discover', 'PRICE_PILOT_SEARCH_UNAVAILABLE', 503);
+    }
   }
   if (action === 'import_menu') {
     if (body.authorization_confirmed !== true) return actionFailure('import_menu', 'SOURCE_AUTHORIZATION_REQUIRED', 400);
