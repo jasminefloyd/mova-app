@@ -1,22 +1,22 @@
 import { useTranslation } from 'react-i18next';
 import type { MetaFunction } from 'react-router';
-import { ButtonLink, Bullets, Eyebrow, JsonLd, PhoneFrame, useSiteShell } from './parts';
+import { ButtonLink, Bullets, Eyebrow, JsonLd, useSiteShell } from './parts';
 import { breadcrumbLd, pageMeta, shellFromMatches, softwareLd } from './seo';
 
 export const meta: MetaFunction = ({ matches }) => pageMeta('features', shellFromMatches(matches));
 
 type FeatureKey = 'showcase' | 'booking' | 'clients' | 'money' | 'revenue' | 'concierge' | 'clientCard' | 'reports';
 
-// W2 Features. Each section: eyebrow, heading, body, three bullets and a decorative screen preview.
-const features: Array<{ id: FeatureKey; anchor: string; art: 'home' | 'booking' | 'client' | 'money' | 'campaign' | 'concierge' | 'status' | 'reports'; reverse?: boolean; band: 'base' | 'alt' }> = [
-  { id: 'showcase', anchor: 'showcase', art: 'home', band: 'base' },
-  { id: 'booking', anchor: 'booking', art: 'booking', reverse: true, band: 'alt' },
-  { id: 'clients', anchor: 'clients', art: 'client', band: 'base' },
-  { id: 'money', anchor: 'money', art: 'money', reverse: true, band: 'alt' },
-  { id: 'revenue', anchor: 'revenue', art: 'campaign', band: 'base' },
-  { id: 'concierge', anchor: 'concierge', art: 'concierge', reverse: true, band: 'alt' },
-  { id: 'clientCard', anchor: 'clientcard', art: 'status', band: 'base' },
-  { id: 'reports', anchor: 'reports', art: 'reports', reverse: true, band: 'alt' },
+// W2 Features. Each section pairs the feature copy with its matching app design screen.
+const features: Array<{ id: FeatureKey; anchor: string; screen: string; alt: string; reverse?: boolean; band: 'base' | 'alt' }> = [
+  { id: 'showcase', anchor: 'showcase', screen: 'stylist-page', alt: 'showcaseScreenAlt', band: 'base' },
+  { id: 'booking', anchor: 'booking', screen: 'booking', alt: 'bookingScreenAlt', reverse: true, band: 'alt' },
+  { id: 'clients', anchor: 'clients', screen: 'clients', alt: 'clientsScreenAlt', band: 'base' },
+  { id: 'money', anchor: 'money', screen: 'money', alt: 'moneyScreenAlt', reverse: true, band: 'alt' },
+  { id: 'revenue', anchor: 'revenue', screen: 'revenue', alt: 'revenueScreenAlt', band: 'base' },
+  { id: 'concierge', anchor: 'concierge', screen: 'concierge', alt: 'conciergeScreenAlt', reverse: true, band: 'alt' },
+  { id: 'clientCard', anchor: 'clientcard', screen: 'client-card', alt: 'clientCardScreenAlt', band: 'base' },
+  { id: 'reports', anchor: 'reports', screen: 'reports', alt: 'reportsScreenAlt', reverse: true, band: 'alt' },
 ];
 
 const bulletKeys: Record<FeatureKey, [string, string, string]> = {
@@ -56,7 +56,7 @@ export default function FeaturesPage() {
       </nav>
     </section>
 
-    {features.map(({ id, anchor, art, reverse, band }) => {
+    {features.map(({ id, anchor, screen, alt, reverse, band }) => {
       const keys = titleKeys[id];
       const copy = <div className="mova-site__split-copy">
         <Eyebrow>{t(`website.features.${keys.eyebrow}`)}</Eyebrow>
@@ -64,7 +64,7 @@ export default function FeaturesPage() {
         <p className="mova-site__lead" style={{ fontSize: 17 }}>{t(`website.features.${keys.body}`)}</p>
         <Bullets items={bulletKeys[id].map((key) => t(`website.features.${key}`))} />
       </div>;
-      const figure = <div className="mova-site__split-art"><PhoneFrame variant={art === 'status' ? 'client' : art === 'reports' ? 'reports' : art} /></div>;
+      const figure = <div className="mova-site__split-art"><div className="mova-site__feature-screen"><img src={`/media/features/${screen}.png`} alt={t(`website.features.${alt}`)} loading="lazy" /></div></div>;
       return <section key={id} id={anchor} aria-labelledby={`${anchor}-h`} className={`mova-site__band${band === 'alt' ? ' mova-site__band--mist' : ''}`}>
         <div className="mova-site__container mova-site__section">
           <div className={`mova-site__split${reverse ? ' mova-site__split--reverse' : ''}`}>
