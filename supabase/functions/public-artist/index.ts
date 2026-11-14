@@ -32,7 +32,7 @@ Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
   const supabase = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data: profile, error: profileError } = await supabase
     .from('mova_artist_profiles')
-    .select('artist_business_id, display_name, handle, specialties, bio, preferred_locale, photo_variants, profile_photo_path, cover_photo_path, cover_source, cover_image_url, cover_credit_name, cover_credit_url, cover_unsplash_url, is_published, search_index_enabled')
+    .select('artist_business_id, display_name, handle, specialties, bio, preferred_locale, photo_variants, profile_photo_path, cover_photo_path, cover_source, cover_image_url, cover_credit_name, cover_credit_url, cover_unsplash_url, is_published, search_index_enabled, contact_phone, contact_email, website_url, social_links')
     .eq('handle', handle)
     .eq('is_published', true)
     .maybeSingle();
@@ -77,7 +77,7 @@ Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
   if (serviceError) return respond({ code: 'PUBLIC_ARTIST_UNAVAILABLE' }, 503);
 
   const { data: locations, error: locationError } = await supabase.from('mova_locations')
-    .select('id,name,booking_mode,time_zone,payment_collector').eq('artist_business_id', businessId).eq('is_active', true).order('name');
+    .select('id,name,booking_mode,time_zone,payment_collector,address').eq('artist_business_id', businessId).eq('is_active', true).order('name');
   if (locationError) return respond({ code: 'PUBLIC_ARTIST_UNAVAILABLE' }, 503);
   const { data: openLocations, error: hoursError } = locations?.length
     ? await supabase.from('mova_location_hours').select('location_id').eq('artist_business_id', businessId).in('location_id', locations.map((location) => location.id))
@@ -128,11 +128,15 @@ Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
       cover_credit_name: profile.cover_credit_name,
       cover_credit_url: profile.cover_credit_url,
       cover_unsplash_url: profile.cover_unsplash_url,
+      contact_phone: profile.contact_phone,
+      contact_email: profile.contact_email,
+      website_url: profile.website_url,
+      social_links: profile.social_links ?? {},
     },
     tab,
     locale,
     services: publicServices,
-    locations: (locations ?? []).map(({ id, name, booking_mode, time_zone }) => ({ id, name, booking_mode, time_zone })),
+    locations: (locations ?? []).map(({ id, name, booking_mode, time_zone, address }) => ({ id, name, booking_mode, time_zone, address: address ?? {} })),
     looks: publishedPortfolio.filter((item): item is NonNullable<typeof item> => item !== null),
     bookable: Boolean(services?.length && locations?.some((location) => openLocations?.some((entry) => entry.location_id === location.id))),
   });

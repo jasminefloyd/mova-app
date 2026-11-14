@@ -2,6 +2,8 @@ import { useLoaderData } from 'react-router';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
 import { PublicArtistPage } from './PublicArtistPage';
 import type { PublicArtist } from './PublicArtistPage';
+import { artistSchema } from './artist-schema';
+import { JsonLd } from '../website/parts';
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   const env = typeof process !== 'undefined' ? process.env : undefined;
@@ -48,6 +50,9 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export default function Route() {
-  const { artist } = useLoaderData<typeof loader>();
-  return <PublicArtistPage initialArtist={artist} />;
+  const { artist, locale, publicBaseUrl } = useLoaderData<typeof loader>();
+  return <>
+    <JsonLd data={artistSchema({ artist, publicBaseUrl, locale: locale === 'es-US' ? 'es-US' : 'en-US' })} />
+    <PublicArtistPage initialArtist={artist} />
+  </>;
 }

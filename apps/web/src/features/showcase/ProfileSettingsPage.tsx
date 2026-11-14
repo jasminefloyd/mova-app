@@ -6,16 +6,57 @@ import { Button, Chip, ErrorState, ScreenHeader, TextArea, TextField } from '../
 import { operatorUrl } from '../../app/operator-url';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 
-type Profile = { display_name: string; bio: string; specialties: string[]; handle: string; preferred_locale: 'en-US' | 'es-US'; profile_photo_path: string | null; cover_photo_path: string | null; cover_source?: 'upload' | 'unsplash'; cover_image_url?: string | null; cover_credit_name?: string | null; cover_credit_url?: string | null; cover_unsplash_url?: string | null };
+type Profile = { display_name: string; bio: string; specialties: string[]; handle: string; preferred_locale: 'en-US' | 'es-US'; profile_photo_path: string | null; cover_photo_path: string | null; cover_source?: 'upload' | 'unsplash'; cover_image_url?: string | null; cover_credit_name?: string | null; cover_credit_url?: string | null; cover_unsplash_url?: string | null; contact_phone?: string | null; contact_email?: string | null; website_url?: string | null; social_links?: Partial<Record<SocialKey, string>> | null };
 type CoverCredit = { name: string; url: string; unsplashUrl: string };
 type Looks = { total: number; shown: number; thumbs: string[] };
 type ProfileService = { id: string; name: string; duration_minutes: number; base_price_minor: number; deposit_type: string; deposit_value: number };
-type Draft = { displayName: string; handle: string; bio: string; specialties: string[] };
+type SocialKey = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube';
+const SOCIAL_KEYS: SocialKey[] = ['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube'];
+type Draft = { displayName: string; handle: string; bio: string; specialties: string[]; phone: string; email: string; website: string; social: Record<SocialKey, string> };
+type ContactDraft = Pick<Draft, 'phone' | 'email' | 'website' | 'social'>;
+type ContactErrorKey = 'phone' | 'email' | 'website' | 'social';
 
 export const BIO_LIMIT = 280;
 export const SPECIALTY_LIMIT = 5;
 const PRESET_KEYS = ['silkPress', 'naturalHair', 'braids', 'locs', 'color', 'cuts', 'wigs', 'kids'] as const;
 const HANDLE_PATTERN = /^[a-z0-9-]{3,30}$/;
+// Mirrors the checks in mova_update_artist_contact (migration 0089), so the form can explain a problem before saving.
+const PHONE_PATTERN = /^\+?[0-9 ()\-.]{7,20}$/;
+const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const HTTPS_PATTERN = /^https:\/\/\S+$/;
+
+export function contactFromProfile(profile: Profile | null): ContactDraft {
+  return {
+    phone: profile?.contact_phone ?? '',
+    email: profile?.contact_email ?? '',
+    website: profile?.website_url ?? '',
+    social: { instagram: '', facebook: '', linkedin: '', tiktok: '', youtube: '', ...(profile?.social_links ?? {}) } as Record<SocialKey, string>,
+  };
+}
+
+export function contactDraft(draft: Draft): ContactDraft {
+  return { phone: draft.phone, email: draft.email, website: draft.website, social: draft.social };
+}
+
+/** The first contact field that would fail the server check, or null when all are acceptable. */
+export function contactProblem(contact: ContactDraft): ContactErrorKey | null {
+  const phone = contact.phone.trim();
+  const email = contact.email.trim();
+  if (!PHONE_PATTERN.test(phone)) return 'phone';
+  if (!EMAIL_PATTERN.test(email) || email.length > 254) return 'email';
+  if (contact.website.trim() && !HTTPS_PATTERN.test(contact.website.trim())) return 'website';
+  if (SOCIAL_KEYS.some((key) => contact.social[key].trim() && !HTTPS_PATTERN.test(contact.social[key].trim()))) return 'social';
+  return null;
+}
+
+/** Maps a contact RPC error to a message key, or null for other errors. */
+export function contactErrorKey(message: string | undefined): ContactErrorKey | null {
+  if (message?.includes('CONTACT_PHONE_INVALID')) return 'phone';
+  if (message?.includes('CONTACT_EMAIL_INVALID')) return 'email';
+  if (message?.includes('WEBSITE_INVALID')) return 'website';
+  if (message?.includes('SOCIAL_LINK')) return 'social';
+  return null;
+}
 
 /** Maps an RPC error from mova_update_artist_profile to a handle message key, or null for other errors. */
 export function handleErrorKey(message: string | undefined): 'reserved' | 'taken' | 'invalid' | null {
@@ -49,7 +90,7 @@ export function ProfileSettingsPage() {
   const [credit, setCredit] = useState<CoverCredit | null>(null);
   const [looks, setLooks] = useState<Looks | null>(null);
   const [services, setServices] = useState<ProfileService[]>([]);
-  const [draft, setDraft] = useState<Draft>({ displayName: '', handle: '', bio: '', specialties: [] });
+  const [draft, setDraft] = useState<Draft>({ displayName: '', handle: '', bio: '', specialties: [], ...contactFromProfile(null) });
   const [photo, setPhoto] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -58,20 +99,21 @@ export function ProfileSettingsPage() {
   const [loadError, setLoadError] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [handleError, setHandleError] = useState<'reserved' | 'taken' | 'invalid' | null>(null);
+  const [contactError, setContactError] = useState<ContactErrorKey | null>(null);
   const [saved, setSaved] = useState(false);
 
   const load = useCallback(async () => {
     if (!client || !businessId) return;
     setLoadError(false);
     const [{ data, error }, items, serviceResult] = await Promise.all([
-      client.from('mova_artist_profiles').select('display_name,bio,specialties,handle,preferred_locale,profile_photo_path,cover_photo_path,cover_source,cover_image_url,cover_credit_name,cover_credit_url,cover_unsplash_url').eq('artist_business_id', businessId).maybeSingle(),
+      client.from('mova_artist_profiles').select('display_name,bio,specialties,handle,preferred_locale,profile_photo_path,cover_photo_path,cover_source,cover_image_url,cover_credit_name,cover_credit_url,cover_unsplash_url,contact_phone,contact_email,website_url,social_links').eq('artist_business_id', businessId).maybeSingle(),
       client.from('mova_portfolio_items').select('media_path,is_published,sort_order').eq('artist_business_id', businessId).order('sort_order'),
       client.from('mova_services').select('id,name,duration_minutes,base_price_minor,deposit_type,deposit_value').eq('artist_business_id', businessId).eq('status', 'active').order('created_at'),
     ]);
     if (error || serviceResult.error != null || !data) { setLoadError(true); return; }
     const value = data as Profile;
     setProfile(value);
-    setDraft({ displayName: value.display_name, handle: value.handle, bio: value.bio ?? '', specialties: value.specialties ?? [] });
+    setDraft({ displayName: value.display_name, handle: value.handle, bio: value.bio ?? '', specialties: value.specialties ?? [], ...contactFromProfile(value) });
     const rows = (items.data ?? []) as { media_path: string; is_published: boolean }[];
     setServices((serviceResult.data ?? []) as ProfileService[]);
     const [photoSigned, coverSigned, ...thumbs] = await Promise.all([
@@ -93,9 +135,10 @@ export function ProfileSettingsPage() {
   const presets = useMemo(() => PRESET_KEYS.map((key) => t(`settings.specialtyPresets.${key}`)), [t]);
   const options = specialtyOptions(profile?.specialties ?? [], presets);
   const full = draft.specialties.length >= SPECIALTY_LIMIT;
+  const contactChanged = JSON.stringify(contactDraft(draft)) !== JSON.stringify(contactFromProfile(profile));
   const dirty = Boolean(profile) && (photo !== null || cover !== null || draft.displayName !== profile?.display_name || draft.handle !== profile?.handle
-    || draft.bio !== (profile?.bio ?? '') || !sameList(draft.specialties, profile?.specialties ?? []));
-  const valid = draft.displayName.trim().length > 0 && HANDLE_PATTERN.test(draft.handle) && draft.specialties.length >= 1 && draft.bio.length <= BIO_LIMIT;
+    || draft.bio !== (profile?.bio ?? '') || !sameList(draft.specialties, profile?.specialties ?? []) || contactChanged);
+  const valid = draft.displayName.trim().length > 0 && HANDLE_PATTERN.test(draft.handle) && draft.specialties.length >= 1 && draft.bio.length <= BIO_LIMIT && contactProblem(contactDraft(draft)) === null;
 
   const edit = (patch: Partial<Draft>) => { setSaved(false); setDraft((old) => ({ ...old, ...patch })); };
   const toggleSpecialty = (item: string) => {
@@ -119,7 +162,7 @@ export function ProfileSettingsPage() {
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!client || !businessId || !profile || !dirty || !valid) return;
-    setBusy(true); setSaveError(false); setHandleError(null); setSaved(false);
+    setBusy(true); setSaveError(false); setHandleError(null); setContactError(null); setSaved(false);
     try {
       // Handle changes go through the 0038 function, which keeps the reserved-handle and uniqueness checks.
       const { error } = await client.rpc('mova_update_artist_profile', {
@@ -130,6 +173,16 @@ export function ProfileSettingsPage() {
         const key = handleErrorKey(error.message);
         if (key) { setHandleError(key); return; }
         throw error;
+      }
+      const social = Object.fromEntries(SOCIAL_KEYS.map((key) => [key, draft.social[key].trim()]).filter(([, value]) => value)) as Record<string, string>;
+      const { error: contactRequestError } = await client.rpc('mova_update_artist_contact', {
+        p_artist_business_id: businessId, p_contact_phone: draft.phone.trim(), p_contact_email: draft.email.trim(),
+        p_website_url: draft.website.trim(), p_social_links: social,
+      });
+      if (contactRequestError) {
+        const key = contactErrorKey(contactRequestError.message);
+        if (key) { setContactError(key); return; }
+        throw contactRequestError;
       }
       if (photo) await upload(photo, 'profile');
       if (cover) await upload(cover, 'cover');
@@ -183,6 +236,20 @@ export function ProfileSettingsPage() {
 
       <TextArea label={t('onboarding.bio')} maxLength={BIO_LIMIT} rows={3} value={draft.bio} onChange={(event) => edit({ bio: event.currentTarget.value })} />
 
+      <fieldset className="mova-specialty-fieldset mova-profile-edit__contact">
+        <legend>{t('settings.contactTitle')}</legend>
+        <p className="mova-field__hint">{t('settings.contactHint')}</p>
+        <TextField label={t('settings.contactPhone')} required type="tel" inputMode="tel" autoComplete="tel" maxLength={20} value={draft.phone}
+          error={contactError === 'phone' ? t('settings.contactErrors.phone') : ''} onChange={(event) => { setContactError(null); edit({ phone: event.currentTarget.value }); }} />
+        <TextField label={t('settings.contactEmail')} required type="email" inputMode="email" autoComplete="email" autoCapitalize="none" maxLength={254} value={draft.email}
+          error={contactError === 'email' ? t('settings.contactErrors.email') : ''} onChange={(event) => { setContactError(null); edit({ email: event.currentTarget.value }); }} />
+        <TextField label={t('settings.website')} type="url" inputMode="url" autoCapitalize="none" maxLength={2000} placeholder="https://" value={draft.website}
+          error={contactError === 'website' ? t('settings.contactErrors.website') : ''} onChange={(event) => { setContactError(null); edit({ website: event.currentTarget.value }); }} />
+        {SOCIAL_KEYS.map((key) => <TextField key={key} label={t(`settings.social.${key}`)} type="url" inputMode="url" autoCapitalize="none" maxLength={2000} placeholder="https://" value={draft.social[key]}
+          error={contactError === 'social' && draft.social[key].trim() && !/^https:\/\/\S+$/.test(draft.social[key].trim()) ? t('settings.contactErrors.social') : ''}
+          onChange={(event) => { setContactError(null); edit({ social: { ...draft.social, [key]: event.currentTarget.value } }); }} />)}
+      </fieldset>
+
       <fieldset className="mova-specialty-fieldset">
         <legend>{t('onboarding.specialties')} <span>· {t('settings.specialtyCount', { count: draft.specialties.length, limit: SPECIALTY_LIMIT })}</span></legend>
         <div className="mova-chip-list">{options.map((item) => {
@@ -208,6 +275,7 @@ export function ProfileSettingsPage() {
       </Link>
 
       {saveError && <p role="alert">{t('settings.saveError')}</p>}
+      {contactError && <p role="alert">{t('settings.contactErrors.summary')}</p>}
       {saved && <p role="status" className="mova-visually-hidden">{t('settings.profileSaved')}</p>}
       <footer className="mova-profile-edit__actions">
         <Button type="submit" loading={busy} disabled={!dirty || !valid}>{saved && !dirty ? t('settings.savedShort') : t('settings.saveProfile')}</Button>

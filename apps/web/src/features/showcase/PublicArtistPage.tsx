@@ -10,9 +10,9 @@ import { trackProfileEvent } from '../reports/track';
 
 type Service = { id: string; name: string; category: string; duration_minutes: number; buffer_minutes?: number; base_price_minor: number; deposit_type: 'none' | 'fixed' | 'percent'; deposit_value: number; location_deposits: Array<{ location_id: string; price_minor: number; duration_minutes: number; deposit_amount_minor: number }> };
 type Look = { id: string; image_url: string; alt_text: string; service_ids: string[] };
-type PublicLocation = { id: string; name: string; booking_mode: 'instant' | 'request'; time_zone: string };
+type PublicLocation = { id: string; name: string; booking_mode: 'instant' | 'request'; time_zone: string; address?: Record<string, string | undefined> };
 export type PublicArtist = {
-  profile: { display_name: string; handle: string; specialties: string[]; bio: string; preferred_locale: string; search_index_enabled: boolean; photo_urls: Record<string, Record<string, string>>; rating_average?: number | null; rating_count?: number; cover_source?: 'upload' | 'unsplash'; cover_image_url?: string | null; cover_credit_name?: string | null; cover_credit_url?: string | null; cover_unsplash_url?: string | null };
+  profile: { display_name: string; handle: string; specialties: string[]; bio: string; preferred_locale: string; search_index_enabled: boolean; photo_urls: Record<string, Record<string, string>>; rating_average?: number | null; rating_count?: number; cover_source?: 'upload' | 'unsplash'; cover_image_url?: string | null; cover_credit_name?: string | null; cover_credit_url?: string | null; cover_unsplash_url?: string | null; contact_phone?: string | null; contact_email?: string | null; website_url?: string | null; social_links?: Partial<Record<'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'youtube', string>> | null };
   services: Service[]; looks: Look[]; locations: PublicLocation[]; bookable: boolean;
 };
 

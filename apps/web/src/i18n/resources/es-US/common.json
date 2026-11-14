@@ -98,6 +98,25 @@
     "changeCover": "Cambiar portada",
     "profilePhotoAlt": "Foto de perfil de {{name}}",
     "changeProfilePhoto": "Cambiar foto de perfil",
+    "contactTitle": "Contacto y enlaces",
+    "contactHint": "Los clientes ven esto en tu página pública y en búsquedas. El teléfono y el correo son obligatorios. Las redes sociales son opcionales.",
+    "contactPhone": "Teléfono",
+    "contactEmail": "Correo electrónico",
+    "website": "Sitio web",
+    "social": {
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "linkedin": "LinkedIn",
+      "tiktok": "TikTok",
+      "youtube": "YouTube"
+    },
+    "contactErrors": {
+      "phone": "Escribe un número de teléfono válido.",
+      "email": "Escribe un correo electrónico válido.",
+      "website": "Empieza con https://.",
+      "social": "Cada enlace debe empezar con https://.",
+      "summary": "Revisa los datos de contacto marcados y guarda de nuevo."
+    },
     "nameClientsSee": "Nombre que ven tus clientes",
     "handlePrefix": "mova-beauty.co/a/",
     "handleWarning": "Si lo cambias, dejarán de funcionar los enlaces y códigos QR que ya compartiste.",

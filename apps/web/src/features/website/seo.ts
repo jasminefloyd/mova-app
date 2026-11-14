@@ -119,6 +119,7 @@ export function siteGraph({ publicBaseUrl: base, locale }: ShellData) {
         description: t('website.seo.organizationDescription'),
         knowsLanguage: ['en', 'es'],
         areaServed: { '@type': 'Country', name: 'United States' },
+        contactPoint: { '@type': 'ContactPoint', contactType: 'customer support', email: 'hello@mova-beauty.co', availableLanguage: ['English', 'Spanish'] },
       },
       {
         '@type': 'WebSite',
