@@ -12,7 +12,7 @@ select ok(not has_table_privilege('authenticated','public.mova_price_pilot_sourc
 select ok(not has_table_privilege('authenticated','public.mova_price_pilot_observations','SELECT'),'stylists cannot read observations directly');
 select ok(not has_table_privilege('authenticated','public.mova_price_pilot_sources','INSERT'),'stylists cannot write sources directly');
 select ok(not has_table_privilege('authenticated','public.mova_price_pilot_observations','INSERT'),'stylists cannot write observations directly');
-select ok(not coalesce((public.mova_feature_gate('af860000-0000-4000-8000-000000000101','ai_price_pilot',null)->>'enabled')::boolean,false),'Price Pilot is disabled by default');
+select ok(not coalesce((public.mova_feature_gate('af860000-0000-4000-8000-000000000101','ai_price_pilot',null)->>'enabled')::boolean,false),'PricePilot is disabled by default');
 
 select set_config('request.jwt.claims','{"role":"service_role"}',true);
 set local role service_role;

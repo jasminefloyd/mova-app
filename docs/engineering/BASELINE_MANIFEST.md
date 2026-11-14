@@ -16,13 +16,14 @@ Recorded: 2026-11-05 · branch `docs/p00-scaffold-and-design-package`
 
 ## Current normative specification revision
 
-The original P00 v2.0 hash above is preserved as the starting baseline. The previously approved v2.1 and v2.2 revision hashes are retained below as history. The current v2.3 normative revision records the owner-specified host and path formats.
+The original P00 v2.0 hash above is preserved as the starting baseline. The previously approved v2.1, v2.2, and v2.3 revision hashes are retained below as history. The current v2.7 normative revision records later approved product decisions and the local PricePilot geographic evidence scope.
 
 | File | Description | SHA-256 |
 |---|---|---|
 | `docs/product/ENGINEERING_SPEC.md` | Superseded normative Engineering Handoff & Implementation Spec v2.1 | `83b4c36df7ac50f2d647b0a09b30f2bd6612dd7c3268a3035c3890f76c55f8ad` |
 | `docs/product/ENGINEERING_SPEC.md` | Superseded normative Engineering Handoff & Implementation Spec v2.2 | `939b6e240f6d974ba89e9f07291428fd55e75ea561d680b5f2838d013d6329ee` |
-| `docs/product/ENGINEERING_SPEC.md` | Current normative Engineering Handoff & Implementation Spec v2.3; owner-specified URL formats and approved O12 multi-service booking model | `bfb49b91df2972178b2d4501bfb35c99e0acbb2ae70faf2b4633adf1422e71e4` |
+| `docs/product/ENGINEERING_SPEC.md` | Superseded normative Engineering Handoff & Implementation Spec v2.3; owner-specified URL formats and approved O12 multi-service booking model | `bfb49b91df2972178b2d4501bfb35c99e0acbb2ae70faf2b4633adf1422e71e4` |
+| `docs/product/ENGINEERING_SPEC.md` | Current normative Engineering Handoff & Implementation Spec v2.7; PricePilot exact postal-code and state/region evidence scope, 45-day address-derived data expiry | `27222ab2c937d197a9bbbbeb5155c3e3d95feaeda639fb3aea57ea9bdca075e8` |
 
 ## Current CR-001 / CR-007 alignment revisions
 

@@ -2,7 +2,7 @@
 
 Every canvas artboard mapped to its route, app shell, features and acceptance criteria, build phase, and the components it is built from. This is the starting point for `docs/engineering/SCREEN_INVENTORY.md` (P00-T05): copy it there and add implementation files as they land.
 
-**53 mapped screens** (58 original canvas renders plus 2 owner-approved derived references; screen 15 TABLED) → **60 reference renders** including state variants.
+**53 mapped screens** (58 original canvas renders plus owner-approved derived references; screen 15 is now an owner-directed derived campaign screen) → **60 reference renders** including state variants.
 
 Every screen must also implement the states the canvas does not draw: **loading (skeleton), empty, error + retry, offline, permission denied, validation** (§2.3), at 320–430 px, in en-US and es-US, with 44 px targets, keyboard order, screen-reader labels and reduced motion. Visual acceptance: QA case `TC-SCR-<number>-01`.
 
@@ -25,7 +25,7 @@ Every screen must also implement the states the canvas does not draw: **loading 
 | 12c | Visit notes | [default](screens/png/12c-visit-notes.png) · [html](screens/html/12c-visit-notes.html) | `/app/clients/:id/visits/:appointmentId` | Artist | F17 · F17-AC02, F17-AC03 | P07 | photo grid (private), TextArea, Chip (products), Toggle (show next visit), Button |
 | 13 | Client import | [default](screens/png/13-client-import.png) · [html](screens/html/13-client-import.html) | `/app/clients/import` | Artist | F05 · F05-AC03, F05-AC04, F05-AC05 | P07 | KPITile counts, Card (duplicate resolver), Button Merge / Keep both, HonestyBanner, disabled Button |
 | 14 | AI Revenue Center (tab) | [default](screens/png/14-ai-revenue-center.png) · [html](screens/html/14-ai-revenue-center.html) | `/app/revenue` | Artist (tab 4 "AI Revenue") | F19 · F19-AC01…04 | P12 | Card inverse (forecast, Estimate label), ListRow tiles with counts, Link, TabBar |
-| 15 | Outreach approval · TABLED | [default](screens/png/15-outreach-TABLED.png) · [html](screens/html/15-outreach-TABLED.html) | `— TABLED, do not build (D-25)` | — | — | — | — |
+| 15 | Campaigns · owner-directed derived screen | Existing screen 15 reference is not an approved target for the new flow | `/:businessId/growth/marketing` | Artist (Growth) | F24 · F24-AC01…06 | P12 extension | ScreenHeader, Card, Button, TextField, TextArea, Checkbox, StatusChip, EmptyState, ErrorState; Mova design tokens |
 | 16 | Settings · from Home photo | [default](screens/png/16-settings.png) · [html](screens/html/16-settings.html) | `/app/settings` | Artist (modal from Home avatar) | D-15 | P02 / P03 | Card inverse (profile), Button secondary ×2, ListRow nav, Button ghost (Sign out) |
 | 16a | Settings · Services | [default](screens/png/16a-settings-services.png) · [html](screens/html/16a-settings-services.html) | `/app/settings/services` | Artist (Settings) | F03 | P04 | ScreenHeader, ServiceCard, DepositSummary, LocationOverrideRow, StatusChip, Button |
 | 16b | Settings · Portfolio | [default](screens/png/16b-settings-portfolio.png) · [html](screens/html/16b-settings-portfolio.html) | `/app/settings/portfolio` | Artist (Settings) | F02 · F02-AC04, F03 | P04 | ScreenHeader, PortfolioItem, Thumbnail, AltTextStatus, ServiceLink, ReorderControl, StatusChip, Button |
@@ -98,4 +98,5 @@ These are required for V1. The phase that needs them cannot be accepted until th
 | P13 | Spanish variants of guest flows 23–31d (layout check with long strings) |
 | P14 | Review reply composer; report review |
 | P13 | Concierge exception "Decide" sheet; web chat widget on showcase |
+| P12 | Campaign channel connection, approval, send/schedule and provider delivery states; current screen is draft-only until channel adapters are ready |
 | All | Loading / empty / error / offline states (pattern library acceptable) |

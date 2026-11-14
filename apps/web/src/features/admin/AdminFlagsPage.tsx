@@ -12,6 +12,10 @@ const labels: Record<Switch['key'], { name: string; note: string }> = {
   reviews: { name: 'Reviews', note: 'Lets clients leave reviews after a visit.' },
   spanish: { name: 'Spanish (US)', note: 'Shows the Spanish interface to stylists who choose it.' },
   tap_to_pay: { name: 'Tap to pay', note: 'Not built yet. It cannot be turned on.' },
+  marketing_email: { name: 'Marketing email', note: 'Delivery stays unavailable until the sender identity, mailing address and consent/compliance review are complete.' },
+  marketing_social: { name: 'Social publishing', note: 'Delivery stays unavailable until platform app review and account publishing connections are complete.' },
+  marketing_push: { name: 'Marketing web push', note: 'Delivery stays unavailable until VAPID, opt-in and preference controls are complete.' },
+  marketing_wallet: { name: 'Wallet marketing', note: 'Only eligible Google Wallet reward notices may use this switch. Apple Wallet updates remain transactional.' },
 };
 
 export default function AdminFlagsPage() {

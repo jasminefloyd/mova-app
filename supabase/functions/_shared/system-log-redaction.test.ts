@@ -17,7 +17,7 @@ describe('system log privacy redaction', () => {
     expect(JSON.stringify(context)).not.toMatch(/private message|allergy|secret|jasmine@example/i);
   });
 
-  it('keeps Price Pilot log metadata while dropping submitted menu URLs and extracted data', () => {
+  it('keeps PricePilot log metadata while dropping submitted menu URLs and extracted data', () => {
     const context = safeSystemContext({ action: 'import_menu', provider: 'firecrawl', outcome: 'completed', extraction_count: 12, submitted_url: 'https://salon.example/menu', service_name: 'Silk press', price: 150 });
     expect(context).toEqual({ action: 'import_menu', provider: 'firecrawl', outcome: 'completed', extraction_count: 12 });
     expect(JSON.stringify(context)).not.toMatch(/salon\.example|Silk press|150/);

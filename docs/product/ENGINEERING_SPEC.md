@@ -1,5 +1,5 @@
 # MOVA — Engineering Handoff & End-to-End Implementation Specification
-**Version:** 2.3 · **Date:** 2026-11-05 · **Status:** Normative implementation contract. Product-owner approvals listed in §0.5 remain mandatory before any affected capability goes live. · **Starting state:** empty repository
+**Version:** 2.7 · **Date:** 2026-11-13 · **Status:** Normative implementation contract. Product-owner approvals listed in §0.5 remain mandatory before any affected capability goes live. · **Starting state:** empty repository
 
 > **Mission.** Build a production-quality, mobile-first Progressive Web App that gives independent hairstylists a business that moves with them: a portable public showcase, location-aware booking, client relationships, honest money tracking, an AI Revenue Center, an AI Concierge, and reporting — in US English and US Spanish. **Brand:** `mova.` — *Your business moves with you.*
 >
@@ -30,7 +30,7 @@
 | R-02 | PRD layout `packages/domain` + `packages/api-contracts`; plan layout `packages/contracts` + `packages/config`. | Canonical packages: `packages/contracts` (Zod DTOs, enums, error codes, analytics event schemas), `packages/domain` (pure business rules, no I/O), `packages/design-tokens`, `packages/config` (TS/lint presets). `api-contracts` is retired. |
 | R-03 | ADR named `ADR-001-web-rendering` vs `ADR-0003-public-rendering`. | Four-digit ADR numbering. Canonical register in §0.6. |
 | R-04 | Plan listed approvals A-01–A-11; PRD listed A-01–A-15. | Full register A-01–A-30 in §0.5. |
-| R-05 | Plan MVP definition and audits said "F01–F12". | V1 scope is **F01–F23** (§1). Every audit, matrix and signoff covers all of them. |
+| R-05 | Plan MVP definition and audits said "F01–F12". | V1 scope is **F01–F24** (§1). Every audit, matrix and signoff covers all of them. |
 | R-06 | Analytics module path `packages/domain/analytics.ts`. | Event schemas live in `packages/contracts/src/analytics.ts`; derivation logic (if any) in `packages/domain`. |
 | R-07 | Five tabs "Home, Calendar, Clients, Growth, Business". | Five tabs **Home, Calendar, Clients, AI Revenue, Reports** (D-15). Business settings move behind the Home avatar. |
 | R-08 | Deposit policy lived on `location_policies`. | Deposit is configured **per service** (D-18), applied only where the artist collects payment. |
@@ -68,7 +68,7 @@ D-01–D-14 from v1 remain locked except where amended below (amendments are mar
 | D-22 | **New.** Rebooking **autopilot** sends approved templates under stylist-approved rules to consenting clients only (subject to A-21). |
 | D-23 | **New.** Reviews come from two sources shown together: **Mova verified-visit reviews** and **Google reviews** (Google ingest conditional on A-05/A-20). |
 | D-24 | **New.** AI Concierge acts as the **stylist's** assistant (not a salon receptionist): answers on Instagram, a Mova business text number, missed-call text-back and page chat; always discloses it is AI; quotes, exceptions and complaints always go to the stylist. Voice answering is out of V1. |
-| D-25 | **New.** Marketing campaigns beyond rebooking/slot offers (canvas screen 15) are **tabled**. Do not build screen 15. |
+| D-25 | **Superseded 2026-11-13.** Owner authorized V1 email, social publishing, Web Push and eligible Google Wallet campaigns; SMS deferred; Apple Wallet remains transactional. See F24 and CR-015. |
 | D-26 | **New.** Home is the stylist's at-a-glance view: KPI strip (this week's revenue, % of hours booked, rating), "Needs you", today, coming up. |
 
 ### 0.4 Status vocabulary
@@ -138,6 +138,7 @@ Navigation changed (D-15); Mova-wide client profile, sign-in, client card and wa
 - **v2.5 (2026-11-06):** Owner requested sequential operator-facing IDs: BID for businesses, CID for clients, and AID for appointments. Rooted Beauty is assigned BID 1 by the backfill ordering. UUIDs remain internal relational and authorization keys. Local migration 0023 and the pending application changes are tracked as CR-008; database behavior is not verified until the migration is applied and tested.
 
 - **v2.6 (2026-11-06):** Owner directed that the temporary coming-soon landing page live at app route `/`, replacing the former “separate site” route assumption for this temporary surface. Its Sign-up and Sign-in actions go to `/auth`; waitlist entries are persisted, no email is sent on submission, and the page displays a saved confirmation. The full company website will replace this temporary page later. A-14 remains open; do not accept production submissions until privacy, anti-bot, and production-domain checks are verified. See CR-009.
+- **v2.7 (2026-11-13):** Feature name is **PricePilot**. Geographic comparisons require an explicitly published menu postal code and state/region to exactly match the stylist's selected Mova location after normalization; only those sources can support same-postal-area claims. The comparison does not imply a radius or travel distance. Public menu location fields expire after 45 days and scheduled cleanup removes them. See CR-017.
 
 ---
 
@@ -157,7 +158,7 @@ Independent stylists build a clientele across rented chairs, suites and commissi
 
 **North-star metric:** completed appointments managed or attributed through Mova per activated artist per month. Supporting KPIs are defined in §11.
 
-### 1.2 Feature catalog (V1 = F01–F23)
+### 1.2 Feature catalog (V1 = F01–F24)
 
 | ID | Feature | Status | Canvas screens |
 |---|---|---|---|
@@ -184,9 +185,21 @@ Independent stylists build a clientele across rented chairs, suites and commissi
 | F21 | Reviews and reputation | LOCKED / A-20, A-29 | 23, 38, 39 |
 | F22 | AI Concierge | LOCKED / A-23, A-24, A-25 | 40–45 |
 | F23 | Get paid: pay links, pay QR, Zelle conditional, Tap to Pay V1.1 | LOCKED / A-02, A-16, A-17 | 18 |
-| — | Marketing campaigns (screen 15) | **TABLED** | 15 |
+| F24 | Email, social, Web Push and eligible Google Wallet marketing campaigns; SMS excluded from V1 | APPROVED / staged provider gates | 15 |
 
 Acceptance criteria use IDs `Fnn-ACnn`. Each AC becomes at least one row in `REQUIREMENTS_MATRIX.csv` and at least one automated test.
+
+### F24. Stylist marketing campaigns
+**Flow:** Growth → Marketing → choose goal (`fill_opening`, `rebook`, `offer`, `showcase`) → choose email, social, Web Push, or eligible Google Wallet → compose per channel/destination → preview eligible audience → save draft. Sends and schedules are separate actions and remain unavailable unless plan, stylist/client feature flags, platform switch, provider setup, consent, suppression, quiet hours, credits, and channel policy all pass at execution time. Social destinations in V1 are Instagram professional accounts, Facebook Pages, and Google Business Profile locations. SMS is deferred; Apple Wallet is only for appointment and pass-state updates.
+
+**Plan allocation:** email/social/Web Push are available in the approved 50/250/1,000 monthly campaign-credit tiers; Google Wallet marketing is limited to AI + Growth, which includes the Wallet client card. Plan access never enables a provider or bypasses opt-in. Marketing consent is independently stored for each stylist, purpose, and channel. No actual provider delivery is claimed by the draft-only implementation.
+
+- F24-AC01: An artist creates, edits, lists, and cancels tenant-scoped drafts; anonymous users and other businesses cannot read them.
+- F24-AC02: Drafts support four goals and per-channel content. Social content can target only Instagram, Facebook, and Google Business Profile destinations; SMS is not offered.
+- F24-AC03: Audience preview excludes clients without relevant email/push consent, with opt-out/suppression, unresolved local time or quiet-hours restrictions, and disabled per-client feature overrides; push additionally requires an active subscription.
+- F24-AC04: Scheduled and immediate delivery fail closed unless all plan, platform, provider, consent, safety and quota checks pass immediately before each send.
+- F24-AC05: Client marketing choices are stored independently for each stylist and channel. Appointment and account messages are not campaign messages.
+- F24-AC06: New UI uses Mova components/tokens, supports en-US/es-US, loading/empty/error/offline/permission/validation states and 320–430 px layouts.
 
 ---
 
@@ -318,7 +331,7 @@ v1 F09 unchanged. Settings row "Reviews & Google profile" (16) shows connection 
 v1 F11 plus: unified **messaging service** (§7.4) used by transactional notices, autopilot, seat filler, review requests and concierge; inbound message routing; STOP/HELP handling; per-artist sending identity; delivery receipts; quiet hours; cost metering per artist (for A-01/A-22).
 
 ### F12. Plans and entitlements
-v1 F12: approved tier names, pricing, fee rates, feature allocation and monthly message allowances live in `docs/product/PLANS_FEATURES_FEES.md`. Migration 0084 stores boolean entitlements and stylist/client overrides. Feature gates fail closed; platform/provider/safety switches remain independent. AI Price Pilot is false by default and shown as a coming-soon teaser until explicitly granted. Its authenticated `price-pilot` Edge Function uses Claude Haiku 5.5 web search as primary and the least-cost supported OpenAI API web-search model as fallback to discover candidate businesses and public menu pages. Yelp is not used. Firecrawl extracts structured prices only from stylist-submitted HTTPS menu URLs after explicit authorization. Only normalized service names, categories, durations, prices, confidence, source host and observation time are retained; raw page content, search prompts and provider payloads are not. Comparisons require five distinct recent source hosts with matching category, duration and currency; the result is an observed middle-price band, not an automatic price change. Every request uses the shared request-ID logger; Price Pilot events record action/outcome/result counts, provider status/duration and bounded search-call counts without page contents or submitted payloads. Provider credentials remain server-side. Screen 22 and public pricing use the approved allocation.
+v1 F12: approved tier names, pricing, fee rates, feature allocation and monthly message allowances live in `docs/product/PLANS_FEATURES_FEES.md`. Migration 0084 stores boolean entitlements and stylist/client overrides. Feature gates fail closed; platform/provider/safety switches remain independent. PricePilot is false by default and shown as a coming-soon teaser until explicitly granted. Its authenticated `price-pilot` Edge Function uses Claude Haiku 5.5 web search as primary and the least-cost supported OpenAI API web-search model as fallback to discover candidate businesses and public menu pages. Yelp is not used. Firecrawl extracts structured prices and a single explicit service address only from stylist-submitted HTTPS menu URLs after authorization. Only normalized service names, categories, durations, prices, confidence, source host, observation time, and the source's state/region and postal code are retained; address-derived market fields expire after 45 days and the scheduled `job-dispatch` cleanup clears them. Raw page content, full addresses, search prompts and provider payloads are not retained. Comparisons require five distinct recent source hosts matching category, duration, currency, and the selected Mova location's exact normalized postal code and state/region. The result is evidence from the same postal area; it does not estimate travel distance or claim a broader radius. Every request uses the shared request-ID logger; PricePilot events record action/outcome/result counts, provider status/duration and bounded search-call counts without page contents or submitted payloads. Provider credentials remain server-side. Screen 22 and public pricing use the approved allocation. The stylist review adds a current-price position against observed minimum, quartiles and median; shows distinct source count, freshness, extraction confidence and observed spread separately; and filters services whose current price is below the observed first quartile. A stylist may create a session-only price plan with a manually entered target and export it as CSV. The median is context only; the screen does not estimate earnings, write service prices, or apply changes automatically.
 
 ### F13. Internationalization
 v1 F13 unchanged and extended to every new surface: client profile, sign-in codes, wallet pass text, claim page, review request and form, concierge replies (in the client's language, detected per conversation and confirmable), templates (EN/ES pairs), reports labels. Spanish templates and concierge system copy require human review (A-12).
@@ -550,7 +563,7 @@ Every screen must implement: loading (skeleton), empty, error with retry, offlin
 | 12c | App-VisitNote | Visit notes | F17 | Before/after photos, what I did, products & settings chips, for next time, show-at-next-visit toggle, Save. |
 | 13 | App-Import | Client import review | F05 | Counts (new, exact, need a look); duplicate resolver (Merge / Keep both); lawful-import notice; disabled Import until resolved. |
 | 14 | App-Growth | AI Revenue Center | F19 | Forecast card; autopilot status; tiles: Concierge, Fill open slots, Rebooking pipeline, Win back; estimate link. |
-| 15 | App-Outreach | Outreach approval | — | **TABLED. Do not build.** |
+| 15 | App-Marketing | Campaigns | F24 | Campaign list, create/edit draft, goal, channel-specific content and destination, eligible-audience preview, consent/safety/provider status; delivery controls appear only when configured and approved. |
 | 16 | App-Business | Settings | D-15 | Profile card; View my page; Show my QR; rows: profile/photo/portfolio, services, locations, payments & payouts, calendar sync, reviews & Google, plan, language & notifications, privacy & data; Sign out. |
 | 16a | Settings-Services | Settings › Services | F03 | Manage service names, durations, buffers, prices, deposits, active state, and location-specific overrides. Owner-approved derived reference; not a source-canvas artboard. |
 | 16b | Settings-Portfolio | Settings › Portfolio | F02, F03 | Upload and order portfolio items; manage alt text, service links, and published/draft state. Owner-approved derived reference; not a source-canvas artboard. |
@@ -1389,7 +1402,7 @@ MOVA RELEASE SIGNOFF (spec v2.2)
 Release version / commit:
 Local integration evidence package and test date:
 Production URL and post-GO verification date:
-F01–F23 coverage: ___ / ___ ACs (100% or explicitly waived)
+F01–F24 coverage: ___ / ___ ACs (100% or explicitly waived)
 T01–T60: PASS / FAIL      UAT-A–M: APPROVED / REJECTED
 Approvals A-01–A-30: each APPROVED or feature flag OFF (attach list)
 G1 Architecture / G2 UX / G3 Feature complete / G4 Security & finance / G5 UAT: ___
@@ -1407,8 +1420,8 @@ You are implementing Mova from docs/product/ENGINEERING_SPEC.md (v2.2).
 Do not generate features in bulk. First:
 1. Create the repository scaffold and all P00 files listed in §13.3.
 2. Write docs/engineering/SCREEN_INVENTORY.md mapping the 51 canvas artboards to
-   routes, components and acceptance criteria (screen 15 is TABLED).
-3. Populate REQUIREMENTS_MATRIX.csv with one row per F01–F23 AC, D-01–D-26,
+   routes, components and acceptance criteria (screen 15 is the owner-directed marketing screen).
+3. Populate REQUIREMENTS_MATRIX.csv with one row per F01–F24 AC, D-01–D-26,
    A-01–A-30 and T01–T60.
 4. Draft ADR-0001, ADR-0002 and ADR-0003 for owner review.
 5. List every approval in DECISION_LOG.md with status OPEN unless recorded otherwise.
@@ -1422,7 +1435,7 @@ enable live payments/messaging/AI, or deploy production without explicit sign-of
 ---
 
 ## Appendix A. Out of V1
-Native iOS/Android apps (except the V1.1 Tap to Pay shell), native home-screen widgets, Tap to Pay (V1.1), voice answering for the concierge, direct posting to Instagram/TikTok, marketing campaigns beyond rebooking/slot offers (**TABLED**, screen 15), loyalty program, waitlist management, Outlook sync, inbound calendar blocking, salon-system integrations, salon payroll/ERP, marketplace discovery and paid ranking, Square/Venmo/PayPal/ACH/BNPL, cross-border payments, locales beyond en-US/es-US, automatic translation of artist-authored content, Mova-generated discounts or pricing changes, AI analysis of client photos (unless separately approved).
+Native iOS/Android apps (except the V1.1 Tap to Pay shell), native home-screen widgets, Tap to Pay (V1.1), voice answering for the concierge, TikTok direct publishing (later release), SMS marketing campaigns (later release), loyalty program, waitlist management, Outlook sync, inbound calendar blocking, salon-system integrations, salon payroll/ERP, marketplace discovery and paid ranking, Square/Venmo/PayPal/ACH/BNPL, cross-border payments, locales beyond en-US/es-US, automatic translation of artist-authored content, Mova-generated discounts or pricing changes, AI analysis of client photos (unless separately approved).
 
 ## Appendix B. Definition of V1 success
 A new independent stylist can sign up, add a recognizable photo, publish a bilingual-ready showcase with looks and services, configure services with per-service deposits and at least one location, accept honestly classified bookings (instant at their suite, requests at the salon), keep private client and visit notes, get paid by pay link or record cash, see appointments on Google or Apple Calendar, fill a cancelled slot with an approved campaign, run consent-safe rebooking reminders, let the concierge answer and book within its rules while handing off quotes, collect verified reviews, and see their performance on Home and Reports — with no critical security, privacy, scheduling, consent or money-correctness defects. A client can book as a guest or keep one Mova profile and card across every stylist they see.

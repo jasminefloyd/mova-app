@@ -1223,3 +1223,39 @@ select,
 .mova-price-pilot__discovery span, .mova-price-pilot__discovery small { color: var(--ink-muted); font-size: var(--fs-caption); }
 .mova-price-pilot__discovery a { color: var(--forest); font-weight: 600; }
 @media (min-width: 560px) { .mova-price-pilot__source-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+.mova-price-pilot__market-card,.mova-price-pilot__confidence,.mova-price-pilot__recommendation,.mova-price-pilot__sources,.mova-price-pilot__plan{display:grid;gap:var(--space-3)}
+.mova-price-pilot__position{display:grid;gap:var(--space-2);padding-block:var(--space-2)}
+.mova-price-pilot__position-values,.mova-price-pilot__position-legend{display:flex;justify-content:space-between;gap:var(--space-3);color:var(--ink-secondary);font-size:var(--fs-caption)}
+.mova-price-pilot__position-track{position:relative;height:18px;border-radius:var(--radius-pill);background:var(--surface-alt);isolation:isolate}
+.mova-price-pilot__position-band{position:absolute;top:5px;height:8px;min-width:8px;border-radius:var(--radius-pill);background:var(--mint);opacity:.9}
+.mova-price-pilot__position-median{position:absolute;top:2px;height:14px;width:2px;background:var(--forest);transform:translateX(-50%)}
+.mova-price-pilot__position-current{position:absolute;top:0;width:18px;height:18px;border:3px solid var(--surface);border-radius:50%;background:var(--accent-warm);box-shadow:0 0 0 2px var(--forest);transform:translateX(-50%);z-index:1}
+.mova-price-pilot__position-legend{flex-wrap:wrap;justify-content:flex-start}
+.mova-price-pilot__position-legend span{display:inline-flex;align-items:center;gap:var(--space-1)}
+.mova-price-pilot__position-legend i{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--mint)}
+.mova-price-pilot__position-legend i.is-current{background:var(--accent-warm)}
+.mova-price-pilot__market-summary{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:var(--space-1) var(--space-3);border-top:1px solid var(--line-subtle);padding-top:var(--space-3);color:var(--ink-secondary);font-size:var(--fs-caption)}
+.mova-price-pilot__market-summary strong{color:var(--forest);font:800 var(--fs-display-m)/1.1 var(--font-display)}
+.mova-price-pilot__market-summary>span:nth-of-type(n+2){grid-column:1/-1}
+.mova-price-pilot__confidence h3,.mova-price-pilot__recommendation h3,.mova-price-pilot__sources h3,.mova-price-pilot__plan h3{margin:0;color:var(--ink-primary);font:700 var(--fs-display-s)/1.2 var(--font-display)}
+.mova-price-pilot__confidence>div{display:flex;justify-content:space-between;gap:var(--space-3);border-bottom:1px solid var(--line-subtle);padding-block:var(--space-2);color:var(--ink-secondary)}
+.mova-price-pilot__confidence>div strong{color:var(--ink-primary);text-align:right}
+.mova-price-pilot__confidence small,.mova-price-pilot__recommendation small,.mova-price-pilot__plan p,.mova-price-pilot__note{margin:0;color:var(--ink-muted);font-size:var(--fs-caption);line-height:1.45}
+.mova-price-pilot__recommendation{border-inline-start:4px solid var(--accent-warm)}
+.mova-price-pilot__recommendation p:not(.mova-overline){margin:0;color:var(--ink-secondary)}
+.mova-price-pilot__sources ul,.mova-price-pilot__planned-list{display:grid;gap:var(--space-2);margin:0;padding:0;list-style:none}
+.mova-price-pilot__sources li,.mova-price-pilot__planned-list li>.mova-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--space-2);border-top:1px solid var(--line-subtle);padding-top:var(--space-3)}
+.mova-price-pilot__sources li>div,.mova-price-pilot__planned-list li>.mova-card>div{display:grid;gap:var(--space-1)}
+.mova-price-pilot__sources li span,.mova-price-pilot__planned-list li span{color:var(--ink-muted);font-size:var(--fs-caption)}
+.mova-price-pilot__sources li a{color:var(--forest);font-size:var(--fs-caption);font-weight:700}
+.mova-price-pilot__sources li>.mova-button,.mova-price-pilot__planned-list li>.mova-card>.mova-button{grid-column:1/-1;justify-self:start}
+.mova-price-pilot__filter{display:inline-flex;align-items:center;gap:var(--space-2);color:var(--ink-secondary);font-size:var(--fs-caption)}
+.mova-price-pilot__filter input,.mova-price-pilot__consent input{width:20px;height:20px;accent-color:var(--forest)}
+.mova-price-pilot__service-list{display:grid;gap:var(--space-2)}
+.mova-price-pilot__service-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--space-3)}
+.mova-price-pilot__service-row.is-selected{border-color:var(--forest);box-shadow:inset 0 0 0 1px var(--forest)}
+.mova-price-pilot__service-row>div{display:grid;gap:var(--space-1);min-width:0}
+.mova-price-pilot__service-row>div:first-child span{color:var(--ink-secondary);font-size:var(--fs-caption)}
+.mova-price-pilot__service-row>div:last-child{justify-items:end}
+.mova-price-pilot__planned-list li>.mova-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--space-2)}
+@media(min-width:720px){.mova-price-pilot__service-list{grid-template-columns:repeat(2,minmax(0,1fr))}.mova-price-pilot__sources ul{grid-template-columns:repeat(2,minmax(0,1fr))}.mova-price-pilot__sources li{border:1px solid var(--line-subtle);border-radius:var(--radius-l);padding:var(--space-3)}}

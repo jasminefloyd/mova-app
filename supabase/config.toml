@@ -204,3 +204,6 @@ verify_jwt = false
 
 [functions.price-pilot]
 verify_jwt = false
+
+[functions.marketing-campaign]
+verify_jwt = false

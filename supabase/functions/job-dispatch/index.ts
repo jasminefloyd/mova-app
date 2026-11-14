@@ -27,6 +27,8 @@ Deno.serve(withSystemRequestLogging('job-dispatch', async (request) => {
   try {
     const db = serviceClient();
     await db.rpc('mova_system_logs_cleanup');
+    const { data: expiredMarketLocations, error: marketLocationCleanupError } = await db.rpc('mova_price_pilot_expire_market_locations');
+    if (marketLocationCleanupError) return respond({ code: 'JOB_DISPATCH_FAILED' }, 503);
     await sendSystemLogAlert(db, (name) => Deno.env.get(name), request);
     const { data, error } = await db.rpc('mova_dispatch_outbox_events', { p_limit: limit });
     if (error) return respond({ code: 'JOB_DISPATCH_FAILED' }, 503);
@@ -56,7 +58,7 @@ Deno.serve(withSystemRequestLogging('job-dispatch', async (request) => {
         autopilot += result.sent;
       }
     }
-    return respond({ enqueued: data, reminders, seat_filler: { expired: expired ?? 0, waves }, autopilot });
+    return respond({ enqueued: data, reminders, expired_market_locations: expiredMarketLocations ?? 0, seat_filler: { expired: expired ?? 0, waves }, autopilot });
   } catch {
     return respond({ code: 'JOB_DISPATCH_FAILED' }, 503);
   }

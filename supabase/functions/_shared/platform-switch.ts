@@ -1,6 +1,6 @@
 import { serviceClient } from './booking.ts';
 
-type PlatformSwitchKey = 'autopilot' | 'concierge' | 'seat_filler' | 'zelle' | 'reviews' | 'spanish' | 'tap_to_pay';
+type PlatformSwitchKey = 'autopilot' | 'concierge' | 'seat_filler' | 'zelle' | 'reviews' | 'spanish' | 'tap_to_pay' | 'marketing_email' | 'marketing_social' | 'marketing_push' | 'marketing_wallet';
 
 /** Read admin-managed product switches from the private table. Missing/error always means off. */
 export async function platformSwitchEnabled(key: PlatformSwitchKey): Promise<boolean> {

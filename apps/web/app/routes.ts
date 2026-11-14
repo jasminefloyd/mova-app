@@ -32,6 +32,7 @@ export default [
     route('clients/:clientId/visits', '../src/features/clients/ClientDetailRoute.tsx', { id: 'client-visits' }),
     route('clients/:clientId/visits/:appointmentId', '../src/features/clients/VisitNotesRoute.tsx', { id: 'client-visit-notes' }),
     route('growth', '../src/app/routes/Growth.tsx'),
+    route('growth/marketing', '../src/features/marketing/MarketingPage.tsx'),
     route('growth/concierge', '../src/features/concierge/ConciergeInboxRoute.tsx'),
     route('growth/concierge/setup', '../src/features/concierge/ConciergeSetupRoute.tsx'),
     route('growth/concierge/quotes/:quoteId', '../src/features/concierge/ConciergeQuotePage.tsx'),

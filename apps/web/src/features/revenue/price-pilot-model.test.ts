@@ -6,11 +6,11 @@ function observation(index: number, price: number, overrides: Partial<PricePilot
   return {
     id: `item-${index}`, source_id: `source-${index}`, service_name: `Silk service ${index}`, category: 'Silk press', duration_minutes: 90,
     price_min_minor: price, price_max_minor: price, currency: 'USD', extraction_confidence: 0.9,
-    observed_at: '2026-11-01T12:00:00Z', mova_price_pilot_sources: { normalized_host: `salon-${index}.example`, submitted_url: `https://salon-${index}.example/menu` }, ...overrides,
+    observed_at: '2026-11-01T12:00:00Z', geographic_match: true, geographic_match_scope: 'postal_code_region', mova_price_pilot_sources: { normalized_host: `salon-${index}.example`, submitted_url: `https://salon-${index}.example/menu` }, ...overrides,
   };
 }
 
-describe('Price Pilot evidence band', () => {
+describe('PricePilot evidence band', () => {
   it('returns the middle half and median from five distinct recent matching menus', () => {
     const rows = [50, 60, 70, 80, 90].map((price, index) => observation(index, price * 100));
     expect(buildPriceEvidence(rows, { name: 'silk', category: 'silk press', durationMinutes: 90, currency: 'USD' }, now)).toEqual({ count: 5, low: 6000, median: 7000, high: 8000 });

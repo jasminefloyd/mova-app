@@ -211,8 +211,8 @@ You are implementing Mova from docs/product/ENGINEERING_SPEC.md (v2.2).
 Do not generate features in bulk. First:
 1. Create the repository scaffold and all P00 files listed in §13.3.
 2. Write docs/engineering/SCREEN_INVENTORY.md mapping the 51 canvas artboards to
-   routes, components and acceptance criteria (screen 15 is TABLED).
-3. Populate REQUIREMENTS_MATRIX.csv with one row per F01–F23 AC, D-01–D-26,
+   routes, components and acceptance criteria (screen 15 is the owner-directed marketing screen).
+3. Populate REQUIREMENTS_MATRIX.csv with one row per F01–F24 AC, D-01–D-26,
    A-01–A-30 and T01–T60.
 4. Draft ADR-0001, ADR-0002 and ADR-0003 for owner review.
 5. List every approval in DECISION_LOG.md with status OPEN unless recorded otherwise.
