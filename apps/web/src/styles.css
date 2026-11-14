@@ -203,6 +203,18 @@ body {
 .mova-home__header h1, .mova-calendar__month-header h1, .mova-clients__header h1, .mova-services-page__header h1, .mova-location-settings__header h1 { margin: 0; font-size: var(--fs-display-xl); line-height: 1.1; }
 .mova-home__settings { display: inline-flex; min-width: var(--tap-min); min-height: var(--tap-min); align-items: center; justify-content: center; border: 0; border-radius: 50%; padding: 0; background: transparent; }
 .mova-home__settings .mova-avatar { width: 44px; height: 44px; border: 1px solid var(--line-control); outline: 2px solid var(--surface-page); outline-offset: 1px; }
+.mova-home-install { display: none; }
+.mova-home-install__icon { display: none; }
+.mova-home-install__copy > strong { display: block; font-size: var(--fs-body-s); }
+.mova-home-install__copy > p { margin: var(--space-1) 0 0; color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.45; }
+.mova-home-install__actions { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); }
+.mova-home-install__action { min-height: 40px; font-size: var(--fs-caption); }
+.mova-home-install__actions .mova-icon-button { margin-left: auto; }
+.mova-home-install__copy > .mova-home-install__help { margin-top: var(--space-2); border-top: 1px solid var(--line-subtle); padding-top: var(--space-2); }
+@media (max-width: 699px) {
+  .mova-home-install { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: start; gap: var(--space-3); border-color: var(--line-subtle); border-radius: var(--radius-xl); padding: var(--space-3); }
+  .mova-home-install__icon { display: grid; width: 36px; height: 36px; place-items: center; border-radius: var(--radius-pill); background: var(--mint); color: var(--forest); }
+}
 .mova-home__metrics { display: grid; min-height: 83px; grid-template-columns: 1.3fr 1fr 1fr; gap: 1px; overflow: hidden; border-radius: var(--radius-xl); background: var(--botanical); color: var(--ink-inverse); text-decoration: none; }
 .mova-home__metrics .mova-kpi { min-height: 83px; align-content: center; gap: 2px; border-radius: 0; padding: var(--space-3); }
 .mova-home__metrics .mova-kpi__label { color: var(--mint); font-size: var(--fs-tab); text-transform: none; }

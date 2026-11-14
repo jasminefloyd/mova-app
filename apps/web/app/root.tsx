@@ -2,6 +2,7 @@ import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, 
 import type { LinksFunction } from 'react-router';
 import stylesheet from '../src/styles.css?url';
 import { AppErrorBoundary } from '../src/app/AppErrorBoundary';
+import { PwaInstallProvider } from '../src/pwa/PwaInstallProvider';
 
 export const links: LinksFunction = () => [{ rel: 'stylesheet', href: stylesheet }];
 
@@ -17,7 +18,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function Root() {
-  return <AppErrorBoundary><Outlet /></AppErrorBoundary>;
+  return <PwaInstallProvider><AppErrorBoundary><Outlet /></AppErrorBoundary></PwaInstallProvider>;
 }
 
 export function ErrorBoundary() {

@@ -3,7 +3,7 @@ import { index, layout, route, type RouteConfig } from '@react-router/dev/routes
 export default [
   route('', '../src/app/PublicShell.tsx', { id: 'public-root-shell' }, [
     route('', '../src/features/website/WebsiteLayout.tsx', { id: 'website-shell' }, [
-      index('../src/features/website/LandingPage.tsx'),
+      index('../src/app/HomeEntryRoute.tsx'),
       route('features', '../src/features/website/FeaturesPage.tsx'),
       route('pricing', '../src/features/website/PricingPage.tsx'),
       route('calculator', '../src/features/website/CalculatorPage.tsx'),
