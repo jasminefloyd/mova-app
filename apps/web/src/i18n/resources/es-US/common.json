@@ -12,7 +12,6 @@
     "saveError": "No pudimos guardar ese cambio. Inténtalo de nuevo.",
     "minutes": "min",
     "noDeposit": "Sin depósito",
-    "deposit": "depósito",
     "statusLabel": "Estado",
     "status": {
       "draft": "Borrador",
@@ -66,7 +65,6 @@
     "signOutError": "No pudimos cerrar tu sesión. Revisa tu conexión e inténtalo de nuevo.",
     "serviceSubtitle": "Administra lo que pueden reservar tus clientes",
     "locationPricing": "Precios por ubicación",
-    "baseAtLocations": "Precio base en {{count}} ubicaciones",
     "overridesApplied": "precio o duración personalizados",
     "bookingPage": "Visible en la página de reservas",
     "bufferShort": "min de preparación",
@@ -156,7 +154,14 @@
     "hiddenStaysHere": "Los looks ocultos se quedan aquí para después.",
     "describeFirst": "Describe la imagen antes de mostrarla en tu página.",
     "deleteLook": "Eliminar look",
-    "confirmDeleteLook": "Toca de nuevo para eliminar este look"
+    "confirmDeleteLook": "Toca de nuevo para eliminar este look",
+    "depositToggle": "Pedir un depósito",
+    "depositKind": "Tipo de depósito",
+    "usesBasePrice": "Usa tu precio base",
+    "noServicesDetail": "Agrega lo que tus clientes pueden reservar: nombre, precio, duración y un depósito opcional.",
+    "baseAtLocations_one": "Precio base en {{count}} ubicación",
+    "baseAtLocations_other": "Precio base en {{count}} ubicaciones",
+    "deposit": "depósito"
   },
   "update": {
     "ready": "Hay una actualización disponible.",

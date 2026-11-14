@@ -1070,7 +1070,7 @@ select,
 .mova-service-form .mova-form-stack { display: grid; gap: var(--space-4); }
 .mova-service-form h1 { margin: 0; color: var(--forest); font: 800 var(--fs-display-l)/1.1 var(--font-display); }
 .mova-service-form .mova-field__label { font-weight: 700; }
-.mova-service-form__numbers { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: var(--space-2); }
+.mova-service-form__numbers { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: end; gap: var(--space-2); }
 .mova-service-form__numbers .mova-field { min-width: 0; }
 .mova-service-form__numbers .mova-input { min-width: 0; padding-inline: 10px; }
 .mova-service-form__deposit { display: grid; gap: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-2xl); padding: var(--space-4); background: var(--surface); }
