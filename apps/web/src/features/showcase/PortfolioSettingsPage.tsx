@@ -67,7 +67,7 @@ export function PortfolioSettingsPage() {
     setUploading(true); setError(false);
     let variants: Record<string, string> | null = null;
     try {
-      const { data: uploaded, error: uploadError } = await client.functions.invoke('photo-upload-url', { body: { kind: 'portfolio', size: file.size, contentType: file.type } });
+      const { data: uploaded, error: uploadError } = await client.functions.invoke('photo-upload-url', { body: { kind: 'portfolio', size: file.size, contentType: file.type, artist_business_id: businessId } });
       if (uploadError) throw uploadError;
       const { path, token, bucket } = uploaded?.data ?? {};
       if (typeof path !== 'string' || typeof token !== 'string' || bucket !== 'mova_portfolio_media') throw new Error('UPLOAD_RESPONSE_INVALID');

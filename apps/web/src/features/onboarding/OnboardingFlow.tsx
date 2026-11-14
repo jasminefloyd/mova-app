@@ -36,13 +36,6 @@ export function OnboardingFlow() {
   const [photoPreview, setPhotoPreview] = useState('');
   const [photoZoom, setPhotoZoom] = useState(1);
   const [services, setServices] = useState<ServiceRow[]>([]);
-  const [serviceName, setServiceName] = useState('');
-  const [serviceCategory, setServiceCategory] = useState('');
-  const [serviceDuration, setServiceDuration] = useState('');
-  const [serviceBuffer, setServiceBuffer] = useState('0');
-  const [servicePrice, setServicePrice] = useState('');
-  const [depositType, setDepositType] = useState<'none' | 'fixed' | 'percent'>('none');
-  const [depositValue, setDepositValue] = useState('');
   const [searchIndexEnabled, setSearchIndexEnabled] = useState(true);
 
   useEffect(() => {
@@ -112,7 +105,11 @@ export function OnboardingFlow() {
         return;
       }
       if (progress?.current_step && progress.current_step !== 'complete') {
-        const mapped = progress.current_step === 'location' || progress.current_step === 'payments' ? 'publish' : progress.current_step;
+        // A location step is completed in the shared Locations editor. If setup is resumed before
+        // it is saved, return to Services so the artist can enter the location again.
+        const mapped = progress.current_step === 'location'
+          ? (location.pathname.endsWith('/publish') ? 'publish' : 'services')
+          : progress.current_step === 'payments' ? 'publish' : progress.current_step;
         if (mapped === 'profile' || mapped === 'photo' || mapped === 'services' || mapped === 'publish') setStep(mapped);
       }
     })();
@@ -232,7 +229,7 @@ export function OnboardingFlow() {
     setError(''); setLoading(true);
     try {
       const { data: upload, error: uploadError } = await supabase.functions.invoke('photo-upload-url', {
-        body: { kind: 'profile', size: photoFile.size, contentType: photoFile.type },
+        body: { kind: 'profile', size: photoFile.size, contentType: photoFile.type, artist_business_id: businessId },
       });
       if (uploadError) throw uploadError;
       const path = upload?.data?.path;
@@ -249,33 +246,14 @@ export function OnboardingFlow() {
     finally { setLoading(false); }
   };
 
-  const addService = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!supabase || !businessId) { setError(t('onboarding.configurationError')); return; }
-    setError(''); setLoading(true);
-    const basePrice = parseMinorUnits(servicePrice);
-    const parsedDeposit = parseMinorUnits(depositValue);
-    if (basePrice === null || (depositType === 'fixed' && parsedDeposit === null) ||
-      (depositType === 'percent' && (parsedDeposit === null || parsedDeposit < 1 || parsedDeposit > 10_000))) {
-      setError(t('onboarding.serviceValuesInvalid')); setLoading(false); return;
-    }
-    const { data, error: insertError } = await supabase.from('mova_services').insert({
-      artist_business_id: businessId, name: serviceName.trim(), category: serviceCategory.trim(),
-      duration_minutes: Number(serviceDuration), buffer_minutes: Number(serviceBuffer), base_price_minor: basePrice,
-      status: 'active', deposit_type: depositType, deposit_value: parsedDeposit ?? 0,
-    }).select('id, name, category, duration_minutes, buffer_minutes, base_price_minor, deposit_type, deposit_value').single();
-    if (insertError) setError(t('onboarding.serviceSaveError'));
-    else if (data) {
-      setServices((rows) => [...rows, data as ServiceRow]);
-      setServiceName(''); setServiceCategory(''); setServiceDuration(''); setServiceBuffer('0'); setServicePrice(''); setDepositValue(''); setDepositType('none');
-    }
-    setLoading(false);
-  };
-
   const continueServices = async () => {
     if (!supabase || !businessId) return;
     setLoading(true); setError('');
-    try { await setProgress('location', 'services'); setStep('publish'); }
+    try {
+      await setProgress('location', 'services');
+      // Use the same location editor as Settings for the first location too.
+      navigate(operatorLocation(businessId, 'settings/locations/new?return_to=%2Fonboarding%2Fpublish&back_to=%2Fonboarding%2Fservices'));
+    }
     catch { setError(t('onboarding.saveProgressError')); }
     finally { setLoading(false); }
   };
@@ -340,26 +318,8 @@ export function OnboardingFlow() {
       {step === 'services' && <section className="mova-form-stack">
         <h1>{t('onboarding.servicesTitle')}</h1>
         <p>{t('onboarding.servicesDescription')}</p>
-        <ul className="mova-service-list">{services.map((service) => <li key={service.id}>
-          <strong>{service.name}</strong>
-          <span>{service.duration_minutes} {t('onboarding.minutes')} · {formatMoney(service.base_price_minor)}</span>
-          <small>{service.deposit_type === 'none' ? t('onboarding.noDeposit') : `${t('onboarding.deposit')}: ${service.deposit_type === 'fixed' ? formatMoney(service.deposit_value) : `${service.deposit_value / 100}%`}`}</small>
-        </li>)}</ul>
-        <form className="mova-form-stack mova-service-form" onSubmit={addService}>
-          <TextField label={t('onboarding.serviceName')} required maxLength={100} value={serviceName} onChange={(event) => setServiceName(event.currentTarget.value)} />
-          <TextField label={t('onboarding.serviceCategory')} required maxLength={80} value={serviceCategory} onChange={(event) => setServiceCategory(event.currentTarget.value)} />
-          <div className="mova-service-numbers">
-            <TextField label={t('onboarding.duration')} type="number" min="5" max="1440" step="5" required value={serviceDuration} onChange={(event) => setServiceDuration(event.currentTarget.value)} />
-            <TextField label={t('onboarding.buffer')} type="number" min="0" max="1440" step="5" required value={serviceBuffer} onChange={(event) => setServiceBuffer(event.currentTarget.value)} />
-          </div>
-          <TextField label={t('onboarding.price')} inputMode="decimal" pattern="[0-9]+(\\.[0-9]{1,2})?" required value={servicePrice} onChange={(event) => setServicePrice(event.currentTarget.value)} />
-          <label className="mova-field"><span className="mova-field__label">{t('onboarding.deposit')}</span><select className="mova-input" value={depositType} onChange={(event) => setDepositType(event.currentTarget.value as typeof depositType)}><option value="none">{t('onboarding.noDeposit')}</option><option value="fixed">{t('onboarding.fixedDeposit')}</option><option value="percent">{t('onboarding.percentDeposit')}</option></select></label>
-          {depositType !== 'none' && <TextField label={depositType === 'fixed' ? t('onboarding.depositAmount') : t('onboarding.depositPercent')} inputMode="decimal" pattern="[0-9]+(\\.[0-9]{1,2})?" required value={depositValue} onChange={(event) => setDepositValue(event.currentTarget.value)} />}
-          {error && <p role="alert">{error}</p>}
-          <Button type="submit" loading={loading}>{t('onboarding.addService')}</Button>
-        </form>
-        <p>{t('onboarding.locationOverridesLater')}</p>
-        {error && services.length > 0 && <p role="alert">{error}</p>}
+        {services.length > 0 && <ul className="mova-service-list">{services.map((service) => <li key={service.id}><strong>{service.name}</strong><span>{service.duration_minutes} {t('onboarding.minutes')} · {formatMoney(service.base_price_minor)}</span></li>)}</ul>}
+        <Button type="button" variant="secondary" onClick={() => navigate(operatorLocation(businessId, 'settings/services?return_to=%2Fonboarding%2Fservices&new=1'))}>{t(services.length ? 'onboarding.addAnotherService' : 'onboarding.addFirstService')}</Button>
         <Button type="button" loading={loading} onClick={continueServices}>{t('onboarding.continue')}</Button>
       </section>}
 
@@ -383,14 +343,6 @@ function routeStep(pathname: string): Step {
 function errorMessage(error: unknown, fallback: string): string {
   if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') return error.message;
   return fallback;
-}
-
-function parseMinorUnits(value: string): number | null {
-  const match = /^(\d+)(?:\.(\d{1,2}))?$/.exec(value.trim());
-  if (!match) return null;
-  const cents = Number(`${match[2] ?? ''}00`.slice(0, 2));
-  const amount = Number(match[1]) * 100 + cents;
-  return Number.isSafeInteger(amount) && amount >= 0 ? amount : null;
 }
 
 function formatMoney(amountMinor: number): string {

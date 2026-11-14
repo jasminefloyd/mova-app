@@ -80,7 +80,7 @@ export function CoverPickerPage() {
     setBusy('uploading');
     setError('');
     try {
-      const { data: result, error: requestError } = await client.functions.invoke('photo-upload-url', { body: { kind: 'cover', size: file.size, contentType: file.type } });
+      const { data: result, error: requestError } = await client.functions.invoke('photo-upload-url', { body: { kind: 'cover', size: file.size, contentType: file.type, artist_business_id: businessId } });
       if (requestError) throw requestError;
       const target = result?.data;
       if (typeof target?.path !== 'string' || typeof target?.token !== 'string' || target.bucket !== 'mova_profile_photos') throw new Error('UPLOAD_RESPONSE_INVALID');

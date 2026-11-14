@@ -327,7 +327,8 @@ body {
 .mova-settings-language > label > span { color: var(--ink-secondary); }
 .mova-settings-language select { min-height: var(--tap-min); max-width: 55%; border: 1px solid var(--line-control); border-radius: var(--radius-m); padding-inline: var(--space-3); background: var(--surface); color: var(--ink-primary); }
 .mova-profile-preview { padding-bottom: var(--space-8); }
-.mova-profile-preview .mova-honesty { width: min(100% - 2 * var(--gutter), 680px); margin: 0 auto var(--space-4); }
+.mova-profile-preview .mova-honesty { width: min(100% - 2 * var(--gutter), 680px); margin: 0 auto var(--space-2); }
+.mova-profile-preview .mova-public-artist__hero { height: 168px; }
 .mova-settings-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 .mova-settings-actions .mova-button { min-height: var(--tap-min); padding-inline: var(--space-2); }
 .mova-settings-menu { padding: 0 var(--space-4); }
@@ -532,6 +533,7 @@ body {
 .mova-location-new__booking-options .mova-radio-card strong { font-size: var(--fs-body); font-weight: 700; }
 .mova-location-new__booking-options .mova-radio-card small { font-size: var(--fs-caption); line-height: 1.4; }
 .mova-location-new__collector .mova-scheduling__pair { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.mova-location-new__payment-hint { margin: 0; color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.45; }
 .mova-location-new .mova-scheduling__days { grid-template-columns: repeat(7,minmax(0,1fr)); gap: var(--space-1); }
 .mova-location-new .mova-scheduling__day { min-width: 0; min-height: var(--tap-min); border-radius: var(--radius-m); font-size: var(--fs-body-s); font-weight: 700; }
 .mova-location-new .mova-location-new__shared-hours { grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-2); }

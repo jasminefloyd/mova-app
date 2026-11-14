@@ -97,7 +97,7 @@ export function ProfileSettingsPage() {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [loadError, setLoadError] = useState(false);
-  const [saveError, setSaveError] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [handleError, setHandleError] = useState<'reserved' | 'taken' | 'invalid' | null>(null);
   const [contactError, setContactError] = useState<ContactErrorKey | null>(null);
   const [saved, setSaved] = useState(false);
@@ -149,7 +149,7 @@ export function ProfileSettingsPage() {
 
   const upload = async (file: File, kind: 'profile' | 'cover') => {
     if (!client) return;
-    const { data: result, error: requestError } = await client.functions.invoke('photo-upload-url', { body: { kind, size: file.size, contentType: file.type } });
+    const { data: result, error: requestError } = await client.functions.invoke('photo-upload-url', { body: { kind, size: file.size, contentType: file.type, artist_business_id: businessId } });
     if (requestError) throw requestError;
     const target = result?.data;
     if (typeof target?.path !== 'string' || typeof target?.token !== 'string' || target.bucket !== 'mova_profile_photos') throw new Error('UPLOAD_RESPONSE_INVALID');
@@ -162,7 +162,7 @@ export function ProfileSettingsPage() {
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!client || !businessId || !profile || !dirty || !valid) return;
-    setBusy(true); setSaveError(false); setHandleError(null); setContactError(null); setSaved(false);
+    setBusy(true); setSaveError(''); setHandleError(null); setContactError(null); setSaved(false);
     try {
       // Handle changes go through the 0038 function, which keeps the reserved-handle and uniqueness checks.
       const { error } = await client.rpc('mova_update_artist_profile', {
@@ -188,7 +188,7 @@ export function ProfileSettingsPage() {
       if (cover) await upload(cover, 'cover');
       setPhoto(null); setCover(null); setPhotoPreview(null); setCoverPreview(null); setSaved(true);
       await load();
-    } catch { setSaveError(true); } finally { setBusy(false); }
+    } catch (error) { setSaveError(await photoOrProfileErrorCode(error)); } finally { setBusy(false); }
   };
 
   const pick = (kind: 'profile' | 'cover') => (event: ChangeEvent<HTMLInputElement>) => {
@@ -274,7 +274,7 @@ export function ProfileSettingsPage() {
         </span>}
       </Link>
 
-      {saveError && <p role="alert">{t('settings.saveError')}</p>}
+      {saveError && <p role="alert">{t('settings.saveError')} ({saveError})</p>}
       {contactError && <p role="alert">{t('settings.contactErrors.summary')}</p>}
       {saved && <p role="status" className="mova-visually-hidden">{t('settings.profileSaved')}</p>}
       <footer className="mova-profile-edit__actions">
@@ -288,4 +288,22 @@ export default ProfileSettingsPage;
 
 function formatServiceMoney(minor: number) {
   return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(minor / 100);
+}
+
+async function photoOrProfileErrorCode(error: unknown): Promise<string> {
+  if (error && typeof error === 'object') {
+    const context = 'context' in error ? error.context : null;
+    if (context instanceof Response) {
+      try {
+        const body = await context.clone().json() as { data?: { code?: unknown }; error?: { code?: unknown } };
+        const code = body.error?.code ?? body.data?.code;
+        if (typeof code === 'string' && /^[A-Z0-9_]{2,80}$/.test(code)) return code;
+      } catch { /* Fall through to the sanitized error message. */ }
+    }
+    if ('message' in error && typeof error.message === 'string') {
+      const match = /\b([A-Z][A-Z0-9_]{2,79})\b/.exec(error.message);
+      if (match) return match[1]!;
+    }
+  }
+  return 'PROFILE_SAVE_FAILED';
 }

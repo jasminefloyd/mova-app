@@ -109,7 +109,7 @@ describe('profile settings edit', () => {
       p_artist_business_id: 'artist-a', p_display_name: 'Nia Updated', p_bio: 'Updated bio for clients.', p_specialties: ['Color', 'Braids'],
     }));
     expect(mocks.rpc).toHaveBeenCalledWith('mova_update_artist_contact', expect.objectContaining({ p_artist_business_id: 'artist-a', p_contact_phone: '+1 404 555 0100', p_contact_email: 'nia@example.com', p_social_links: {} }));
-    expect(mocks.functions.invoke).toHaveBeenCalledWith('photo-upload-url', expect.objectContaining({ body: { kind: 'profile', size: 15, contentType: 'image/png' } }));
+    expect(mocks.functions.invoke).toHaveBeenCalledWith('photo-upload-url', expect.objectContaining({ body: expect.objectContaining({ kind: 'profile', size: 15, contentType: 'image/png', artist_business_id: 'artist-a' }) }));
     expect(mocks.uploadToSignedUrl).toHaveBeenCalled();
     expect(mocks.functions.invoke).toHaveBeenCalledWith('photo-process', expect.objectContaining({ body: { path: 'profile/profile-photo.png', kind: 'profile', zoom: 1 } }));
     expect(view.host.textContent).toContain('Updated bio for clients.');

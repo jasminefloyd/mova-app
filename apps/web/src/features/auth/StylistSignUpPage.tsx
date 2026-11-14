@@ -1,8 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { LocaleSwitcher } from '../../app/LocaleSwitcher';
-import { useLocale } from '../../app/LocaleProvider';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import type { ReactNode } from 'react';
 import './stylist-auth.css';
@@ -15,7 +13,6 @@ function FeatureIcon({ children }: { children: ReactNode }) {
 export default function StylistSignUpPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { locale, setLocale } = useLocale();
   const supabase = useMemo(() => { try { return createMovaSupabaseClient(); } catch { return null; } }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,7 +30,7 @@ export default function StylistSignUpPage() {
       const { data, error: authError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
-        options: { emailRedirectTo: `${window.location.origin}/onboarding/profile`, data: { preferred_locale: locale } },
+        options: { emailRedirectTo: `${window.location.origin}/onboarding/profile`, data: { preferred_locale: 'en-US' } },
       });
       if (authError) { setError(t('stylistAuth.signUp.error')); return; }
       if (data.session) navigate('/onboarding/profile', { replace: true });
@@ -48,7 +45,6 @@ export default function StylistSignUpPage() {
   return <div className="stylist-auth stylist-auth--signup">
     <header className="stylist-auth__top stylist-auth__top--dark">
       <Link className="stylist-auth__wordmark" to="/">mova</Link>
-      <div className="stylist-auth__locale stylist-auth__locale--dark"><LocaleSwitcher /></div>
     </header>
 
     <div className="stylist-auth__split">
@@ -92,18 +88,6 @@ export default function StylistSignUpPage() {
             <input id="stylist-signup-password" name="password" type="password" autoComplete="new-password" aria-describedby="stylist-signup-pass-hint" required value={password} onChange={(event) => setPassword(event.currentTarget.value)} />
             <span id="stylist-signup-pass-hint" className="stylist-auth__hint">{t('stylistAuth.signUp.passwordHint')}</span>
           </div>
-
-          <fieldset className="stylist-auth__languages">
-            <legend>{t('stylistAuth.signUp.languageLegend')}</legend>
-            <div className="stylist-auth__language-options">
-              <label className={`stylist-auth__language${locale === 'en-US' ? ' is-selected' : ''}`}>
-                <input type="radio" name="stylist-signup-language" value="en-US" checked={locale === 'en-US'} onChange={() => setLocale('en-US')} />{t('stylistAuth.signUp.english')}
-              </label>
-              <label className={`stylist-auth__language${locale === 'es-US' ? ' is-selected' : ''}`}>
-                <input type="radio" name="stylist-signup-language" value="es-US" checked={locale === 'es-US'} onChange={() => setLocale('es-US')} />{t('stylistAuth.signUp.spanish')}
-              </label>
-            </div>
-          </fieldset>
 
           {notice && <p className="stylist-auth__notice" role="status">{notice}</p>}
           {error && <p className="stylist-auth__error" role="alert">{error}</p>}

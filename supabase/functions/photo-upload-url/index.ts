@@ -20,6 +20,7 @@ Deno.serve(withSystemRequestLogging('photo-upload-url', async (request) => {
   const kind = body?.kind;
   const size = Number(body?.size);
   const contentType = typeof body?.contentType === 'string' ? body.contentType.toLowerCase() : '';
+  const requestedBusinessId = typeof body?.artist_business_id === 'string' ? body.artist_business_id : '';
   if (!['profile', 'cover', 'portfolio', 'visit'].includes(kind) || !Number.isFinite(size) || size <= 0 || size > maxBytes || !allowedMime.has(contentType)) {
     return json({ code: 'INVALID_UPLOAD' }, 422);
   }
@@ -27,8 +28,10 @@ Deno.serve(withSystemRequestLogging('photo-upload-url', async (request) => {
   const userClient = createClient(url, anonKey, { global: { headers: { Authorization: authorization } }, auth: { persistSession: false } });
   const { data: { user } } = await userClient.auth.getUser();
   if (!user) return json({ code: 'AUTH_REQUIRED' }, 401);
-  const { data: membership, error: membershipError } = await userClient.from('mova_artist_memberships')
-    .select('artist_business_id').eq('user_id', user.id).eq('status', 'active').limit(1).maybeSingle();
+  let membershipQuery = userClient.from('mova_artist_memberships')
+    .select('artist_business_id').eq('user_id', user.id).eq('status', 'active');
+  if (requestedBusinessId) membershipQuery = membershipQuery.eq('artist_business_id', requestedBusinessId);
+  const { data: membership, error: membershipError } = await membershipQuery.limit(1).maybeSingle();
   if (membershipError || !membership) return json({ code: 'ARTIST_MEMBERSHIP_REQUIRED' }, 403);
 
   const bucket = kind === 'portfolio' ? 'mova_portfolio_media' : kind === 'visit' ? 'mova_visit_private' : 'mova_profile_photos';

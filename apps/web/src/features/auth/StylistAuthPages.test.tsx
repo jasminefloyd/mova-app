@@ -42,13 +42,13 @@ describe('stylist sign-in (/login, W9)', () => {
 describe('stylist sign-up (/signup, W8)', () => {
   beforeAll(async () => { await i18nReady; });
 
-  it('renders the account form with the password rule and both app languages', () => {
+  it('renders the account form in English without an app language selector', () => {
     const markup = render('/signup', <StylistSignUpPage />);
     expect(markup).toContain('Create your account');
     expect(markup).toContain('Use at least 9 characters.');
     expect(markup).toContain('autoComplete="new-password"');
-    expect(markup).toContain('value="en-US"');
-    expect(markup).toContain('value="es-US"');
+    expect(markup).not.toContain('name="stylist-signup-language"');
+    expect(markup).not.toContain('Español (US)');
   });
 
   it('sends "See plans" to /pricing and sign-in back to /login', () => {

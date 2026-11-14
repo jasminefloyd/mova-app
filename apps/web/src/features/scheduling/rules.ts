@@ -1,7 +1,7 @@
 // P6 scheduling screens: pure validation and payload rules for New location (19a), the Calendar
 // add sheet's New client (08d), New appointment (08c) and Block time (08e). No React, no I/O.
 
-export const LOCATION_KINDS = ['suite', 'commission_salon', 'home_studio', 'mobile'] as const;
+export const LOCATION_KINDS = ['suite', 'booth', 'commission_salon', 'home_studio', 'mobile'] as const;
 export type LocationKind = (typeof LOCATION_KINDS)[number];
 
 export const BLOCK_REASONS = ['personal_break', 'holiday', 'time_off', 'other'] as const;

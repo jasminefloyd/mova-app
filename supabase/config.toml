@@ -16,6 +16,11 @@ content_path = "./supabase/templates/recovery.html"
 [functions.public-artist]
 verify_jwt = false
 
+# The handler verifies the bearer token with Auth and checks active artist membership.
+# Gateway verification must be off so browser OPTIONS preflights can reach its CORS handler.
+[functions.photo-process]
+verify_jwt = false
+
 [functions.guides-public]
 verify_jwt = false
 

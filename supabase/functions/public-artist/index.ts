@@ -70,7 +70,7 @@ Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
   const businessId = profile.artist_business_id;
   const { data: services, error: serviceError } = await supabase
     .from('mova_services')
-    .select('id, name, category, duration_minutes, buffer_minutes, base_price_minor, deposit_type, deposit_value')
+    .select('id, name, category, duration_minutes, buffer_minutes, base_price_minor, deposit_type, deposit_value, location_assignment_mode')
     .eq('artist_business_id', businessId)
     .eq('status', 'active')
     .order('name');
@@ -104,7 +104,7 @@ Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
 
   const publicServices = (services ?? []).map((service) => ({
     ...service,
-    location_deposits: (locations ?? []).map((location) => {
+    location_deposits: (locations ?? []).filter((location) => service.location_assignment_mode !== 'selected' || serviceLocations?.some((item) => item.service_id === service.id && item.location_id === location.id)).map((location) => {
       const override = serviceLocations?.find((item) => item.service_id === service.id && item.location_id === location.id);
       const price = override?.price_minor_override ?? service.base_price_minor;
       return { location_id: location.id, price_minor: price, duration_minutes: (override?.duration_minutes_override ?? service.duration_minutes) + service.buffer_minutes,

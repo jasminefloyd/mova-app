@@ -15,6 +15,8 @@ export type Slot = { startsAt: string; endsAt: string; localDate: string; localT
 
 const formatterCache = new Map<string, Intl.DateTimeFormat>();
 const localDateOffsetsCache = new Map<string, number[]>();
+// Keep a slot interval of margin from the database's moving booking-window edges.
+const BOOKING_WINDOW_EDGE_BUFFER_MS = 15 * 60_000;
 
 function formatter(timeZone: string) {
   let value = formatterCache.get(timeZone);
@@ -89,8 +91,8 @@ export function searchAvailability(input: {
   const duration = service.durationMinutes + service.bufferMinutes;
   const blocked = [...(input.busy ?? []), ...(input.holds ?? []), ...(input.blocked ?? [])].map((range) => [Date.parse(range.startsAt) - location.bufferBeforeMinutes * 60_000, Date.parse(range.endsAt) + location.bufferAfterMinutes * 60_000] as const);
   const now = Date.parse(input.now);
-  const earliest = now + location.leadMinutes * 60_000;
-  const latest = now + location.horizonDays * 86_400_000;
+  const earliest = now + location.leadMinutes * 60_000 + BOOKING_WINDOW_EDGE_BUFFER_MS;
+  const latest = now + location.horizonDays * 86_400_000 - BOOKING_WINDOW_EDGE_BUFFER_MS;
   const output: Slot[] = [];
   for (let dayOffset = 0; dayOffset < Math.min(input.days, location.horizonDays + 1); dayOffset++) {
     const date = addDays(input.fromDate, dayOffset);
