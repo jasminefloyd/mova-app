@@ -1,1 +1,55 @@
-.mova-marketing-page{display:grid;gap:var(--space-5);padding-bottom:calc(var(--space-8) + env(safe-area-inset-bottom))}.mova-marketing-heading{display:grid;gap:var(--space-2)}.mova-marketing-heading h1{margin:0;color:var(--ink-primary);font:800 var(--fs-display-l)/1.05 var(--font-display)}.mova-marketing-heading p{margin:0;color:var(--ink-secondary)}.mova-marketing-hero{display:grid;gap:var(--space-4)}.mova-marketing-hero h2,.mova-marketing-hero p{margin:0}.mova-marketing-channels,.mova-marketing-channel-list{display:grid;gap:var(--space-3)}.mova-marketing-channel{display:grid;gap:var(--space-3)}.mova-marketing-channel>label{display:grid;grid-template-columns:var(--tap-min) minmax(0,1fr) auto;align-items:center;gap:var(--space-3);min-height:var(--tap-min)}.mova-marketing-channel>label input{width:22px;height:22px;accent-color:var(--forest)}.mova-marketing-channel>label span{display:grid;gap:var(--space-1)}.mova-marketing-channel>label small,.mova-marketing-channel-summary p,.mova-marketing-campaign small{color:var(--ink-secondary)}.mova-marketing-channel__content{display:grid;gap:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--line-subtle)}.mova-marketing-destinations{display:grid;gap:var(--space-2);margin:0;border:1px solid var(--line-subtle);border-radius:var(--radius-l);padding:var(--space-3)}.mova-marketing-destinations legend{padding-inline:var(--space-1);font-weight:700}.mova-marketing-page .mova-field select{width:100%;min-height:var(--btn-secondary-h);border:1px solid var(--line-control);border-radius:var(--radius-l);padding:0 var(--space-3);background:var(--surface);color:var(--ink-primary);font:inherit}.mova-marketing-preview{margin:0;padding:var(--space-3);border-radius:var(--radius-l);background:var(--surface-alt);color:var(--ink-primary)}.mova-marketing-page>section{display:grid;gap:var(--space-3)}.mova-marketing-page>section>h2,.mova-marketing-page>h2{margin:0;color:var(--ink-primary);font:700 var(--fs-display-s)/1.2 var(--font-display)}.mova-marketing-channel-summary,.mova-marketing-campaign{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-3)}.mova-marketing-channel-summary h3{margin:0;font:700 var(--fs-body-l)/1.2 var(--font-display)}.mova-marketing-channel-summary p{margin:var(--space-1) 0 0}.mova-marketing-campaigns{display:grid;gap:var(--space-3);margin:0;padding:0;list-style:none}.mova-marketing-campaigns li>.mova-card{display:grid;gap:var(--space-3)}.mova-marketing-campaign{align-items:center}.mova-marketing-campaign>div{display:grid;gap:var(--space-1)}.mova-marketing-campaign-section .mova-empty-state{padding-block:var(--space-6)}.mova-marketing-actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);position:sticky;bottom:0;padding:var(--space-3);border:1px solid var(--line-subtle);border-radius:var(--radius-l);background:var(--surface)}.mova-marketing-page>.mova-button--ghost{justify-self:center}@media(min-width:720px){.mova-marketing-page{max-width:960px;margin-inline:auto}.mova-marketing-channel-list{grid-template-columns:repeat(2,minmax(0,1fr))}.mova-marketing-channels{grid-template-columns:repeat(2,minmax(0,1fr))}.mova-marketing-actions{position:static;justify-self:end;width:min(100%,440px);padding:0;border:0;background:transparent}}
+.mova-marketing-page { display: grid; align-content: start; gap: var(--space-5); padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom)); }
+.mova-marketing-heading { display: grid; gap: var(--space-2); }
+.mova-marketing-heading h1 { margin: 0; }
+.mova-marketing-heading p:not(.mova-overline) { margin: 0; color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.5; }
+
+.mova-marketing-hero { display: grid; gap: var(--space-4); padding: var(--space-5); }
+.mova-marketing-page > .mova-marketing-hero > h2 { margin: 0; color: var(--ink-inverse); font: 700 var(--fs-display-s)/1.2 var(--font-display); }
+.mova-marketing-hero p { margin: 0; color: var(--ink-inverse); font-size: var(--fs-body-s); line-height: 1.5; }
+
+.mova-marketing-page > section { display: grid; gap: var(--space-3); }
+.mova-marketing-page > section > h2,
+.mova-marketing-page > h2 { margin: 0; color: var(--ink-primary); font: 700 var(--fs-display-s)/1.2 var(--font-display); }
+.mova-marketing-page .mova-status { flex: none; white-space: nowrap; }
+
+.mova-marketing-channels,
+.mova-marketing-channel-list { display: grid; gap: var(--space-3); }
+.mova-marketing-channel-list > .mova-card { display: grid; gap: var(--space-2); }
+.mova-marketing-channel-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.mova-marketing-channel-summary h3 { margin: 0; font: 700 var(--fs-body-l)/1.2 var(--font-display); }
+.mova-marketing-channel-list p { margin: 0; color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-marketing-channel-list small,
+.mova-marketing-campaign small,
+.mova-marketing-campaigns li > .mova-card > small { color: var(--ink-muted); font-size: var(--fs-caption); line-height: 1.45; }
+
+.mova-marketing-channel { display: grid; gap: var(--space-3); }
+.mova-marketing-channel__pick { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: var(--space-2) var(--space-3); width: 100%; }
+.mova-marketing-channel__pick > span { margin-top: var(--space-1); }
+.mova-marketing-channel__text { display: grid; gap: var(--space-1); }
+.mova-marketing-channel__title { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.mova-marketing-channel__title strong { font: 700 var(--fs-body-l)/1.2 var(--font-display); }
+.mova-marketing-channel__text small { color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.45; }
+.mova-marketing-channel__content { display: grid; gap: var(--space-3); border-top: 1px solid var(--line-subtle); padding-top: var(--space-3); }
+.mova-marketing-destinations { display: grid; gap: var(--space-1); margin: 0; border: 1px solid var(--line-subtle); border-radius: var(--radius-l); padding: var(--space-2) var(--space-3); }
+.mova-marketing-destinations legend { padding-inline: var(--space-1); color: var(--ink-secondary); font-size: var(--fs-caption); font-weight: 600; }
+.mova-marketing-preview { margin: 0; border-radius: var(--radius-l); padding: var(--space-3); background: var(--surface-alt); color: var(--ink-primary); font-size: var(--fs-body-s); line-height: 1.45; }
+
+.mova-marketing-safety { display: grid; gap: var(--space-2); }
+.mova-marketing-safety p { margin: 0; color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-marketing-message { margin: 0; color: var(--ink-secondary); font-size: var(--fs-body-s); }
+
+.mova-marketing-campaigns { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.mova-marketing-campaigns li > .mova-card { display: grid; gap: var(--space-3); }
+.mova-marketing-campaign { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.mova-marketing-campaign > div { display: grid; gap: var(--space-1); min-width: 0; }
+.mova-marketing-campaign-section .mova-empty-state { padding-block: var(--space-6); }
+
+.mova-marketing-actions { position: sticky; bottom: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); border: 1px solid var(--line-subtle); border-radius: var(--radius-l); padding: var(--space-3); background: var(--surface); }
+.mova-marketing-page > .mova-button--ghost { justify-self: center; }
+
+@media (min-width: 720px) {
+  .mova-marketing-page { max-width: 960px; margin-inline: auto; }
+  .mova-marketing-channel-list,
+  .mova-marketing-channels { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mova-marketing-actions { position: static; justify-self: end; width: min(100%, 440px); border: 0; padding: 0; background: transparent; }
+}

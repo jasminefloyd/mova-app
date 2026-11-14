@@ -1185,9 +1185,11 @@ select,
 .mova-price-pilot__hero h2 { margin: 0; color: var(--ink-inverse); font: 700 var(--fs-display-s)/1.2 var(--font-display); }
 .mova-price-pilot__hero > p:last-child { margin: 0; color: var(--ink-inverse); font-size: var(--fs-body-s); line-height: 1.5; }
 .mova-price-pilot__section { display: grid; gap: var(--space-3); }
-.mova-price-pilot__section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-2); }
+.mova-price-pilot__section-heading { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-2); }
+.mova-price-pilot__section-heading > div { flex: 1 1 200px; min-width: 0; }
+.mova-price-pilot .mova-status, .mova-price-pilot__section-heading .mova-button { flex: none; white-space: nowrap; }
 .mova-price-pilot__section-heading h2, .mova-price-pilot__method h2 { margin: 0; font: 700 var(--fs-display-s)/1.2 var(--font-display); }
-.mova-price-pilot__section-heading .mova-section-overline, .mova-price-pilot__method .mova-section-overline { margin: 0 0 var(--space-1); color: var(--ink-muted); font-size: var(--fs-micro); font-weight: 700; letter-spacing: .06em; }
+.mova-price-pilot__section-heading .mova-overline { margin-bottom: var(--space-1); }
 .mova-price-pilot__current { display: grid; gap: var(--space-2); }
 .mova-price-pilot__current > div { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
 .mova-price-pilot__current > div span { font-weight: 600; }
@@ -1200,13 +1202,12 @@ select,
 .mova-price-pilot__source-grid p { margin: 0; color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.45; }
 .mova-price-pilot__source-grid small { color: var(--ink-muted); font-size: var(--fs-micro); font-weight: 600; }
 .mova-price-pilot__method { display: grid; gap: var(--space-3); }
-.mova-price-pilot__method ol { display: grid; gap: var(--space-2); margin: 0; padding-left: 1.4em; color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-price-pilot__method ol { display: grid; gap: var(--space-2); margin: 0; padding-inline-start: 1.4em; list-style: decimal; color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.45; }
 .mova-price-pilot__method > p:last-child, .mova-price-pilot__gate-note { margin: 0; color: var(--ink-muted); font-size: var(--fs-caption); line-height: 1.45; }
 .mova-price-pilot__source-form { display: grid; gap: var(--space-3); }
 .mova-price-pilot__source-form h3, .mova-price-pilot__source-form p { margin: 0; }
-.mova-price-pilot__source-form > p:not(.mova-section-overline) { color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.45; }
-.mova-price-pilot__consent { display: flex; align-items: flex-start; gap: var(--space-2); color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.4; }
-.mova-price-pilot__consent input { flex: 0 0 auto; width: 20px; height: 20px; accent-color: var(--forest); }
+.mova-price-pilot__source-form > p { color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.45; }
+.mova-price-pilot__consent, .mova-price-pilot__filter { display: flex; color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.45; }
 .mova-price-pilot__observations { display: grid; gap: var(--space-2); }
 .mova-price-pilot__observation { display: grid; gap: var(--space-2); }
 .mova-price-pilot__observation > div { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
@@ -1226,7 +1227,7 @@ select,
 .mova-price-pilot__market-card,.mova-price-pilot__confidence,.mova-price-pilot__recommendation,.mova-price-pilot__sources,.mova-price-pilot__plan{display:grid;gap:var(--space-3)}
 .mova-price-pilot__position{display:grid;gap:var(--space-2);padding-block:var(--space-2)}
 .mova-price-pilot__position-values,.mova-price-pilot__position-legend{display:flex;justify-content:space-between;gap:var(--space-3);color:var(--ink-secondary);font-size:var(--fs-caption)}
-.mova-price-pilot__position-track{position:relative;height:18px;border-radius:var(--radius-pill);background:var(--surface-alt);isolation:isolate}
+.mova-price-pilot__position-track{position:relative;height:18px;margin-inline:9px;border-radius:var(--radius-pill);background:var(--surface-alt);isolation:isolate}
 .mova-price-pilot__position-band{position:absolute;top:5px;height:8px;min-width:8px;border-radius:var(--radius-pill);background:var(--mint);opacity:.9}
 .mova-price-pilot__position-median{position:absolute;top:2px;height:14px;width:2px;background:var(--forest);transform:translateX(-50%)}
 .mova-price-pilot__position-current{position:absolute;top:0;width:18px;height:18px;border:3px solid var(--surface);border-radius:50%;background:var(--accent-warm);box-shadow:0 0 0 2px var(--forest);transform:translateX(-50%);z-index:1}
@@ -1241,16 +1242,17 @@ select,
 .mova-price-pilot__confidence>div{display:flex;justify-content:space-between;gap:var(--space-3);border-bottom:1px solid var(--line-subtle);padding-block:var(--space-2);color:var(--ink-secondary)}
 .mova-price-pilot__confidence>div strong{color:var(--ink-primary);text-align:right}
 .mova-price-pilot__confidence small,.mova-price-pilot__recommendation small,.mova-price-pilot__plan p,.mova-price-pilot__note{margin:0;color:var(--ink-muted);font-size:var(--fs-caption);line-height:1.45}
-.mova-price-pilot__recommendation{border-inline-start:4px solid var(--accent-warm)}
 .mova-price-pilot__recommendation p:not(.mova-overline){margin:0;color:var(--ink-secondary)}
+.mova-price-pilot__sources>p{margin:0;color:var(--ink-secondary);font-size:var(--fs-caption);line-height:1.45}
+.mova-price-pilot__sources .mova-button--ghost,.mova-price-pilot__planned-list .mova-button--ghost{margin-inline-start:calc(-1 * var(--space-3))}
+.mova-price-pilot__sources--unmatched li>.mova-button{grid-column:auto;justify-self:end;margin-inline-start:0}
+.mova-price-pilot__sources li>strong:first-child{overflow-wrap:anywhere}
 .mova-price-pilot__sources ul,.mova-price-pilot__planned-list{display:grid;gap:var(--space-2);margin:0;padding:0;list-style:none}
 .mova-price-pilot__sources li,.mova-price-pilot__planned-list li>.mova-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--space-2);border-top:1px solid var(--line-subtle);padding-top:var(--space-3)}
 .mova-price-pilot__sources li>div,.mova-price-pilot__planned-list li>.mova-card>div{display:grid;gap:var(--space-1)}
 .mova-price-pilot__sources li span,.mova-price-pilot__planned-list li span{color:var(--ink-muted);font-size:var(--fs-caption)}
 .mova-price-pilot__sources li a{color:var(--forest);font-size:var(--fs-caption);font-weight:700}
 .mova-price-pilot__sources li>.mova-button,.mova-price-pilot__planned-list li>.mova-card>.mova-button{grid-column:1/-1;justify-self:start}
-.mova-price-pilot__filter{display:inline-flex;align-items:center;gap:var(--space-2);color:var(--ink-secondary);font-size:var(--fs-caption)}
-.mova-price-pilot__filter input,.mova-price-pilot__consent input{width:20px;height:20px;accent-color:var(--forest)}
 .mova-price-pilot__service-list{display:grid;gap:var(--space-2)}
 .mova-price-pilot__service-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--space-3)}
 .mova-price-pilot__service-row.is-selected{border-color:var(--forest);box-shadow:inset 0 0 0 1px var(--forest)}

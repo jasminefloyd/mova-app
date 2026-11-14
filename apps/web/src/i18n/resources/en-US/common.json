@@ -767,13 +767,13 @@
       "confidence": "confidence",
       "durationNotListed": "Duration not listed",
       "removeSource": "Remove menu source",
-      "addMenu": "ADD A MENU",
+      "addMenu": "Add a menu",
       "menuUrlTitle": "Add a public service menu",
       "menuUrlBody": "Use a menu you have permission to process. Only extracted service names and prices are retained; page content is discarded.",
       "menuUrl": "Menu page URL",
       "authorization": "I’m authorized to submit this menu URL for price extraction and comparison.",
       "importMenu": "Check this menu",
-      "discoverSources": "FIND LOCAL BUSINESSES",
+      "discoverSources": "Find local businesses",
       "discoveryPrivacy": "Claude searches first, with OpenAI as a fallback. Results help find candidate businesses; a menu price and its published postal code and state or region must be verified before comparison.",
       "cityOrZip": "City or ZIP code",
       "search": "Find businesses",
@@ -821,7 +821,10 @@
       "samePostalArea": "Same postal code and state or region",
       "unmatchedSources": "Sources without a local match",
       "unmatchedSourceDetail": "This menu is excluded from local comparisons because its published address is missing, expired or outside this postal area.",
-      "featureOff": "PricePilot is currently switched off for this stylist. The screen is a preview; market search and recommendations are unavailable."
+      "featureOff": "PricePilot is currently switched off for this stylist. The screen is a preview; market search and recommendations are unavailable.",
+      "chartRange": "middle half",
+      "chartCurrent": "Your price",
+      "percentileLowest": "Your price is below every price in this sample"
     }
   },
   "scheduling": {
@@ -2511,23 +2514,37 @@
     "goalRebook": "Invite clients to rebook",
     "goalOffer": "Promote an offer",
     "goalShowcase": "Showcase your work",
-    "goalName": { "fill_opening": "Fill an opening", "rebook": "Invite clients to rebook", "offer": "Promote an offer", "showcase": "Showcase your work" },
+    "goalName": {
+      "fill_opening": "Fill an opening",
+      "rebook": "Invite clients to rebook",
+      "offer": "Promote an offer",
+      "showcase": "Showcase your work"
+    },
     "channels": "Choose channels",
-    "channel": { "email": "Email", "social": "Social posts", "web_push": "Web push", "wallet": "Wallet" },
+    "channel": {
+      "email": "Email",
+      "social": "Social posts",
+      "web_push": "Web push",
+      "wallet": "Wallet"
+    },
     "channelDetail": {
       "email": "Rebooking, seasonal offers, services, and several openings.",
       "social": "Instagram, Facebook Pages, and Google Business Profile.",
       "web_push": "Short, timely openings for clients who opted in.",
       "wallet": "Eligible Google Wallet rewards. Apple Wallet is for appointment changes."
     },
-    "planLocked": "Plan allocation pending",
+    "planLocked": "Not on your plan",
     "rolloutOff": "Not connected",
     "available": "Available",
     "subject": "Email subject",
     "caption": "Social caption",
     "captionFor": "Caption for {{channel}}",
     "destinations": "Post to",
-    "destination": { "instagram": "Instagram professional account", "facebook": "Facebook Page", "google_business": "Google Business Profile location" },
+    "destination": {
+      "instagram": "Instagram professional account",
+      "facebook": "Facebook Page",
+      "google_business": "Google Business Profile location"
+    },
     "message": "Message",
     "book": "Book this opening",
     "safetyTitle": "No messages are sent from this screen yet.",
@@ -2557,7 +2574,25 @@
     "saveError": "We couldn’t save that campaign. Try again.",
     "saveDraft": "Save draft",
     "cancel": "Cancel draft",
-    "status": { "draft": "Draft", "scheduled": "Scheduled", "sending": "Sending", "sent": "Sent", "partial": "Partly sent", "failed": "Failed", "cancelled": "Cancelled" },
-    "reason": { "CHANNEL_ROLLOUT_DISABLED": "Channel rollout is paused", "NO_CONSENTED_RECIPIENTS": "No eligible clients have consented", "SOCIAL_CONNECTION_NOT_CONFIGURED": "Connect an approved social account first", "WALLET_PROVIDER_NOT_CONFIGURED": "Wallet issuer setup is required" }
+    "status": {
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "sending": "Sending",
+      "sent": "Sent",
+      "partial": "Partly sent",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "reason": {
+      "CHANNEL_ROLLOUT_DISABLED": "Channel rollout is paused",
+      "NO_CONSENTED_RECIPIENTS": "No eligible clients have consented",
+      "SOCIAL_CONNECTION_NOT_CONFIGURED": "Connect an approved social account first",
+      "WALLET_PROVIDER_NOT_CONFIGURED": "Wallet issuer setup is required"
+    },
+    "defaults": {
+      "subject": "A time just opened up",
+      "message": "I have an opening this week. Choose a time that works for you.",
+      "caption": "A time just opened up. Book your next visit with me."
+    }
   }
 }

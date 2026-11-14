@@ -767,13 +767,13 @@
       "confidence": "confianza",
       "durationNotListed": "Duración no indicada",
       "removeSource": "Quitar fuente del menú",
-      "addMenu": "AGREGAR UN MENÚ",
+      "addMenu": "Agregar un menú",
       "menuUrlTitle": "Agrega un menú público de servicios",
       "menuUrlBody": "Usa un menú que tengas permiso para procesar. Solo se guardan los nombres y precios extraídos; el contenido de la página se descarta.",
       "menuUrl": "URL de la página del menú",
       "authorization": "Tengo autorización para enviar esta URL para extraer y comparar precios.",
       "importMenu": "Revisar este menú",
-      "discoverSources": "BUSCAR NEGOCIOS LOCALES",
+      "discoverSources": "Buscar negocios locales",
       "discoveryPrivacy": "Claude busca primero y OpenAI sirve como respaldo. Los resultados ayudan a encontrar negocios candidatos; se deben verificar el precio del menú y su código postal y estado o región publicados antes de comparar.",
       "cityOrZip": "Ciudad o código postal",
       "search": "Buscar negocios",
@@ -821,7 +821,10 @@
       "samePostalArea": "Mismo código postal y estado o región",
       "unmatchedSources": "Fuentes sin coincidencia local",
       "unmatchedSourceDetail": "Este menú se excluye de las comparaciones locales porque la dirección publicada falta, venció o está fuera de esta zona postal.",
-      "featureOff": "PricePilot está desactivado para esta estilista. Esta pantalla es una vista previa; la búsqueda local y las recomendaciones no están disponibles."
+      "featureOff": "PricePilot está desactivado para esta estilista. Esta pantalla es una vista previa; la búsqueda local y las recomendaciones no están disponibles.",
+      "chartRange": "mitad central",
+      "chartCurrent": "Tu precio",
+      "percentileLowest": "Tu precio está por debajo de todos los precios de esta muestra"
     }
   },
   "scheduling": {
@@ -2511,23 +2514,37 @@
     "goalRebook": "Invitar a reservar otra vez",
     "goalOffer": "Promocionar una oferta",
     "goalShowcase": "Mostrar tu trabajo",
-    "goalName": { "fill_opening": "Llenar un espacio disponible", "rebook": "Invitar a reservar otra vez", "offer": "Promocionar una oferta", "showcase": "Mostrar tu trabajo" },
+    "goalName": {
+      "fill_opening": "Llenar un espacio disponible",
+      "rebook": "Invitar a reservar otra vez",
+      "offer": "Promocionar una oferta",
+      "showcase": "Mostrar tu trabajo"
+    },
     "channels": "Elige los canales",
-    "channel": { "email": "Correo electrónico", "social": "Publicaciones sociales", "web_push": "Notificaciones web", "wallet": "Billetera" },
+    "channel": {
+      "email": "Correo electrónico",
+      "social": "Publicaciones sociales",
+      "web_push": "Notificaciones web",
+      "wallet": "Billetera"
+    },
     "channelDetail": {
       "email": "Reservas, ofertas de temporada, servicios y espacios disponibles.",
       "social": "Instagram, páginas de Facebook y Perfil de Negocio de Google.",
       "web_push": "Avisos breves y oportunos para clientes que dieron permiso.",
       "wallet": "Recompensas aptas de Google Wallet. Apple Wallet es para cambios de citas."
     },
-    "planLocked": "Falta asignar al plan",
+    "planLocked": "No incluido en tu plan",
     "rolloutOff": "Sin conexión",
     "available": "Disponible",
     "subject": "Asunto del correo",
     "caption": "Texto para redes",
     "captionFor": "Texto para {{channel}}",
     "destinations": "Publicar en",
-    "destination": { "instagram": "Cuenta profesional de Instagram", "facebook": "Página de Facebook", "google_business": "Ubicación del Perfil de Negocio de Google" },
+    "destination": {
+      "instagram": "Cuenta profesional de Instagram",
+      "facebook": "Página de Facebook",
+      "google_business": "Ubicación del Perfil de Negocio de Google"
+    },
     "message": "Mensaje",
     "book": "Reservar este espacio",
     "safetyTitle": "Esta pantalla todavía no envía mensajes.",
@@ -2557,7 +2574,25 @@
     "saveError": "No pudimos guardar la campaña. Inténtalo de nuevo.",
     "saveDraft": "Guardar borrador",
     "cancel": "Cancelar borrador",
-    "status": { "draft": "Borrador", "scheduled": "Programada", "sending": "Enviando", "sent": "Enviada", "partial": "Enviada parcialmente", "failed": "Fallida", "cancelled": "Cancelada" },
-    "reason": { "CHANNEL_ROLLOUT_DISABLED": "El canal está pausado", "NO_CONSENTED_RECIPIENTS": "Ningún cliente apto dio su consentimiento", "SOCIAL_CONNECTION_NOT_CONFIGURED": "Conecta primero una cuenta social aprobada", "WALLET_PROVIDER_NOT_CONFIGURED": "Se debe configurar el emisor de billetera" }
+    "status": {
+      "draft": "Borrador",
+      "scheduled": "Programada",
+      "sending": "Enviando",
+      "sent": "Enviada",
+      "partial": "Enviada parcialmente",
+      "failed": "Fallida",
+      "cancelled": "Cancelada"
+    },
+    "reason": {
+      "CHANNEL_ROLLOUT_DISABLED": "El canal está pausado",
+      "NO_CONSENTED_RECIPIENTS": "Ningún cliente apto dio su consentimiento",
+      "SOCIAL_CONNECTION_NOT_CONFIGURED": "Conecta primero una cuenta social aprobada",
+      "WALLET_PROVIDER_NOT_CONFIGURED": "Se debe configurar el emisor de billetera"
+    },
+    "defaults": {
+      "subject": "Se acaba de abrir un espacio",
+      "message": "Tengo un espacio disponible esta semana. Elige la hora que te convenga.",
+      "caption": "Se acaba de abrir un espacio. Reserva tu próxima visita conmigo."
+    }
   }
 }

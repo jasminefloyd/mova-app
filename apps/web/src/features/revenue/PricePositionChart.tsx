@@ -1,10 +1,12 @@
-import type { PriceEvidence } from './price-pilot-model';
+import type { PriceEvidenceDetails } from './price-pilot-model';
 
-export function PricePositionChart({ evidence, current, formatPrice, label }: {
-  evidence: NonNullable<PriceEvidence>;
+export function PricePositionChart({ evidence, current, formatPrice, label, rangeLabel, currentLabel }: {
+  evidence: PriceEvidenceDetails;
   current: number;
   formatPrice: (minor: number) => string;
   label: string;
+  rangeLabel: string;
+  currentLabel: string;
 }) {
   const min = Math.min(evidence.marketMin, current);
   const max = Math.max(evidence.marketMax, current);
@@ -17,6 +19,6 @@ export function PricePositionChart({ evidence, current, formatPrice, label }: {
       <span className="mova-price-pilot__position-median" style={{ left: position(evidence.median) }} />
       <span className="mova-price-pilot__position-current" style={{ left: position(current) }} />
     </div>
-    <div className="mova-price-pilot__position-legend"><span><i className="is-range" />{formatPrice(evidence.low)}–{formatPrice(evidence.high)} · middle half</span><span><i className="is-current" />Your price · {formatPrice(current)}</span></div>
+    <div className="mova-price-pilot__position-legend"><span><i className="is-range" />{formatPrice(evidence.low)}–{formatPrice(evidence.high)} · {rangeLabel}</span><span><i className="is-current" />{currentLabel} · {formatPrice(current)}</span></div>
   </div>;
 }
