@@ -6,7 +6,7 @@ import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 const channelSpec = {
   email: { feature: 'marketing_email', platform: 'marketing_email', provider: 'resend' },
   social: { feature: 'marketing_social', platform: 'marketing_social', provider: null },
-  web_push: { feature: 'marketing_web_push', platform: 'marketing_push', provider: 'web_push' },
+  web_push: { feature: 'marketing_web_push', platform: 'marketing_web_push', provider: 'web_push' },
   wallet: { feature: 'marketing_wallet', platform: 'marketing_wallet', provider: null },
 } as const;
 type Channel = keyof typeof channelSpec;

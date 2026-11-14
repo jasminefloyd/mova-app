@@ -793,7 +793,7 @@
       "authorization": "Tengo autorización para enviar esta URL para extraer y comparar precios.",
       "importMenu": "Revisar este menú",
       "discoverSources": "Buscar negocios locales",
-      "discoveryPrivacy": "Claude busca primero y OpenAI sirve como respaldo. Los resultados ayudan a encontrar negocios candidatos; se deben verificar el precio del menú y su código postal y estado o región publicados antes de comparar.",
+      "discoveryPrivacy": "Buscamos negocios cercanos en listados públicos. Los resultados son solo candidatos: el precio de un menú y su código postal deben verificarse antes de cualquier comparación.",
       "cityOrZip": "Ciudad o código postal",
       "search": "Buscar negocios",
       "openWebsite": "Abrir sitio web",

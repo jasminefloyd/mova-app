@@ -207,7 +207,7 @@ export function PricePilotPage() {
   if (!client || !businessId) return <main className="mova-page mova-price-pilot"><EmptyState title={t('revenue.pricePilot.signIn')} /></main>;
 
   return <main className="mova-page mova-revenue-page mova-price-pilot">
-    <ScreenHeader title={t('revenue.pricePilot.title')} onBack={() => navigate(operatorUrl(businessId, 'growth'))} backLabel={t('revenue.backToCenter')} />
+    <ScreenHeader onBack={() => navigate(operatorUrl(businessId, 'growth'))} backLabel={t('revenue.backToCenter')} />
     <h1>{t('revenue.pricePilot.title')}</h1>
     {offline && <OfflineBanner>{t('revenue.pricePilot.offline')}</OfflineBanner>}
     {error ? <ErrorState title={t('revenue.pricePilot.error')} retryLabel={t('revenue.pricePilot.retry')} onRetry={() => void load()} /> : <>

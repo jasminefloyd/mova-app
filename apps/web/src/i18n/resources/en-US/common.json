@@ -793,7 +793,7 @@
       "authorization": "I’m authorized to submit this menu URL for price extraction and comparison.",
       "importMenu": "Check this menu",
       "discoverSources": "Find local businesses",
-      "discoveryPrivacy": "Claude searches first, with OpenAI as a fallback. Results help find candidate businesses; a menu price and its published postal code and state or region must be verified before comparison.",
+      "discoveryPrivacy": "We search public listings for businesses near you. Results are candidates only: a menu's price and its postal code must be verified before any comparison.",
       "cityOrZip": "City or ZIP code",
       "search": "Find businesses",
       "openWebsite": "Open website",

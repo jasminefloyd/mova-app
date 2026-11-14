@@ -170,7 +170,7 @@ export type SupportList = {
   counts: { all: number; new: number; in_progress: number; waiting_on_stylist: number; resolved: number };
 };
 
-export type Switch = { key: 'autopilot' | 'concierge' | 'seat_filler' | 'zelle' | 'reviews' | 'spanish' | 'tap_to_pay' | 'marketing_email' | 'marketing_social' | 'marketing_push' | 'marketing_wallet'; enabled: boolean; reason: string | null; updated_at: string; updated_by: string | null };
+export type Switch = { key: 'autopilot' | 'concierge' | 'seat_filler' | 'zelle' | 'reviews' | 'spanish' | 'tap_to_pay' | 'marketing_email' | 'marketing_social' | 'marketing_web_push' | 'marketing_wallet'; enabled: boolean; reason: string | null; updated_at: string; updated_by: string | null };
 
 export type Health = {
   checked_at: string;
