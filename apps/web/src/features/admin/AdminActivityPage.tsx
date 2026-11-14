@@ -34,7 +34,7 @@ export default function AdminActivityPage() {
       {page.isPending ? <Loading /> : null}
       {page.data && rows.length === 0 ? <Empty>No activity matches.</Empty> : null}
       {rows.length > 0 ? (
-        <table className="tbl">
+        <div className="tbl-wrap admin-record-list"><table className="tbl">
           <thead><tr className="th"><th>When</th><th>Who</th><th>Action</th><th>Stylist</th><th>Reason</th></tr></thead>
           <tbody>
             {rows.map((row) => (
@@ -47,8 +47,12 @@ export default function AdminActivityPage() {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       ) : null}
+      {rows.length > 0 ? <div className="admin-mobile-list">{rows.map((row) => <article className="admin-record" key={`mobile-${row.id}`}>
+        <span><strong>{row.action}</strong><small>{formatDateTime(row.occurred_at)} · {row.business_name ? `${row.business_name}${row.bid ? ` · BID-${row.bid}` : ''}` : row.admin_name}</small></span>
+        <span className="admin-record__aside">{row.object_type}</span><small>{row.reason ?? '—'}</small>
+      </article>)}</div> : null}
       <p className="small muted">{formatCount(rows.length)} shown.</p>
       {(olderHasMore ?? page.data?.has_more) ? <button type="button" className="btn sm ghost" onClick={() => void loadOlder()}>Load older</button> : null}
     </>

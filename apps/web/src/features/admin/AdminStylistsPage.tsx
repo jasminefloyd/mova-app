@@ -45,7 +45,7 @@ export default function AdminStylistsPage() {
       {list.isPending ? <Loading /> : null}
       {list.data && list.data.stylists.length === 0 ? <Empty>No stylists match this view.</Empty> : null}
       {list.data && list.data.stylists.length > 0 ? (
-        <div className="tbl-wrap">
+        <div className="tbl-wrap admin-record-list">
           <table className="tbl">
             <thead>
               <tr className="th"><th>Stylist</th><th>Status</th><th>Plan</th><th>Fee</th><th>Done (30d)</th><th>Last booking</th></tr>
@@ -70,6 +70,13 @@ export default function AdminStylistsPage() {
           </div>
         </div>
       ) : null}
+      {list.data && list.data.stylists.length > 0 ? <div className="admin-mobile-list">{list.data.stylists.map((row) => (
+        <Link key={row.id} className="admin-record" to={`/admin/stylists/${row.id}`}>
+          <span><strong>{row.name}</strong><small>{row.business_name} · BID-{row.bid}</small></span>
+          <span className="admin-record__aside"><Pill tone={statusTone[row.status_key]}>{statusLabel[row.status_key]}</Pill></span>
+          <small>{row.plan_name} · {formatFeeBps(row.fee_bps)} · {formatCount(row.done_30d)} done · {row.last_booking_at ? formatRelativeDay(row.last_booking_at) : 'No bookings'}</small>
+        </Link>
+      ))}<div className="admin-record admin-record-paging"><span>{formatCount(offset + 1)}–{formatCount(Math.min(offset + PAGE, list.data.total))} of {formatCount(list.data.total)}</span><span className="row"><button type="button" className="btn sm ghost" disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - PAGE))}>Previous</button><button type="button" className="btn sm ghost" disabled={offset + PAGE >= list.data.total} onClick={() => setOffset(offset + PAGE)}>Next</button></span></div></div> : null}
     </>
   );
 }

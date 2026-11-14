@@ -7,13 +7,15 @@ import { Card, ErrorNote, Kpi, Loading, PageHead, Segmented } from './AdminPrimi
 
 type WindowKey = '7' | '30' | '90';
 
-const kpis: { key: keyof OverviewWindow; label: string; money?: boolean }[] = [
+const kpis: { key: keyof OverviewWindow; label: string; money?: boolean; percentage?: boolean; note?: string }[] = [
   { key: 'active_stylists', label: 'Active stylists' },
   { key: 'new_signups', label: 'New sign-ups' },
   { key: 'bookings_made', label: 'Bookings made' },
-  { key: 'completed', label: 'Appointments completed' },
-  { key: 'processed_minor', label: 'Processed', money: true },
-  { key: 'fees_minor', label: 'Mova fees', money: true },
+  { key: 'no_shows', label: 'No-show rate', percentage: true },
+  { key: 'processed_minor', label: 'Processed by Mova', money: true },
+  { key: 'fees_minor', label: 'Mova fees earned', money: true },
+  { key: 'recorded_minor', label: 'Recorded by stylists', money: true, note: 'Cash and other · no fee' },
+  { key: 'salon_minor', label: 'Collected by salons', money: true, note: 'No fee' },
 ];
 
 const nudgeReason: Record<Overview['needs_nudge']['items'][number]['reason'], string> = {
@@ -40,30 +42,37 @@ export default function AdminOverviewPage() {
     <>
       <PageHead
         title="Overview"
-        sub="Platform numbers for the period. Amounts are in US dollars; days are Eastern time."
+        sub="How Mova is doing across every stylist."
         actions={<><Segmented label="Period" value={days} onChange={setDays} options={[{ value: '7', label: '7 days' }, { value: '30', label: '30 days' }, { value: '90', label: '90 days' }]} /><button type="button" className="btn sm ghost" onClick={exportCsv} disabled={!overview.data}>Export CSV</button></>}
       />
       <ErrorNote message={overview.isError ? adminErrorText(overview.error) : null} />
       {overview.isPending ? <Loading /> : null}
       {overview.data ? (
         <>
+          <section className="northstar" aria-label="North star metric">
+            <div><div className="eyebrow">North star</div><div>Completed appointments per active stylist</div>
+              <div className="value">{formatCount(Math.round(overview.data.current.completed / Math.max(overview.data.current.active_stylists, 1) * 10) / 10)}<small> / period</small></div>
+              <div className="small">{formatCount(overview.data.current.completed)} completed · {formatCount(overview.data.current.active_stylists)} active</div>
+            </div>
+            <div className="trend" aria-label="Weekly active stylist trend">{overview.data.weekly_active.map((row) => {
+              const max = Math.max(1, ...overview.data!.weekly_active.map((entry) => entry.stylists));
+              return <i key={row.week} title={`${isoWeekLabel(row.week)}: ${formatCount(row.stylists)}`} style={{ height: `${Math.max(8, row.stylists / max * 100)}%` }} />;
+            })}</div>
+          </section>
           <div className="kpi-grid">
             {kpis.map((kpi) => {
               const current = overview.data.current[kpi.key];
               const change = formatChange(current, overview.data.prior[kpi.key]);
-              const value = kpi.money ? formatMoneyMinor(current) : formatCount(current);
-              return <Kpi key={kpi.key} label={kpi.label} value={value} note={<span className={`${change.direction === 'up' ? 'up' : change.direction === 'down' ? 'down' : ''}`}>{change.text}</span>} />;
+              const value = kpi.money ? formatMoneyMinor(current) : kpi.percentage ? formatPercent(current, overview.data.current.bookings_made) : formatCount(current);
+              return <Kpi key={kpi.key} label={kpi.label} value={value} note={kpi.note ?? <span className={`${change.direction === 'up' ? 'up' : change.direction === 'down' ? 'down' : ''}`}>{change.text}</span>} />;
             })}
           </div>
+          <div className="k3">
+            <Kpi label="Seat filler" value={formatCount(overview.data.current.seat_filler_filled)} note={`${formatPercent(overview.data.current.seat_filler_filled, overview.data.current.seat_filler_offered)} of offers filled`} />
+            <Kpi label="Rebooking autopilot" value={formatPercent(overview.data.current.autopilot_rebooked, overview.data.current.autopilot_sent)} note={`${formatCount(overview.data.current.autopilot_rebooked)} rebooked from ${formatCount(overview.data.current.autopilot_sent)} reminders`} />
+            <Kpi label="AI Concierge" value={formatPercent(overview.data.current.concierge_handed, overview.data.current.concierge_conversations)} note={`${formatCount(overview.data.current.concierge_handed)} of ${formatCount(overview.data.current.concierge_conversations)} conversations handed to stylist`} />
+          </div>
           <div className="cols2">
-            <Card title="Seat filler and autopilot">
-              <dl className="kv">
-                <dt>Seat filler filled</dt><dd>{formatCount(overview.data.current.seat_filler_filled)} of {formatCount(overview.data.current.seat_filler_offered)} offers</dd>
-                <dt>Autopilot rebooked</dt><dd>{formatCount(overview.data.current.autopilot_rebooked)} of {formatCount(overview.data.current.autopilot_sent)} messages</dd>
-                <dt>Concierge handed to a stylist</dt><dd>{formatCount(overview.data.current.concierge_handed)} of {formatCount(overview.data.current.concierge_conversations)} conversations ({formatPercent(overview.data.current.concierge_handed, overview.data.current.concierge_conversations)})</dd>
-                <dt>No-shows</dt><dd>{formatCount(overview.data.current.no_shows)}</dd>
-              </dl>
-            </Card>
             <Card title="Funnel">
               <ul className="list">
                 {([
@@ -83,13 +92,10 @@ export default function AdminOverviewPage() {
           </div>
           <div className="cols2">
             <Card title="Weekly active stylists">
-              {overview.data.weekly_active.length === 0 ? <p className="muted">No activity in this period.</p> : (
-                <table className="tbl"><thead><tr className="th"><th>Week</th><th>Active stylists</th></tr></thead><tbody>
-                  {overview.data.weekly_active.map((row) => (
-                    <tr key={row.week} className="tr"><td>{isoWeekLabel(row.week)} · {row.week}</td><td className="mono">{formatCount(row.stylists)}</td></tr>
-                  ))}
-                </tbody></table>
-              )}
+              {overview.data.weekly_active.length === 0 ? <p className="muted">No activity in this period.</p> : <div className="weekly-bars">{overview.data.weekly_active.map((row) => {
+                const max = Math.max(1, ...overview.data!.weekly_active.map((entry) => entry.stylists));
+                return <div key={row.week} title={`${isoWeekLabel(row.week)} · ${formatCount(row.stylists)}`}><b>{formatCount(row.stylists)}</b><i style={{ height: `${Math.max(8, row.stylists / max * 100)}%` }} /><small>{isoWeekLabel(row.week)}</small></div>;
+              })}</div>}
             </Card>
             <Card title="Top stylists">
               {overview.data.top_stylists.length === 0 ? <p className="muted">No completed appointments yet.</p> : (

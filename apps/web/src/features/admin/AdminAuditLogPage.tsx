@@ -66,7 +66,7 @@ export default function AdminAuditLogPage() {
       {page.isPending ? <Loading /> : null}
       {page.data && events.length === 0 ? <Empty>No events match this view.</Empty> : null}
       {events.length > 0 ? (
-        <table className="tbl">
+        <div className="tbl-wrap admin-record-list"><table className="tbl">
           <thead><tr className="th"><th>When</th><th>Category</th><th>Who</th><th>Event</th><th>Summary</th></tr></thead>
           <tbody>
             {events.map((event, index) => (
@@ -79,8 +79,12 @@ export default function AdminAuditLogPage() {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       ) : null}
+      {events.length > 0 ? <div className="admin-mobile-list">{events.map((event, index) => <article key={`mobile-${event.occurred_at}-${event.reference}-${index}`} className="admin-record">
+        <span><strong>{event.summary}</strong><small>{formatDateTime(event.occurred_at)} · {event.actor}</small></span>
+        <span className="admin-record__aside">{event.category}</span><small className="mono">{event.event} · {event.reference}</small>
+      </article>)}</div> : null}
       {hasMore ? <button type="button" className="btn sm ghost" onClick={() => void loadOlder()}>Load older events</button> : null}
     </>
   );

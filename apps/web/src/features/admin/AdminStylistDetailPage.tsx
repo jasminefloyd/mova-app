@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminErrorText, adminRpc, isAdminError, type StylistDetail } from './admin-api';
 import { formatCount, formatDate, formatDateTime, formatFeeBps, formatMoneyMinor, formatPercent } from './admin-format';
-import { Card, ConfirmDialog, ErrorNote, Loading, PageHead, Pill } from './AdminPrimitives';
+import { Card, ConfirmDialog, ErrorNote, Kpi, Loading, PageHead, Pill } from './AdminPrimitives';
 
 export default function AdminStylistDetailPage() {
   const { businessId = '' } = useParams();
@@ -61,8 +61,9 @@ export default function AdminStylistDetailPage() {
     <>
       <PageHead
         title={d.profile?.display_name ?? d.business.name}
-        sub={`${d.business.name} · B${d.business.bid} · ${d.owner_email ?? 'No owner email on file'}`}
+        sub={<><Pill tone={d.business.status === 'active' ? 'ok' : 'bad'}>{d.business.status}</Pill> {d.business.name} · BID-{d.business.bid} · {d.owner_email ?? 'No owner email on file'}{d.business.created_at ? ` · joined ${formatDate(d.business.created_at)}` : ''}</>}
         actions={<>
+          {d.profile?.handle ? <a className="btn sm ghost" href={`https://mova-beauty.co/a/${encodeURIComponent(d.profile.handle)}`} target="_blank" rel="noreferrer">View public page ↗</a> : null}
           <Link className="btn sm ghost" to={`/admin/stylists/${businessId}/audit`}>Audit log</Link>
           <Link className="btn sm ghost" to={`/admin/logs?stylist=${businessId}`}>System logs</Link>
           <Link className="btn sm ghost" to="/admin/fees">Fees</Link>
@@ -72,6 +73,12 @@ export default function AdminStylistDetailPage() {
       />
       <ErrorNote message={actionError} />
       {notice ? <p className="notice" role="status">{notice}</p> : null}
+      <div className="k4">
+        <Kpi label="Completed (30d)" value={formatCount(d.metrics.completed_30d)} />
+        <Kpi label="Processed by Mova" value={formatMoneyMinor(d.metrics.processed_30d_minor)} />
+        <Kpi label="Mova fees" value={formatMoneyMinor(d.metrics.fees_30d_minor)} />
+        <Kpi label="Repeat clients (90d)" value={formatPercent(d.metrics.repeat_clients_90d, d.metrics.clients_90d)} />
+      </div>
       <div className="cols2">
         <Card title="Account">
           <dl className="kv">

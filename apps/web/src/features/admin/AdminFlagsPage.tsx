@@ -43,46 +43,34 @@ export default function AdminFlagsPage() {
 
   if (switches.isPending) return <Loading />;
   if (switches.isError || !switches.data) return <ErrorNote message={adminErrorText(switches.error)} />;
+  const emergency = switches.data.filter((sw) => ['autopilot', 'concierge', 'seat_filler'].includes(sw.key));
+  const product = switches.data.filter((sw) => !['autopilot', 'concierge', 'seat_filler'].includes(sw.key));
+
+  function renderSwitches(items: Switch[]) {
+    return <Card className="pad0"><ul className="list">{items.map((sw) => {
+      const meta = labels[sw.key];
+      const next = pending[sw.key] ?? sw.enabled;
+      const blocked = sw.key === 'tap_to_pay';
+      return <li key={sw.key} className="feature-row">
+        <div className="feature-row__copy"><strong>{meta.name}</strong>{pending[sw.key] !== undefined ? <Pill tone="warn">Pending</Pill> : null}
+          <p>{meta.note}</p><p className="small muted">{next ? 'On for everyone' : 'Off for everyone'} · Last changed {formatDateTime(sw.updated_at)}{sw.updated_by ? ` by ${sw.updated_by}` : ''}{sw.reason ? ` · ${sw.reason}` : ''}</p>
+        </div>
+        <button type="button" className={`sw${next ? ' on' : ''}`} role="switch" aria-checked={next} aria-label={meta.name} disabled={busy || (blocked && !next)} onClick={() => setPending((current) => {
+          const copy = { ...current }; const want = !next;
+          if (want === sw.enabled) delete copy[sw.key]; else copy[sw.key] = want;
+          return copy;
+        })}><i /></button>
+      </li>;
+    })}</ul></Card>;
+  }
 
   return (
     <>
-      <PageHead title="Feature switches" sub="Turn platform features on or off for everyone. Changes take a few seconds to reach stylists and clients." />
+      <PageHead title="Feature switches" sub="Turn features on or off for everyone. Changes are recorded in admin activity." />
       <ErrorNote message={error} />
       {message ? <p className="notice" role="status">{message}</p> : null}
-      <Card>
-        <ul className="list">
-          {switches.data.map((sw) => {
-            const meta = labels[sw.key];
-            const next = pending[sw.key] ?? sw.enabled;
-            const blocked = sw.key === 'tap_to_pay';
-            return (
-              <li key={sw.key} className="toggle-row">
-                <div>
-                  <strong>{meta.name}</strong> <Pill tone={next ? 'ok' : 'off'}>{next ? 'On' : 'Off'}</Pill>
-                  {pending[sw.key] !== undefined ? <Pill tone="warn">Pending</Pill> : null}
-                  <div className="small muted">{meta.note}</div>
-                  <div className="small muted">Last changed {formatDateTime(sw.updated_at)}{sw.updated_by ? ` by ${sw.updated_by}` : ''}{sw.reason ? ` · ${sw.reason}` : ''}</div>
-                </div>
-                <button
-                  type="button"
-                  className={`sw${next ? ' on' : ''}`}
-                  role="switch"
-                  aria-checked={next}
-                  aria-label={meta.name}
-                  disabled={busy || (blocked && !next)}
-                  onClick={() => setPending((current) => {
-                    const copy = { ...current };
-                    const want = !next;
-                    if (want === sw.enabled) delete copy[sw.key];
-                    else copy[sw.key] = want;
-                    return copy;
-                  })}
-                />
-              </li>
-            );
-          })}
-        </ul>
-      </Card>
+      <section className="stack"><div><h2 className="group-heading">Emergency off switches</h2><p className="sub">Features that send messages or reply for stylists. Turning one off stops it everywhere.</p></div>{renderSwitches(emergency)}</section>
+      <section className="stack"><h2 className="group-heading">Product features</h2>{renderSwitches(product)}</section>
       {changes.length > 0 ? (
         <Card title={`${changes.length} pending change${changes.length === 1 ? '' : 's'}`}>
           <label className="field"><span className="lbl">Reason (kept in the admin log)</span><input className="input" value={reason} onChange={(e) => setReason(e.target.value)} minLength={5} maxLength={500} /></label>
