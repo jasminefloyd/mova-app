@@ -327,10 +327,12 @@ begin
   where not exists (select 1 from public.mova_reviews existing where existing.appointment_id=sample.appointment_id)
   on conflict do nothing;
 
-  -- P15: assignment is only a demo default; all catalog plans remain proposed.
+  -- P15: owner-authorized AI + Growth entitlement for the Rooted Beauty demo account.
+  -- This is a test plan assignment only; it does not create a Stripe subscription.
   insert into public.mova_business_plan_assignments (artist_business_id, plan_key, assignment_status)
-  values (business_id, 'free', 'current')
-  on conflict (artist_business_id) do nothing;
+  values (business_id, 'ai_growth', 'current')
+  on conflict (artist_business_id) do update
+    set plan_key = excluded.plan_key, assignment_status = 'current', updated_at = now();
 
   -- P14: synthetic report activity for this private demo fixture. These are
   -- illustrative analytics only; the Rooted Beauty profile remains unpublished.
