@@ -2087,6 +2087,7 @@
       "ai_growth": "AI + Growth"
     },
     "billingUnavailable": "Podrás cambiar de plan cuando la facturación esté configurada.",
+    "liveMode": "Pago seguro con Stripe. Los planes se cobran mensualmente.",
     "testMode": "Modo de prueba: no se hacen cobros reales.",
     "notice": {
       "confirmed": "Tu plan se actualizó.",

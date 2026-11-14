@@ -6,11 +6,11 @@ import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { operatorUrl } from '../../app/operator-url';
 
 type Plan = { plan_key: string; display_name: string; monthly_price_minor: number; mova_fee_basis_points: number; status: string; entitlements: Record<string, unknown> };
-type Summary = { current_plan: Plan; plans: Plan[]; usage: Record<string, number>; subscription?: { plan_key: string; status: string } | null; billing_available?: boolean };
+type Summary = { current_plan: Plan; plans: Plan[]; usage: Record<string, number>; subscription?: { plan_key: string; status: string; livemode?: boolean } | null; billing_available?: boolean; billing_mode?: 'test' | 'live' | null };
 
 export const formatFee = (bps: number, locale?: string) => new Intl.NumberFormat(locale, { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 2 }).format(bps / 10000);
 
-/** Board 22 with O10's confirmed prices. Plan changes go through Stripe Billing in test mode (task 5.8). */
+/** Board 22 with O10's confirmed prices. Plan changes go through platform Stripe Billing. */
 export function PlanPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -40,6 +40,15 @@ export function PlanPage() {
     if (!client || !businessId) return;
     const params = new URLSearchParams(location.search);
     const sessionId = params.get('session_id');
+    if (params.get('billing') === 'return' && !confirmed.current) {
+      confirmed.current = true;
+      void (async () => {
+        try { await call('plan-management', { action: 'refresh' }); } catch { setNotice('failed'); }
+        navigate(location.pathname, { replace: true });
+        await load();
+      })();
+      return;
+    }
     if (params.get('checkout') === 'success' && sessionId && !confirmed.current) {
       confirmed.current = true;
       void (async () => {
@@ -56,7 +65,7 @@ export function PlanPage() {
   const choose = async (plan: string) => {
     setBusy(plan); setNotice(null);
     try {
-      const paid = data?.subscription && ['active', 'trialing', 'past_due'].includes(data.subscription.status);
+      const paid = data?.subscription && data.subscription.livemode === (data.billing_mode === 'live') && ['active', 'trialing', 'past_due'].includes(data.subscription.status);
       const result = paid || plan === 'free'
         ? await call('subscription-portal', { return_path: location.pathname })
         : await call('subscription-checkout', { plan_key: plan, return_path: location.pathname });
@@ -84,7 +93,7 @@ export function PlanPage() {
           </Card>;
         })}</div>
         {!data?.billing_available && <p className="mova-plan-footnote">{t('plan.billingUnavailable')}</p>}
-        {data?.billing_available && <p className="mova-plan-footnote">{t('plan.testMode')}</p>}
+        {data?.billing_available && <p className="mova-plan-footnote">{t(data.billing_mode === 'live' ? 'plan.liveMode' : 'plan.testMode')}</p>}
         <p className="mova-plan-footnote">{t('plan.feeNote')}</p>
       </>}
   </main>;

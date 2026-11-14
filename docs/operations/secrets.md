@@ -27,7 +27,11 @@ Use separate credentials for development and production. The product owner has d
 | `DATABASE_URL` | Server-side database tooling only | No |
 | `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` | Vercel deployment tooling | No |
 
-The root `.env.example` contains blank values only. This phase does not configure or deploy hosted secrets.
+The root `.env.example` contains placeholder values only. Hosted secrets are configured separately in each platform's secret store.
+
+## Stripe plan subscriptions
+
+Plan billing has a separate mode from the test-only checkout used for stylist deposits and pay links. Set `MOVA_STRIPE_BILLING_MODE=live` and `STRIPE_API_KEY` to a platform Stripe secret or restricted live key with permission to create/retrieve Checkout Sessions and Billing Portal Sessions. Set `MOVA_STRIPE_PRICE_PRO` and `MOVA_STRIPE_PRICE_AI_GROWTH` to active monthly USD price IDs in that same live account. The configured prices should be $19/month and $39/month. Do not set `MOVA_STRIPE_TEST_MODE` to enable subscriptions; that flag controls unrelated payment functions. Configure an active default Stripe Billing Portal with both prices available for subscription updates. `OPERATOR_BASE_URL` must be the same origin stylists sign in on (`https://mova-beauty.co`) so Stripe returns to the existing browser session. The local sample defaults plan billing to test mode; production live mode is enabled only by the production Edge Function secrets.
 
 `MOVA_NOTES_KEK_HEX` is a server-only 32-byte AES-256 key encoded as 64 hexadecimal characters. Generate a deployment-specific key with `openssl rand -hex 32`, then store it in the local ignored `.env` and the production Edge Function secret store. Never place the key in a `VITE_` variable. Sensitive client-note operations fail closed when the key is absent or invalid. Keep a protected backup and do not rotate or replace the key without a key-version migration plan; existing ciphertext uses key version `v1`.
 

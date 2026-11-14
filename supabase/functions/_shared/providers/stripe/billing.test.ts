@@ -1,19 +1,18 @@
 import { describe, expect, it, vi } from 'vitest';
 import { planPriceId, StripeBillingClient, verifiedSubscription } from './billing';
 
-// Task 5.8. No live calls: the fetcher is injected.
+// Billing provider tests use injected fetchers; no Stripe API calls are made.
 const biz = 'e2500000-0000-4000-8000-000000000001';
-describe('Stripe Billing test mode (task 5.8)', () => {
+describe('Stripe Billing', () => {
   it('reads plan price ids from config only when they look like Stripe prices', () => {
     const env = (values: Record<string, string>) => (name: string) => values[name];
     expect(planPriceId('pro', env({ MOVA_STRIPE_PRICE_PRO: 'price_123' }))).toBe('price_123');
     expect(planPriceId('ai_growth', env({ MOVA_STRIPE_PRICE_AI_GROWTH: '19.00' }))).toBeNull();
     expect(planPriceId('pro', env({}))).toBeNull();
   });
-  it('refuses live keys and live objects', async () => {
-    expect(() => new StripeBillingClient('sk_live_x')).toThrow('STRIPE_TEST_KEY_REQUIRED');
+  it('rejects a live object returned to a test-mode checkout lookup', async () => {
     const fetcher = vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ id: 'cs_test_1', livemode: true }));
-    await expect(new StripeBillingClient('sk_test_x', fetcher).retrieveCheckout('cs_test_1')).rejects.toThrow('STRIPE_LIVE_OBJECT_REJECTED');
+    await expect(new StripeBillingClient('sk_test_x', fetcher).retrieveCheckout('cs_test_1')).rejects.toThrow('STRIPE_OBJECT_MODE_MISMATCH');
   });
   it('creates a subscription checkout tagged with the business and plan', async () => {
     const fetcher = vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ id: 'cs_test_1', url: 'https://checkout.stripe.invalid/x', livemode: false }));

@@ -2087,6 +2087,7 @@
       "ai_growth": "AI + Growth"
     },
     "billingUnavailable": "Plan changes open when billing is set up.",
+    "liveMode": "Secure checkout via Stripe. Plans are billed monthly.",
     "testMode": "Test mode: no real charges are made.",
     "notice": {
       "confirmed": "Your plan is updated.",
