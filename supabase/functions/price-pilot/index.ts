@@ -1,6 +1,7 @@
 import { artistClient, corsHeaders, serviceClient } from '../_shared/booking.ts';
 import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 import { zipDistanceMiles } from '../_shared/zip-centroids.ts';
+import { searchGooglePlaces, type PlaceCandidate } from '../_shared/google-places.ts';
 import { withSystemRequestLogging, writeSystemLog } from '../_shared/system-log.ts';
 
 type MenuItem = { name?: unknown; category?: unknown; duration_minutes?: unknown; price_min?: unknown; price_max?: unknown; currency?: unknown; pricing_basis?: unknown; confidence?: unknown };
@@ -60,6 +61,20 @@ function normalizePostal(value: unknown) {
 function providerFromEnv(name: string, fallback: SearchProvider): SearchProvider {
   const value = Deno.env.get(name);
   return value === 'anthropic' || value === 'openai' ? value : fallback;
+}
+
+/** Google Places competitor profiles for a location. Unconfigured or failed lookups return no results, never invented ones. */
+async function googlePlacesDiscovery(request: Request, businessId: string, userId: string, query: string) {
+  const provider = 'google_places';
+  try {
+    const found = await searchGooglePlaces(`hair salon in ${query}`, { apiKey: Deno.env.get('MOVA_GOOGLE_PLACES_API_KEY') });
+    if (!found.configured) return { provider, configured: false, results: [] as unknown[] };
+    await writeSystemLog({ level: 'info', source: 'provider', eventName: 'price_pilot.google_places.completed', requestId: request.headers.get('x-request-id'), routeOrFunction: 'price-pilot', httpStatus: 200, userId, artistBusinessId: businessId, message: 'PricePilot Google Places lookup completed', context: { provider, outcome: 'completed', result_count: found.results.length } });
+    return { provider, configured: true, results: found.results.map((place: PlaceCandidate) => ({ name: place.name, address: place.address, website: place.website, url: place.mapsUrl || place.website, provider, attribution: 'Google', rating: place.rating, review_count: place.reviewCount, price_tier: place.priceTier })) };
+  } catch {
+    await writeSystemLog({ level: 'warning', source: 'provider', eventName: 'price_pilot.google_places.failed', requestId: request.headers.get('x-request-id'), routeOrFunction: 'price-pilot', httpStatus: 502, userId, artistBusinessId: businessId, message: 'PricePilot Google Places lookup failed', context: { provider, outcome: 'failed' } });
+    return { provider, configured: true, results: [] as unknown[] };
+  }
 }
 
 async function providerLog(request: Request, businessId: string, userId: string, provider: string, outcome: 'completed' | 'failed', status: number | null, started: number, count?: number, searchCalls?: number) {
@@ -228,7 +243,8 @@ async function handle(request: Request): Promise<Response> {
     try {
       const result = await discoverCompetitors(request, businessId, user.id, query);
       await writeSystemLog({ level: 'info', source: 'function', eventName: 'price_pilot.discovery.completed', requestId, routeOrFunction: 'price-pilot', httpStatus: 200, userId: user.id, artistBusinessId: businessId, message: 'PricePilot competitor discovery completed', context: { action, provider: result.provider, outcome: 'completed', result_count: result.results.length } });
-      return Response.json({ data: { results: [{ provider: result.provider, configured: true, results: result.results }], note: 'Web search results are candidate discovery context only. They are not stored or used as comparable menu prices; prices must be extracted and verified from linked menus.' } }, { headers: cors });
+      const places = await googlePlacesDiscovery(request, businessId, user.id, query);
+      return Response.json({ data: { results: [{ provider: result.provider, configured: true, results: result.results }, places], note: 'Web search results are candidate discovery context only. They are not stored or used as comparable menu prices; prices must be extracted and verified from linked menus.' } }, { headers: cors });
     } catch {
       return actionFailure('discover', 'PRICE_PILOT_SEARCH_UNAVAILABLE', 503);
     }
