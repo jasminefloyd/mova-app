@@ -240,14 +240,17 @@ async function handle(request: Request): Promise<Response> {
     if (query.length < 2) return actionFailure('discover', 'LOCATION_REQUIRED', 400);
     const limited = await reserveLookup('discover');
     if (limited) return limited;
+    let webSearch: { provider: string; configured: boolean; results: SearchSource[]; error?: string };
     try {
       const result = await discoverCompetitors(request, businessId, user.id, query);
-      await writeSystemLog({ level: 'info', source: 'function', eventName: 'price_pilot.discovery.completed', requestId, routeOrFunction: 'price-pilot', httpStatus: 200, userId: user.id, artistBusinessId: businessId, message: 'PricePilot competitor discovery completed', context: { action, provider: result.provider, outcome: 'completed', result_count: result.results.length } });
-      const places = await googlePlacesDiscovery(request, businessId, user.id, query);
-      return Response.json({ data: { results: [{ provider: result.provider, configured: true, results: result.results }, places], note: 'Web search results are candidate discovery context only. They are not stored or used as comparable menu prices; prices must be extracted and verified from linked menus.' } }, { headers: cors });
+      webSearch = { provider: result.provider, configured: true, results: result.results };
     } catch {
-      return actionFailure('discover', 'PRICE_PILOT_SEARCH_UNAVAILABLE', 503);
+      // Google Places is an independent discovery source; an AI web-search outage must not hide it.
+      webSearch = { provider: 'web_search', configured: false, results: [], error: 'WEB_SEARCH_UNAVAILABLE' };
     }
+    const places = await googlePlacesDiscovery(request, businessId, user.id, query);
+    await writeSystemLog({ level: webSearch.configured ? 'info' : 'warning', source: 'function', eventName: 'price_pilot.discovery.completed', requestId, routeOrFunction: 'price-pilot', httpStatus: 200, userId: user.id, artistBusinessId: businessId, errorCode: webSearch.configured ? null : 'WEB_SEARCH_UNAVAILABLE', message: 'PricePilot competitor discovery completed', context: { action, outcome: webSearch.configured ? 'completed' : 'partial', provider: webSearch.provider, result_count: webSearch.results.length + places.results.length } });
+    return Response.json({ data: { results: [webSearch, places], note: 'Web search results are candidate discovery context only. They are not stored or used as comparable menu prices; prices must be extracted and verified from linked menus.' } }, { headers: cors });
   }
   if (action === 'import_menu') {
     // Menu checks are limited to the stylist's own website, as published on their profile.
