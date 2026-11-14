@@ -5,8 +5,20 @@ import { corsHeaders } from '../_shared/cors.ts';
 import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 
 const wasmModule = 'npm:@imagemagick/magick-wasm@0.0.44';
-const wasmBytes = await Deno.readFile(new URL('magick.wasm', import.meta.resolve(wasmModule)));
-await initializeImageMagick(wasmBytes);
+let imageMagickInitialization: Promise<void> | null = null;
+
+function ensureImageMagickInitialized(): Promise<void> {
+  if (!imageMagickInitialization) {
+    imageMagickInitialization = (async () => {
+      const wasmBytes = await Deno.readFile(new URL('magick.wasm', import.meta.resolve(wasmModule)));
+      await initializeImageMagick(wasmBytes);
+    })().catch((error) => {
+      imageMagickInitialization = null;
+      throw error;
+    });
+  }
+  return imageMagickInitialization;
+}
 
 const json = (data: unknown, status = 200) => Response.json({ data, error: null, request_id: crypto.randomUUID() }, { status, headers: corsHeaders });
 
@@ -45,6 +57,11 @@ Deno.serve(withSystemRequestLogging('photo-process', async (request) => {
   if (!membership) return json({ code: 'ARTIST_MEMBERSHIP_REQUIRED' }, 403);
   if (kind === 'cover' && !await planFeatureEnabled(membership.artist_business_id, 'custom_cover')) return json({ code: 'PLAN_FEATURE_NOT_INCLUDED', feature: 'custom_cover' }, 403);
   if ((kind === 'profile' || kind === 'cover') && membership.role !== 'owner') return json({ code: 'OWNER_PROFILE_REQUIRED' }, 403);
+  try {
+    await ensureImageMagickInitialized();
+  } catch {
+    return json({ code: 'IMAGE_PROCESSOR_UNAVAILABLE' }, 503);
+  }
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const bucket = kind === 'portfolio' ? 'mova_portfolio_media' : kind === 'visit' ? 'mova_visit_private' : 'mova_profile_photos';
   const visitNoteId = typeof body?.visit_note_id === 'string' ? body.visit_note_id : '';

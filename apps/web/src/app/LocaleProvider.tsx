@@ -7,15 +7,17 @@ import { readStoredLocale, storeLocale } from './locale';
 type LocaleContextValue = { locale: Locale; setLocale: (locale: Locale) => void };
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-export function LocaleProvider({ storageKey, children }: PropsWithChildren<{ storageKey: string }>) {
-  const [locale, setLocaleState] = useState<Locale>(() => readStoredLocale(storageKey));
+export function LocaleProvider({ storageKey, fixedLocale, children }: PropsWithChildren<{ storageKey: string; fixedLocale?: Locale }>) {
+  // Keep the server and first browser render identical. The saved locale is
+  // applied in the effect below after hydration completes.
+  const [locale, setLocaleState] = useState<Locale>(() => fixedLocale ?? 'en-US');
 
   useEffect(() => {
-    const stored = readStoredLocale(storageKey);
+    const stored = fixedLocale ?? readStoredLocale(storageKey);
     setLocaleState(stored);
     void i18n.changeLanguage(stored);
     document.documentElement.lang = stored;
-  }, [storageKey]);
+  }, [storageKey, fixedLocale]);
 
   const setLocale = useCallback((next: Locale) => {
     storeLocale(storageKey, next);
