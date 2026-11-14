@@ -4,13 +4,19 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 import { corsHeaders } from '../_shared/cors.ts';
 import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 
-const wasmModule = 'npm:@imagemagick/magick-wasm@0.0.44';
+const wasmUrl = 'https://cdn.jsdelivr.net/npm/@imagemagick/magick-wasm@0.0.44/dist/x86/magick.wasm';
+const wasmSha256 = 'b7d6710436b150dc5bd1ca04d80b6b7614c54854d7470f888f7e69a2a41b00e4';
 let imageMagickInitialization: Promise<void> | null = null;
 
 function ensureImageMagickInitialized(): Promise<void> {
   if (!imageMagickInitialization) {
     imageMagickInitialization = (async () => {
-      const wasmBytes = await Deno.readFile(new URL('magick.wasm', import.meta.resolve(wasmModule)));
+      const response = await fetch(wasmUrl);
+      if (!response.ok) throw new Error(`ImageMagick WASM fetch failed: ${response.status}`);
+      const wasmBytes = new Uint8Array(await response.arrayBuffer());
+      const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', wasmBytes));
+      const actualSha256 = [...digest].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+      if (actualSha256 !== wasmSha256) throw new Error('ImageMagick WASM integrity check failed');
       await initializeImageMagick(wasmBytes);
     })().catch((error) => {
       imageMagickInitialization = null;

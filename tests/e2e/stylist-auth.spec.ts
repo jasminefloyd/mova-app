@@ -67,18 +67,18 @@ test.describe('stylist sign-up (/signup)', () => {
     await expect(page.getByText('invite-only', { exact: false })).toHaveCount(0);
   });
 
-  test('a new stylist with a session continues to onboarding, and the app language is sent with the account', async ({ page }) => {
+  test('a new stylist with a session continues to onboarding in English by default', async ({ page }) => {
     const requests = await mockAuth(page, { signUp: 'session' });
     await page.goto('/signup');
     await page.getByLabel('Email', { exact: true }).fill('new-stylist@mova.invalid');
     await page.getByLabel('Password', { exact: true }).fill('a-long-password');
-    await page.getByRole('radio', { name: 'Español (EE. UU.)' }).check();
-    await page.getByRole('button', { name: 'Crear cuenta' }).click();
+    await expect(page.getByRole('radio')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Create account' }).click();
     await expect(page).toHaveURL(/\/onboarding\/profile$/);
     expect(requests.signUp).toHaveLength(1);
     expect(requests.signUp[0]).toMatchObject({
       email: 'new-stylist@mova.invalid',
-      data: { preferred_locale: 'es-US' },
+      data: { preferred_locale: 'en-US' },
     });
   });
 

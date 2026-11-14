@@ -15,7 +15,7 @@ const validGoal = (value: unknown) => ['fill_opening','rebook','offer','showcase
 const bounded = (value: unknown, max: number) => typeof value === 'string' && value.trim().length > 0 && value.length <= max;
 
 // Audience segments are fixed choices from the product decision (Nov 13). Each one narrows the consented audience.
-const segments = ['consented_clients', 'lapsed_60', 'recent_90', 'upcoming'] as const;
+const segments = ['consented_clients', 'lapsed_60', 'recent_90', 'recent_180', 'booked_service', 'upcoming'] as const;
 type Segment = typeof segments[number];
 const validSegment = (value: unknown): value is Segment => typeof value === 'string' && (segments as readonly string[]).includes(value);
 const DAY_MS = 86_400_000;
@@ -24,18 +24,20 @@ const APPOINTMENT_READ_LIMIT = 5000;
 /**
  * Narrows consented client ids to a segment using appointment history.
  * lapsed_60: last confirmed or completed visit more than 60 days ago, with no upcoming booking.
- * recent_90: a confirmed or completed visit in the last 90 days.
+ * recent_90 / recent_180: a confirmed or completed visit in the last 90 / 180 days.
+ * booked_service: a confirmed or completed visit for the selected service.
  * upcoming: at least one confirmed booking in the future.
  * Throws AUDIENCE_TOO_LARGE rather than guessing when history exceeds the read limit.
  */
-async function segmentClientIds(db: ReturnType<typeof serviceClient>, businessId: string, segment: Segment, candidateIds: string[], now: number) {
+async function segmentClientIds(db: ReturnType<typeof serviceClient>, businessId: string, segment: Segment, candidateIds: string[], now: number, serviceId?: string) {
   if (segment === 'consented_clients' || candidateIds.length === 0) return candidateIds;
+  if (segment === 'booked_service' && !serviceId) throw new Error('SERVICE_REQUIRED');
   const nowIso = new Date(now).toISOString();
   const { data: upcoming, error: upcomingError } = await db.from('mova_appointments').select('client_id')
     .eq('artist_business_id', businessId).eq('status', 'confirmed').gt('starts_at', nowIso).not('client_id', 'is', null).limit(APPOINTMENT_READ_LIMIT);
   if (upcomingError) throw new Error('AUDIENCE_PREVIEW_FAILED');
   if ((upcoming ?? []).length >= APPOINTMENT_READ_LIMIT) throw new Error('AUDIENCE_TOO_LARGE');
-  const { data: past, error: pastError } = await db.from('mova_appointments').select('client_id,starts_at')
+  const { data: past, error: pastError } = await db.from('mova_appointments').select('client_id,starts_at,service_id')
     .eq('artist_business_id', businessId).in('status', ['confirmed', 'completed']).lte('starts_at', nowIso)
     .gte('starts_at', new Date(now - 730 * DAY_MS).toISOString()).not('client_id', 'is', null)
     .order('starts_at', { ascending: false }).limit(APPOINTMENT_READ_LIMIT);
@@ -50,7 +52,9 @@ async function segmentClientIds(db: ReturnType<typeof serviceClient>, businessId
   }
   const candidates = new Set(candidateIds);
   if (segment === 'upcoming') return candidateIds.filter((id) => upcomingIds.has(id));
+  if (segment === 'booked_service') return [...new Set((past ?? []).filter((row) => row.service_id === serviceId).map((row) => row.client_id as string))].filter((id) => candidates.has(id));
   if (segment === 'recent_90') return [...lastVisit].filter(([id, time]) => candidates.has(id) && time >= now - 90 * DAY_MS).map(([id]) => id);
+  if (segment === 'recent_180') return [...lastVisit].filter(([id, time]) => candidates.has(id) && time >= now - 180 * DAY_MS).map(([id]) => id);
   return [...lastVisit].filter(([id, time]) => candidates.has(id) && time < now - 60 * DAY_MS && !upcomingIds.has(id)).map(([id]) => id);
 }
 
@@ -112,20 +116,42 @@ Deno.serve(withSystemRequestLogging('marketing-campaign', async (request) => {
     }
     const candidateIds = pushEligibleClientIds ? ids.filter((id) => pushEligibleClientIds?.has(id)) : ids;
     const segment: Segment = validSegment(body.segment) ? body.segment : 'consented_clients';
+    if (segment === 'booked_service' && (typeof body.service_id !== 'string' || !/^[0-9a-f-]{36}$/i.test(body.service_id))) return respond({ code: 'SERVICE_REQUIRED' }, 422);
     let audienceIds: string[];
     try {
-      audienceIds = await segmentClientIds(db, actor.businessId, segment, candidateIds, Date.now());
+      audienceIds = await segmentClientIds(db, actor.businessId, segment, candidateIds, Date.now(), typeof body.service_id === 'string' ? body.service_id : undefined);
     } catch (segmentError) {
-      return respond({ code: segmentError instanceof Error && segmentError.message === 'AUDIENCE_TOO_LARGE' ? 'AUDIENCE_TOO_LARGE' : 'AUDIENCE_PREVIEW_FAILED' }, segmentError instanceof Error && segmentError.message === 'AUDIENCE_TOO_LARGE' ? 409 : 500);
+      const code = segmentError instanceof Error ? segmentError.message : '';
+      return respond({ code: code === 'AUDIENCE_TOO_LARGE' || code === 'SERVICE_REQUIRED' ? code : 'AUDIENCE_PREVIEW_FAILED' }, code === 'AUDIENCE_TOO_LARGE' ? 409 : code === 'SERVICE_REQUIRED' ? 422 : 500);
     }
     const { data: eligible, error: eligibilityError } = await db.rpc('mova_marketing_eligible_count', {
       p_artist_business_id: actor.businessId, p_client_ids: audienceIds, p_channel: consentChannel, p_purpose: purpose,
     });
     if (eligibilityError) return respond({ code: 'AUDIENCE_PREVIEW_FAILED' }, 500);
+    let sampleClients: Array<{ id: string; display_name: string; last_visit_at: string | null }> = [];
+    if (body.include_sample === true && eligible > 0) {
+      // Only return names after the same consent, suppression, and quiet-hours gate used at send time.
+      const candidates = audienceIds.slice(0, 40);
+      const eligibleIds: string[] = [];
+      for (let offset = 0; offset < candidates.length && eligibleIds.length < 4; offset += 10) {
+        const batch = candidates.slice(offset, offset + 10);
+        const decisions = await Promise.all(batch.map((clientId) => db.rpc('mova_can_send', {
+          p_artist_business_id: actor.businessId, p_client_id: clientId, p_channel: consentChannel, p_purpose: purpose, p_now: new Date().toISOString(),
+        })));
+        batch.forEach((clientId, index) => {
+          if (decisions[index]?.error == null && decisions[index]?.data?.allowed === true && eligibleIds.length < 4) eligibleIds.push(clientId);
+        });
+      }
+      if (eligibleIds.length) {
+        const { data: rows } = await db.from('mova_clients').select('id,display_name,last_visit_at')
+          .eq('artist_business_id', actor.businessId).in('id', eligibleIds);
+        sampleClients = (rows ?? []) as typeof sampleClients;
+      }
+    }
     await writeSystemLog({ level: 'info', source: 'function', eventName: 'marketing.audience.previewed', requestId: request.headers.get('x-request-id'), userId: actor.user.id, artistBusinessId: actor.businessId, message: 'Marketing audience eligibility previewed', context: { action: 'preview', result_count: eligible } });
     const reason = !platform ? 'CHANNEL_ROLLOUT_DISABLED' : eligible === 0 ? 'NO_CONSENTED_RECIPIENTS' : body.channel === 'email' ? 'EMAIL_DELIVERY_NOT_CONFIGURED' : 'PUSH_DELIVERY_NOT_CONFIGURED';
     return respond({ channel: body.channel, segment, eligible, considered: audienceIds.length, capped: ids.length === 500,
-      audience: body.channel === 'email' ? 'Clients with email consent' : 'Clients with push consent', ready: false, reason });
+      sample_clients: sampleClients, audience: body.channel === 'email' ? 'Clients with email consent' : 'Clients with push consent', ready: false, reason });
   }
 
   if (body.action === 'save') {
@@ -147,6 +173,7 @@ Deno.serve(withSystemRequestLogging('marketing-campaign', async (request) => {
     }
     if (body.audience !== undefined && (!body.audience || typeof body.audience !== 'object' || Array.isArray(body.audience) || Object.keys(body.audience).some((key) => !['segment','service_id','location_id'].includes(key)) || Object.values(body.audience).some((value) => typeof value !== 'string' || value.length > 100))) return respond({ code: 'CAMPAIGN_AUDIENCE_INVALID' }, 422);
     if (body.audience?.segment !== undefined && !validSegment(body.audience.segment)) return respond({ code: 'CAMPAIGN_AUDIENCE_INVALID' }, 422);
+    if (body.audience?.segment === 'booked_service' && (typeof body.audience.service_id !== 'string' || !/^[0-9a-f-]{36}$/i.test(body.audience.service_id))) return respond({ code: 'SERVICE_REQUIRED' }, 422);
     const audience = body.audience && typeof body.audience === 'object' ? body.audience : {};
     const rows = channels.map((item) => ({ artist_business_id: actor.businessId,
       channel: item.channel, provider: channelSpec[item.channel].provider, content: item.content, status: 'draft' }));

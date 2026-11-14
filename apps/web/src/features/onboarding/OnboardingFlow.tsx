@@ -194,6 +194,12 @@ export function OnboardingFlow() {
         });
         if (claimError) throw claimError;
         const claimed = Array.isArray(data) ? data[0] : data;
+        if (!claimed?.artist_business_id) throw new Error('ARTIST_BUSINESS_MISSING');
+        const { data: business, error: businessError } = await supabase.from('mova_artist_businesses')
+          .select('business_number').eq('id', claimed.artist_business_id).maybeSingle();
+        if (businessError || !business?.business_number) throw businessError ?? new Error('BUSINESS_DISPLAY_ID_MISSING');
+        window.sessionStorage.setItem('mova_active_artist_business_id', claimed.artist_business_id);
+        window.sessionStorage.setItem('mova_active_artist_business_display_id', displayId('BID', business.business_number));
         setBusinessId(claimed.artist_business_id);
       } else {
         const { error: profileError } = await supabase.rpc('mova_update_artist_profile', {
