@@ -43,7 +43,7 @@ select is((select (public.mova_admin_fees_overview() -> 'platform' ->> 'fee_bps'
 select is((select (public.mova_admin_fees_overview() -> 'history')::text like '%fee.stylist_rate_set%'), true, 'fee changes appear in the history');
 
 -- Switches.
-select is((select jsonb_array_length(public.mova_admin_switches())), 7, 'seven switches are listed');
+select is((select jsonb_array_length(public.mova_admin_switches())), 11, 'eleven platform switches are listed (0070 base, 0087 marketing)');
 select lives_ok($$select public.mova_admin_set_platform_switch('zelle', true, 'Turn on recorded Zelle for the pilot')$$, 'an admin can turn a switch on with a reason');
 select throws_ok($$select public.mova_admin_set_platform_switch('tap_to_pay', true, 'Turn on tap to pay now')$$, '55000', 'SWITCH_NOT_BUILT', 'tap to pay cannot be turned on yet');
 select throws_ok($$select public.mova_admin_set_platform_switch('autopilot', false, 'no')$$, '22023', 'REASON_REQUIRED', 'a switch change needs a reason');

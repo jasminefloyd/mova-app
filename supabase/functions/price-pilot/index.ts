@@ -1,6 +1,7 @@
 import { artistClient, corsHeaders, serviceClient } from '../_shared/booking.ts';
 import { planFeatureEnabled } from '../_shared/plan-feature.ts';
-import { redactSystemText, withSystemRequestLogging, writeSystemLog } from '../_shared/system-log.ts';
+import { zipDistanceMiles } from '../_shared/zip-centroids.ts';
+import { withSystemRequestLogging, writeSystemLog } from '../_shared/system-log.ts';
 
 type MenuItem = { name?: unknown; category?: unknown; duration_minutes?: unknown; price_min?: unknown; price_max?: unknown; currency?: unknown; pricing_basis?: unknown; confidence?: unknown };
 type MenuLocation = { region?: unknown; postal_code?: unknown; country_code?: unknown; address_excerpt?: unknown };
@@ -21,6 +22,16 @@ function normalizeUrl(value: unknown): URL | null {
     return url;
   } catch { return null; }
 }
+/** Lower-case host without a leading www., or null. Used to confirm a menu is on the stylist's own website. */
+function ownHost(value: unknown): string | null {
+  try {
+    const host = new URL(String(value)).hostname.toLowerCase();
+    return host ? host.replace(/^www\./, '') : null;
+  } catch {
+    return null;
+  }
+}
+
 function text(value: unknown, max: number) { return typeof value === 'string' ? value.trim().slice(0, max) : ''; }
 function minor(value: unknown) { const number = Number(value); return Number.isFinite(number) && number >= 0 && number <= 1000000 ? Math.round(number * 100) : null; }
 function normalizeGeoPart(value: unknown) { return text(value, 80).normalize('NFKC').toLocaleUpperCase('en-US').replace(/[^A-Z0-9]/g, ''); }
@@ -202,9 +213,18 @@ async function handle(request: Request): Promise<Response> {
   catch { return fail('INVALID_BODY', 400); }
   const action = text(body.action, 30);
   const db = serviceClient();
+  // Business searches and menu checks share one monthly allowance per stylist (see mova_price_pilot_consume).
+  const reserveLookup = async (actionName: string): Promise<Response | null> => {
+    const { error } = await db.rpc('mova_price_pilot_consume', { p_artist_business_id: businessId });
+    if (!error) return null;
+    if (String(error.message).includes('PRICE_PILOT_LIMIT_REACHED')) return actionFailure(actionName, 'PRICE_PILOT_LIMIT_REACHED', 429);
+    return actionFailure(actionName, 'PRICE_PILOT_USAGE_FAILED', 500);
+  };
   if (action === 'discover') {
     const query = text(body.location, 100);
     if (query.length < 2) return actionFailure('discover', 'LOCATION_REQUIRED', 400);
+    const limited = await reserveLookup('discover');
+    if (limited) return limited;
     try {
       const result = await discoverCompetitors(request, businessId, user.id, query);
       await writeSystemLog({ level: 'info', source: 'function', eventName: 'price_pilot.discovery.completed', requestId, routeOrFunction: 'price-pilot', httpStatus: 200, userId: user.id, artistBusinessId: businessId, message: 'PricePilot competitor discovery completed', context: { action, provider: result.provider, outcome: 'completed', result_count: result.results.length } });
@@ -214,9 +234,16 @@ async function handle(request: Request): Promise<Response> {
     }
   }
   if (action === 'import_menu') {
-    if (body.authorization_confirmed !== true) return actionFailure('import_menu', 'SOURCE_AUTHORIZATION_REQUIRED', 400);
+    // Menu checks are limited to the stylist's own website, as published on their profile.
+    const { data: profileRow, error: profileError } = await db.from('mova_artist_profiles').select('website_url').eq('artist_business_id', businessId).maybeSingle();
+    if (profileError) return actionFailure('import_menu', 'PRICE_PILOT_READ_FAILED', 500);
+    const websiteHost = ownHost(profileRow?.website_url);
+    if (!websiteHost) return actionFailure('import_menu', 'OWN_WEBSITE_REQUIRED', 400);
     const url = normalizeUrl(body.url);
     if (!url) return actionFailure('import_menu', 'MENU_URL_INVALID', 400);
+    if (ownHost(url.href) !== websiteHost) return actionFailure('import_menu', 'MENU_NOT_ON_OWN_WEBSITE', 403);
+    const limited = await reserveLookup('import_menu');
+    if (limited) return limited;
     const extracted = await extractMenu(request, businessId, user.id, url);
     if (!extracted.configured) return actionFailure('import_menu', 'FIRECRAWL_NOT_CONFIGURED', 503);
     const items = extracted.items.map((item) => ({
@@ -234,10 +261,14 @@ async function handle(request: Request): Promise<Response> {
     const checkedAt = new Date().toISOString();
     const { data: source, error: sourceError } = await db.from('mova_price_pilot_sources').upsert({ artist_business_id: businessId, submitted_url: `${url.origin}${url.pathname}`, normalized_host: url.hostname, authorization_confirmed: true, status: 'active', last_checked_at: checkedAt, market_region: extracted.location?.region ?? null, market_postal_code: extracted.location?.postal_code ?? null, market_country_code: extracted.location?.country_code ?? null, market_location_expires_at: extracted.location ? new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString() : null }, { onConflict: 'artist_business_id,submitted_url' }).select('id').single();
     if (sourceError || !source) return actionFailure('import_menu', 'PRICE_PILOT_SAVE_FAILED', 500);
-    const { error: deleteError } = await db.from('mova_price_pilot_observations').delete().eq('source_id', source.id).eq('artist_business_id', businessId);
-    if (deleteError) return actionFailure('import_menu', 'PRICE_PILOT_SAVE_FAILED', 500);
-    const { error: insertError } = await db.from('mova_price_pilot_observations').insert(items.map((item) => ({ ...item, source_id: source.id, artist_business_id: businessId })));
-    if (insertError) return actionFailure('import_menu', 'PRICE_PILOT_SAVE_FAILED', 500);
+    // One transaction: the previous prices are removed only when the new ones are written.
+    const { error: replaceError } = await db.rpc('mova_price_pilot_replace_observations', {
+      p_artist_business_id: businessId, p_source_id: source.id,
+      p_rows: items.map((item) => ({ service_name: item.name, category: item.category, duration_minutes: item.duration_minutes,
+        price_min_minor: item.price_min_minor, price_max_minor: item.price_max_minor, currency: item.currency,
+        pricing_basis: item.pricing_basis, extraction_confidence: item.extraction_confidence })),
+    });
+    if (replaceError) return actionFailure('import_menu', 'PRICE_PILOT_SAVE_FAILED', 500);
     await writeSystemLog({ level: 'info', source: 'function', eventName: 'price_pilot.menu_import.completed', requestId, routeOrFunction: 'price-pilot', httpStatus: 200, userId: user.id, artistBusinessId: businessId, message: 'Authorized menu import completed', context: { action, outcome: 'completed', extraction_count: items.length } });
     return Response.json({ data: { imported: items.length } }, { headers: cors });
   }
@@ -251,6 +282,8 @@ async function handle(request: Request): Promise<Response> {
     const stylistPostal = normalizePostal(stylistAddress.postal_code);
     const stylistRegion = normalizeRegion(stylistAddress.state);
     const stylistCountry = normalizeGeoPart(stylistAddress.country_code);
+    const { data: settingsRow } = await db.from('mova_price_pilot_settings').select('radius_miles').eq('artist_business_id', businessId).maybeSingle();
+    const radius = Number(settingsRow?.radius_miles ?? 5);
     const { data, error } = await db.from('mova_price_pilot_observations').select('id,source_id,service_name,category,duration_minutes,price_min_minor,price_max_minor,currency,pricing_basis,extraction_confidence,observed_at,mova_price_pilot_sources!inner(normalized_host,submitted_url,status,market_region,market_postal_code,market_country_code,market_location_expires_at)').eq('artist_business_id', businessId).eq('mova_price_pilot_sources.status', 'active').gt('expires_at', new Date().toISOString()).order('observed_at', { ascending: false }).limit(300);
     if (error) return actionFailure('list', 'PRICE_PILOT_READ_FAILED', 500);
     const observations = (data ?? []).map((row) => {
@@ -260,11 +293,19 @@ async function handle(request: Request): Promise<Response> {
       const sourceCountry = normalizeGeoPart(source?.market_country_code);
       const countryMatches = !stylistCountry || !sourceCountry || stylistCountry === sourceCountry;
       const geoExpiry = Date.parse(String(source?.market_location_expires_at ?? ''));
-      const geographicMatch = Boolean(Number.isFinite(geoExpiry) && geoExpiry > Date.now() && stylistPostal && stylistRegion && sourcePostal && sourceRegion && stylistPostal === sourcePostal && stylistRegion === sourceRegion && countryMatches);
+      const fresh = Number.isFinite(geoExpiry) && geoExpiry > Date.now();
+      const sameRegion = Boolean(stylistRegion && sourceRegion && stylistRegion === sourceRegion && countryMatches);
+      const exactMatch = Boolean(fresh && sameRegion && stylistPostal && sourcePostal && stylistPostal === sourcePostal);
+      // Nearby ZIPs count only inside the same state or region, and only within the stylist's chosen radius.
+      const distance = fresh && sameRegion && !exactMatch && stylistPostal && sourcePostal ? zipDistanceMiles(stylistPostal, sourcePostal) : null;
+      const nearbyMatch = distance !== null && distance <= radius;
+      const geographicMatch = exactMatch || nearbyMatch;
+      const scope = exactMatch ? 'postal_code_region' : nearbyMatch ? 'nearby_postal_code' : null;
       return {
         ...row,
         geographic_match: geographicMatch,
-        geographic_match_scope: geographicMatch ? 'postal_code_region' : null,
+        geographic_match_scope: scope,
+        distance_miles: distance,
         mova_price_pilot_sources: source ? { normalized_host: source.normalized_host, submitted_url: source.submitted_url } : null,
       };
     });
@@ -273,10 +314,57 @@ async function handle(request: Request): Promise<Response> {
   }
   if (action === 'remove_source') {
     const sourceId = text(body.source_id, 50);
-    const { error } = await db.from('mova_price_pilot_sources').update({ status: 'removed' }).eq('id', sourceId).eq('artist_business_id', businessId);
+    const { data: removedRows, error } = await db.from('mova_price_pilot_sources').update({ status: 'removed' }).eq('id', sourceId).eq('artist_business_id', businessId).select('id');
     if (error) return actionFailure('remove_source', 'PRICE_PILOT_REMOVE_FAILED', 500);
+    if (!removedRows?.length) return actionFailure('remove_source', 'SOURCE_NOT_FOUND', 404);
     await db.from('mova_price_pilot_observations').delete().eq('source_id', sourceId).eq('artist_business_id', businessId);
     await writeSystemLog({ level: 'info', source: 'function', eventName: 'price_pilot.source.removed', requestId, routeOrFunction: 'price-pilot', httpStatus: 200, userId: user.id, artistBusinessId: businessId, message: 'PricePilot menu source removed', context: { action, outcome: 'completed' } });
+    return Response.json({ data: { removed: true } }, { headers: cors });
+  }
+  if (action === 'settings_get') {
+    const { data, error } = await db.from('mova_price_pilot_settings').select('radius_miles').eq('artist_business_id', businessId).maybeSingle();
+    if (error) return actionFailure(action, 'PRICE_PILOT_READ_FAILED', 500);
+    return Response.json({ data: { radius_miles: data?.radius_miles ?? 5 } }, { headers: cors });
+  }
+  if (action === 'settings_save') {
+    const radius = Number(body.radius_miles);
+    if (!Number.isInteger(radius) || radius < 1 || radius > 15) return actionFailure(action, 'RADIUS_INVALID', 400);
+    const { error } = await db.from('mova_price_pilot_settings').upsert({ artist_business_id: businessId, radius_miles: radius, updated_at: new Date().toISOString() });
+    if (error) return actionFailure(action, 'PRICE_PILOT_SAVE_FAILED', 500);
+    return Response.json({ data: { radius_miles: radius } }, { headers: cors });
+  }
+  if (action === 'plan_list') {
+    const { data, error } = await db.from('mova_price_plans')
+      .select('id,location_id,service_id,current_price_minor,target_price_minor,reference_median_minor,evidence_count,updated_at,mova_services(name),mova_locations(name)')
+      .eq('artist_business_id', businessId).order('updated_at', { ascending: false });
+    if (error) return actionFailure(action, 'PRICE_PILOT_READ_FAILED', 500);
+    return Response.json({ data: { plans: data ?? [] } }, { headers: cors });
+  }
+  if (action === 'plan_save') {
+    const uuid = (value: unknown) => typeof value === 'string' && /^[0-9a-f-]{36}$/i.test(value);
+    const minor = (value: unknown, min: number) => Number.isInteger(value) && (value as number) >= min && (value as number) <= 100000000;
+    const median = body.reference_median_minor == null ? null : minor(body.reference_median_minor, 0) ? Number(body.reference_median_minor) : undefined;
+    if (!uuid(body.location_id) || !uuid(body.service_id) || !minor(body.current_price_minor, 0) || !minor(body.target_price_minor, 1) || median === undefined) {
+      return actionFailure(action, 'PLAN_INVALID', 400);
+    }
+    const [{ data: service }, { data: location }] = await Promise.all([
+      db.from('mova_services').select('id').eq('id', body.service_id).eq('artist_business_id', businessId).maybeSingle(),
+      db.from('mova_locations').select('id').eq('id', body.location_id).eq('artist_business_id', businessId).maybeSingle(),
+    ]);
+    if (!service || !location) return actionFailure(action, 'PLAN_TARGET_NOT_FOUND', 404);
+    const { data, error } = await db.from('mova_price_plans').upsert({
+      artist_business_id: businessId, location_id: body.location_id, service_id: body.service_id,
+      current_price_minor: body.current_price_minor, target_price_minor: body.target_price_minor,
+      reference_median_minor: median, evidence_count: Number.isInteger(body.evidence_count) && (body.evidence_count as number) >= 0 ? body.evidence_count : 0,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'artist_business_id,location_id,service_id' }).select('id').single();
+    if (error || !data) return actionFailure(action, 'PRICE_PILOT_SAVE_FAILED', 500);
+    return Response.json({ data: { id: data.id } }, { headers: cors });
+  }
+  if (action === 'plan_remove') {
+    const { data, error } = await db.from('mova_price_plans').delete().eq('id', text(body.plan_id, 50)).eq('artist_business_id', businessId).select('id');
+    if (error) return actionFailure(action, 'PRICE_PILOT_REMOVE_FAILED', 500);
+    if (!data?.length) return actionFailure(action, 'PLAN_NOT_FOUND', 404);
     return Response.json({ data: { removed: true } }, { headers: cors });
   }
   return actionFailure(action || 'unknown', 'ACTION_NOT_SUPPORTED', 400);

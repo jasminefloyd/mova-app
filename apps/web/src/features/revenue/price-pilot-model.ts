@@ -1,3 +1,9 @@
+/** Exact ZIP/region match, or a nearby ZIP inside the stylist's chosen radius and the same region. */
+export type GeographicMatchScope = 'postal_code_region' | 'nearby_postal_code';
+
+/** Services count as comparable when their durations differ by at most this many minutes. */
+export const DURATION_TOLERANCE_MINUTES = 15;
+
 export type PricePilotObservation = {
   id: string;
   source_id: string;
@@ -10,7 +16,7 @@ export type PricePilotObservation = {
   extraction_confidence: number;
   observed_at: string;
   geographic_match?: boolean;
-  geographic_match_scope?: 'postal_code_region' | null;
+  geographic_match_scope?: GeographicMatchScope | null;
   mova_price_pilot_sources: { normalized_host: string; submitted_url: string };
 };
 
@@ -37,11 +43,12 @@ export function findComparableObservations(
   const targetCategory = target.category?.trim().toLocaleLowerCase() ?? '';
   const targetName = target.name.trim().toLocaleLowerCase();
   for (const item of observations) {
-    if (item.geographic_match !== true || item.geographic_match_scope !== 'postal_code_region') continue;
+    if (item.geographic_match !== true || !item.geographic_match_scope) continue;
     const category = item.category?.trim().toLocaleLowerCase() ?? '';
     const name = item.service_name.trim().toLocaleLowerCase();
     const matches = targetCategory ? category === targetCategory : name === targetName;
-    const durationMatches = target.durationMinutes === null || item.duration_minutes === target.durationMinutes;
+    const durationMatches = target.durationMinutes === null
+      || (item.duration_minutes !== null && Math.abs(item.duration_minutes - target.durationMinutes) <= DURATION_TOLERANCE_MINUTES);
     const observedAt = Date.parse(item.observed_at);
     const isRecent = Number.isFinite(observedAt) && observedAt <= now && observedAt >= now - 45 * 24 * 60 * 60 * 1000;
     if (!matches || !durationMatches || item.currency !== target.currency || item.extraction_confidence < 0.7 || !isRecent) continue;
@@ -64,6 +71,7 @@ function quantile(values: number[], q: number): number {
 /**
  * Build evidence only from recent, high-confidence, comparable observations,
  * counting at most one current observation per independent source host.
+ * Comparison uses each menu's low-end price.
  */
 export function buildPriceEvidenceDetails(
   observations: PricePilotObservation[],
@@ -72,7 +80,8 @@ export function buildPriceEvidenceDetails(
 ): PriceEvidenceDetails | null {
   const matched = findComparableObservations(observations, target, now);
   if (matched.length < 5) return null;
-  const prices = matched.map((item) => (item.price_min_minor + item.price_max_minor) / 2).sort((a, b) => a - b);
+  // Compare the stylist's price with the low end of each menu, so a "from" price is matched like for like.
+  const prices = matched.map((item) => item.price_min_minor).sort((a, b) => a - b);
   const low = Math.round(quantile(prices, 0.25));
   const median = Math.round(quantile(prices, 0.5));
   const high = Math.round(quantile(prices, 0.75));

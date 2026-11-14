@@ -14,6 +14,46 @@ const validChannel = (value: unknown): value is Channel => typeof value === 'str
 const validGoal = (value: unknown) => ['fill_opening','rebook','offer','showcase'].includes(String(value));
 const bounded = (value: unknown, max: number) => typeof value === 'string' && value.trim().length > 0 && value.length <= max;
 
+// Audience segments are fixed choices from the product decision (Nov 13). Each one narrows the consented audience.
+const segments = ['consented_clients', 'lapsed_60', 'recent_90', 'upcoming'] as const;
+type Segment = typeof segments[number];
+const validSegment = (value: unknown): value is Segment => typeof value === 'string' && (segments as readonly string[]).includes(value);
+const DAY_MS = 86_400_000;
+const APPOINTMENT_READ_LIMIT = 5000;
+
+/**
+ * Narrows consented client ids to a segment using appointment history.
+ * lapsed_60: last confirmed or completed visit more than 60 days ago, with no upcoming booking.
+ * recent_90: a confirmed or completed visit in the last 90 days.
+ * upcoming: at least one confirmed booking in the future.
+ * Throws AUDIENCE_TOO_LARGE rather than guessing when history exceeds the read limit.
+ */
+async function segmentClientIds(db: ReturnType<typeof serviceClient>, businessId: string, segment: Segment, candidateIds: string[], now: number) {
+  if (segment === 'consented_clients' || candidateIds.length === 0) return candidateIds;
+  const nowIso = new Date(now).toISOString();
+  const { data: upcoming, error: upcomingError } = await db.from('mova_appointments').select('client_id')
+    .eq('artist_business_id', businessId).eq('status', 'confirmed').gt('starts_at', nowIso).not('client_id', 'is', null).limit(APPOINTMENT_READ_LIMIT);
+  if (upcomingError) throw new Error('AUDIENCE_PREVIEW_FAILED');
+  if ((upcoming ?? []).length >= APPOINTMENT_READ_LIMIT) throw new Error('AUDIENCE_TOO_LARGE');
+  const { data: past, error: pastError } = await db.from('mova_appointments').select('client_id,starts_at')
+    .eq('artist_business_id', businessId).in('status', ['confirmed', 'completed']).lte('starts_at', nowIso)
+    .gte('starts_at', new Date(now - 730 * DAY_MS).toISOString()).not('client_id', 'is', null)
+    .order('starts_at', { ascending: false }).limit(APPOINTMENT_READ_LIMIT);
+  if (pastError) throw new Error('AUDIENCE_PREVIEW_FAILED');
+  if ((past ?? []).length >= APPOINTMENT_READ_LIMIT) throw new Error('AUDIENCE_TOO_LARGE');
+  const upcomingIds = new Set((upcoming ?? []).map((row) => row.client_id as string));
+  const lastVisit = new Map<string, number>();
+  for (const row of past ?? []) {
+    const id = row.client_id as string;
+    const time = Date.parse(row.starts_at as string);
+    if (!lastVisit.has(id) || time > (lastVisit.get(id) ?? 0)) lastVisit.set(id, time);
+  }
+  const candidates = new Set(candidateIds);
+  if (segment === 'upcoming') return candidateIds.filter((id) => upcomingIds.has(id));
+  if (segment === 'recent_90') return [...lastVisit].filter(([id, time]) => candidates.has(id) && time >= now - 90 * DAY_MS).map(([id]) => id);
+  return [...lastVisit].filter(([id, time]) => candidates.has(id) && time < now - 60 * DAY_MS && !upcomingIds.has(id)).map(([id]) => id);
+}
+
 Deno.serve(withSystemRequestLogging('marketing-campaign', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
@@ -71,13 +111,20 @@ Deno.serve(withSystemRequestLogging('marketing-campaign', async (request) => {
       pushEligibleClientIds = new Set((links ?? []).filter((link) => activeUsers.has(userByAccount.get(link.customer_account_id))).map((link) => link.client_id));
     }
     const candidateIds = pushEligibleClientIds ? ids.filter((id) => pushEligibleClientIds?.has(id)) : ids;
+    const segment: Segment = validSegment(body.segment) ? body.segment : 'consented_clients';
+    let audienceIds: string[];
+    try {
+      audienceIds = await segmentClientIds(db, actor.businessId, segment, candidateIds, Date.now());
+    } catch (segmentError) {
+      return respond({ code: segmentError instanceof Error && segmentError.message === 'AUDIENCE_TOO_LARGE' ? 'AUDIENCE_TOO_LARGE' : 'AUDIENCE_PREVIEW_FAILED' }, segmentError instanceof Error && segmentError.message === 'AUDIENCE_TOO_LARGE' ? 409 : 500);
+    }
     const { data: eligible, error: eligibilityError } = await db.rpc('mova_marketing_eligible_count', {
-      p_artist_business_id: actor.businessId, p_client_ids: candidateIds, p_channel: consentChannel, p_purpose: purpose,
+      p_artist_business_id: actor.businessId, p_client_ids: audienceIds, p_channel: consentChannel, p_purpose: purpose,
     });
     if (eligibilityError) return respond({ code: 'AUDIENCE_PREVIEW_FAILED' }, 500);
     await writeSystemLog({ level: 'info', source: 'function', eventName: 'marketing.audience.previewed', requestId: request.headers.get('x-request-id'), userId: actor.user.id, artistBusinessId: actor.businessId, message: 'Marketing audience eligibility previewed', context: { action: 'preview', result_count: eligible } });
     const reason = !platform ? 'CHANNEL_ROLLOUT_DISABLED' : eligible === 0 ? 'NO_CONSENTED_RECIPIENTS' : body.channel === 'email' ? 'EMAIL_DELIVERY_NOT_CONFIGURED' : 'PUSH_DELIVERY_NOT_CONFIGURED';
-    return respond({ channel: body.channel, eligible, considered: ids.length, capped: ids.length === 500,
+    return respond({ channel: body.channel, segment, eligible, considered: audienceIds.length, capped: ids.length === 500,
       audience: body.channel === 'email' ? 'Clients with email consent' : 'Clients with push consent', ready: false, reason });
   }
 
@@ -99,16 +146,41 @@ Deno.serve(withSystemRequestLogging('marketing-campaign', async (request) => {
       }
     }
     if (body.audience !== undefined && (!body.audience || typeof body.audience !== 'object' || Array.isArray(body.audience) || Object.keys(body.audience).some((key) => !['segment','service_id','location_id'].includes(key)) || Object.values(body.audience).some((value) => typeof value !== 'string' || value.length > 100))) return respond({ code: 'CAMPAIGN_AUDIENCE_INVALID' }, 422);
+    if (body.audience?.segment !== undefined && !validSegment(body.audience.segment)) return respond({ code: 'CAMPAIGN_AUDIENCE_INVALID' }, 422);
+    const audience = body.audience && typeof body.audience === 'object' ? body.audience : {};
+    const rows = channels.map((item) => ({ artist_business_id: actor.businessId,
+      channel: item.channel, provider: channelSpec[item.channel].provider, content: item.content, status: 'draft' }));
+    if (typeof body.id === 'string') {
+      // Editing a saved draft replaces its fields and channel content. Anything already sent or scheduled is read-only.
+      const { data: existing, error: existingError } = await db.from('mova_marketing_campaigns').update({
+        name, goal: body.goal, audience, updated_at: new Date().toISOString(),
+      }).eq('artist_business_id', actor.businessId).eq('id', body.id).eq('status', 'draft').select('id,name,goal,status,created_at').maybeSingle();
+      if (existingError || !existing) return respond({ code: 'CAMPAIGN_NOT_EDITABLE' }, 409);
+      const { error: deleteError } = await db.from('mova_marketing_campaign_channels').delete().eq('campaign_id', existing.id).eq('artist_business_id', actor.businessId);
+      if (deleteError) return respond({ code: 'CAMPAIGN_SAVE_FAILED' }, 500);
+      const { error: replaceError } = await db.from('mova_marketing_campaign_channels').insert(rows.map((row) => ({ ...row, campaign_id: existing.id })));
+      if (replaceError) return respond({ code: 'CAMPAIGN_SAVE_FAILED' }, 500);
+      await writeSystemLog({ level: 'info', source: 'function', eventName: 'marketing.campaign.draft_updated', requestId: request.headers.get('x-request-id'), userId: actor.user.id, artistBusinessId: actor.businessId, message: 'Marketing campaign draft updated' });
+      return respond({ campaign: existing });
+    }
     const { data: campaign, error } = await db.from('mova_marketing_campaigns').insert({
       artist_business_id: actor.businessId, created_by: actor.user.id, name, goal: body.goal,
-      audience: body.audience && typeof body.audience === 'object' ? body.audience : {}, status: 'draft',
+      audience, status: 'draft',
     }).select('id,name,goal,status,created_at').single();
     if (error || !campaign) return respond({ code: 'CAMPAIGN_SAVE_FAILED' }, 500);
-    const rows = channels.map((item) => ({ campaign_id: campaign.id, artist_business_id: actor.businessId,
-      channel: item.channel, provider: channelSpec[item.channel].provider, content: item.content, status: 'draft' }));
-    const { error: channelError } = await db.from('mova_marketing_campaign_channels').insert(rows);
+    const insertRows = rows.map((row) => ({ ...row, campaign_id: campaign.id }));
+    const { error: channelError } = await db.from('mova_marketing_campaign_channels').insert(insertRows);
     if (channelError) { await db.from('mova_marketing_campaigns').delete().eq('id', campaign.id).eq('artist_business_id', actor.businessId); return respond({ code: 'CAMPAIGN_SAVE_FAILED' }, 500); }
     await writeSystemLog({ level: 'info', source: 'function', eventName: 'marketing.campaign.draft_created', requestId: request.headers.get('x-request-id'), userId: actor.user.id, artistBusinessId: actor.businessId, message: 'Marketing campaign draft created', context: { action: 'create', outcome: 'draft' } });
+    return respond({ campaign });
+  }
+
+  if (body.action === 'get') {
+    if (typeof body.id !== 'string') return respond({ code: 'CAMPAIGN_ID_REQUIRED' }, 422);
+    const { data: campaign, error } = await db.from('mova_marketing_campaigns')
+      .select('id,name,goal,status,audience,created_at,mova_marketing_campaign_channels(channel,content,status)')
+      .eq('artist_business_id', actor.businessId).eq('id', body.id).maybeSingle();
+    if (error || !campaign) return respond({ code: 'CAMPAIGN_NOT_FOUND' }, 404);
     return respond({ campaign });
   }
 
