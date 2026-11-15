@@ -411,3 +411,7 @@ Implemented the direct CAL UI fixes and owner decisions: Calendar now has Day, h
 ## 2026-11-14 marketing and Concierge rollout
 
 Applied migration 0096 individually through the Supabase Management API (production history version `20261115014722`) for location booking closeout, followed by 0097 (history version `20261115014735`) for separate rebooking reminders and stylist-level opt-in autopilot defaults. Migration 0097 disabled autopilot for any stylist that had it enabled; the global emergency pause remains separate. Deployed the changed `marketing-campaign` and `revenue-center` Edge Functions. The web build and locale check passed; 9 focused E2E cases passed across Marketing, autopilot/win-back and Concierge setup/inbox. GitHub commit and Vercel production deployment are pending in this rollout.
+
+## 2026-11-14 QA Run 2 follow-up
+
+Fixed the issues found when re-testing 9cb554a: the booking request screen now shows the decline confirmation sheet (Decline previously did nothing there); the public profile shows the bio on both tabs, so stylists without looks keep their bio; fully booked days are listed again as disabled "Full" days in the booking day picker, and the no-times state still appears when no day has openings; the new-location rules tests now enter owner hours explicitly and assert that defaults start empty. Unit tests (360) and the web build pass. Calendar redesign boards C0–C6 are on the design canvas; the calendar layout itself is not changed in code yet.

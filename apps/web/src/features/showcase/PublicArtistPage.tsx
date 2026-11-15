@@ -103,7 +103,7 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
       <p className="mova-public-artist__specialties">{artist.profile.specialties.join(' · ')}{artist.profile.specialties.length > 0 && reputation && ' · '}{reputation}</p>
       {locationsLabel && <p className="mova-public-artist__location"><Icon name="location" size={24}/><span>{locationsLabel}</span></p>}
       {artist.profile.cover_source === 'unsplash' && artist.profile.cover_credit_name && artist.profile.cover_credit_url && artist.profile.cover_unsplash_url && <p className="mova-public-artist__cover-credit">{t('coverPicker.photoCredit')} <a href={artist.profile.cover_credit_url} target="_blank" rel="noopener noreferrer">{artist.profile.cover_credit_name}</a> / <a href={artist.profile.cover_unsplash_url} target="_blank" rel="noopener noreferrer">{t('coverPicker.unsplash')}</a></p>}
-      {tab === 'looks' && artist.profile.bio && <p className="mova-public-artist__bio">{artist.profile.bio}</p>}
+      {artist.profile.bio && <p className="mova-public-artist__bio">{artist.profile.bio}</p>}
       <span role="status" className="sr-only">{shareCopied ? t('identity.linkCopied') : ''}</span>
     </section>
     {!preview && !artist.bookable && <Card tone="warm" className="mova-public-artist__booking-unavailable"><p>{t('showcase.bookingUnavailable')}</p></Card>}

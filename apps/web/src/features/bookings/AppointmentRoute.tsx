@@ -69,6 +69,7 @@ export function AppointmentRoute(){
       {error&&<p className="mova-booking-request__error" role="alert">{t('appointmentDetail.actionError')}</p>}
     </div>
     <footer className="mova-booking-request__actions"><Button loading={busy} type="button" onClick={()=>void action('confirmed')}>{t('booking.acceptAt',{time:fmt(booking.starts_at,{hour:'numeric',minute:'2-digit'})})}</Button><div><Button variant="secondary" loading={busy} type="button" onClick={()=>void loadSuggestionSlots()}>{t('booking.suggestTime')}</Button><Button className="mova-booking-request__decline" variant="secondary" loading={busy} type="button" onClick={()=>setConfirmDecline(true)}>{t('booking.declineShort')}</Button></div></footer>
+    <Sheet open={confirmDecline} title={t('booking.declineConfirmTitle')} closeLabel={t('booking.keepRequest')} onClose={()=>setConfirmDecline(false)}><p>{t('booking.declineConfirmBody')}</p><div className="mova-actions"><Button variant="secondary" type="button" onClick={()=>setConfirmDecline(false)}>{t('booking.keepRequest')}</Button><Button variant="destructive" loading={busy} type="button" onClick={()=>{setConfirmDecline(false);void action('declined');}}>{t('booking.confirmDecline')}</Button></div></Sheet>
   </main>;
   return <main className="mova-page mova-appointment-detail">
     <ScreenHeader title={t('appointmentDetail.title')} backLabel={t('appointmentDetail.back')} onBack={()=>navigate(operatorUrl(businessId,''))} trailing={<IconButton label={t('appointmentDetail.more')} icon="more" disabled/>}/>

@@ -5,10 +5,21 @@ import {
   type NewClientDraft, type NewLocationDraft,
 } from './rules';
 
-const location = (patch: Partial<NewLocationDraft> = {}): NewLocationDraft => ({ ...newLocationDefaults('America/New_York'), kind: 'suite', name: 'Studio 9 Suites', address: '210 Main St, Suite 4', ...patch });
+const ownerHours = { opens: '09:00', closes: '17:00' };
+const location = (patch: Partial<NewLocationDraft> = {}): NewLocationDraft => ({
+  ...newLocationDefaults('America/New_York'), kind: 'suite', name: 'Studio 9 Suites', address: '210 Main St, Suite 4',
+  weekdays: [2, 4, 5], hoursByWeekday: { 2: ownerHours, 4: ownerHours, 5: ownerHours }, ...patch,
+});
 
 describe('New location validation (board 19a)', () => {
-  it('TC-SCR-19A-02 accepts a complete suite with the board defaults', () => {
+  it('TC-SCR-19A-01 starts with no working days or hours, so owners enter their own', () => {
+    const defaults = newLocationDefaults('America/New_York');
+    expect(defaults.weekdays).toEqual([]);
+    expect(defaults.hoursByWeekday).toEqual({});
+    expect(validateNewLocation({ ...defaults, kind: 'suite', name: 'Studio 9 Suites', address: '210 Main St, Suite 4' })).toEqual({ weekdays: true });
+  });
+
+  it('TC-SCR-19A-02 accepts a complete suite once working days and hours are entered', () => {
     expect(validateNewLocation(location())).toEqual({});
   });
 
