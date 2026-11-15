@@ -37,12 +37,12 @@ export type NewLocationDraft = {
 
 export type NewLocationField = 'kind' | 'name' | 'address' | 'timeZone' | 'weekdays' | 'hours';
 
-// Board 19a starts with Tuesday, Thursday and Friday ticked, 9 to 5, 15 min buffer, 12 h notice, 8 weeks ahead.
+// Owners enter their own working days and hours; location availability is never prefilled.
 export function newLocationDefaults(timeZone: string): NewLocationDraft {
   return {
     kind: '', name: '', address: '', timeZone,
     mode: 'instant', collector: 'artist',
-    weekdays: [2, 4, 5], hoursByWeekday: { 2: { opens: '09:00', closes: '17:00' }, 4: { opens: '09:00', closes: '17:00' }, 5: { opens: '09:00', closes: '17:00' } },
+    weekdays: [], hoursByWeekday: {},
     bufferMinutes: 15, noticeHours: 12, bookAheadWeeks: 8,
   };
 }

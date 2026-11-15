@@ -4,6 +4,7 @@ const businessId = 'e2500000-0000-4000-8000-000000000001';
 const locationId = 'e2500000-0000-4000-8000-000000000050';
 const serviceId = 'e2500000-0000-4000-8000-000000000301';
 const userId = 'e2500000-0000-4000-8000-000000000777';
+const projectRef = new URL(process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321').hostname.split('.')[0] ?? '127';
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, x-mova-artist-business-id, prefer, accept-profile, content-profile',
@@ -14,7 +15,7 @@ const cors = {
 test('new stylist can complete onboarding through the shared service and location editors', async ({ page }) => {
   const user = { id: userId, aud: 'authenticated', role: 'authenticated', email: 'hello+qatest3@move-beauty.co', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: {}, created_at: '2026-01-01T00:00:00.000Z' };
   const session = { access_token: 'onboarding-test-token', token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'onboarding-test-refresh', user };
-  await page.addInitScript((value) => localStorage.setItem('sb-127-auth-token', JSON.stringify(value)), session);
+  await page.addInitScript(({ key, value }) => localStorage.setItem(key, JSON.stringify(value)), { key: `sb-${projectRef}-auth-token`, value: session });
 
   let claimed = false;
   let profile = { display_name: '', handle: '', bio: '', specialties: [] as string[], preferred_locale: 'en-US', search_index_enabled: true };
@@ -100,6 +101,9 @@ test('new stylist can complete onboarding through the shared service and locatio
   await page.getByLabel('Your link').fill('rooted-beauty-qa');
   await page.getByLabel('Add a specialty').fill('Silk press');
   await page.getByRole('button', { name: 'Add', exact: true }).click();
+  const specialtyChip = page.getByRole('button', { name: 'Silk press ×' });
+  await expect(specialtyChip).toBeVisible();
+  expect(await specialtyChip.evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
   await page.getByLabel('About you').fill('Healthy hair and protective styles.');
   await expect(page.getByRole('button', { name: 'Continue' })).toBeEnabled();
   await page.getByRole('button', { name: 'Continue' }).click();

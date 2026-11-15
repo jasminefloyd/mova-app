@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, ClientCard, ErrorState, Sheet, StatusChip } from '../../components';
+import { Button, Card, ClientCard, EmptyState, ErrorState, Sheet, StatusChip } from '../../components';
 import { clientProfilesEnabled, publicEnv } from '../../lib/env';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import { QrCode } from '../identity/QrCode';
@@ -26,6 +26,7 @@ export function BookingManageRoute() {
   const [selected, setSelected] = useState<Slot | null>(null);
   const [showReschedule, setShowReschedule] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [rescheduleMessage, setRescheduleMessage] = useState('');
   const [clientCardUrl, setClientCardUrl] = useState('');
   const groupedDays = useMemo(() => [...new Set(slots.map((slot) => slot.local_date))], [slots]);
 
@@ -82,6 +83,7 @@ export function BookingManageRoute() {
 
   const chooseReschedule = async () => {
     if (!booking) return;
+    setRescheduleMessage('');
     setBusy(true);
     try {
       const fromDate = new Intl.DateTimeFormat('en-CA', { timeZone: booking.location?.time_zone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
@@ -104,6 +106,13 @@ export function BookingManageRoute() {
         method: 'POST', headers: { 'Content-Type': 'application/json', apikey: publicEnv.VITE_SUPABASE_ANON_KEY ?? '', 'Idempotency-Key': crypto.randomUUID() },
         body: JSON.stringify({ token, new_starts_at: selected.starts_at }),
       });
+      const body = await response.json().catch(() => null);
+      if (!response.ok && body?.data?.code === 'SLOT_TAKEN') {
+        setSelected(null);
+        await chooseReschedule();
+        setRescheduleMessage(t('booking.slotTaken'));
+        return;
+      }
       if (!response.ok) throw new Error();
       setShowReschedule(false);
       setSelected(null);
@@ -159,7 +168,8 @@ export function BookingManageRoute() {
       {booking.status === 'confirmed' && !policyAllowsChange && <p role="note">{t('booking.changeWindowClosed')}</p>}
       {showReschedule && <section>
         <h2>{t('booking.chooseTime')}</h2>
-        {groupedDays.map((date) => <div key={date}><h3>{date}</h3><div className="mova-time-options">{slots.filter((slot) => slot.local_date === date).map((slot) => <button className="mova-chip" key={slot.starts_at} aria-pressed={selected?.starts_at === slot.starts_at} type="button" onClick={() => setSelected(slot)}>{slot.local_time} {slot.utc_offset} {slot.booking_mode === 'request' ? t('booking.mode.request') : ''}</button>)}</div></div>)}
+        {rescheduleMessage&&<p role="status" className="mova-field__hint">{rescheduleMessage}</p>}
+        {groupedDays.length===0?<EmptyState title={t('booking.noTimesTitle')} detail={t('booking.noTimesDetail')}/>:groupedDays.map((date) => <div key={date}><h3>{new Intl.DateTimeFormat(i18n.resolvedLanguage,{weekday:'long',month:'long',day:'numeric',timeZone:'UTC'}).format(new Date(`${date}T12:00:00Z`))}</h3><div className="mova-time-options">{slots.filter((slot) => slot.local_date === date).map((slot) => <button className="mova-chip" key={slot.starts_at} aria-pressed={selected?.starts_at === slot.starts_at} type="button" onClick={() => setSelected(slot)}>{new Intl.DateTimeFormat(i18n.resolvedLanguage,{hour:'numeric',minute:'2-digit',timeZone:booking.location?.time_zone}).format(new Date(slot.starts_at))} {slot.booking_mode === 'request' ? t('booking.mode.request') : ''}</button>)}</div></div>)}
         {selected && <Button loading={busy} type="button" onClick={() => void reschedule()}>{t('booking.submitReschedule')}</Button>}
       </section>}
       {['pending_artist', 'pending_payment'].includes(booking.status) && <Button type="button" variant="destructive" loading={busy} onClick={() => setConfirmCancel(true)}>{t('booking.cancel')}</Button>}

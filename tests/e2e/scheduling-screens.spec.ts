@@ -187,7 +187,9 @@ test('TC-SCR-43-01 Teach your concierge saves a permission from its toggle', asy
   const sent: Recorded[] = [];
   await functionMock(page, 'concierge-artist', (body) => body.action === 'save-settings'
     ? { settings: {}, enabled: false }
-    : { settings: { enabled: false, globally_paused: true, channels: {}, permissions: { answer: true, book_instant: false, request_salon: false, reschedule: false } }, conversations: [], handoffs: [], knowledge: [], aiEnabled: false }, sent);
+    : body.action === 'save-knowledge'
+      ? { knowledge: { id: 'knowledge-1', kind: 'faq', question: 'Do you offer silk press?', answer_en: 'Yes, book a consultation first.', answer_es: null, status: 'draft' } }
+      : { settings: { enabled: false, globally_paused: true, channels: {}, permissions: { answer: true, book_instant: false, request_salon: false, reschedule: false } }, conversations: [], handoffs: [], knowledge: [], aiEnabled: false }, sent);
   await page.goto('/BID-1/growth/concierge/setup');
   await expect(page.getByRole('heading', { level: 1, name: 'Teach your concierge' })).toBeVisible();
   await expect(page.getByText("It always says it's your AI assistant.")).toBeVisible();
@@ -195,4 +197,33 @@ test('TC-SCR-43-01 Teach your concierge saves a permission from its toggle', asy
   await page.getByRole('switch', { name: 'Reschedule within your policy' }).click();
   await expect.poll(() => sent.filter((item) => (item.body as { action?: string }).action === 'save-settings').length).toBe(1);
   expect(sent.find((item) => (item.body as { action?: string }).action === 'save-settings')?.body).toMatchObject({ action: 'save-settings', permissions: expect.objectContaining({ reschedule: true, answer: true }) });
+  await expect(page.getByRole('switch', { name: 'Reschedule within your policy' })).toBeEnabled();
+  await page.getByRole('button', { name: /FAQs & how to prep/ }).click();
+  const permissionRow = page.locator('label.mova-toggle', { hasText: 'Reschedule within your policy' });
+  expect((await permissionRow.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+  await page.getByRole('textbox', { name: 'Question' }).fill('Do you offer silk press?');
+  await page.locator('main.mova-page textarea').nth(0).fill('Yes, book a consultation first.');
+  const saveAnswer = page.getByRole('button', { name: 'Save information' });
+  expect((await saveAnswer.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+  await saveAnswer.click();
+  await expect.poll(() => sent.filter((item) => (item.body as { action?: string }).action === 'save-knowledge').length).toBe(1);
+  expect(sent.find((item) => (item.body as { action?: string }).action === 'save-knowledge')?.body).toMatchObject({ action: 'save-knowledge', question: 'Do you offer silk press?', answer_en: 'Yes, book a consultation first.' });
+});
+
+test('TC-AI-09 Concierge labels web chat and open conversations, then pauses every reply', async ({ page }) => {
+  await openOperatorPage(page, '/');
+  const sent: Recorded[] = [];
+  let paused = false;
+  await functionMock(page, 'concierge-artist', (body) => {
+    if (body.action === 'pause') { paused = true; return { paused: true }; }
+    return { settings: { enabled: !paused, globally_paused: paused, channels: {}, permissions: {} }, conversations: [{ id: 'conversation-1', channel: 'web_chat', client_id: clientId, locale: 'en-US', status: 'open', last_message_at: new Date().toISOString(), mova_clients: { display_name: 'Simone A.' } }], handoffs: [], knowledge: [], metrics: {}, aiEnabled: !paused };
+  }, sent);
+  await page.goto('/BID-1/growth/concierge');
+  await expect(page.getByText(/Web chat · Open/)).toBeVisible();
+  const pauseButton = page.getByRole('button', { name: 'Pause the concierge' });
+  expect((await pauseButton.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+  await pauseButton.click();
+  await expect.poll(() => sent.some((item) => (item.body as { action?: string }).action === 'pause')).toBe(true);
+  await expect(page.getByText('Paused · AI replies wait for approval')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Paused · AI replies wait for approval' })).toBeDisabled();
 });

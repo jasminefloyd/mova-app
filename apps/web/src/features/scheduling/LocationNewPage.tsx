@@ -99,15 +99,15 @@ export function LocationNewPage() {
   const update = <K extends keyof NewLocationDraft>(key: K, value: NewLocationDraft[K]) => setDraft((current) => ({ ...current, [key]: value }));
   const toggleDay = (weekday: number) => setDraft((current) => {
     const removing = current.weekdays.includes(weekday);
-    const primary = current.hoursByWeekday[current.weekdays[0] ?? weekday] ?? { opens: '09:00', closes: '17:00' };
+    const primary = current.hoursByWeekday[current.weekdays[0] ?? weekday] ?? { opens: '', closes: '' };
     return {
       ...current,
       weekdays: removing ? current.weekdays.filter((day) => day !== weekday) : [...current.weekdays, weekday],
-      hoursByWeekday: removing ? current.hoursByWeekday : { ...current.hoursByWeekday, [weekday]: differentHours ? { opens: '09:00', closes: '17:00' } : primary },
+      hoursByWeekday: removing ? current.hoursByWeekday : { ...current.hoursByWeekday, [weekday]: differentHours ? { opens: '', closes: '' } : primary },
     };
   });
   const updateDayHours = (weekday: number, key: 'opens' | 'closes', value: string) => setDraft((current) => {
-    const hours = current.hoursByWeekday[weekday] ?? { opens: '09:00', closes: '17:00' };
+    const hours = current.hoursByWeekday[weekday] ?? { opens: '', closes: '' };
     const nextHours = { ...hours, [key]: value };
     const selected = differentHours ? [weekday] : current.weekdays;
     return { ...current, hoursByWeekday: { ...current.hoursByWeekday, ...Object.fromEntries(selected.map((day) => [day, nextHours])) } };
@@ -115,7 +115,7 @@ export function LocationNewPage() {
   const toggleDifferentHours = () => {
     setDraft((current) => {
       if (differentHours) {
-        const first = current.hoursByWeekday[current.weekdays[0] ?? 0] ?? { opens: '09:00', closes: '17:00' };
+        const first = current.hoursByWeekday[current.weekdays[0] ?? 0] ?? { opens: '', closes: '' };
         return { ...current, hoursByWeekday: { ...current.hoursByWeekday, ...Object.fromEntries(current.weekdays.map((day) => [day, first])) } };
       }
       return current;
@@ -157,7 +157,7 @@ export function LocationNewPage() {
   const weeks = (value: number) => t('scheduling.weeksShort', { count: value });
   const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
 
-  const primaryHours = draft.hoursByWeekday[draft.weekdays[0] ?? 0] ?? { opens: '09:00', closes: '17:00' };
+  const primaryHours = draft.hoursByWeekday[draft.weekdays[0] ?? 0] ?? { opens: '', closes: '' };
   return <main className="mova-page mova-scheduling mova-scheduling--screen mova-location-new">
     <ScreenHeader title={t(locationId ? 'scheduling.locationNew.editTitle' : 'scheduling.locationNew.title')} onBack={() => navigate(backTo)} backLabel={t('scheduling.locationNew.back')} />
     <h1 className="mova-location-new__title">{t('scheduling.locationNew.heading')}</h1>
@@ -205,12 +205,13 @@ export function LocationNewPage() {
         <div className="mova-scheduling__days" role="group" aria-label={t('scheduling.locationNew.daysLabel')}>
           {dayNames.map((name, weekday) => <button key={name} type="button" className="mova-scheduling__day" aria-pressed={draft.weekdays.includes(weekday)} aria-label={t(`scheduling.days.${name}`)} onClick={() => toggleDay(weekday)}>{t(`scheduling.daysShort.${name}`)}</button>)}
         </div>
+        {draft.weekdays.length === 0 && <p className="mova-field__hint">{t('scheduling.locationNew.hoursHint')}</p>}
         {errors.weekdays && <p className="mova-field__error" role="alert">{fieldError('weekdays')}</p>}
-        {!differentHours && <div className="mova-form-grid mova-location-new__shared-hours">
+        {!differentHours && draft.weekdays.length > 0 && <div className="mova-form-grid mova-location-new__shared-hours">
           <TextField label={t('scheduling.locationNew.opens')} type="time" value={primaryHours.opens} onChange={(event) => updateDayHours(draft.weekdays[0] ?? 0, 'opens', event.target.value)} />
           <TextField label={t('scheduling.locationNew.closes')} type="time" value={primaryHours.closes} onChange={(event) => updateDayHours(draft.weekdays[0] ?? 0, 'closes', event.target.value)} />
         </div>}
-        {differentHours && draft.weekdays.slice().sort((a, b) => a - b).map((weekday) => <div key={weekday} className="mova-location-new__day-hours"><strong>{t(`scheduling.days.${dayNames[weekday]}`)}</strong><div className="mova-form-grid"><TextField label={t('scheduling.locationNew.opens')} type="time" value={draft.hoursByWeekday[weekday]?.opens ?? '09:00'} onChange={(event) => updateDayHours(weekday, 'opens', event.target.value)} /><TextField label={t('scheduling.locationNew.closes')} type="time" value={draft.hoursByWeekday[weekday]?.closes ?? '17:00'} onChange={(event) => updateDayHours(weekday, 'closes', event.target.value)} /></div></div>)}
+        {differentHours && draft.weekdays.slice().sort((a, b) => a - b).map((weekday) => <div key={weekday} className="mova-location-new__day-hours"><strong>{t(`scheduling.days.${dayNames[weekday]}`)}</strong><div className="mova-form-grid"><TextField label={t('scheduling.locationNew.opens')} type="time" value={draft.hoursByWeekday[weekday]?.opens ?? ''} onChange={(event) => updateDayHours(weekday, 'opens', event.target.value)} /><TextField label={t('scheduling.locationNew.closes')} type="time" value={draft.hoursByWeekday[weekday]?.closes ?? ''} onChange={(event) => updateDayHours(weekday, 'closes', event.target.value)} /></div></div>)}
         <button type="button" className="mova-scheduling__inline-link mova-location-new__different-hours" aria-expanded={differentHours} onClick={toggleDifferentHours}>{t(differentHours ? 'scheduling.locationNew.sameHours' : 'scheduling.locationNew.differentHours')}</button>
         {errors.hours && <p className="mova-field__error" role="alert">{fieldError('hours')}</p>}
       </fieldset>

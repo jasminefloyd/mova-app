@@ -2,6 +2,7 @@ import { withSystemRequestLogging, writeSystemLog } from '../_shared/system-log.
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
+import { estimateCadence, rebookingWindow } from '../../../packages/domain/src/rebooking.ts';
 
 const channelSpec = {
   email: { feature: 'marketing_email', platform: 'marketing_email', provider: 'resend' },
@@ -11,11 +12,11 @@ const channelSpec = {
 } as const;
 type Channel = keyof typeof channelSpec;
 const validChannel = (value: unknown): value is Channel => typeof value === 'string' && value in channelSpec;
-const validGoal = (value: unknown) => ['fill_opening','rebook','offer','showcase'].includes(String(value));
+const validGoal = (value: unknown) => ['fill_opening','rebook','rebooking_reminder','offer','showcase'].includes(String(value));
 const bounded = (value: unknown, max: number) => typeof value === 'string' && value.trim().length > 0 && value.length <= max;
 
 // Audience segments are fixed choices from the product decision (Nov 13). Each one narrows the consented audience.
-const segments = ['consented_clients', 'lapsed_60', 'recent_90', 'recent_180', 'booked_service', 'upcoming'] as const;
+const segments = ['consented_clients', 'lapsed_60', 'recent_90', 'recent_180', 'booked_service', 'upcoming', 'due_rebook'] as const;
 type Segment = typeof segments[number];
 const validSegment = (value: unknown): value is Segment => typeof value === 'string' && (segments as readonly string[]).includes(value);
 const DAY_MS = 86_400_000;
@@ -27,6 +28,7 @@ const APPOINTMENT_READ_LIMIT = 5000;
  * recent_90 / recent_180: a confirmed or completed visit in the last 90 / 180 days.
  * booked_service: a confirmed or completed visit for the selected service.
  * upcoming: at least one confirmed booking in the future.
+ * due_rebook: an opted-in client with a computed return window starting in the next 7 days.
  * Throws AUDIENCE_TOO_LARGE rather than guessing when history exceeds the read limit.
  */
 async function segmentClientIds(db: ReturnType<typeof serviceClient>, businessId: string, segment: Segment, candidateIds: string[], now: number, serviceId?: string) {
@@ -37,7 +39,7 @@ async function segmentClientIds(db: ReturnType<typeof serviceClient>, businessId
     .eq('artist_business_id', businessId).eq('status', 'confirmed').gt('starts_at', nowIso).not('client_id', 'is', null).limit(APPOINTMENT_READ_LIMIT);
   if (upcomingError) throw new Error('AUDIENCE_PREVIEW_FAILED');
   if ((upcoming ?? []).length >= APPOINTMENT_READ_LIMIT) throw new Error('AUDIENCE_TOO_LARGE');
-  const { data: past, error: pastError } = await db.from('mova_appointments').select('client_id,starts_at,service_id')
+  const { data: past, error: pastError } = await db.from('mova_appointments').select('client_id,starts_at,service_id,status')
     .eq('artist_business_id', businessId).in('status', ['confirmed', 'completed']).lte('starts_at', nowIso)
     .gte('starts_at', new Date(now - 730 * DAY_MS).toISOString()).not('client_id', 'is', null)
     .order('starts_at', { ascending: false }).limit(APPOINTMENT_READ_LIMIT);
@@ -52,6 +54,22 @@ async function segmentClientIds(db: ReturnType<typeof serviceClient>, businessId
   }
   const candidates = new Set(candidateIds);
   if (segment === 'upcoming') return candidateIds.filter((id) => upcomingIds.has(id));
+  if (segment === 'due_rebook') {
+    const history = new Map<string, string[]>();
+    for (const row of past ?? []) {
+      if (row.status !== 'completed' || !row.client_id || !row.service_id) continue;
+      const key = `${row.client_id}:${row.service_id}`;
+      history.set(key, [...(history.get(key) ?? []), row.starts_at as string]);
+    }
+    const dueIds = new Set<string>();
+    const through = now + 7 * DAY_MS;
+    for (const [key, visits] of history) {
+      const lastVisit = visits.reduce((latest, visit) => Date.parse(visit) > Date.parse(latest) ? visit : latest);
+      const { dueAt } = rebookingWindow(lastVisit, estimateCadence(visits));
+      if (Date.parse(dueAt) >= now && Date.parse(dueAt) <= through) dueIds.add(key.split(':')[0]!);
+    }
+    return candidateIds.filter((id) => dueIds.has(id) && !upcomingIds.has(id));
+  }
   if (segment === 'booked_service') return [...new Set((past ?? []).filter((row) => row.service_id === serviceId).map((row) => row.client_id as string))].filter((id) => candidates.has(id));
   if (segment === 'recent_90') return [...lastVisit].filter(([id, time]) => candidates.has(id) && time >= now - 90 * DAY_MS).map(([id]) => id);
   if (segment === 'recent_180') return [...lastVisit].filter(([id, time]) => candidates.has(id) && time >= now - 180 * DAY_MS).map(([id]) => id);
@@ -88,7 +106,7 @@ Deno.serve(withSystemRequestLogging('marketing-campaign', async (request) => {
     const platform = await platformSwitchEnabled(channelSpec[body.channel].platform);
     if (body.channel === 'social') return respond({ channel: body.channel, eligible: null, audience: 'Public followers', ready: false, reason: 'SOCIAL_CONNECTION_NOT_CONFIGURED' });
     if (body.channel === 'wallet') return respond({ channel: body.channel, eligible: null, audience: 'Clients with an eligible saved pass', ready: false, reason: 'WALLET_PROVIDER_NOT_CONFIGURED' });
-    const purpose = body.goal === 'rebook' ? 'rebooking_reminders' : 'offers';
+    const purpose = ['rebook', 'rebooking_reminder'].includes(String(body.goal)) ? 'rebooking_reminders' : 'offers';
     const consentChannel = body.channel === 'web_push' ? 'push' : 'email';
     const { data: clients, error } = await db.from('mova_clients').select('id,email_normalized,marketing_opted_out')
       .eq('artist_business_id', actor.businessId).eq('marketing_opted_out', false).limit(500);

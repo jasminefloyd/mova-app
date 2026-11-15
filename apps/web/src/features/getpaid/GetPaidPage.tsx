@@ -24,7 +24,8 @@ export function GetPaidPage(){
   useEffect(()=>{void load();},[load]);
   const balance=appointment?.balance_due_minor??0;const amountMinor=useMemo(()=>/^\d+(\.\d{1,2})?$/.test(amount)?Math.round(Number(amount)*100):0,[amount]);
   const currency=(minor:number)=>new Intl.NumberFormat(i18n.resolvedLanguage,{style:'currency',currency:'USD'}).format(minor/100);
-  const availableMethods:Method[]=['card',...(settings.cash_enabled?['cash' as const]:[]),...(settings.other_enabled?['other' as const]:[])];
+  const availableMethods:Method[]=[...(collector==='artist'?['card' as const]:[]),...(settings.cash_enabled?['cash' as const]:[]),...(settings.other_enabled?['other' as const]:[])];
+  useEffect(()=>{if(collector==='salon'&&method==='card')setMethod(settings.cash_enabled?'cash':settings.other_enabled?'other':'cash');},[collector,method,settings.cash_enabled,settings.other_enabled]);
   const save=async()=>{if(!client||!businessId||!appointment||amountMinor<=0)return;setBusy(true);setError(false);try{const{data:{session}}=await client.auth.getSession();const response=await fetch(endpoint('manual-payment-record'),{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${session?.access_token??''}`,'x-mova-artist-business-id':businessId,'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify({appointment_id:appointment.id,method:method==='card'?'card_checkout':method,amount_minor:amountMinor,collector,recorded_method_label:method==='other'?otherLabel.trim():undefined})});const payload=await response.json();if(!response.ok)throw new Error(payload.error?.code??'PAYMENT_RECORD_FAILED');back();}catch{setError(true);}finally{setBusy(false);}};
   return <main className="mova-page mova-get-paid">
     <header className="mova-get-paid__header"><h1>{t('money.getPaid')}</h1><IconButton label={t('money.close')} icon="close" onClick={back}/></header>

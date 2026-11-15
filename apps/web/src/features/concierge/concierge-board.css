@@ -5,7 +5,7 @@
 
 .mova-concierge-board__teach {
   display: inline-flex;
-  min-height: 40px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--line-control);
@@ -36,7 +36,7 @@
   display: inline-flex;
   width: max-content;
   max-width: 100%;
-  min-height: 24px;
+  min-height: 44px;
   align-items: center;
   gap: 6px;
   border-radius: var(--radius-pill);
@@ -148,11 +148,11 @@
 .mova-concierge-handoff__copy strong { color: var(--forest); font-size: var(--fs-body-s); line-height: 1.3; }
 .mova-concierge-handoff__copy small { color: var(--ink-secondary); font-size: var(--fs-micro); line-height: 1.35; }
 
-.mova-concierge-handoff__next { display: grid; width: 28px; height: 36px; place-items: center; color: var(--forest); }
+.mova-concierge-handoff__next { display: grid; width: 44px; height: 44px; place-items: center; color: var(--forest); }
 
 .mova-concierge-decide {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 44px;
   align-items: center;
   border-radius: var(--radius-pill);
   padding: 0 14px;
@@ -239,7 +239,7 @@
 .mova-concierge-board__rows .mova-toggle {
   display: flex;
   width: 100%;
-  min-height: 49px;
+  min-height: 56px;
   justify-content: space-between;
   gap: var(--space-3);
   border-bottom: 1px solid var(--line-subtle);
@@ -254,6 +254,9 @@
 .mova-concierge-board__rows .mova-toggle input:checked + .mova-toggle__track span { transform: translateX(16px); }
 
 .mova-concierge-board__fixed--locked > span:last-child { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-secondary); font-weight: 700; white-space: nowrap; }
+
+.mova-concierge-board__fixed { min-height: 52px; }
+.mova-concierge-board__channel { min-height: 52px; }
 
 .mova-concierge-board__knowledge-link { cursor: pointer; }
 .mova-concierge-board__knowledge-link:hover { color: var(--forest); }

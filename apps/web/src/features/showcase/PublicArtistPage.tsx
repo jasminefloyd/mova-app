@@ -24,8 +24,9 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
   const navigate = useNavigate();
   const locale = params.get('locale') === 'es-US' ? 'es-US' : params.get('locale') === 'en-US' ? 'en-US' : initialLocale ?? (i18n.resolvedLanguage === 'es-US' ? 'es-US' : 'en-US');
   const t = i18n.getFixedT(locale);
-  const tab = params.get('tab') === 'services' ? 'services' : 'looks';
   const [artist, setArtist] = useState<PublicArtist | null>(initialArtist);
+  const requestedTab = params.get('tab');
+  const tab = requestedTab === 'services' || (!requestedTab && artist?.looks.length === 0) ? 'services' : 'looks';
   const [loading, setLoading] = useState(!initialArtist);
   const [shareCopied, setShareCopied] = useState(false);
   const scrollPositions = useRef<Record<string, number>>({});
@@ -105,6 +106,7 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
       {tab === 'looks' && artist.profile.bio && <p className="mova-public-artist__bio">{artist.profile.bio}</p>}
       <span role="status" className="sr-only">{shareCopied ? t('identity.linkCopied') : ''}</span>
     </section>
+    {!preview && !artist.bookable && <Card tone="warm" className="mova-public-artist__booking-unavailable"><p>{t('showcase.bookingUnavailable')}</p></Card>}
     <p className="sr-only" aria-live="polite">{tab === 'looks' ? t('showcase.looks') : t('showcase.services')}</p>
     <div className="mova-public-tabs" role="tablist" aria-label={t('showcase.tabs')}>
       <button id="mova-public-looks-tab" type="button" role="tab" aria-controls="mova-public-looks" aria-selected={tab === 'looks'} onClick={() => switchTab('looks')}>{t('showcase.looks')}</button>
@@ -116,7 +118,7 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
         <img src={look.image_url} alt={look.alt_text} loading="lazy" />
         <span className="mova-look-card__photo-label">{t('showcase.portfolioPhoto')}</span>
         <div className="mova-look-card__body"><p>{look.alt_text || look.service_ids.map((id) => servicesById.get(id)?.name).filter(Boolean).join(' · ')}</p>
-        {look.service_ids.map((id) => servicesById.get(id)).filter((service): service is Service => Boolean(service)).map((service) => {const depositUnavailable=!stripeTestModeEnabled&&service.location_deposits.some((item)=>item.deposit_amount_minor>0);return depositUnavailable?<p key={service.id} className="mova-public-services__deposit-note">{t('booking.depositUnavailable')}</p>:<Button key={service.id} type="button" variant="secondary" disabled={preview} onClick={() => { const query = new URLSearchParams({ service_id: service.id, portfolio_item_id: look.id, locale }); navigate(`/a/${encodeURIComponent(handle)}/book?${query.toString()}`); }}>{t('showcase.bookThisLook')}</Button>;})}</div>
+        {artist.bookable&&look.service_ids.map((id) => servicesById.get(id)).filter((service): service is Service => Boolean(service)).map((service) => {const depositUnavailable=!stripeTestModeEnabled&&service.location_deposits.some((item)=>item.deposit_amount_minor>0);return depositUnavailable?<p key={service.id} className="mova-public-services__deposit-note">{t('booking.depositUnavailable')}</p>:<Button key={service.id} type="button" variant="secondary" disabled={preview} onClick={() => { const query = new URLSearchParams({ service_id: service.id, portfolio_item_id: look.id, locale }); navigate(`/a/${encodeURIComponent(handle)}/book?${query.toString()}`); }}>{t('showcase.bookThisLook')}</Button>;})}</div>
       </Card>)}</div> : <EmptyState title={t('showcase.noLooks')} />}
     </section>
     <section id="mova-public-services" role="tabpanel" aria-labelledby="mova-public-services-tab" tabIndex={0} hidden={tab !== 'services'}>

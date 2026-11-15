@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, EmptyState, ErrorState, IconButton, ScreenHeader } from '../../components';
+import { Button, Card, EmptyState, ErrorState, IconButton, ScreenHeader, Sheet } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { useNavigate } from 'react-router';
 import { operatorUrl } from '../../app/operator-url';
 
 type Location = { id: string; name: string; location_type: string; booking_mode: string; payment_collector: string; time_zone: string; display_color_index: number; is_active: boolean };
 type HoursRow = { weekday: number; opens_at: string; closes_at: string };
+type LocationActiveResult = { is_active: boolean; open_bookings: number };
 
 function zoneLabel(timeZone: string, locale: string) {
   try { return new Intl.DateTimeFormat(locale, { timeZone, timeZoneName: 'longGeneric' }).formatToParts(new Date()).find((part) => part.type === 'timeZoneName')?.value ?? timeZone; }
@@ -26,6 +27,10 @@ export function LocationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [statusLocation, setStatusLocation] = useState<Location | null>(null);
+  const [openBookingCount, setOpenBookingCount] = useState<number | null>(null);
+  const [statusBusy, setStatusBusy] = useState(false);
+  const [statusError, setStatusError] = useState(false);
 
   const load = async () => {
     if (!client || !businessId) return;
@@ -54,6 +59,59 @@ export function LocationsPage() {
     navigate(operatorUrl(businessId, `${base}${query}`));
   };
 
+  const openStatusSheet = (location: Location) => {
+    setStatusLocation(location);
+    setOpenBookingCount(null);
+    setStatusError(false);
+    if (!location.is_active || !client || !businessId) return;
+    setStatusBusy(true);
+    void client.from('mova_appointments').select('id', { count: 'exact', head: true })
+      .eq('artist_business_id', businessId).eq('location_id', location.id)
+      .in('status', ['pending_payment', 'pending_artist', 'confirmed'])
+      .then(({ count, error: countError }) => {
+        if (countError) setStatusError(true);
+        else setOpenBookingCount(count ?? 0);
+        setStatusBusy(false);
+      });
+  };
+
+  const refreshOpenBookings = async () => {
+    if (!client || !businessId || !statusLocation) return;
+    setStatusBusy(true);
+    setStatusError(false);
+    const { count, error: countError } = await client.from('mova_appointments').select('id', { count: 'exact', head: true })
+      .eq('artist_business_id', businessId).eq('location_id', statusLocation.id)
+      .in('status', ['pending_payment', 'pending_artist', 'confirmed']);
+    if (countError) setStatusError(true);
+    else setOpenBookingCount(count ?? 0);
+    setStatusBusy(false);
+  };
+
+  const setLocationActive = async () => {
+    if (!client || !businessId || !statusLocation) return;
+    setStatusBusy(true);
+    setStatusError(false);
+    const { data, error: updateError } = await client.rpc('mova_set_location_active', {
+      p_artist_business_id: businessId,
+      p_location_id: statusLocation.id,
+      p_is_active: !statusLocation.is_active,
+    });
+    if (updateError) {
+      setStatusError(true);
+      setStatusBusy(false);
+      return;
+    }
+    const result = data as LocationActiveResult;
+    if (statusLocation.is_active && result.open_bookings > 0) {
+      setOpenBookingCount(result.open_bookings);
+      setStatusBusy(false);
+      return;
+    }
+    setStatusLocation(null);
+    setStatusBusy(false);
+    await load();
+  };
+
   if (identityLoading || loading) return <main className="mova-page"><p role="status" aria-busy="true">{t('locations.loading')}</p></main>;
   if (!businessId) return <main className="mova-page"><ErrorState title={t('locations.identityError')} retryLabel={t('locations.retry')} onRetry={() => window.location.reload()} /></main>;
   return <main className="mova-page mova-location-settings">
@@ -65,16 +123,42 @@ export function LocationsPage() {
       const days = [...(hours[location.id] ?? [])].sort((a, b) => a.weekday - b.weekday);
       const color = location.display_color_index % 2 === 0 ? 'one' : 'two';
       const expanded = expandedId === location.id;
+      const collectorLabel = location.payment_collector === 'artist'
+        ? t('locations.cardCollector.artist')
+        : location.payment_collector === 'salon'
+          ? t('locations.cardCollector.salon')
+          : t('locations.cardCollector.unknown');
       return <Card className={`mova-location-card${expanded ? ' is-featured' : ''}`} key={location.id}>
         <header className="mova-location-card__heading"><span className={`mova-location-card__dot mova-location-card__dot--${color}`} aria-hidden="true"/><h2><button type="button" className="mova-location-card__toggle" aria-expanded={expanded} onClick={() => setExpandedId(expanded ? null : location.id)}>{location.name}</button></h2><span className={`mova-location-card__status${location.is_active ? '' : ' is-off'}`}>{t(location.is_active ? 'screens.locations.bookingOn' : 'locations.inactive')}</span></header>
         <p className="mova-location-card__type">{t(`locations.types.${location.location_type}`)} · {zoneLabel(location.time_zone, i18n.language)}</p>
-        <div className="mova-location-card__chips"><span className={location.booking_mode === 'request' ? 'is-request' : ''}>{t(`locations.cardMode.${location.booking_mode}`)}</span><span>{t(`locations.cardCollector.${location.payment_collector}`)}</span></div>
+        <div className="mova-location-card__chips"><span className={location.booking_mode === 'request' ? 'is-request' : ''}>{t(`locations.cardMode.${location.booking_mode}`)}</span><span>{collectorLabel}</span></div>
         {expanded && <>
           <div className="mova-location-card__hours">{days.map((row) => <p key={row.weekday}><span>{t(`locations.weekdaysShort.${row.weekday}`)}</span><strong>{clockLabel(row.opens_at, i18n.language)} – {clockLabel(row.closes_at, i18n.language)}</strong></p>)}</div>
-          <Button type="button" variant="secondary" onClick={() => openLocation(location.id)}>{t('screens.locations.editHours')}</Button>
+          <div className="mova-location-card__actions"><Button type="button" variant="secondary" onClick={() => openLocation(location.id)}>{t('screens.locations.editHours')}</Button><Button type="button" variant={location.is_active ? 'ghost' : 'secondary'} onClick={() => openStatusSheet(location)}>{t(location.is_active ? 'locations.disableBooking' : 'locations.enableBooking')}</Button></div>
         </>}
       </Card>;
     })}</div>
+    <Sheet open={Boolean(statusLocation)} title={statusLocation?.is_active ? t('locations.disableTitle') : t('locations.enableTitle')} closeLabel={t('settings.cancel')} onClose={() => { if (!statusBusy) setStatusLocation(null); }}>
+      <div className="mova-form-stack mova-location-status-sheet">
+        {statusLocation?.is_active ? <>
+          <p>{t('locations.disableIntro', { name: statusLocation.name })}</p>
+          {statusError && <p role="alert">{t('locations.statusError')}</p>}
+          {openBookingCount === null ? <>{!statusError&&<p role="status" aria-busy="true">{t('locations.checkingBookings')}</p>}{statusError&&<Button type="button" variant="secondary" loading={statusBusy} onClick={() => void refreshOpenBookings()}>{t('settings.retry')}</Button>}</> : openBookingCount > 0 ? <>
+            <p role="status">{t('locations.openBookings', { count: openBookingCount })}</p>
+            <p>{t('locations.closeBookingsBeforeDisable')}</p>
+            <Button type="button" variant="secondary" onClick={() => { setStatusLocation(null); navigate(operatorUrl(businessId, 'calendar')); }}>{t('locations.openCalendar')}</Button>
+            <Button type="button" variant="ghost" loading={statusBusy} onClick={() => void refreshOpenBookings()}>{t('locations.recheckBookings')}</Button>
+          </> : <>
+            <p>{t('locations.noOpenBookings')}</p>
+            <Button type="button" variant="destructive" loading={statusBusy} onClick={() => void setLocationActive()}>{t('locations.confirmDisable')}</Button>
+          </>}
+        </> : <>
+          <p>{t('locations.enableIntro', { name: statusLocation?.name ?? '' })}</p>
+          {statusError && <p role="alert">{t('locations.statusError')}</p>}
+          <Button type="button" loading={statusBusy} onClick={() => void setLocationActive()}>{t('locations.confirmEnable')}</Button>
+        </>}
+      </div>
+    </Sheet>
   </main>;
 }
 

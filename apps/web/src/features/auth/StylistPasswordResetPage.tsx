@@ -34,7 +34,8 @@ export default function StylistPasswordResetPage() {
     event.preventDefault(); setBusy(true); setError('');
     if (!supabase) { setError(t('stylistAuth.configurationError')); setBusy(false); return; }
     try {
-      await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` });
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` });
+      if (resetError) throw resetError;
       // Keep the response generic so the form does not disclose whether an account exists.
       setState('sent');
     } catch { setError(t('stylistAuth.passwordReset.requestError')); }

@@ -54,6 +54,7 @@ export function CalendarPage() {
   const day = isDateKey(requestedDay) ? requestedDay : dateKey(new Date());
   const selectDay = useCallback((value: string) => setSearchParams({ day: value }), [setSearchParams]);
   const [locationId, setLocationId] = useState('all');
+  const [calendarView, setCalendarView] = useState<'day'|'week'|'requests'>('day');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -134,6 +135,16 @@ export function CalendarPage() {
     .filter((part) => hour === 9 || hour === 12 || part.type !== 'dayPeriod')
     .map((part) => part.value).join('').trim();
   const hasItems = visibleAppointments.length > 0 || visibleBlocks.length > 0;
+  const requests = appointments.filter(item => ['pending_artist','pending_payment'].includes(item.status) && (locationId==='all'||locationId===item.location_id));
+  const renderTimeline = (key:string, compactWeek=false) => {
+    const dayAppointments=appointments.filter(item=>{const loc=locationById.get(item.location_id);return (locationId==='all'||locationId===item.location_id)&&dateKey(new Date(item.starts_at),loc?.time_zone)===key;});
+    const dayBlocks=blocks.filter(item=>{const loc=locationById.get(item.location_id);return (locationId==='all'||locationId===item.location_id)&&dateKey(new Date(item.starts_at),loc?.time_zone)===key;});
+    return <div className={`mova-calendar__timeline${compactWeek?' mova-calendar__timeline--week':''}`} role="group" aria-label={t('calendar.scheduleFor', { day: new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date(`${key}T12:00:00`)) })} style={{ '--calendar-hour-height': `${CALENDAR_HOUR_HEIGHT}px` } as CSSProperties}>
+      {hourLabels.map((hour,index)=><div className="mova-calendar__hour" key={hour} style={{top:`${index*CALENDAR_HOUR_HEIGHT}px`}}><time>{timeLabel(hour)}</time></div>)}
+      {dayAppointments.map(item=>{const location=locationById.get(item.location_id);const zone=location?.time_zone??'UTC';const position=blockPosition(item.starts_at,item.ends_at,zone);const compact=position.height<56;const color=colorClass(locationIndexById.get(item.location_id)??0);const startTime=new Intl.DateTimeFormat(i18n.resolvedLanguage,{hour:'numeric',minute:'2-digit',timeZone:zone}).format(new Date(item.starts_at));const endTime=new Intl.DateTimeFormat(i18n.resolvedLanguage,{hour:'numeric',minute:'2-digit',timeZone:zone}).format(new Date(item.ends_at));return <Link key={item.id} className={`mova-calendar__event ${color}${compact?' mova-calendar__event--compact':''}`} aria-label={`${item.service_names?.join(' + ')||item.service_name_snapshot}, ${item.client_name}, ${startTime}–${endTime}, ${location?.name??''}, ${t(`booking.status.${item.status}`)}`} style={{top:`${position.top}px`,height:`${Math.max(position.height,28)}px`}} to={operatorUrl(businessId,`appointments/${displayId('AID',item.appointment_number)}`)}><strong>{item.service_names?.join(' + ')||item.service_name_snapshot} · {item.client_name}</strong><span>{compact?startTime:`${startTime} – ${endTime}${location?` · ${location.name}`:''}`}</span></Link>;})}
+      {dayBlocks.map(block=>{const zone=locationById.get(block.location_id)?.time_zone??'UTC';const position=blockPosition(block.starts_at,block.ends_at,zone);return <div key={block.id} className="mova-calendar__block" style={{top:`${position.top}px`,height:`${position.height}px`}}><span>{t('scheduling.blockedLabel',{label:block.label||blockReasonLabel(block.reason)})}</span></div>;})}
+    </div>;
+  };
 
   return <main className="mova-page mova-calendar">
     <header className="mova-calendar__header">
@@ -146,6 +157,9 @@ export function CalendarPage() {
       </div>
 
       <DayStrip variant="calendar" label={t('calendar.days')} days={days} selected={day} onSelect={selectDay} />
+      <div className="mova-calendar__view-tabs" role="group" aria-label={t('calendar.viewLabel')}>
+        {(['day','week','requests'] as const).map(view=><button key={view} aria-pressed={calendarView===view} className={`mova-chip${calendarView===view?' is-selected':''}`} type="button" onClick={()=>setCalendarView(view)}>{t(`calendar.views.${view}`)}{view==='requests'?` · ${requests.length}`:''}</button>)}
+      </div>
 
       <div className="mova-calendar__filters" role="group" aria-label={t('calendar.locationFilter')}>
         <button className={`mova-chip${locationId === 'all' ? ' is-selected' : ''}`} type="button" aria-pressed={locationId === 'all'} onClick={() => setLocationId('all')}>{t('calendar.allLocations')}</button>
@@ -158,33 +172,13 @@ export function CalendarPage() {
     {error && <ErrorState title={t('calendar.loadError')} retryLabel={t('calendar.retry')} onRetry={() => void load()} />}
     <HonestyBanner tone="soft">{externalLocation ? t('calendar.externalCalendarNote', { location: externalLocation.name }) : t('calendar.externalCalendarGenericNote')}</HonestyBanner>
 
-    <div className="mova-calendar__timeline" role="group" aria-label={t('calendar.scheduleFor', { day: new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'long', month: 'long', day: 'numeric' }).format(selectedDate) })} style={{ '--calendar-hour-height': `${CALENDAR_HOUR_HEIGHT}px` } as CSSProperties}>
-      {hourLabels.map((hour, index) => <div className="mova-calendar__hour" key={hour} style={{ top: `${index * CALENDAR_HOUR_HEIGHT}px` }}><time>{timeLabel(hour)}</time></div>)}
-      {visibleAppointments.map((item) => {
-        const location = locationById.get(item.location_id);
-        const zone = location?.time_zone ?? 'UTC';
-        const position = blockPosition(item.starts_at, item.ends_at, zone);
-        const compact = position.height < 56;
-        const visibleHeight = Math.max(position.height, 28);
-        const color = colorClass(locationIndexById.get(item.location_id) ?? 0);
-        const startTime = new Intl.DateTimeFormat(i18n.resolvedLanguage, { hour: 'numeric', minute: '2-digit', timeZone: zone }).format(new Date(item.starts_at));
-        const endTime = new Intl.DateTimeFormat(i18n.resolvedLanguage, { hour: 'numeric', minute: '2-digit', timeZone: zone }).format(new Date(item.ends_at));
-        const status = t(`booking.status.${item.status}`);
-        return <Link key={item.id} className={`mova-calendar__event ${color}${compact ? ' mova-calendar__event--compact' : ''}`} aria-label={`${item.service_names?.join(' + ')||item.service_name_snapshot}, ${item.client_name}, ${startTime}–${endTime}, ${location?.name ?? ''}, ${status}`} style={{ top: `${position.top}px`, height: `${visibleHeight}px` }} to={operatorUrl(businessId, `appointments/${displayId('AID',item.appointment_number)}`)}>
-          <strong>{item.service_names?.join(' + ')||item.service_name_snapshot} · {item.client_name}</strong>
-          <span>{compact ? startTime : `${startTime} – ${endTime}${location ? ` · ${location.name}` : ''}`}</span>
-        </Link>;
-      })}
-      {visibleBlocks.map((block) => {
-        const zone = locationById.get(block.location_id)?.time_zone ?? 'UTC';
-        const position = blockPosition(block.starts_at, block.ends_at, zone);
-        return <div key={block.id} className="mova-calendar__block" style={{ top: `${position.top}px`, height: `${position.height}px` }}>
-          <span>{t('scheduling.blockedLabel', { label: block.label || blockReasonLabel(block.reason) })}</span>
-        </div>;
-      })}
-    </div>
+    {calendarView==='day'&&renderTimeline(day)}
+    {calendarView==='week'&&<div className="mova-calendar__week-scroll"><div className="mova-calendar__week-grid">{days.map(item=><section key={item.id} className="mova-calendar__week-day"><button type="button" className="mova-calendar__week-day-label" onClick={()=>{selectDay(item.id);setCalendarView('day');}}>{item.weekday} {item.date}</button>{renderTimeline(item.id,true)}</section>)}</div></div>}
+    {calendarView==='requests'&&<section className="mova-calendar__requests" aria-label={t('calendar.views.requests')}>
+      {requests.length?requests.map(item=>{const loc=locationById.get(item.location_id);return <Link key={item.id} to={operatorUrl(businessId,`appointments/${displayId('AID',item.appointment_number)}`)} className="mova-calendar__request"><span><strong>{item.client_name} · {item.service_names?.join(' + ')||item.service_name_snapshot}</strong><small>{new Intl.DateTimeFormat(i18n.resolvedLanguage,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:loc?.time_zone}).format(new Date(item.starts_at))} · {loc?.name??''}</small></span><span className="mova-calendar__request-status">{t(`booking.status.${item.status}`)}</span></Link>;}):<EmptyState title={t('calendar.noRequests')}/>}
+    </section>}
 
-    {!error && !hasItems && <EmptyState title={t('calendar.empty')} />}
+    {!error && calendarView==='day' && !hasItems && <EmptyState title={t('calendar.empty')} />}
     <IconButton className="mova-calendar__fab" label={t('calendar.newAppointment')} icon="plus" onClick={() => navigate(`${operatorUrl(businessId, 'calendar/add')}?day=${encodeURIComponent(day)}`)} />
     <Outlet />
   </main>;

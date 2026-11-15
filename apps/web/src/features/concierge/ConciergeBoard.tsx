@@ -28,8 +28,8 @@ export function ConciergeInboxPage() {
       .then(({ data: row }) => setArtistName(row?.display_name ?? null));
   }, [client, businessId]);
 
-  const channelName = (value: string) => t(`concierge.channelLabels.${({ web_chat: 'webChat', sms: 'sms', missed_call: 'missedCall', instagram: 'instagram' } as Record<string, string>)[value] ?? 'unknown'}`);
-  const conversationStatus = (value: string) => t(`concierge.conversationStatus.${({ handled: 'handled', needs_you: 'needsYou', closed: 'closed' } as Record<string, string>)[value] ?? 'unknown'}`);
+  const channelName = (value: string) => t(`concierge.channelLabels.${({ web_chat: 'webChat', webchat: 'webChat', 'web-chat': 'webChat', page_chat: 'webChat', website_chat: 'webChat', sms: 'sms', missed_call: 'missedCall', instagram: 'instagram' } as Record<string, string>)[value.trim().toLowerCase()] ?? 'unknown'}`);
+  const conversationStatus = (value: string) => t(`concierge.conversationStatus.${({ handled: 'handled', needs_you: 'needsYou', open: 'open', closed: 'closed' } as Record<string, string>)[value.trim().toLowerCase()] ?? 'unknown'}`);
   const handoffType = (value: string) => t(`concierge.handoffTypes.${({ quote: 'quote', exception: 'exception', complaint: 'complaint' } as Record<string, string>)[value] ?? 'other'}`);
   const on = Boolean(data?.settings.enabled && !data.settings.globally_paused);
   const metrics = data?.metrics;
@@ -208,12 +208,12 @@ export function ConciergeSetupPage() {
           <Card className="mova-concierge-board__rows mova-concierge-board__knowledge-editor">
             <form className="mova-concierge-form" onSubmit={(event) => void save(event)}>
               <label className="mova-field"><span className="mova-field__label">{t('concierge.kind')}</span>
-                <select className="mova-input" value={form.kind} onChange={(event) => setForm((value) => ({ ...value, kind: event.currentTarget.value }))}>
+              <select className="mova-input" value={form.kind} onChange={(event) => { const kind = event.currentTarget.value; setForm((value) => ({ ...value, kind })); }}>
                   <option value="faq">{t('concierge.faq')}</option><option value="prep">{t('concierge.prep')}</option><option value="policy">{t('concierge.policy')}</option><option value="location_detail">{t('concierge.location')}</option>
                 </select></label>
-              <TextField label={t('concierge.question')} required maxLength={500} value={form.question} onChange={(event) => setForm((value) => ({ ...value, question: event.currentTarget.value }))} />
-              <TextArea label={t('concierge.answerEn')} required maxLength={3000} value={form.answer_en} onChange={(event) => setForm((value) => ({ ...value, answer_en: event.currentTarget.value }))} />
-              <TextArea label={t('concierge.answerEs')} maxLength={3000} value={form.answer_es} onChange={(event) => setForm((value) => ({ ...value, answer_es: event.currentTarget.value }))} />
+              <TextField label={t('concierge.question')} required maxLength={500} value={form.question} onChange={(event) => { const question = event.currentTarget.value; setForm((value) => ({ ...value, question })); }} />
+              <TextArea label={t('concierge.answerEn')} required maxLength={3000} value={form.answer_en} onChange={(event) => { const answer_en = event.currentTarget.value; setForm((value) => ({ ...value, answer_en })); }} />
+              <TextArea label={t('concierge.answerEs')} maxLength={3000} value={form.answer_es} onChange={(event) => { const answer_es = event.currentTarget.value; setForm((value) => ({ ...value, answer_es })); }} />
               <Button type="submit" disabled={busy}>{t('concierge.saveKnowledge')}</Button>
             </form>
             {knowledge.length

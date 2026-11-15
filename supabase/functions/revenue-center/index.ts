@@ -31,10 +31,10 @@ Deno.serve(withSystemRequestLogging('revenue-center', async(request)=>{
   const clientMap=new Map((clients??[]).map((client)=>[client.id,client]));
   const rows=(opportunities??[]).map((item)=>({...item,client:clientMap.get(item.client_id)??null}));
   const winback=rows.filter((item)=>{const evidence=item.evidence as {typical_days?:number};const typical=Number(evidence?.typical_days??42);return Date.now()-Date.parse(item.last_visit_at)>=2*typical*day&&item.client&&!item.client.marketing_opted_out;});
-  return respond({pipeline:rows,winback,decisions:decisions??[],outboundEnabled:outbound()!==null,settings:settings??{enabled:true,slot_texts_autopilot:true,rules:{new_client_weeks:6,attribution_days:14,per_client_days:14,per_cycle_max:2,daily_cap:10,quiet_start:'09:00',quiet_end:'20:00'}},counts:{due:rows.filter((x)=>x.status==='due').length,contacted:rows.filter((x)=>x.status==='contacted').length,rebooked:rows.filter((x)=>x.status==='rebooked').length,winback:winback.length}});
+  return respond({pipeline:rows,winback,decisions:decisions??[],outboundEnabled:outbound()!==null,settings:settings??{enabled:false,slot_texts_autopilot:true,rules:{new_client_weeks:6,attribution_days:14,per_client_days:14,per_cycle_max:2,daily_cap:10,quiet_start:'09:00',quiet_end:'20:00'}},counts:{due:rows.filter((x)=>x.status==='due').length,contacted:rows.filter((x)=>x.status==='contacted').length,rebooked:rows.filter((x)=>x.status==='rebooked').length,winback:winback.length}});
  }
  if(body.action==='save-rules'||body.action==='set-autopilot'){
-  // O11: the stylist's own switches (default ON); sending still needs the platform flag.
+  // Stylist-controlled autopilot defaults OFF. Platform-level emergency switch remains separate.
   const {data:existing}=await db.from('mova_autopilot_settings').select('enabled,slot_texts_autopilot,rules').eq('artist_business_id',actor.businessId).maybeSingle();
   let rules=existing?.rules??{new_client_weeks:6,attribution_days:14,per_client_days:14,per_cycle_max:2,daily_cap:10,quiet_start:'09:00',quiet_end:'20:00'};
   if(body.action==='save-rules'){
@@ -42,7 +42,7 @@ Deno.serve(withSystemRequestLogging('revenue-center', async(request)=>{
    const n=(v:unknown,min:number,max:number,d:number)=>{const x=Number(v);return Number.isFinite(x)?Math.min(max,Math.max(min,Math.round(x))):d;};
    rules={...rules,daily_cap:n(next.daily_cap,0,50,10),per_client_days:n(next.per_client_days,7,90,14),per_cycle_max:n(next.per_cycle_max??rules.per_cycle_max,1,3,2),attribution_days:n(next.attribution_days??rules.attribution_days,1,60,14),quiet_start:'09:00',quiet_end:'20:00'};
   }
-  const enabled=body.action==='set-autopilot'&&typeof body.enabled==='boolean'?body.enabled:(existing?.enabled??true);
+  const enabled=body.action==='set-autopilot'&&typeof body.enabled==='boolean'?body.enabled:(existing?.enabled??false);
   const slots=body.action==='set-autopilot'&&typeof body.slot_texts_autopilot==='boolean'?body.slot_texts_autopilot:(existing?.slot_texts_autopilot??true);
   const {error}=await db.from('mova_autopilot_settings').upsert({artist_business_id:actor.businessId,enabled,slot_texts_autopilot:slots,rules,updated_by:actor.user.id,updated_at:new Date().toISOString()},{onConflict:'artist_business_id'});
   return error?respond({code:'AUTOPILOT_SAVE_FAILED'},500):respond({settings:{enabled,slot_texts_autopilot:slots,rules}});

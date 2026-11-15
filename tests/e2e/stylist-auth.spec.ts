@@ -159,6 +159,22 @@ test.describe('stylist sign-in (/login)', () => {
   });
 });
 
+test.describe('password reset (/reset-password)', () => {
+  test('a rejected reset request shows an error instead of claiming the email was sent', async ({ page }) => {
+    let recoveryRequestIntercepted = false;
+    await page.route('**/recover**', async (route) => {
+      recoveryRequestIntercepted = true;
+      return json(route, 429, { code: 'over_email_send_rate_limit', msg: 'Email rate limit exceeded' });
+    });
+    await page.goto('/reset-password');
+    await page.getByLabel('Email', { exact: true }).fill('stylist@example.com');
+    await page.getByRole('button', { name: 'Send reset link' }).click();
+    expect(recoveryRequestIntercepted).toBe(true);
+    await expect(page.getByRole('alert')).toContainText('We couldn’t send the reset link.');
+    await expect(page.getByText('If an account uses that email, a reset link is on its way.')).toHaveCount(0);
+  });
+});
+
 test.describe('/auth redirect', () => {
   test('/auth lands on /login and keeps the returnTo query', async ({ page }) => {
     await page.goto('/auth?returnTo=%2FBID-1%2Fsettings');

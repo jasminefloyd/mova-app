@@ -95,10 +95,11 @@ export default function ConciergeQuotePage() {
     }
   };
 
-  const channelLabel = quote?.channel === 'sms' ? t('concierge.channelLabels.sms')
-    : quote?.channel === 'web_chat' ? t('concierge.channelLabels.webChat')
-      : quote?.channel === 'missed_call' ? t('concierge.channelLabels.missedCall')
-        : quote?.channel === 'instagram' ? t('concierge.channelLabels.instagram') : t('concierge.channelLabels.unknown');
+  const normalizedChannel = quote?.channel?.trim().toLowerCase();
+  const channelLabel = normalizedChannel === 'sms' ? t('concierge.channelLabels.sms')
+    : ['web_chat', 'webchat', 'web-chat', 'page_chat', 'website_chat'].includes(normalizedChannel ?? '') ? t('concierge.channelLabels.webChat')
+      : normalizedChannel === 'missed_call' ? t('concierge.channelLabels.missedCall')
+        : normalizedChannel === 'instagram' ? t('concierge.channelLabels.instagram') : t('concierge.channelLabels.unknown');
   const quoteStatusLabel = quote?.status === 'open' ? t('concierge.quoteStatuses.open')
     : quote?.status === 'quoted' ? t('concierge.quoteStatuses.quoted')
       : quote?.status === 'consult_offered' ? t('concierge.quoteStatuses.consultOffered')
