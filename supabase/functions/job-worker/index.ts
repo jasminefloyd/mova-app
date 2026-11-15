@@ -49,8 +49,15 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
     }, { onConflict: 'artist_business_id,user_id,event_type,payload' });
     if (insertError) throw new Error('INBOX_WRITE_FAILED');
   }
-  // Task 4.3: the client's appointment email, only while the email provider is the fake (O4).
-  const emailProvider = emailProviderFromEnv((name) => Deno.env.get(name));
+  // Transactional appointment emails use the global email-send switch.
+  const env = (name: string) => Deno.env.get(name);
+  const emailProvider = emailProviderFromEnv(env);
+  // Welcome mail has its own switch so enabling it does not turn on appointment or
+  // other proposed email templates. It reuses the configured Resend sender/key.
+  const welcomeEnabled = env('MOVA_EMAIL_STYLIST_WELCOME_ENABLED') === 'true';
+  const welcomeEmailProvider = emailProvider ?? (welcomeEnabled
+    ? emailProviderFromEnv((name) => name === 'MOVA_MESSAGING_LIVE_EMAIL' ? 'true' : env(name))
+    : null);
   const aggregate = event as { aggregate_type?: string; aggregate_id?: string };
   if (emailProvider && outboxEvent.event_type.startsWith('appointment.') && aggregate.aggregate_type === 'appointment' && aggregate.aggregate_id) {
     const templateForEvent: Record<string, EmailTemplateId> = { 'appointment.rescheduled': 'appointment_moved', 'appointment.cancelled': 'appointment_cancelled', 'appointment.review_request': 'review_request' };
@@ -79,12 +86,13 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
     }
   }
 
-  if (emailProvider && outboxEvent.event_type === 'artist.welcome' && Deno.env.get('MOVA_EMAIL_PROPOSED_ENABLED') === 'true') {
+  if (outboxEvent.event_type === 'artist.welcome' && welcomeEnabled) {
+    if (!welcomeEmailProvider) throw new Error('WELCOME_EMAIL_PROVIDER_NOT_CONFIGURED');
     const { data: context, error } = await db.rpc('mova_stylist_welcome_email_context', { p_artist_business_id: outboxEvent.artist_business_id });
     if (error) throw new Error('STYLIST_EMAIL_CONTEXT_FAILED');
     const value = context as { recipients?: Array<{ email: string; name: string }>; vars?: AppointmentEmailVars; artist_business_id?: string; locale?: string } | null;
     for (const recipient of value?.recipients ?? []) {
-      const sent = await sendEmail(db as unknown as EmailDb, emailProvider, {
+      const sent = await sendEmail(db as unknown as EmailDb, welcomeEmailProvider, {
         artistBusinessId: value?.artist_business_id ?? outboxEvent.artist_business_id!, clientId: null,
         to: recipient.email, templateId: 'stylist_welcome', locale: value?.locale === 'es-US' ? 'es-US' : 'en-US',
         vars: { ...(value?.vars as AppointmentEmailVars), clientName: recipient.name, stylistName: recipient.name,
