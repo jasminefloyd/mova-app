@@ -17,7 +17,7 @@ const equal = (left: string, right: string) => {
 
 async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId: string) {
   const { data: event, error } = await db.from('mova_outbox_events')
-    .select('id,artist_business_id,event_type,payload,aggregate_type,aggregate_id').eq('id', eventId).maybeSingle();
+    .select('id,artist_business_id,event_type,payload,aggregate_type,aggregate_id,occurred_at').eq('id', eventId).maybeSingle();
   if (error || !event) throw new Error('OUTBOX_EVENT_READ_FAILED');
   const outboxEvent = event as OutboxEvent;
   // Task 5.1: a cancelled or no-show slot becomes a seat-filler campaign (sending stays behind its flag).
@@ -27,27 +27,31 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
   }
   if (!outboxEvent.artist_business_id) return;
 
-  const { data: members, error: memberError } = await db.from('mova_artist_memberships')
-    .select('user_id').eq('artist_business_id', outboxEvent.artist_business_id).eq('status', 'active');
-  if (memberError) throw new Error('MEMBERSHIP_READ_FAILED');
+  const eventAgeMs = Date.now() - Date.parse(outboxEvent.occurred_at);
+  // Do not create fresh-looking inbox alerts for events that sat in the queue for a day.
+  if (Number.isFinite(eventAgeMs) && eventAgeMs >= 0 && eventAgeMs <= 24 * 60 * 60 * 1000) {
+    const { data: members, error: memberError } = await db.from('mova_artist_memberships')
+      .select('user_id').eq('artist_business_id', outboxEvent.artist_business_id).eq('status', 'active');
+    if (memberError) throw new Error('MEMBERSHIP_READ_FAILED');
 
-  const keys = notificationKeys(outboxEvent.event_type);
-  const payload = eventNotificationPayload(outboxEvent);
-  for (const member of members ?? []) {
-    const { data: preferences, error: preferenceError } = await db.from('mova_notification_preferences')
-      .select('preferences').eq('artist_business_id', outboxEvent.artist_business_id).eq('user_id', member.user_id).maybeSingle();
-    const preference = resolveInAppNotificationPreference({ data: preferences, error: preferenceError });
-    if (!preference.ok) throw new Error('NOTIFICATION_PREFERENCES_READ_FAILED');
-    if (!preference.enabled) continue;
-    const { error: insertError } = await db.from('mova_notification_inbox').upsert({
-      artist_business_id: outboxEvent.artist_business_id,
-      user_id: member.user_id,
-      event_type: outboxEvent.event_type,
-      title_key: keys.title,
-      body_key: keys.body,
-      payload,
-    }, { onConflict: 'artist_business_id,user_id,event_type,payload' });
-    if (insertError) throw new Error('INBOX_WRITE_FAILED');
+    const keys = notificationKeys(outboxEvent.event_type);
+    const payload = eventNotificationPayload(outboxEvent);
+    for (const member of members ?? []) {
+      const { data: preferences, error: preferenceError } = await db.from('mova_notification_preferences')
+        .select('preferences').eq('artist_business_id', outboxEvent.artist_business_id).eq('user_id', member.user_id).maybeSingle();
+      const preference = resolveInAppNotificationPreference({ data: preferences, error: preferenceError });
+      if (!preference.ok) throw new Error('NOTIFICATION_PREFERENCES_READ_FAILED');
+      if (!preference.enabled) continue;
+      const { error: insertError } = await db.from('mova_notification_inbox').upsert({
+        artist_business_id: outboxEvent.artist_business_id,
+        user_id: member.user_id,
+        event_type: outboxEvent.event_type,
+        title_key: keys.title,
+        body_key: keys.body,
+        payload,
+      }, { onConflict: 'artist_business_id,user_id,event_type,payload' });
+      if (insertError) throw new Error('INBOX_WRITE_FAILED');
+    }
   }
   // Transactional appointment emails use the global email-send switch.
   const env = (name: string) => Deno.env.get(name);

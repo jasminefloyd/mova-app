@@ -3,6 +3,7 @@ export type OutboxEvent = {
   artist_business_id: string | null;
   event_type: string;
   payload: Record<string, unknown>;
+  occurred_at: string;
 };
 
 export function notificationKeys(eventType: string) {
