@@ -291,12 +291,15 @@ body {
 .mova-calendar__view-tabs { display:flex; gap:var(--space-2); overflow-x:auto; padding-block:2px; }
 .mova-calendar__view-tabs .mova-chip { min-height:var(--tap-min); flex:none; padding-inline:var(--space-4); }
 .mova-calendar__week-scroll { overflow-x:auto; margin-top:var(--space-3); padding-bottom:var(--space-2); }
-.mova-calendar__week-grid { display:grid; grid-template-columns:repeat(7,minmax(132px,1fr)); min-width:924px; }
+.mova-calendar__week-grid { display:grid; grid-template-columns:44px repeat(7,minmax(120px,1fr)); min-width:884px; }
+.mova-calendar__week-gutter { position:sticky; left:0; z-index:2; background:var(--surface-page); }
+.mova-calendar__week-gutter .mova-calendar__hour { border-top-color:transparent; }
+.mova-calendar__week-gutter-label { min-height:var(--tap-min); border-bottom:1px solid var(--line-subtle); }
 .mova-calendar__week-day { min-width:0; border-left:1px solid var(--line-subtle); }
 .mova-calendar__week-day-label { width:100%; min-height:var(--tap-min); border:0; border-bottom:1px solid var(--line-subtle); background:var(--surface-page); color:var(--ink-primary); font:600 var(--fs-caption)/1.2 var(--font-ui); }
 .mova-calendar__timeline--week { margin:0; }
 .mova-calendar__timeline--week .mova-calendar__hour time { font-size:var(--fs-micro); }
-.mova-calendar__timeline--week .mova-calendar__event,.mova-calendar__timeline--week .mova-calendar__block { right:2px; left:34px; padding-inline:5px; }
+.mova-calendar__timeline--week .mova-calendar__event,.mova-calendar__timeline--week .mova-calendar__block { right:3px; left:3px; padding-inline:5px; }
 .mova-calendar__timeline--week .mova-calendar__event strong { font-size:var(--fs-micro); }
 .mova-calendar__timeline--week .mova-calendar__event span { display:none; }
 .mova-calendar__requests { display:grid; gap:var(--space-2); margin-top:var(--space-3); }
@@ -982,7 +985,7 @@ select,
 @media(max-width:359px){.mova-reports-grid{grid-template-columns:1fr}.mova-report-card--revenue,.mova-report-card--money,.mova-report-card--traffic,.mova-report-card--marketing{grid-column:auto}}
 
 .mova-profile-edit-photo{display:grid;gap:var(--space-4)}.mova-profile-edit-photo img{width:112px;height:112px;object-fit:cover;border-radius:var(--radius-pill)}.mova-profile-edit-photo .mova-input{max-width:100%}
-.mova-public-artist__header{min-height:184px;background-position:center;background-size:cover}.mova-public-artist__location{margin-top:var(--space-2)!important;color:var(--ink-inverse)!important;font-size:var(--fs-body-s)}.mova-public-artist__book{position:sticky;z-index:5;bottom:0;margin:var(--space-4) calc(var(--gutter) * -1) calc(var(--space-7) * -1);padding:var(--space-3) var(--gutter) calc(var(--space-3) + env(safe-area-inset-bottom));border-top:1px solid var(--line-subtle);background:var(--surface-page)}.mova-public-artist__book .mova-button{width:100%;min-height:var(--tap-min)}
+.mova-public-artist__header{min-height:184px;background-position:center;background-size:cover}.mova-public-artist__location{margin-top:var(--space-2)!important;font-size:var(--fs-body-s)}.mova-public-artist__header .mova-public-artist__location{color:var(--ink-inverse)!important}.mova-public-artist__book{position:sticky;z-index:5;bottom:0;margin:var(--space-4) calc(var(--gutter) * -1) calc(var(--space-7) * -1);padding:var(--space-3) var(--gutter) calc(var(--space-3) + env(safe-area-inset-bottom));border-top:1px solid var(--line-subtle);background:var(--surface-page)}.mova-public-artist__book .mova-button{width:100%;min-height:var(--tap-min)}
 .mova-revenue-progress{display:grid;gap:var(--space-2);margin-block:var(--space-3)}.mova-revenue-progress label{font-size:var(--fs-caption);color:var(--surface-inverse)}.mova-revenue-progress progress{width:100%;height:12px;accent-color:var(--mint)}.mova-revenue-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-2);margin-block:var(--space-3)}.mova-revenue-kpis .mova-card{display:grid;gap:var(--space-1);padding:var(--space-3)}.mova-revenue-kpis strong{font:700 var(--fs-display-s)/1 var(--font-display);color:var(--forest)}.mova-revenue-kpis span{font-size:var(--fs-caption);color:var(--ink-secondary);overflow-wrap:break-word;hyphens:auto}.mova-revenue-group{margin-top:var(--space-5)}.mova-revenue-group h2{margin-bottom:var(--space-2);font-size:var(--fs-body-l)}
 .mova-concierge-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-2)}.mova-concierge-stats .mova-card{display:grid;align-content:start;gap:var(--space-1);padding:var(--space-3)}.mova-concierge-stats strong{font-size:var(--fs-caption);line-height:1.25;overflow-wrap:break-word;hyphens:auto}.mova-concierge-stats span{font-size:var(--fs-micro);color:var(--ink-secondary)}
 
