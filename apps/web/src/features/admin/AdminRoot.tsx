@@ -17,7 +17,7 @@ export function loader({ request }: LoaderFunctionArgs) {
 }
 
 export function meta() {
-  return [{ title: 'Mova admin' }, { name: 'robots', content: 'noindex, nofollow' }];
+  return [{ title: 'Mova Beauty Admin' }, { name: 'robots', content: 'noindex, nofollow' }];
 }
 
 export function createAdminQueryClient() {

@@ -60,6 +60,9 @@ verify_jwt = false
 [functions.location-save]
 verify_jwt = false
 
+[functions.location-address-search]
+verify_jwt = false
+
 [functions.booking-create]
 verify_jwt = false
 

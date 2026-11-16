@@ -381,16 +381,16 @@ export function OnboardingFlow() {
           </>}
       </section>}
 
-      {step === 'services' && <section className="mova-form-stack mova-onboarding-setup" aria-labelledby="onboarding-services-h">
-        <h1 id="onboarding-services-h">{t('onboarding.servicesTitle')}</h1>
-        <p>{t('onboarding.servicesDescription')}</p>
+      {step === 'services' && <section className="mova-form-stack mova-onboarding-setup" aria-label={t('onboarding.servicesTitle')}>
         {setupLoaded && (services.length === 0 || addingService)
           ? <ServiceSettingsPage embedded={{
             preselectLocationIds: locations.map((item) => item.id),
             onSaved: () => { setAddingService(false); void refreshSetup(); },
-            ...(services.length ? { onCancel: () => setAddingService(false) } : {}),
+            onCancel: () => services.length ? setAddingService(false) : navigate('/onboarding/location'),
           }} />
           : setupLoaded && <>
+            <h1 id="onboarding-services-h">{t('onboarding.servicesTitle')}</h1>
+            <p>{t('onboarding.servicesDescription')}</p>
             <ul className="mova-onboarding-setup__list">{services.map((service) => <li key={service.id}>
               <span className="mova-onboarding-setup__check" aria-hidden="true">✓</span>
               <span><strong>{service.name}</strong><small>{service.duration_minutes} {t('onboarding.minutes')} · {formatMoney(service.base_price_minor)}</small></span>
@@ -404,7 +404,7 @@ export function OnboardingFlow() {
       {step === 'payments' && <section className="mova-form-stack mova-onboarding-setup" aria-labelledby="onboarding-payments-h">
         <h1 id="onboarding-payments-h">{t('onboarding.paymentsTitle')}</h1>
         <p>{t('onboarding.paymentsDescription')}</p>
-        <PaymentSettingsPage embedded={{ continueLabel: t('onboarding.finishSetup'), onContinue: finishSetup }} />
+        <PaymentSettingsPage embedded={{ continueLabel: t('onboarding.finishSetup'), onContinue: finishSetup, onEditLocations: () => { setAddingLocation(false); setStep('location'); } }} />
         {error && <p role="alert">{error}</p>}
       </section>}
     </main>

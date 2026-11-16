@@ -65,7 +65,7 @@ export function artistSchema({ artist, publicBaseUrl, locale }: ArtistSchemaInpu
           '@type': 'Offer',
           price: (service.base_price_minor / 100).toFixed(2),
           priceCurrency: 'USD',
-          itemOffered: { '@type': 'Service', name: service.name, ...(service.category ? { serviceType: service.category } : {}) },
+          itemOffered: { '@type': 'Service', name: service.name, ...(service.description ? { description: service.description } : {}), ...(service.category ? { serviceType: service.category } : {}) },
         })),
       },
     } : {}),

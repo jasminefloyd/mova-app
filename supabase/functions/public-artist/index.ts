@@ -70,7 +70,7 @@ Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
   const businessId = profile.artist_business_id;
   const { data: services, error: serviceError } = await supabase
     .from('mova_services')
-    .select('id, name, category, duration_minutes, buffer_minutes, base_price_minor, deposit_type, deposit_value, location_assignment_mode')
+    .select('id, name, category, description, duration_minutes, buffer_minutes, base_price_minor, deposit_type, deposit_value, location_assignment_mode')
     .eq('artist_business_id', businessId)
     .eq('status', 'active')
     .order('name');

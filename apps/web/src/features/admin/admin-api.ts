@@ -62,6 +62,10 @@ const messages: Record<string, string> = {
   BLOG_NOT_FOUND: 'That guide no longer exists.',
   STYLIST_FILTER_INVALID: 'That filter is not available.',
   BUSINESS_NOT_FOUND: 'That stylist no longer exists.',
+  FEATURE_NOT_INCLUDED_IN_PLAN: 'This feature is not included in the stylist’s current plan.',
+  FEATURE_OVERRIDE_INVALID: 'That feature cannot be adjusted here.',
+  PLAN_INVALID: 'Choose an active plan.',
+  STYLIST_SWITCH_INVALID: 'That stylist setting cannot be changed here.',
   AUDIT_CATEGORY_INVALID: 'That audit filter is not available.',
   FEE_OUT_OF_RANGE: 'Fees must be between 0% and 3%.',
   REASON_REQUIRED: 'Write a reason of at least 5 characters.',
@@ -135,6 +139,13 @@ export type StylistDetail = {
   feedback: { id: string; type: string; status: string; created_at: string; preview: string }[];
   overrides: { fee_bps: number; starts_at: string; ends_at: string | null; reason: string }[];
 };
+
+export type StylistFeatureControls = {
+  current_plan: { plan_key: string; display_name: string };
+  plans: { plan_key: string; display_name: string; monthly_price_minor: number; entitlements: Record<string, unknown> }[];
+  features: { feature_key: string; plan_enabled: boolean; override_enabled: boolean | null; enabled: boolean; reason: string | null; updated_at: string | null; updated_by: string | null }[];
+};
+export type StylistRuntimeSwitches = Record<'zelle_recorded' | 'rebooking_autopilot' | 'seat_filler_autopilot' | 'review_requests' | 'google_review_import' | 'ai_concierge' | 'wallet_card' | 'social_share', boolean>;
 
 export type AuditEvent = { occurred_at: string; category: string; actor: string; event: string; reference: string; summary: string };
 export type AuditPage = { events: AuditEvent[]; has_more: boolean };

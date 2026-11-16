@@ -22,7 +22,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data, matches }) => {
-  if (!data?.post) return [{ title: 'mova' }];
+  if (!data?.post) return [{ title: 'Mova Beauty Guides' }];
   const { post, publicBaseUrl } = data;
   // The server already applies these fallbacks; repeating them keeps the tags right if a field arrives empty.
   const seo = { ...post.seo, meta_title: post.seo.meta_title || post.title, meta_description: post.seo.meta_description || post.summary };
@@ -30,7 +30,7 @@ export const meta: MetaFunction<typeof loader> = ({ data, matches }) => {
   const image = seo.og_image_url ?? post.cover?.url ?? null;
   return [
     ...socialMeta({
-      title: `${seo.meta_title} | mova`,
+      title: `${seo.meta_title} | Mova Beauty`,
       description: seo.meta_description,
       canonical,
       base: publicBaseUrl,

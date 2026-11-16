@@ -51,6 +51,8 @@ export function scheduleLabel(payouts: Payouts, t: Translate, locale: string) {
 export type PaymentSettingsEmbed = {
   /** Onboarding step 6: saves any change to the manual methods, then continues. */
   onContinue: () => Promise<void>;
+  /** Return to onboarding locations to review which salons collect payments. */
+  onEditLocations?: () => void;
   continueLabel: string;
 };
 
@@ -224,7 +226,9 @@ export function PaymentSettingsPage({ embedded }: { embedded?: PaymentSettingsEm
 
         {salonNames && <aside className="mova-payment-settings__salon">
           <p><strong>{t('money.salonCollectsFor', { names: salonNames })}</strong> {t('money.salonCollectsRest')}</p>
-          {!embedded && <a href={operatorUrl(businessId, 'settings/locations')}>{t('money.changeInLocations')}</a>}
+          {embedded
+            ? <button type="button" className="mova-payment-settings__location-link" onClick={embedded.onEditLocations}>{t('money.changeInLocations')}</button>
+            : <a href={operatorUrl(businessId, 'settings/locations')}>{t('money.changeInLocations')}</a>}
         </aside>}
 
         {saveError && <p role="alert">{t('money.settingsSaveError')}</p>}

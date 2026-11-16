@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, ErrorState, Icon, RadioCard, ScreenHeader, TextField } from '../../components';
@@ -42,6 +42,10 @@ export function LocationNewPage({ embedded }: { embedded?: LocationEditorEmbed }
   const [savedClientDetails, setSavedClientDetails] = useState<Record<string, unknown>>({});
   const [savedExceptions, setSavedExceptions] = useState<Array<{ exception_date: string; is_closed: boolean; hours: Array<{ opens_at: string; closes_at: string }>; reason: string }>>([]);
   const [savedPolicyRemainder, setSavedPolicyRemainder] = useState<Record<string, number>>({});
+  const [addressSuggestions, setAddressSuggestions] = useState<Array<{ place_id: string; description: string }>>([]);
+  const [addressSearching, setAddressSearching] = useState(false);
+  const [addressMenuOpen, setAddressMenuOpen] = useState(false);
+  const addressSearchSequence = useRef(0);
   const zones = Intl.supportedValuesOf('timeZone');
 
   const locationsPath = operatorUrl(businessId, 'settings/locations');
@@ -106,6 +110,28 @@ export function LocationNewPage({ embedded }: { embedded?: LocationEditorEmbed }
   }, [locationId, client, businessId]);
 
   const update = <K extends keyof NewLocationDraft>(key: K, value: NewLocationDraft[K]) => setDraft((current) => ({ ...current, [key]: value }));
+  const searchAddresses = (value: string) => {
+    update('address', value);
+    setSavedAddress((current) => { const address = { ...current }; delete address.google_place_id; return address; });
+    setAddressMenuOpen(true);
+    const sequence = ++addressSearchSequence.current;
+    if (value.trim().length < 3 || !businessId) { setAddressSuggestions([]); setAddressSearching(false); return; }
+    setAddressSearching(true);
+    window.setTimeout(() => {
+      if (sequence !== addressSearchSequence.current) return;
+      void callFunction<{ suggestions: Array<{ place_id: string; description: string }> }>(client, businessId, 'location-address-search', { input: value.trim() })
+        .then((result) => { if (sequence === addressSearchSequence.current) setAddressSuggestions(result.suggestions ?? []); })
+        .catch(() => { if (sequence === addressSearchSequence.current) setAddressSuggestions([]); })
+        .finally(() => { if (sequence === addressSearchSequence.current) setAddressSearching(false); });
+    }, 250);
+  };
+  const selectAddress = (suggestion: { place_id: string; description: string }) => {
+    addressSearchSequence.current += 1;
+    update('address', suggestion.description);
+    setSavedAddress((current) => ({ ...current, street: suggestion.description, google_place_id: suggestion.place_id }));
+    setAddressSuggestions([]);
+    setAddressMenuOpen(false);
+  };
   const toggleDay = (weekday: number) => setDraft((current) => {
     const removing = current.weekdays.includes(weekday);
     const primary = current.hoursByWeekday[current.weekdays[0] ?? weekday] ?? { opens: '', closes: '' };
@@ -183,7 +209,12 @@ export function LocationNewPage({ embedded }: { embedded?: LocationEditorEmbed }
       </fieldset>
 
       <TextField label={t('scheduling.locationNew.name')} placeholder={t('scheduling.locationNew.namePlaceholder')} maxLength={120} value={draft.name} error={fieldError('name')} onChange={(event) => update('name', event.target.value)} />
-      <div className="mova-location-new__address"><Icon name="location" size={20} /><TextField label={t('scheduling.locationNew.address')} placeholder={t('scheduling.locationNew.addressPlaceholder')} hint={t('scheduling.locationNew.addressHint')} autoComplete="street-address" maxLength={300} value={draft.address} error={fieldError('address')} onChange={(event) => update('address', event.target.value)} /></div>
+      <div className="mova-location-new__address"><Icon name="location" size={20} /><TextField label={t('scheduling.locationNew.address')} placeholder={t('scheduling.locationNew.addressPlaceholder')} hint={t('scheduling.locationNew.addressHint')} autoComplete="street-address" maxLength={300} value={draft.address} error={fieldError('address')} onChange={(event) => searchAddresses(event.target.value)} />
+        {addressMenuOpen && (addressSearching || addressSuggestions.length > 0) && <div className="mova-location-new__address-suggestions" role="listbox" aria-label={t('scheduling.locationNew.addressSuggestions')}>
+          {addressSearching && <p role="status">{t('scheduling.locationNew.addressSearching')}</p>}
+          {addressSuggestions.map((suggestion) => <button type="button" role="option" key={suggestion.place_id} onClick={() => selectAddress(suggestion)}>{suggestion.description}</button>)}
+        </div>}
+      </div>
       {!zoneOpen && <p className="mova-location-new__zone"><Icon name="clock" size={16} /><span>{t('scheduling.locationNew.timeZoneLine', { zone: zoneName(draft.timeZone, i18n.language) })}</span><button type="button" className="mova-scheduling__inline-link" onClick={() => setZoneOpen(true)}>{t('scheduling.locationNew.timeZoneChange')}</button></p>}
       {(zoneOpen || errors.timeZone) && <label className="mova-field"><span className="mova-field__label">{t('scheduling.locationNew.timeZone')}</span>
         <select className="mova-input" value={draft.timeZone} aria-invalid={Boolean(errors.timeZone)} onChange={(event) => update('timeZone', event.target.value)}>

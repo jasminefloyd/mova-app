@@ -1,9 +1,55 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { adminErrorText, adminRpc, isAdminError, type StylistDetail } from './admin-api';
+import { adminErrorText, adminRpc, isAdminError, type StylistDetail, type StylistFeatureControls, type StylistRuntimeSwitches } from './admin-api';
 import { formatCount, formatDate, formatDateTime, formatFeeBps, formatMoneyMinor, formatPercent } from './admin-format';
 import { Card, ConfirmDialog, ErrorNote, Kpi, Loading, PageHead, Pill } from './AdminPrimitives';
+
+const featureLabels: Record<string, { name: string; note: string }> = {
+  booking_page: { name: 'Booking page', note: 'Public stylist page and booking entry point.' },
+  calendar_multi_location: { name: 'Multi-location calendar', note: 'Manage availability across locations.' },
+  unlimited_clients: { name: 'Unlimited clients', note: 'Client list capacity.' },
+  unlimited_bookings: { name: 'Unlimited bookings', note: 'Booking capacity.' },
+  unlimited_locations: { name: 'Multiple locations', note: 'Create and book at multiple work locations.' },
+  client_notes_photos: { name: 'Client notes and photos', note: 'Private client history and reference photos.' },
+  guest_booking: { name: 'Guest booking', note: 'Let clients book without creating an account.' },
+  payments_deposits_links: { name: 'Payments, deposits and links', note: 'Collect deposits and send payment links.' },
+  booking_emails: { name: 'Booking emails', note: 'Transactional booking email access.' },
+  bilingual_en_es: { name: 'English and Spanish', note: 'Bilingual stylist and client experiences.' },
+  reports_basic: { name: 'Basic reports', note: 'Reports and business activity summaries.' },
+  reviews_private: { name: 'Private reviews', note: 'Collect private client feedback.' },
+  reviews_public: { name: 'Public reviews', note: 'Publish eligible client reviews.' },
+  reports_advanced: { name: 'Advanced reports', note: 'Advanced analytics and reporting.' },
+  seat_filler: { name: 'Seat filler', note: 'Offer newly opened appointment slots.' },
+  text_autopilot: { name: 'Text autopilot', note: 'Automated stylist-approved client messages.' },
+  text_reminders: { name: 'Appointment text reminders', note: 'Transactional appointment text messages.' },
+  rebooking_assist: { name: 'Rebooking assist', note: 'Tools to identify and contact clients who are due.' },
+  google_calendar_sync: { name: 'Google Calendar sync', note: 'Connect and sync stylist calendar events.' },
+  custom_cover: { name: 'Custom profile cover', note: 'Choose a custom cover photo.' },
+  custom_handle: { name: 'Custom profile link', note: 'Set a custom public profile handle.' },
+  rebooking_autopilot: { name: 'Rebooking autopilot', note: 'Automated rebooking reminders; stylist settings and global pause still apply.' },
+  concierge: { name: 'AI Concierge', note: 'AI-assisted replies; stylist consent/settings and global pause still apply.' },
+  concierge_instagram: { name: 'Instagram Concierge', note: 'Handle eligible Instagram messages.' },
+  wallet_client_card: { name: 'Client wallet card', note: 'Offer a stylist card in supported digital wallets.' },
+  reports_ai_revenue: { name: 'AI Revenue reports', note: 'AI-assisted revenue and forecasting tools.' },
+  missed_call_textback: { name: 'Missed-call text back', note: 'Send an approved reply after missed calls.' },
+  ai_price_pilot: { name: 'PricePilot', note: 'Local pricing research and recommendations.' },
+  marketing_email: { name: 'Marketing email', note: 'Create and send email campaigns.' },
+  marketing_social: { name: 'Social publishing', note: 'Create social campaigns and publish to connected accounts.' },
+  marketing_web_push: { name: 'Web push campaigns', note: 'Send eligible push campaigns to opted-in clients.' },
+  marketing_wallet: { name: 'Wallet notifications', note: 'Send eligible Google Wallet campaign updates.' },
+};
+
+const runtimeSwitchLabels: Record<keyof StylistRuntimeSwitches, { name: string; note: string }> = {
+  zelle_recorded: { name: 'Zelle recorded', note: 'Allow recording Zelle as a payment method.' },
+  rebooking_autopilot: { name: 'Rebooking autopilot', note: 'Stylist preference for automated rebooking reminders.' },
+  seat_filler_autopilot: { name: 'Seat filler messages', note: 'Stylist preference for messages when an appointment opens.' },
+  review_requests: { name: 'Ask for reviews', note: 'Stylist preference for review requests after visits.' },
+  google_review_import: { name: 'Google review import', note: 'Show imported Google reviews in the reputation tools.' },
+  ai_concierge: { name: 'AI Concierge', note: 'Stylist preference for AI-assisted client replies.' },
+  wallet_card: { name: 'Client wallet card', note: 'Offer the stylist’s saved card in supported wallets.' },
+  social_share: { name: 'Social sharing', note: 'Enable social sharing tools for this stylist.' },
+};
 
 export default function AdminStylistDetailPage() {
   const { businessId = '' } = useParams();
@@ -13,11 +59,85 @@ export default function AdminStylistDetailPage() {
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [featureToChange, setFeatureToChange] = useState<{ key: string; enabled: boolean } | null>(null);
+  const [runtimeSwitchToChange, setRuntimeSwitchToChange] = useState<{ key: keyof StylistRuntimeSwitches; enabled: boolean } | null>(null);
+  const [planEditorOpen, setPlanEditorOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('');
+  const [featureControlsBusy, setFeatureControlsBusy] = useState(false);
   const detail = useQuery({
     queryKey: ['admin', 'stylist', businessId],
     queryFn: () => adminRpc<StylistDetail>('mova_admin_stylist_detail', { p_business_id: businessId }),
     enabled: businessId.length > 0,
   });
+  const featureControls = useQuery({
+    queryKey: ['admin', 'stylist-features', businessId],
+    queryFn: () => adminRpc<StylistFeatureControls>('mova_admin_stylist_feature_controls', { p_artist_business_id: businessId }),
+    enabled: businessId.length > 0,
+  });
+  const runtimeSwitches = useQuery({
+    queryKey: ['admin', 'stylist-runtime-switches', businessId],
+    queryFn: () => adminRpc<StylistRuntimeSwitches>('mova_admin_stylist_runtime_switches', { p_artist_business_id: businessId }),
+    enabled: businessId.length > 0,
+  });
+
+  async function saveFeatureOverride(reason: string) {
+    if (!featureToChange) return;
+    setFeatureControlsBusy(true); setActionError(null);
+    try {
+      await adminRpc('mova_admin_set_stylist_feature', {
+        p_artist_business_id: businessId, p_feature_key: featureToChange.key, p_enabled: featureToChange.enabled, p_reason: reason,
+      });
+      setFeatureToChange(null);
+      setNotice(`${featureLabels[featureToChange.key]?.name ?? featureToChange.key} access updated. The change is in admin activity.`);
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'stylist-features', businessId] });
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'stylist', businessId] });
+    } catch (error) {
+      setActionError(adminErrorText(error));
+      if (isAdminError(error, 'PLATFORM_ADMIN_REQUIRED')) setFeatureToChange(null);
+    } finally { setFeatureControlsBusy(false); }
+  }
+
+  async function saveRuntimeSwitch(reason: string) {
+    if (!runtimeSwitchToChange) return;
+    setFeatureControlsBusy(true); setActionError(null);
+    try {
+      await adminRpc('mova_admin_set_stylist_runtime_switch', {
+        p_artist_business_id: businessId, p_switch_key: runtimeSwitchToChange.key, p_enabled: runtimeSwitchToChange.enabled, p_reason: reason,
+      });
+      setRuntimeSwitchToChange(null);
+      setNotice(`${runtimeSwitchLabels[runtimeSwitchToChange.key].name} updated for this stylist. The change is in admin activity.`);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin', 'stylist-runtime-switches', businessId] }),
+        queryClient.invalidateQueries({ queryKey: ['admin', 'stylist', businessId] }),
+      ]);
+    } catch (error) {
+      setActionError(adminErrorText(error));
+      if (isAdminError(error, 'PLATFORM_ADMIN_REQUIRED')) setRuntimeSwitchToChange(null);
+    } finally { setFeatureControlsBusy(false); }
+  }
+
+  async function savePlan(reason: string) {
+    if (!selectedPlan) return;
+    if (selectedPlan === featureControls.data?.current_plan.plan_key) {
+      setPlanEditorOpen(false);
+      setNotice('The plan is unchanged. Existing feature overrides remain in effect.');
+      return;
+    }
+    setFeatureControlsBusy(true); setActionError(null);
+    try {
+      await adminRpc('mova_admin_set_stylist_plan', { p_artist_business_id: businessId, p_plan_key: selectedPlan, p_reason: reason });
+      setPlanEditorOpen(false);
+      setNotice('Plan updated. Feature access now follows the new tier; previous individual feature overrides were cleared.');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin', 'stylist-features', businessId] }),
+        queryClient.invalidateQueries({ queryKey: ['admin', 'stylist', businessId] }),
+        queryClient.invalidateQueries({ queryKey: ['admin', 'stylists'] }),
+      ]);
+    } catch (error) {
+      setActionError(adminErrorText(error));
+      if (isAdminError(error, 'PLATFORM_ADMIN_REQUIRED')) setPlanEditorOpen(false);
+    } finally { setFeatureControlsBusy(false); }
+  }
 
   async function unpublish(reason: string) {
     setBusy(true);
@@ -110,16 +230,31 @@ export default function AdminStylistDetailPage() {
             <dt>Locations · services · clients</dt><dd>{formatCount(d.metrics.locations)} · {formatCount(d.metrics.services)} · {formatCount(d.metrics.clients)}</dd>
           </dl>
         </Card>
-        <Card title="Feature switches">
-          <dl className="kv">
-            <dt>Zelle recorded</dt><dd>{d.switches.zelle_recorded ? 'On' : 'Off'}</dd>
-            <dt>Rebooking autopilot</dt><dd>{d.switches.rebooking_autopilot ? 'On' : 'Off'}</dd>
-            <dt>AI concierge</dt><dd>{d.switches.ai_concierge ? 'On' : 'Off'}</dd>
-            <dt>Wallet card</dt><dd>{d.switches.wallet_card ? 'On' : 'Off'}</dd>
-            <dt>Social share</dt><dd>{d.switches.social_share ? 'On' : 'Off'}</dd>
-          </dl>
-        </Card>
       </div>
+      <section className="stack">
+        <div><h2 className="group-heading">Feature access</h2><p className="sub">Plan access follows the assigned tier automatically. You can override any individual feature for this stylist, including a temporary grant outside their tier. A plan change clears overrides and returns features to the new tier’s defaults. Stylist opt-in, provider readiness, consent and global emergency switches still apply.</p></div>
+        {featureControls.isPending ? <Loading label="Loading feature access" /> : featureControls.isError || !featureControls.data ? <ErrorNote message={adminErrorText(featureControls.error)} /> : <>
+          <Card title={`Plan features · ${featureControls.data.current_plan.display_name}`} aside={<button type="button" className="btn sm ghost" onClick={() => { setSelectedPlan(featureControls.data!.current_plan.plan_key); setPlanEditorOpen(true); }}>Change plan</button>} className="pad0">
+            <ul className="list">{featureControls.data.features.map((feature) => {
+              const meta = featureLabels[feature.feature_key] ?? { name: feature.feature_key, note: 'Plan-controlled feature.' };
+              return <li key={feature.feature_key} className="feature-row">
+                <div className="feature-row__copy"><strong>{meta.name}</strong>{feature.override_enabled === false ? <Pill tone="warn">Admin off</Pill> : feature.override_enabled === true ? <Pill tone="new">Admin on</Pill> : feature.plan_enabled ? <Pill tone="ok">Plan default</Pill> : <Pill tone="off">Not in plan</Pill>}
+                  <p>{meta.note}</p>
+                  <p className="small muted">{feature.enabled ? 'Access enabled' : feature.plan_enabled ? 'Access disabled by admin' : 'Upgrade required'}{feature.override_enabled === true && !feature.plan_enabled ? ' · enabled by admin outside plan' : ''}{feature.reason ? ` · ${feature.reason}` : ''}{feature.updated_by ? ` · ${feature.updated_by}` : ''}</p>
+                </div>
+                <button type="button" className={`sw${feature.enabled ? ' on' : ''}`} role="switch" aria-checked={feature.enabled} aria-label={meta.name} disabled={featureControlsBusy} onClick={() => setFeatureToChange({ key: feature.feature_key, enabled: !feature.enabled })}><i /></button>
+              </li>;
+            })}</ul>
+          </Card>
+          <Card title="Stylist feature settings" className="pad0">
+            {runtimeSwitches.isPending ? <p className="muted" style={{ padding: 16 }}>Loading stylist settings…</p> : runtimeSwitches.isError || !runtimeSwitches.data ? <div style={{ padding: 16 }}><ErrorNote message={adminErrorText(runtimeSwitches.error)} /></div> : <ul className="list">{(Object.keys(runtimeSwitchLabels) as (keyof StylistRuntimeSwitches)[]).map((key) => {
+              const meta = runtimeSwitchLabels[key]; const enabled = runtimeSwitches.data[key];
+              return <li key={key} className="feature-row"><div className="feature-row__copy"><strong>{meta.name}</strong><p>{meta.note}</p><p className="small muted">{enabled ? 'On for this stylist' : 'Off for this stylist'}</p></div><button type="button" className={`sw${enabled ? ' on' : ''}`} role="switch" aria-checked={enabled} aria-label={meta.name} disabled={featureControlsBusy} onClick={() => setRuntimeSwitchToChange({ key, enabled: !enabled })}><i /></button></li>;
+            })}</ul>}
+            <p className="small muted" style={{ padding: '0 16px 14px' }}>These switches set stylist-level preferences. Subscription entitlements, provider readiness, client consent and global emergency switches remain in force.</p>
+          </Card>
+        </>}
+      </section>
       <div className="cols2">
         <Card title="Custom rates">
           {d.overrides.length === 0 ? <p className="muted">No custom rate. This stylist pays the plan rate.</p> : (
@@ -149,6 +284,39 @@ export default function AdminStylistDetailPage() {
         error={actionError}
         onCancel={() => setSuspensionOpen(false)}
         onConfirm={(reason) => void setSuspension(reason)}
+      />
+      <ConfirmDialog
+        open={featureToChange !== null}
+        title={`${featureToChange?.enabled ? 'Enable' : 'Disable'} ${featureLabels[featureToChange?.key ?? '']?.name ?? 'feature'} access?`}
+        body={<>This changes this stylist’s individual feature override and is recorded in admin activity. An admin override can grant a feature outside the assigned tier. Changing the plan later clears individual overrides and restores the new tier’s defaults. Global emergency switches and other runtime requirements still apply.</>}
+        confirmLabel={featureToChange?.enabled ? 'Enable access' : 'Disable access'}
+        reasonRequired
+        busy={featureControlsBusy}
+        error={actionError}
+        onCancel={() => setFeatureToChange(null)}
+        onConfirm={(reason) => void saveFeatureOverride(reason)}
+      />
+      <ConfirmDialog
+        open={runtimeSwitchToChange !== null}
+        title={`${runtimeSwitchToChange?.enabled ? 'Turn on' : 'Turn off'} ${runtimeSwitchToChange ? runtimeSwitchLabels[runtimeSwitchToChange.key].name : 'stylist setting'}?`}
+        body={<>This changes the stylist-level setting used by the product. It is recorded in admin activity. Plan access and system-wide emergency controls still apply.</>}
+        confirmLabel={runtimeSwitchToChange?.enabled ? 'Turn on' : 'Turn off'}
+        reasonRequired
+        busy={featureControlsBusy}
+        error={actionError}
+        onCancel={() => setRuntimeSwitchToChange(null)}
+        onConfirm={(reason) => void saveRuntimeSwitch(reason)}
+      />
+      <ConfirmDialog
+        open={planEditorOpen}
+        title="Change stylist plan?"
+        body={<label className="field"><span className="lbl">New plan</span><select className="input" value={selectedPlan} onChange={(event) => setSelectedPlan(event.target.value)}>{(featureControls.data?.plans ?? []).map((plan) => <option key={plan.plan_key} value={plan.plan_key}>{plan.display_name} · ${(plan.monthly_price_minor / 100).toFixed(0)}/month</option>)}</select><span className="small muted">Feature access will follow this plan. Existing individual feature overrides will be cleared.</span></label>}
+        confirmLabel="Change plan"
+        reasonRequired
+        busy={featureControlsBusy}
+        error={actionError}
+        onCancel={() => setPlanEditorOpen(false)}
+        onConfirm={(reason) => void savePlan(reason)}
       />
       <ConfirmDialog
         open={unpublishOpen}

@@ -1,9 +1,9 @@
 {
   "id": "/",
-  "name": "mova",
-  "short_name": "mova",
+  "name": "Mova Beauty",
+  "short_name": "Mova Beauty",
   "description": "Your business moves with you.",
-  "start_url": "/auth",
+  "start_url": "/login",
   "scope": "/",
   "display": "standalone",
   "background_color": "#F7F5EF",

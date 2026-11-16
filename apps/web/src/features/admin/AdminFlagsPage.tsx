@@ -66,7 +66,7 @@ export default function AdminFlagsPage() {
 
   return (
     <>
-      <PageHead title="Feature switches" sub="Turn features on or off for everyone. Changes are recorded in admin activity." />
+      <PageHead title="Feature switches" sub="These are platform-wide controls. Turn an individual feature off for one stylist from that stylist’s admin profile; these global switches remain the emergency pause. Changes are recorded in admin activity." />
       <ErrorNote message={error} />
       {message ? <p className="notice" role="status">{message}</p> : null}
       <section className="stack"><div><h2 className="group-heading">Emergency off switches</h2><p className="sub">Features that send messages or reply for stylists. Turning one off stops it everywhere.</p></div>{renderSwitches(emergency)}</section>

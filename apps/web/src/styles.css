@@ -556,12 +556,17 @@ body {
 .mova-location-new .mova-choice-fieldset legend { color: var(--forest); font-size: var(--fs-body-s); }
 .mova-location-new .mova-field__label { color: var(--forest); font-size: var(--fs-body-s); font-weight: 600; }
 .mova-location-new .mova-input { min-height: var(--input-h); border-radius: var(--radius-l); background: var(--surface); font-size: var(--fs-body-l); }
-.mova-location-new__kind-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: var(--space-2); }
+.mova-location-new__kind-grid { grid-template-columns: 1fr !important; gap: var(--space-2); }
 .mova-location-new .mova-radio-card { min-height: var(--option-h); border-radius: var(--radius-l); font-size: var(--fs-body-s); }
 .mova-location-new .mova-radio-card strong { font-size: var(--fs-body-s); }
 .mova-location-new .mova-radio-card__dot { display: none; }
 .mova-location-new .mova-radio-card input { width: 20px; height: 20px; flex: none; }
 .mova-location-new__address { position: relative; }
+.mova-location-new__address-suggestions { position: absolute; z-index: 5; top: calc(100% - 4px); right: 0; left: 0; display: grid; overflow: hidden; border: 1px solid var(--line-control); border-radius: var(--radius-l); background: var(--surface); box-shadow: var(--shadow-card); }
+.mova-location-new__address-suggestions p, .mova-location-new__address-suggestions button { margin: 0; padding: var(--space-3) var(--space-4); color: var(--ink-primary); font: inherit; text-align: left; }
+.mova-location-new__address-suggestions button { min-height: var(--tap-min); border: 0; border-bottom: 1px solid var(--line-subtle); background: transparent; cursor: pointer; }
+.mova-location-new__address-suggestions button:last-child { border-bottom: 0; }
+.mova-location-new__address-suggestions button:hover, .mova-location-new__address-suggestions button:focus-visible { background: var(--surface-page); }
 .mova-location-new__address > .mova-icon { position: absolute; z-index: 1; top: 43px; left: 14px; color: var(--ink-secondary); pointer-events: none; }
 .mova-location-new .mova-location-new__address .mova-input { padding-left: 44px; }
 .mova-location-new__zone { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: calc(var(--space-2) * -1) 0 0; color: var(--ink-muted); font-size: var(--fs-caption); }
@@ -1022,7 +1027,9 @@ select,
 .mova-payment-settings__manual .mova-toggle small { color: var(--ink-muted); font-size: var(--fs-micro); }
 .mova-payment-settings__salon { display: grid; gap: var(--space-2); border: 1px dashed var(--accent-warm-strong); border-radius: var(--radius-xl); padding: 14px var(--space-4); background: var(--surface-warm); }
 .mova-payment-settings__salon p { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; }
-.mova-payment-settings__salon a { color: var(--forest); font-weight: 700; font-size: var(--fs-body-s); }
+.mova-payment-settings__salon a,
+.mova-payment-settings__location-link { color: var(--forest); font: inherit; font-weight: 700; font-size: var(--fs-body-s); text-align: left; text-decoration: underline; }
+.mova-payment-settings__location-link { justify-self: start; border: 0; padding: 0; background: transparent; cursor: pointer; }
 .mova-payment-settings__actions { position: sticky; bottom: 0; padding: var(--space-3) 0 var(--space-5); background: var(--surface-page); }
 .mova-payment-settings__actions .mova-button { width: 100%; }
 
@@ -1112,6 +1119,7 @@ select,
 .mova-service-form .mova-form-stack { display: grid; gap: var(--space-4); }
 .mova-service-form h1 { margin: 0; color: var(--forest); font: 800 var(--fs-display-l)/1.1 var(--font-display); }
 .mova-service-form .mova-field__label { font-weight: 700; }
+.mova-service-form .mova-textarea { min-height: 72px; }
 .mova-service-form__numbers { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: end; gap: var(--space-2); }
 .mova-service-form__numbers .mova-field { min-width: 0; }
 .mova-service-form__numbers .mova-input { min-width: 0; padding-inline: 10px; }
@@ -1131,10 +1139,24 @@ select,
 .mova-service-form__location > label span { display: grid; gap: 2px; }
 .mova-service-form__location small { color: var(--ink-muted); font-size: var(--fs-body-s); }
 .mova-service-form__location .mova-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.mova-service-form__looks { display: grid; gap: var(--space-2); }
+.mova-service-form__looks h2 { margin: 0; font: 700 var(--fs-display-s)/1.2 var(--font-display); color: var(--forest); }
+.mova-service-form__looks p { margin: 0; color: var(--ink-muted); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-service-form__look-thumbs { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: var(--space-2); }
+.mova-service-form__look-thumbs img, .mova-service-form__look-thumbs > span { display: block; width: 100%; aspect-ratio: 1; border: 1px solid var(--line); border-radius: var(--radius-l); background: var(--surface-alt); object-fit: cover; }
+.mova-service-form__look-thumbs p { grid-column: 1 / -1; }
+.mova-service-form__looks > a { min-height: var(--tap-min); justify-self: start; align-content: center; color: var(--forest); font-weight: 700; text-decoration: underline; }
+.mova-service-form__looks > button { min-height: var(--tap-min); justify-self: start; border: 0; padding: 0; background: transparent; color: var(--forest); font: 700 var(--fs-body-s) var(--font-ui); text-decoration: underline; cursor: pointer; }
+.mova-service-form__delete { display: grid; justify-items: center; gap: var(--space-2); padding-block: var(--space-2); text-align: center; }
+.mova-service-form__delete > button { min-height: var(--tap-min); border: 0; background: transparent; color: var(--danger); font: 700 var(--fs-body) var(--font-ui); text-decoration: underline; cursor: pointer; }
+.mova-service-form__delete p { max-width: 32ch; margin: 0; color: var(--ink-muted); font-size: var(--fs-body-s); }
+.mova-service-form__delete > div { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); }
 .mova-service-form .mova-toggle { display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--line); border-radius: var(--radius-2xl); padding: var(--space-3) var(--space-4); background: var(--surface); }
 .mova-service-form .mova-toggle small { color: var(--ink-muted); }
 .mova-service-form__actions { position: sticky; bottom: 0; display: grid; grid-template-columns: minmax(110px,.7fr) minmax(0,1.5fr); gap: var(--space-2); margin-inline: calc(var(--gutter) * -1); border-top: 1px solid var(--line); padding: var(--space-3) var(--gutter) calc(var(--space-4) + env(safe-area-inset-bottom)); background: var(--surface-page); }
 .mova-service-form__actions .mova-button { min-height: 56px; }
+.mova-service-form__actions.is-single { grid-template-columns: 1fr; }
+.mova-public-services__description { margin: var(--space-1) 0 var(--space-2); color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.45; }
 @media (max-width: 359px) { .mova-service-form__numbers { grid-template-columns: repeat(2,minmax(0,1fr)); } .mova-service-form__numbers .mova-field:last-child { grid-column: span 2; } }
 
 /* 3.5 Send feedback (canvas 16e) */

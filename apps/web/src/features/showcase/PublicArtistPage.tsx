@@ -8,7 +8,7 @@ import { PublicLocaleToggle } from '../../app/PublicLocaleToggle';
 import { WebChat } from '../concierge/WebChat';
 import { trackProfileEvent } from '../reports/track';
 
-type Service = { id: string; name: string; category: string; duration_minutes: number; buffer_minutes?: number; base_price_minor: number; deposit_type: 'none' | 'fixed' | 'percent'; deposit_value: number; location_deposits: Array<{ location_id: string; price_minor: number; duration_minutes: number; deposit_amount_minor: number }> };
+type Service = { id: string; name: string; category: string; description?: string; duration_minutes: number; buffer_minutes?: number; base_price_minor: number; deposit_type: 'none' | 'fixed' | 'percent'; deposit_value: number; location_deposits: Array<{ location_id: string; price_minor: number; duration_minutes: number; deposit_amount_minor: number }> };
 type Look = { id: string; image_url: string; alt_text: string; service_ids: string[] };
 type PublicLocation = { id: string; name: string; booking_mode: 'instant' | 'request'; time_zone: string; address?: Record<string, string | undefined> };
 export type PublicArtist = {
@@ -125,6 +125,7 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
       <h2 className="sr-only">{t('showcase.services')}</h2>
       {artist.services.length ? <ul className="mova-public-services">{artist.services.map((service) => <li key={service.id}>
         <div className="mova-public-services__head"><strong>{service.name}</strong><span className="mova-public-services__price">{formatMoney(service.base_price_minor, locale)}</span></div>
+        {service.description && <p className="mova-public-services__description">{service.description}</p>}
         <div className="mova-public-services__info"><div><small>{formatDuration(service.duration_minutes, locale)} · {service.location_deposits.map((deposit) => { const location = artist.locations.find((entry) => entry.id === deposit.location_id); return deposit.deposit_amount_minor > 0 ? t('showcase.depositAt', { amount: formatMoney(deposit.deposit_amount_minor, locale), location: location?.name ?? '' }) : t('showcase.noDepositAt', { location: location?.name ?? '' }); }).join(' · ') || t('showcase.noDeposit')}</small><small>{[...new Set(service.location_deposits.map((deposit) => artist.locations.find((entry) => entry.id === deposit.location_id)?.name).filter(Boolean))].join(' · ')}</small></div>
         {artist.bookable && (!stripeTestModeEnabled&&service.location_deposits.some((item)=>item.deposit_amount_minor>0)
           ? <p className="mova-public-services__deposit-note">{t('booking.depositUnavailable')}</p>
