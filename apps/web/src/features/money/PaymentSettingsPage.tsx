@@ -48,7 +48,13 @@ export function scheduleLabel(payouts: Payouts, t: Translate, locale: string) {
   }
 }
 
-export function PaymentSettingsPage() {
+export type PaymentSettingsEmbed = {
+  /** Onboarding step 6: saves any change to the manual methods, then continues. */
+  onContinue: () => Promise<void>;
+  continueLabel: string;
+};
+
+export function PaymentSettingsPage({ embedded }: { embedded?: PaymentSettingsEmbed } = {}) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
@@ -64,6 +70,8 @@ export function PaymentSettingsPage() {
   const [loadError, setLoadError] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [continuing, setContinuing] = useState(false);
+  const [needsMethod, setNeedsMethod] = useState(false);
 
   const headers = useCallback(async () => {
     if (!client) return null;
@@ -105,10 +113,10 @@ export function PaymentSettingsPage() {
   const dirty = settings.cash_enabled !== savedMethods.cash_enabled || settings.other_enabled !== savedMethods.other_enabled;
   const setMethod = (key: keyof Methods, value: boolean) => { setSaved(false); setSettings((old) => ({ ...old, [key]: value })); };
 
-  const save = async () => {
-    if (!dirty) return;
+  const save = async (): Promise<boolean> => {
+    if (!dirty) return true;
     const h = await headers();
-    if (!h) return;
+    if (!h) return false;
     setSaving(true); setSaveError(false); setSaved(false);
     try {
       const methods = { cash_enabled: settings.cash_enabled, other_enabled: settings.other_enabled };
@@ -116,7 +124,8 @@ export function PaymentSettingsPage() {
       if (!response.ok) throw new Error();
       setSavedMethods(methods);
       setSaved(true);
-    } catch { setSaveError(true); } finally { setSaving(false); }
+      return true;
+    } catch { setSaveError(true); return false; } finally { setSaving(false); }
   };
 
   const connectStripe = async () => {
@@ -124,7 +133,7 @@ export function PaymentSettingsPage() {
     if (!h) return;
     setStripeBusy(true); setStripeError(false);
     try {
-      const response = await fetch(`${publicEnv.VITE_SUPABASE_URL}/functions/v1/stripe-connect-onboard`, { method: 'POST', headers: h, body: JSON.stringify({ action: 'start', return_path: window.location.pathname }) });
+      const response = await fetch(`${publicEnv.VITE_SUPABASE_URL}/functions/v1/stripe-connect-onboard`, { method: 'POST', headers: h, body: JSON.stringify({ action: 'start', return_path: embedded ? '/onboarding/payments' : window.location.pathname }) });
       const body = await response.json();
       if (!response.ok || typeof body.data?.authorization_url !== 'string') throw new Error();
       window.location.assign(body.data.authorization_url);
@@ -132,6 +141,14 @@ export function PaymentSettingsPage() {
   };
 
   const state = stripeState(connection);
+  const continueSetup = async () => {
+    if (!embedded) return;
+    setNeedsMethod(false);
+    // At least one way to get paid: Stripe, a recorded method, or a salon that collects for you.
+    if (state !== 'active' && !settings.cash_enabled && !settings.other_enabled && settings.salon_locations.length === 0) { setNeedsMethod(true); return; }
+    setContinuing(true);
+    try { if (await save()) await embedded.onContinue(); } finally { setContinuing(false); }
+  };
   const fee = useMemo(() => settings.platform_fee_bps == null ? null : formatFeePercent(settings.platform_fee_bps, i18n.language), [settings.platform_fee_bps, i18n.language]);
   const feeNote = (rest: string) => fee && <p className="mova-payment-settings__fee"><strong>{t('money.feeNoteStrong', { percent: fee })}</strong>{rest}</p>;
   const salonNames = settings.salon_locations.length
@@ -142,12 +159,13 @@ export function PaymentSettingsPage() {
     ? <Button type="button" loading={stripeBusy} onClick={() => void connectStripe()}>{label}</Button>
     : <><Button type="button" disabled>{label}</Button><small>{t('money.stripeSetupUnavailable')}</small></>;
 
-  return <main className="mova-page mova-payment-settings">
-    <ScreenHeader title={t('money.paymentSettingsTitle')} onBack={() => navigate(operatorUrl(businessId, 'settings'))} backLabel={t('settings.close')} />
+  const Root = embedded ? 'div' : 'main';
+  return <Root className={`mova-payment-settings${embedded ? ' mova-payment-settings--embedded' : ' mova-page'}`}>
+    {!embedded && <ScreenHeader title={t('money.paymentSettingsTitle')} onBack={() => navigate(operatorUrl(businessId, 'settings'))} backLabel={t('settings.close')} />}
     {identityLoading || loading ? <p role="status" aria-busy="true">{t('money.loading')}</p>
       : loadError ? <ErrorState title={t('money.settingsError')} retryLabel={t('money.retry')} onRetry={() => void load()} />
       : <>
-        <div className="mova-payment-settings__head"><h1>{t('money.howYouGetPaid')}</h1><p>{t('money.paymentSettingsIntro')}</p></div>
+        {!embedded && <div className="mova-payment-settings__head"><h1>{t('money.howYouGetPaid')}</h1><p>{t('money.paymentSettingsIntro')}</p></div>}
 
         <Card className="mova-payment-settings__stripe">
           <div className="mova-payment-settings__card-head">
@@ -188,7 +206,7 @@ export function PaymentSettingsPage() {
             </dl>
             {feeNote(t('money.feeNoteActive'))}
             <div className="mova-payment-settings__links">
-              <a className="mova-button mova-button--secondary" href={operatorUrl(businessId, 'money')}>{t('money.seePayouts')}</a>
+              {!embedded && <a className="mova-button mova-button--secondary" href={operatorUrl(businessId, 'money')}>{t('money.seePayouts')}</a>}
               {dashboardUrl && <a className="mova-button mova-button--secondary" href={dashboardUrl} target="_blank" rel="noreferrer">{t('money.openStripe')}</a>}
             </div>
             <small>{t('money.stripeManagedNote')}</small>
@@ -206,16 +224,19 @@ export function PaymentSettingsPage() {
 
         {salonNames && <aside className="mova-payment-settings__salon">
           <p><strong>{t('money.salonCollectsFor', { names: salonNames })}</strong> {t('money.salonCollectsRest')}</p>
-          <a href={operatorUrl(businessId, 'settings/locations')}>{t('money.changeInLocations')}</a>
+          {!embedded && <a href={operatorUrl(businessId, 'settings/locations')}>{t('money.changeInLocations')}</a>}
         </aside>}
 
         {saveError && <p role="alert">{t('money.settingsSaveError')}</p>}
         {saved && <p role="status" className="mova-visually-hidden">{t('money.settingsSaved')}</p>}
+        {needsMethod && <p role="alert">{t('money.onboardingNeedsMethod')}</p>}
         <footer className="mova-payment-settings__actions">
-          <Button type="button" loading={saving} disabled={!dirty} onClick={() => void save()}>{saved && !dirty ? t('money.savedShort') : t('money.savePaymentSettings')}</Button>
+          {embedded
+            ? <Button type="button" loading={saving || continuing} onClick={() => void continueSetup()}>{embedded.continueLabel}</Button>
+            : <Button type="button" loading={saving} disabled={!dirty} onClick={() => void save()}>{saved && !dirty ? t('money.savedShort') : t('money.savePaymentSettings')}</Button>}
         </footer>
       </>}
-  </main>;
+  </Root>;
 }
 
 export default PaymentSettingsPage;

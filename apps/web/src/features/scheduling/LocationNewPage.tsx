@@ -13,13 +13,22 @@ function zoneName(timeZone: string, locale: string) {
   try { return new Intl.DateTimeFormat(locale, { timeZone, timeZoneName: 'longGeneric' }).formatToParts(new Date()).find((part) => part.type === 'timeZoneName')?.value ?? timeZone; } catch { return timeZone; }
 }
 
+export type LocationEditorEmbed = {
+  /** Called with the saved location id instead of navigating away. */
+  onSaved: (locationId: string) => void;
+  /** Optional cancel, shown next to Save (for example when adding another location during onboarding). */
+  onCancel?: () => void;
+  saveLabel?: string;
+};
+
 // Board 19a: Create new location. Saves through the existing location-save function.
-export function LocationNewPage() {
+// Onboarding step 4 embeds the same form, so a first location is set up exactly as it is in Settings.
+export function LocationNewPage({ embedded }: { embedded?: LocationEditorEmbed } = {}) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
-  const locationId = searchParams.get('location_id');
+  const locationId = embedded ? null : searchParams.get('location_id');
   const [zoneOpen, setZoneOpen] = useState(false);
   const [draft, setDraft] = useState<NewLocationDraft>(() => newLocationDefaults(Intl.DateTimeFormat().resolvedOptions().timeZone));
   const [differentHours, setDifferentHours] = useState(false);
@@ -132,7 +141,7 @@ export function LocationNewPage() {
     setBusy(true);
     try {
       const payload = locationSavePayload(draft, colorIndex);
-      await callFunction(client, businessId, 'location-save', {
+      const saved = await callFunction<{ id?: string }>(client, businessId, 'location-save', {
         ...payload,
         location_id: locationId,
         address: { ...savedAddress, street: draft.address.trim() },
@@ -140,7 +149,8 @@ export function LocationNewPage() {
         client_details: savedClientDetails,
         policies: { ...payload.policies, ...savedPolicyRemainder },
       });
-      navigate(returnTo);
+      if (embedded) embedded.onSaved(typeof saved?.id === 'string' ? saved.id : '');
+      else navigate(returnTo);
     } catch (error) {
       setSaveError(errorCode(error));
     } finally {
@@ -148,8 +158,9 @@ export function LocationNewPage() {
     }
   };
 
-  if (identityLoading || loadingLocation) return <main className="mova-page mova-scheduling"><p role="status">{t('scheduling.locationNew.loading')}</p></main>;
-  if (!businessId) return <main className="mova-page mova-scheduling"><ErrorState title={t('scheduling.identityError')} retryLabel={t('scheduling.retry')} onRetry={() => window.location.reload()} /></main>;
+  const Root = embedded ? 'div' : 'main';
+  if (identityLoading || loadingLocation) return <Root className="mova-page mova-scheduling"><p role="status">{t('scheduling.locationNew.loading')}</p></Root>;
+  if (!businessId) return <Root className="mova-page mova-scheduling"><ErrorState title={t('scheduling.identityError')} retryLabel={t('scheduling.retry')} onRetry={() => window.location.reload()} /></Root>;
 
   const fieldError = (key: NewLocationField) => errors[key] ? t(`scheduling.locationNew.error.${key}`) : '';
   const minutes = (value: number) => value === 0 ? t('scheduling.locationNew.noBuffer') : t('scheduling.minutesShort', { count: value });
@@ -158,9 +169,9 @@ export function LocationNewPage() {
   const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
 
   const primaryHours = draft.hoursByWeekday[draft.weekdays[0] ?? 0] ?? { opens: '', closes: '' };
-  return <main className="mova-page mova-scheduling mova-scheduling--screen mova-location-new">
-    <ScreenHeader title={t(locationId ? 'scheduling.locationNew.editTitle' : 'scheduling.locationNew.title')} onBack={() => navigate(backTo)} backLabel={t('scheduling.locationNew.back')} />
-    <h1 className="mova-location-new__title">{t('scheduling.locationNew.heading')}</h1>
+  return <Root className={`mova-scheduling mova-location-new${embedded ? ' mova-location-new--embedded' : ' mova-page mova-scheduling--screen'}`}>
+    {!embedded && <ScreenHeader title={t(locationId ? 'scheduling.locationNew.editTitle' : 'scheduling.locationNew.title')} onBack={() => navigate(backTo)} backLabel={t('scheduling.locationNew.back')} />}
+    {!embedded && <h1 className="mova-location-new__title">{t('scheduling.locationNew.heading')}</h1>}
     {loadError && <ErrorState title={t('scheduling.locationNew.loadError')} retryLabel={t('scheduling.retry')} onRetry={() => window.location.reload()} />}
     <form className="mova-scheduling__form" onSubmit={(event) => void submit(event)} noValidate>
       <fieldset className="mova-choice-fieldset">
@@ -230,10 +241,11 @@ export function LocationNewPage() {
 
       {saveError && <p className="mova-field__error" role="alert">{t('scheduling.locationNew.saveError')}</p>}
       <div className="mova-actions mova-scheduling__footer-actions">
-      <Button type="submit" disabled={Boolean(locationId && loadError)} loading={busy}>{t(locationId ? 'scheduling.locationNew.saveEdit' : 'scheduling.locationNew.save')}</Button>
+      {embedded?.onCancel && <Button type="button" variant="secondary" onClick={embedded.onCancel}>{t('settings.cancel')}</Button>}
+      <Button type="submit" disabled={Boolean(locationId && loadError)} loading={busy}>{embedded?.saveLabel ?? t(locationId ? 'scheduling.locationNew.saveEdit' : 'scheduling.locationNew.save')}</Button>
       </div>
     </form>
-  </main>;
+  </Root>;
 }
 
 export default LocationNewPage;

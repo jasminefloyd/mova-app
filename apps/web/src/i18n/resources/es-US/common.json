@@ -1407,7 +1407,8 @@
       "weekly": "Semanal, los {{day}}",
       "monthly": "Mensual, el día {{day}}",
       "manual": "Cuando lo solicites"
-    }
+    },
+    "onboardingNeedsMethod": "Activa al menos una forma de recibir pagos."
   },
   "operator": {
     "loading": "Verificando el acceso al espacio de trabajo…",
@@ -2025,8 +2026,8 @@
     "photoOptional": "La foto de perfil es opcional",
     "bookingLater": "Las reservas se activan cuando configures una ubicación",
     "searchIndex": "Mostrar mi página en los resultados de búsqueda",
-    "servicesTitle": "Agrega tus servicios",
-    "servicesDescription": "Configura los detalles del servicio y cualquier depósito. Puedes ajustarlos después.",
+    "servicesTitle": "Lo que ofreces",
+    "servicesDescription": "Agrega al menos un servicio. Tu ubicación ya está seleccionada.",
     "addFirstService": "Agrega tu primer servicio",
     "addAnotherService": "Agregar otro servicio",
     "serviceName": "Nombre del servicio",
@@ -2048,7 +2049,26 @@
     "servicesConfigured": "servicios configurados",
     "publish": "Publicar mi página",
     "publishError": "No pudimos publicar tu página. Inténtalo de nuevo.",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "locationTitle": "Dónde trabajas",
+    "locationDescription": "Agrega el lugar donde tus clientes te reservan. Puedes agregar más ubicaciones después en Configuración.",
+    "saveLocation": "Guardar ubicación",
+    "addAnotherLocation": "Agregar otra ubicación",
+    "paymentsTitle": "Cómo recibes pagos",
+    "paymentsDescription": "Conecta Stripe para pagos con tarjeta y depósitos, o cobra a tu manera.",
+    "finishSetup": "Terminar configuración",
+    "welcomeSettingUp": "Configurando tu cuenta…",
+    "welcomeTitle": "Te damos la bienvenida a Mova, {{name}}",
+    "welcomeStepAccount": "Creando tu cuenta",
+    "welcomeStepPage": "Publicando tu página",
+    "welcomeStepBooking": "Activando las reservas",
+    "welcomeLive": "Tu página ya está publicada",
+    "nextTitle": "Próximos pasos",
+    "nextSettingsTitle": "Agrega más servicios y ubicaciones",
+    "nextSettingsBody": "Ya estás lista en {{location}}. Agrega más servicios, ubicaciones y horarios en Configuración.",
+    "nextSettingsBodyNoLocation": "Agrega más servicios, ubicaciones y horarios en Configuración.",
+    "goToSettings": "Ir a Configuración",
+    "goHome": "Ir a Inicio"
   },
   "language": "Idioma",
   "stylistAuth": {
@@ -2057,39 +2077,18 @@
     "signIn": {
       "badge": "Inicio de sesión para estilistas",
       "title": "Qué bueno verte de nuevo",
-      "intro": "Tu calendario, tus clientes y tu dinero están justo donde los dejaste.",
+      "intro": "Te enviaremos un enlace seguro por correo para iniciar sesión. No necesitas contraseña.",
       "formLabel": "Iniciar sesión",
       "email": "Correo electrónico",
-      "password": "Contraseña",
-      "forgot": "¿Olvidaste tu contraseña?",
-      "submit": "Iniciar sesión",
-      "submitting": "Iniciando sesión",
+      "submit": "Envíame un enlace para entrar",
+      "submitting": "Enviando enlace",
       "newToMova": "¿Eres nuevo en Mova?",
       "createLink": "Crea una cuenta de estilista",
       "clientPrompt": "¿Te reservó un estilista en Mova?",
       "clientLink": "Inicio de sesión de clientes",
       "clientNote": "usa un código de un solo uso, sin contraseña.",
       "chooseTitle": "Elige un negocio",
-      "error": "No pudimos iniciar tu sesión. Revisa tu correo y contraseña."
-    },
-    "passwordReset": {
-      "badge": "Recuperación de cuenta",
-      "title": "Restablece tu contraseña",
-      "intro": "Ingresa el correo de tu cuenta y te enviaremos un enlace seguro si está registrado.",
-      "send": "Enviar enlace",
-      "sending": "Enviando enlace…",
-      "sent": "Si existe una cuenta con ese correo, recibirás un enlace. Revisa también el correo no deseado.",
-      "requestError": "No pudimos enviar el enlace. Revisa el correo e inténtalo de nuevo.",
-      "newTitle": "Elige una contraseña nueva",
-      "newIntro": "Usa al menos 9 caracteres para tu contraseña nueva.",
-      "newPassword": "Contraseña nueva",
-      "save": "Guardar contraseña",
-      "saving": "Guardando contraseña…",
-      "updateError": "No pudimos cambiar la contraseña. Solicita un enlace nuevo e inténtalo de nuevo.",
-      "savedTitle": "Contraseña actualizada",
-      "saved": "Tu contraseña se actualizó. Inicia sesión con la contraseña nueva.",
-      "signIn": "Ir a iniciar sesión",
-      "back": "Volver a iniciar sesión"
+      "error": "No pudimos enviar el enlace. Revisa el correo e inténtalo de nuevo."
     },
     "signUp": {
       "forIndependent": "Para estilistas independientes",
@@ -2108,24 +2107,40 @@
       "title": "Crea tu cuenta",
       "formLabel": "Crea tu cuenta",
       "email": "Correo electrónico",
-      "password": "Contraseña",
-      "passwordHint": "Usa al menos 9 caracteres.",
-      "languageLegend": "Idioma de la app",
-      "english": "English (US)",
-      "spanish": "Español (EE. UU.)",
       "submit": "Crear cuenta",
-      "submitting": "Creando cuenta",
-      "legal": "Al crear una cuenta aceptas los Términos y la Política de privacidad. Te enviaremos un enlace para verificar tu correo.",
+      "submitting": "Enviando enlace",
+      "legal": "Al crear una cuenta aceptas los Términos y la Política de privacidad. Te enviaremos un enlace seguro por correo para terminar. No necesitas contraseña.",
       "haveAccount": "¿Ya tienes una cuenta?",
       "signIn": "Iniciar sesión",
       "verifyEmail": "Revisa tu correo para ver el enlace de verificación. Tu perfil estará listo cuando regreses.",
-      "passwordRule": "Usa al menos 9 caracteres.",
-      "error": "No pudimos crear tu cuenta. Revisa tus datos e inténtalo de nuevo."
+      "error": "No pudimos crear tu cuenta. Revisa tus datos e inténtalo de nuevo.",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "namesPrivate": "Solo tú ves tu nombre. Tus clientes ven tu nombre público y tu enlace.",
+      "nameRequired": "Escribe tu nombre y apellido."
     },
     "legal": {
       "terms": "Términos",
       "privacy": "Privacidad",
       "help": "Ayuda"
+    },
+    "checkEmail": {
+      "title": "Revisa tu correo",
+      "body": "Enviamos un enlace seguro a {{email}}. Ábrelo en este dispositivo para continuar.",
+      "once": "El enlace funciona una sola vez y vence en poco tiempo.",
+      "spam": "¿No lo encuentras? Revisa la carpeta de spam o promociones.",
+      "resend": "Enviar el enlace de nuevo",
+      "resendIn": "Enviar de nuevo en {{seconds}} s",
+      "resent": "Un nuevo enlace va en camino.",
+      "different": "Usar otro correo",
+      "signInSent": "Si hay una cuenta de Mova con {{email}}, te enviamos un enlace para entrar."
+    },
+    "confirm": {
+      "working": "Iniciando sesión…",
+      "expiredTitle": "Este enlace venció o ya se usó",
+      "expiredBody": "Los enlaces funcionan una sola vez y vencen en poco tiempo. Envíate uno nuevo.",
+      "newLink": "Enviar un enlace nuevo",
+      "error": "No pudimos iniciar sesión con ese enlace."
     }
   },
   "showcase": {

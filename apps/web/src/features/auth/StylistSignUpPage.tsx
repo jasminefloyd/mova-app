@@ -1,40 +1,43 @@
 import { useMemo, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import type { ReactNode } from 'react';
+import { CheckEmailPanel } from './CheckEmailPanel';
+import { sendStylistEmailLink } from './email-link';
 import './stylist-auth.css';
 
 function FeatureIcon({ children }: { children: ReactNode }) {
   return <span className="stylist-auth__feature-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{children}</svg></span>;
 }
 
-/** W8 · /signup: stylist sign-up. Anyone can create an account; there is no invite or waitlist step. */
+/** W8 · /signup: stylist sign-up (onboarding step 1). Passwordless: first name, last name and email,
+ * then a secure email link verifies the address and signs the stylist in. No invite or waitlist step. */
 export default function StylistSignUpPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const supabase = useMemo(() => { try { return createMovaSupabaseClient(); } catch { return null; } }, []);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
+  const [sent, setSent] = useState(false);
+
+  const send = async () => {
+    if (!supabase) return false;
+    const result = await sendStylistEmailLink(supabase, { email, create: true, firstName, lastName, locale: 'en-US', returnTo: '/onboarding/profile' });
+    return result.ok;
+  };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError(''); setNotice('');
+    setError('');
     if (!supabase) { setError(t('stylistAuth.configurationError')); return; }
-    if (password.length < 9) { setError(t('stylistAuth.signUp.passwordRule')); return; }
+    if (!firstName.trim() || !lastName.trim()) { setError(t('stylistAuth.signUp.nameRequired')); return; }
     setBusy(true);
     try {
-      const { data, error: authError } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: { emailRedirectTo: `${window.location.origin}/onboarding/profile`, data: { preferred_locale: 'en-US' } },
-      });
-      if (authError) { setError(t('stylistAuth.signUp.error')); return; }
-      if (data.session) navigate('/onboarding/profile', { replace: true });
-      else setNotice(t('stylistAuth.signUp.verifyEmail'));
+      if (await send()) setSent(true);
+      else setError(t('stylistAuth.signUp.error'));
     } catch {
       setError(t('stylistAuth.signUp.error'));
     } finally {
@@ -72,30 +75,41 @@ export default function StylistSignUpPage() {
       </section>
 
       <section className="stylist-auth__form-panel" aria-labelledby="stylist-signup-h">
-        <form className="stylist-auth__form-column" onSubmit={(event) => void submit(event)}>
+        {sent ? <div className="stylist-auth__form-column">
+          <div className="stylist-auth__progress" aria-hidden="true">
+            {[0, 1, 2, 3, 4, 5].map((index) => <span key={index} className={index === 0 ? 'is-current' : undefined} />)}
+          </div>
+          <span className="stylist-auth__step">{t('stylistAuth.signUp.step')}</span>
+          <CheckEmailPanel email={email.trim()} onResend={send} onChangeEmail={() => setSent(false)} />
+        </div> : <form className="stylist-auth__form-column" onSubmit={(event) => void submit(event)}>
           <div className="stylist-auth__progress" aria-hidden="true">
             {[0, 1, 2, 3, 4, 5].map((index) => <span key={index} className={index === 0 ? 'is-current' : undefined} />)}
           </div>
           <span className="stylist-auth__step">{t('stylistAuth.signUp.step')}</span>
           <h1 id="stylist-signup-h" className="stylist-auth__title">{t('stylistAuth.signUp.title')}</h1>
 
+          <div className="stylist-auth__name-row">
+            <div className="stylist-auth__field">
+              <label htmlFor="stylist-signup-first">{t('stylistAuth.signUp.firstName')}</label>
+              <input id="stylist-signup-first" name="given-name" autoComplete="given-name" required maxLength={80} value={firstName} onChange={(event) => setFirstName(event.currentTarget.value)} />
+            </div>
+            <div className="stylist-auth__field">
+              <label htmlFor="stylist-signup-last">{t('stylistAuth.signUp.lastName')}</label>
+              <input id="stylist-signup-last" name="family-name" autoComplete="family-name" required maxLength={80} value={lastName} onChange={(event) => setLastName(event.currentTarget.value)} />
+            </div>
+          </div>
+          <p className="stylist-auth__hint">{t('stylistAuth.signUp.namesPrivate')}</p>
           <div className="stylist-auth__field">
             <label htmlFor="stylist-signup-email">{t('stylistAuth.signUp.email')}</label>
             <input id="stylist-signup-email" name="email" type="email" autoComplete="email" placeholder="you@example.com" required value={email} onChange={(event) => setEmail(event.currentTarget.value)} />
           </div>
-          <div className="stylist-auth__field">
-            <label htmlFor="stylist-signup-password">{t('stylistAuth.signUp.password')}</label>
-            <input id="stylist-signup-password" name="password" type="password" autoComplete="new-password" aria-describedby="stylist-signup-pass-hint" required value={password} onChange={(event) => setPassword(event.currentTarget.value)} />
-            <span id="stylist-signup-pass-hint" className="stylist-auth__hint">{t('stylistAuth.signUp.passwordHint')}</span>
-          </div>
 
-          {notice && <p className="stylist-auth__notice" role="status">{notice}</p>}
           {error && <p className="stylist-auth__error" role="alert">{error}</p>}
           <button className="stylist-auth__submit" type="submit" disabled={busy}>{t(busy ? 'stylistAuth.signUp.submitting' : 'stylistAuth.signUp.submit')}</button>
           <p className="stylist-auth__legal">{t('stylistAuth.signUp.legal')}</p>
 
           <p className="stylist-auth__aside">{t('stylistAuth.signUp.haveAccount')} <Link className="stylist-auth__strong" to="/login">{t('stylistAuth.signUp.signIn')}</Link></p>
-        </form>
+        </form>}
       </section>
     </div>
   </div>;

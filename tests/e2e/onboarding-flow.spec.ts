@@ -9,11 +9,12 @@ const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, x-mova-artist-business-id, prefer, accept-profile, content-profile',
   'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+  'Access-Control-Expose-Headers': 'Content-Range',
   'Content-Range': '0-0/1',
 };
 
-test('new stylist can complete onboarding through the shared service and location editors', async ({ page }) => {
-  const user = { id: userId, aud: 'authenticated', role: 'authenticated', email: 'hello+qatest3@move-beauty.co', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: {}, created_at: '2026-01-01T00:00:00.000Z' };
+test('new stylist completes onboarding: profile, photo, where you work, what you offer, how you get paid, welcome', async ({ page }) => {
+  const user = { id: userId, aud: 'authenticated', role: 'authenticated', email: 'hello+qatest3@move-beauty.co', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: { first_name: 'Ari', last_name: 'Monroe' }, created_at: '2026-01-01T00:00:00.000Z' };
   const session = { access_token: 'onboarding-test-token', token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'onboarding-test-refresh', user };
   await page.addInitScript(({ key, value }) => localStorage.setItem(key, JSON.stringify(value)), { key: `sb-${projectRef}-auth-token`, value: session });
 
@@ -21,6 +22,7 @@ test('new stylist can complete onboarding through the shared service and locatio
   let profile = { display_name: '', handle: '', bio: '', specialties: [] as string[], preferred_locale: 'en-US', search_index_enabled: true };
   let progress = { current_step: 'profile', completed_steps: [] as string[], form_data: {} as Record<string, unknown> };
   const services: Array<Record<string, unknown>> = [];
+  const locations: Array<Record<string, unknown>> = [];
   const writes: Array<{ name: string; body: unknown }> = [];
 
   await page.route('**/auth/v1/**', async (route) => {
@@ -77,21 +79,26 @@ test('new stylist can complete onboarding through the shared service and locatio
       return json(services);
     }
     if (table === 'mova_locations') {
-      if (method === 'HEAD') return route.fulfill({ status: 200, headers: { ...cors, 'Content-Range': claimed ? '0-0/1' : '0-0/0' } });
-      return json([]);
+      if (method === 'HEAD') return route.fulfill({ status: 200, headers: { ...cors, 'Content-Range': `0-0/${locations.length}` } });
+      return json(accept.includes('vnd.pgrst.object') ? (locations[0] ?? null) : locations);
     }
     if (table === 'mova_service_locations') return json([]);
     return json(accept.includes('vnd.pgrst.object') ? null : []);
   });
-  await page.route('**/functions/v1/location-save', async (route) => {
-    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
-    writes.push({ name: 'location-save', body: route.request().postDataJSON() });
-    return route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify({ data: { id: locationId }, error: null, request_id: 'onboarding-qa' }) });
-  });
   await page.route('**/functions/v1/**', async (route) => {
     if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
     const name = new URL(route.request().url()).pathname.split('/').pop();
-    if (name === 'location-save') writes.push({ name, body: route.request().postDataJSON() });
+    if (name === 'location-save') {
+      const body = route.request().postDataJSON() as Record<string, unknown>;
+      writes.push({ name, body });
+      locations.push({ id: locationId, name: body.name ?? 'Studio 9 Suites', location_type: body.location_type ?? 'suite', booking_mode: 'instant', payment_collector: 'artist', is_active: true });
+      return route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify({ data: { id: locationId }, error: null, request_id: 'onboarding-qa' }) });
+    }
+    if (name === 'payment-settings') {
+      const body = route.request().postDataJSON() as Record<string, unknown>;
+      if (body.action === 'save') writes.push({ name, body });
+      return route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify({ data: { cash_enabled: false, other_enabled: false, salon_locations: [] }, error: null }) });
+    }
     return route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify({ data: {}, error: null, request_id: 'onboarding-qa' }) });
   });
 
@@ -110,31 +117,47 @@ test('new stylist can complete onboarding through the shared service and locatio
   await expect(page.getByRole('heading', { level: 1, name: 'Add a profile photo' })).toBeVisible();
   await page.getByRole('button', { name: 'Later' }).click();
 
-  await expect(page.getByRole('heading', { level: 1, name: 'Add your services' })).toBeVisible();
-  await page.getByRole('button', { name: 'Add your first service' }).click();
-  await expect(page).toHaveURL(/\/BID-1\/settings\/services\?return_to=%2Fonboarding%2Fservices&new=1$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'Add service' })).toBeVisible();
+  // Step 4 · Where you work: the full Settings location editor, inside onboarding.
+  await expect(page).toHaveURL(/\/onboarding\/location$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Where you work' })).toBeVisible();
+  await page.getByRole('radio', { name: 'Suite rental' }).check();
+  await page.getByLabel('Location name').fill('Studio 9 Suites');
+  await page.getByLabel('Address').fill('210 Main St, Suite 4');
+  await page.getByRole('button', { name: 'Tuesday' }).click();
+  await page.getByLabel('Opens').fill('09:00');
+  await page.getByLabel('Closes').fill('17:00');
+  await page.getByRole('button', { name: 'Save location' }).click();
+  await expect(page.getByText('Studio 9 Suites')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add another location' })).toBeVisible();
+  await page.getByRole('button', { name: 'Continue' }).click();
+
+  // Step 5 · What you offer: the full Add a service editor with the new location already ticked.
+  await expect(page).toHaveURL(/\/onboarding\/services$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'What you offer' })).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: /Studio 9 Suites/ })).toBeChecked();
   await page.getByLabel('Service name').fill('Silk press');
   await page.getByLabel('Category').fill('Silk press');
   await page.getByLabel('Duration (minutes)').fill('90');
   await page.getByLabel('Buffer (minutes)').fill('15');
   await page.getByLabel('Price (USD)').fill('150');
   await page.getByRole('button', { name: 'Save service' }).click();
-  await expect(page).toHaveURL(/\/onboarding\/services$/);
-  await expect(page.getByText('Silk press')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add another service' })).toBeVisible();
   await page.getByRole('button', { name: 'Continue' }).click();
 
-  await expect(page).toHaveURL(/\/BID-1\/settings\/locations\/new\?return_to=%2Fonboarding%2Fpublish&back_to=%2Fonboarding%2Fservices$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'Where else do you work?' })).toBeVisible();
-  await page.getByRole('radio', { name: 'Suite rental' }).check();
-  await page.getByLabel('Location name').fill('Studio 9 Suites');
-  await page.getByLabel('Address').fill('210 Main St, Suite 4');
-  await page.getByRole('button', { name: 'Save location' }).click();
+  // Step 6 · How you get paid: at least one way to get paid before finishing.
+  await expect(page).toHaveURL(/\/onboarding\/payments$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'How you get paid' })).toBeVisible();
+  await expect(page.getByText('Zelle')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Finish setup' }).click();
+  await expect(page.getByText('Turn on at least one way to get paid.')).toBeVisible();
+  await page.getByRole('switch', { name: /^Cash/ }).check();
+  await page.getByRole('button', { name: 'Finish setup' }).click();
 
-  await expect(page).toHaveURL(/\/onboarding\/publish$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'Ready to go live' })).toBeVisible();
-  expect(writes.map(({ name }) => name)).toEqual(expect.arrayContaining(['mova_claim_artist_profile', 'mova_services', 'location-save']));
-  await page.getByRole('button', { name: 'Publish my showcase' }).click();
-  await expect(page).toHaveURL(/\/BID-1\/?$/);
-  expect(writes.map(({ name }) => name)).toContain('mova_publish_artist_profile');
+  // Step 7 · Welcome: the page is published, then the next step is Settings.
+  await expect(page).toHaveURL(/\/onboarding\/welcome$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Welcome to Mova, Ari' })).toBeVisible({ timeout: 8000 });
+  await expect(page.getByRole('link', { name: 'mova-beauty.co/a/rooted-beauty-qa' })).toBeVisible();
+  expect(writes.map(({ name }) => name)).toEqual(expect.arrayContaining(['mova_claim_artist_profile', 'location-save', 'mova_services', 'payment-settings', 'mova_publish_artist_profile']));
+  await page.getByRole('button', { name: 'Go to Settings' }).click();
+  await expect(page).toHaveURL(/\/BID-1\/settings\/?$/);
 });

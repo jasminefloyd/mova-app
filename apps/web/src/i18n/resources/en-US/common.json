@@ -1407,7 +1407,8 @@
       "weekly": "Weekly on {{day}}",
       "monthly": "Monthly on day {{day}}",
       "manual": "When you request it"
-    }
+    },
+    "onboardingNeedsMethod": "Turn on at least one way to get paid."
   },
   "operator": {
     "loading": "Verifying workspace access…",
@@ -2025,8 +2026,8 @@
     "photoOptional": "Profile photo is optional",
     "bookingLater": "Booking turns on after a location is set up",
     "searchIndex": "Show my page in search results",
-    "servicesTitle": "Add your services",
-    "servicesDescription": "Set your service details and any deposit. You can adjust these later.",
+    "servicesTitle": "What you offer",
+    "servicesDescription": "Add at least one service. Your location is already selected.",
     "addFirstService": "Add your first service",
     "addAnotherService": "Add another service",
     "serviceName": "Service name",
@@ -2048,7 +2049,26 @@
     "servicesConfigured": "services configured",
     "publish": "Publish my showcase",
     "publishError": "We couldn't publish your showcase. Try again.",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "locationTitle": "Where you work",
+    "locationDescription": "Add the place clients book you. You can add more locations later in Settings.",
+    "saveLocation": "Save location",
+    "addAnotherLocation": "Add another location",
+    "paymentsTitle": "How you get paid",
+    "paymentsDescription": "Connect Stripe for card payments and deposits, or take payment your own way.",
+    "finishSetup": "Finish setup",
+    "welcomeSettingUp": "Setting up your account…",
+    "welcomeTitle": "Welcome to Mova, {{name}}",
+    "welcomeStepAccount": "Creating your account",
+    "welcomeStepPage": "Publishing your page",
+    "welcomeStepBooking": "Turning on booking",
+    "welcomeLive": "Your page is live",
+    "nextTitle": "Next steps",
+    "nextSettingsTitle": "Add more services and locations",
+    "nextSettingsBody": "You're set up at {{location}}. Add more services, locations and hours in Settings.",
+    "nextSettingsBodyNoLocation": "Add more services, locations and hours in Settings.",
+    "goToSettings": "Go to Settings",
+    "goHome": "Go to Home"
   },
   "language": "Language",
   "stylistAuth": {
@@ -2057,39 +2077,18 @@
     "signIn": {
       "badge": "Stylist sign-in",
       "title": "Welcome back",
-      "intro": "Your calendar, clients and money are right where you left them.",
+      "intro": "We'll email you a secure link to sign in. No password needed.",
       "formLabel": "Sign in",
       "email": "Email",
-      "password": "Password",
-      "forgot": "Forgot password?",
-      "submit": "Sign in",
-      "submitting": "Signing in",
+      "submit": "Email me a sign-in link",
+      "submitting": "Sending link",
       "newToMova": "New to Mova?",
       "createLink": "Create a stylist account",
       "clientPrompt": "Booked with a stylist on Mova?",
       "clientLink": "Client sign-in",
       "clientNote": "uses a one-time code, no password.",
       "chooseTitle": "Choose a business",
-      "error": "We couldn't sign you in. Check your email and password."
-    },
-    "passwordReset": {
-      "badge": "Account recovery",
-      "title": "Reset your password",
-      "intro": "Enter your account email and we’ll send a secure reset link if it’s registered.",
-      "send": "Send reset link",
-      "sending": "Sending link…",
-      "sent": "If an account uses that email, a reset link is on its way. Check your inbox and spam folder.",
-      "requestError": "We couldn’t send the reset link. Check the email and try again.",
-      "newTitle": "Choose a new password",
-      "newIntro": "Use at least 9 characters for your new password.",
-      "newPassword": "New password",
-      "save": "Save new password",
-      "saving": "Saving password…",
-      "updateError": "We couldn’t update your password. Request a fresh reset link and try again.",
-      "savedTitle": "Password updated",
-      "saved": "Your password is updated. Sign in with your new password.",
-      "signIn": "Go to sign in",
-      "back": "Back to sign in"
+      "error": "We couldn't send a sign-in link. Check the email and try again."
     },
     "signUp": {
       "forIndependent": "For independent stylists",
@@ -2108,24 +2107,40 @@
       "title": "Create your account",
       "formLabel": "Create your account",
       "email": "Email",
-      "password": "Password",
-      "passwordHint": "Use at least 9 characters.",
-      "languageLegend": "App language",
-      "english": "English (US)",
-      "spanish": "Español (EE. UU.)",
       "submit": "Create account",
-      "submitting": "Creating account",
-      "legal": "By creating an account you agree to the Terms and Privacy Policy. We'll email you a link to verify your address.",
+      "submitting": "Sending link",
+      "legal": "By creating an account you agree to the Terms and Privacy Policy. We'll email you a secure link to finish. No password needed.",
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
       "verifyEmail": "Check your email for a verification link. Your profile will be ready when you return.",
-      "passwordRule": "Use at least 9 characters.",
-      "error": "We couldn't create your account. Check your details and try again."
+      "error": "We couldn't create your account. Check your details and try again.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "namesPrivate": "Only you see your name. Clients see your display name and link.",
+      "nameRequired": "Enter your first and last name."
     },
     "legal": {
       "terms": "Terms",
       "privacy": "Privacy",
       "help": "Help"
+    },
+    "checkEmail": {
+      "title": "Check your email",
+      "body": "We sent a secure link to {{email}}. Open it on this device to continue.",
+      "once": "The link works once and expires after a short time.",
+      "spam": "Can't find it? Check your spam or promotions folder.",
+      "resend": "Send the link again",
+      "resendIn": "Send again in {{seconds}} s",
+      "resent": "A new link is on its way.",
+      "different": "Use a different email",
+      "signInSent": "If there's a Mova account for {{email}}, a sign-in link is on its way."
+    },
+    "confirm": {
+      "working": "Signing you in…",
+      "expiredTitle": "This link has expired or was already used",
+      "expiredBody": "Sign-in links work once and expire after a short time. Send yourself a new one.",
+      "newLink": "Send a new link",
+      "error": "We couldn't sign you in with that link."
     }
   },
   "showcase": {

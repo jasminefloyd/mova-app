@@ -19,12 +19,13 @@ function render(path: string, node: ReactElement) {
 describe('stylist sign-in (/login, W9)', () => {
   beforeAll(async () => { await i18nReady; });
 
-  it('renders the existing-stylist form with email and password and no sign-up fields', () => {
+  it('renders a passwordless email-link form with no password or sign-up fields', () => {
     const markup = render('/login', <StylistSignInPage />);
     expect(markup).toContain('Welcome back');
     expect(markup).toContain('aria-label="Sign in"');
-    expect(markup).toContain('autoComplete="current-password"');
-    expect(markup).not.toContain('Use at least 9 characters.');
+    expect(markup).toContain('Email me a sign-in link');
+    expect(markup).not.toContain('type="password"');
+    expect(markup).not.toContain('Forgot');
     expect(markup).not.toContain('name="stylist-signup-language"');
   });
 
@@ -42,11 +43,15 @@ describe('stylist sign-in (/login, W9)', () => {
 describe('stylist sign-up (/signup, W8)', () => {
   beforeAll(async () => { await i18nReady; });
 
-  it('renders the account form in English without an app language selector', () => {
+  it('asks for private first and last name and email, with no password and no app language selector', () => {
     const markup = render('/signup', <StylistSignUpPage />);
     expect(markup).toContain('Create your account');
-    expect(markup).toContain('Use at least 9 characters.');
-    expect(markup).toContain('autoComplete="new-password"');
+    expect(markup).toContain('First name');
+    expect(markup).toContain('Last name');
+    expect(markup).toContain('autoComplete="given-name"');
+    expect(markup).toContain('autoComplete="family-name"');
+    expect(markup).toContain('Only you see your name.');
+    expect(markup).not.toContain('type="password"');
     expect(markup).not.toContain('name="stylist-signup-language"');
     expect(markup).not.toContain('Español (US)');
   });

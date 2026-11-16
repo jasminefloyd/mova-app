@@ -27,20 +27,16 @@ async function json(route: Route, status: number, body: unknown) {
   return route.fulfill({ status, contentType: 'application/json', headers: cors, body: JSON.stringify(body) });
 }
 
-/** signUp: 'session' signs straight in, 'verify' waits for the email link, 'error' fails. */
-async function mockAuth(page: Page, options: { signUp?: 'session' | 'verify' | 'error'; signIn?: 'ok' | 'bad'; memberships?: number } = {}) {
-  const requests: { signUp: unknown[]; signIn: number } = { signUp: [], signIn: 0 };
-  await page.route('**/auth/v1/signup**', async (route) => {
-    if (route.request().method() === 'POST') requests.signUp.push(route.request().postDataJSON());
-    if (options.signUp === 'error') return json(route, 422, { code: 'weak_password', msg: 'Password should be at least 6 characters.' });
-    if (options.signUp === 'verify') return json(route, 200, user);
-    return json(route, 200, session());
-  });
-  await page.route('**/auth/v1/token**', async (route) => {
-    if (route.request().method() === 'OPTIONS') return json(route, 200, {});
-    requests.signIn += 1;
-    if (options.signIn === 'bad') return json(route, 400, { error: 'invalid_grant', error_description: 'Invalid login credentials' });
-    return json(route, 200, session());
+/** otp: 'ok' sends the link, 'unknown' is an email with no account (sign-in only), 'error' fails. */
+async function mockAuth(page: Page, options: { otp?: 'ok' | 'unknown' | 'error'; memberships?: number; progress?: string | null } = {}) {
+  const requests: { otp: Array<{ body: Record<string, unknown>; redirectTo: string | null }> } = { otp: [] };
+  await page.route('**/auth/v1/otp**', async (route) => {
+    if (route.request().method() === 'POST') {
+      requests.otp.push({ body: route.request().postDataJSON() as Record<string, unknown>, redirectTo: new URL(route.request().url()).searchParams.get('redirect_to') });
+    }
+    if (options.otp === 'error') return json(route, 429, { code: 'over_email_send_rate_limit', msg: 'Email rate limit exceeded' });
+    if (options.otp === 'unknown') return json(route, 422, { code: 'otp_disabled', msg: 'Signups not allowed for otp' });
+    return json(route, 200, {});
   });
   await page.route('**/auth/v1/user', (route) => json(route, 200, user));
   await page.route('**/rest/v1/**', async (route) => {
@@ -53,10 +49,21 @@ async function mockAuth(page: Page, options: { signUp?: 'session' | 'verify' | '
       const rows = Array.from({ length: options.memberships ?? 0 }, () => ({ artist_business_id: businessId }));
       return json(route, 200, single ? (rows[0] ?? null) : rows);
     }
+    if (table === 'mova_onboarding_progress') {
+      const row = options.progress ? { current_step: options.progress } : null;
+      return json(route, 200, single ? row : row ? [row] : []);
+    }
     if (table === 'mova_artist_businesses') return json(route, 200, single ? { id: businessId, business_number: 1, business_number_display: 'BID-1' } : [{ id: businessId, business_number: 1 }]);
     return json(route, 200, single ? null : []);
   });
   return requests;
+}
+
+/** Opens /auth/confirm the way the emailed link does, with the session the link would create already stored. */
+async function landFromEmailLink(page: Page, query = '') {
+  const projectRef = new URL(process.env.VITE_SUPABASE_URL ?? 'http://127.0.0.1:54321').hostname.split('.')[0] ?? '127';
+  await page.addInitScript(({ key, value }) => localStorage.setItem(key, JSON.stringify(value)), { key: `sb-${projectRef}-auth-token`, value: session() });
+  await page.goto(`/auth/confirm${query}`);
 }
 
 test.describe('stylist sign-up (/signup)', () => {
@@ -67,46 +74,44 @@ test.describe('stylist sign-up (/signup)', () => {
     await expect(page.getByText('invite-only', { exact: false })).toHaveCount(0);
   });
 
-  test('a new stylist with a session continues to onboarding in English by default', async ({ page }) => {
-    const requests = await mockAuth(page, { signUp: 'session' });
+  test('asks for first name, last name and email, then emails a secure link (no password)', async ({ page }) => {
+    const requests = await mockAuth(page, { otp: 'ok' });
     await page.goto('/signup');
-    await page.getByLabel('Email', { exact: true }).fill('new-stylist@mova.invalid');
-    await page.getByLabel('Password', { exact: true }).fill('a-long-password');
+    await expect(page.getByLabel('Password')).toHaveCount(0);
     await expect(page.getByRole('radio')).toHaveCount(0);
+    await page.getByLabel('First name').fill('Ari');
+    await page.getByLabel('Last name').fill('Monroe');
+    await page.getByLabel('Email', { exact: true }).fill('new-stylist@mova.invalid');
     await page.getByRole('button', { name: 'Create account' }).click();
-    await expect(page).toHaveURL(/\/onboarding\/profile$/);
-    expect(requests.signUp).toHaveLength(1);
-    expect(requests.signUp[0]).toMatchObject({
+    await expect(page.getByRole('heading', { level: 1, name: 'Check your email' })).toBeVisible();
+    await expect(page.getByText('new-stylist@mova.invalid')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Send again/ })).toBeDisabled();
+    expect(requests.otp).toHaveLength(1);
+    expect(requests.otp[0]?.body).toMatchObject({
       email: 'new-stylist@mova.invalid',
-      data: { preferred_locale: 'en-US' },
+      create_user: true,
+      data: { first_name: 'Ari', last_name: 'Monroe', preferred_locale: 'en-US' },
     });
+    expect(requests.otp[0]?.redirectTo).toMatch(/\/auth\/confirm\?returnTo=%2Fonboarding%2Fprofile$/);
   });
 
-  test('without a session the page asks the stylist to verify their email', async ({ page }) => {
-    await mockAuth(page, { signUp: 'verify' });
+  test('"Use a different email" goes back to the form', async ({ page }) => {
+    await mockAuth(page, { otp: 'ok' });
     await page.goto('/signup');
+    await page.getByLabel('First name').fill('Ari');
+    await page.getByLabel('Last name').fill('Monroe');
     await page.getByLabel('Email', { exact: true }).fill('new-stylist@mova.invalid');
-    await page.getByLabel('Password', { exact: true }).fill('a-long-password');
     await page.getByRole('button', { name: 'Create account' }).click();
-    await expect(page.getByRole('status')).toContainText('Check your email for a verification link.');
-    await expect(page).toHaveURL(/\/signup$/);
+    await page.getByRole('button', { name: 'Use a different email' }).click();
+    await expect(page.getByLabel('Email', { exact: true })).toHaveValue('new-stylist@mova.invalid');
   });
 
-  test('a password under 9 characters is refused before any request is sent', async ({ page }) => {
-    const requests = await mockAuth(page, { signUp: 'session' });
+  test('a failed request shows the account error', async ({ page }) => {
+    await mockAuth(page, { otp: 'error' });
     await page.goto('/signup');
+    await page.getByLabel('First name').fill('Ari');
+    await page.getByLabel('Last name').fill('Monroe');
     await page.getByLabel('Email', { exact: true }).fill('new-stylist@mova.invalid');
-    await page.getByLabel('Password', { exact: true }).fill('short');
-    await page.getByRole('button', { name: 'Create account' }).click();
-    await expect(page.getByRole('alert')).toContainText('Use at least 9 characters.');
-    expect(requests.signUp).toEqual([]);
-  });
-
-  test('a failed sign-up shows the account error', async ({ page }) => {
-    await mockAuth(page, { signUp: 'error' });
-    await page.goto('/signup');
-    await page.getByLabel('Email', { exact: true }).fill('new-stylist@mova.invalid');
-    await page.getByLabel('Password', { exact: true }).fill('a-long-password');
     await page.getByRole('button', { name: 'Create account' }).click();
     await expect(page.getByRole('alert')).toContainText("We couldn't create your account.");
   });
@@ -122,31 +127,30 @@ test.describe('stylist sign-up (/signup)', () => {
 });
 
 test.describe('stylist sign-in (/login)', () => {
-  test('a stylist with one business opens that business', async ({ page }) => {
-    await mockAuth(page, { signIn: 'ok', memberships: 1 });
+  test('emails a sign-in link without creating an account', async ({ page }) => {
+    const requests = await mockAuth(page, { otp: 'ok' });
     await page.goto('/login');
+    await expect(page.getByLabel('Password')).toHaveCount(0);
     await page.getByLabel('Email', { exact: true }).fill('new-stylist@mova.invalid');
-    await page.getByLabel('Password', { exact: true }).fill('a-long-password');
-    await page.getByRole('button', { name: 'Sign in' }).click();
-    await expect(page).toHaveURL(/\/BID-1\/?$/);
+    await page.getByRole('button', { name: 'Email me a sign-in link' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Check your email' })).toBeVisible();
+    expect(requests.otp[0]?.body).toMatchObject({ email: 'new-stylist@mova.invalid', create_user: false });
   });
 
-  test('a stylist with no business goes to onboarding', async ({ page }) => {
-    await mockAuth(page, { signIn: 'ok', memberships: 0 });
+  test('an email with no account gets the same answer, so the page never reveals who has an account', async ({ page }) => {
+    await mockAuth(page, { otp: 'unknown' });
     await page.goto('/login');
-    await page.getByLabel('Email', { exact: true }).fill('new-stylist@mova.invalid');
-    await page.getByLabel('Password', { exact: true }).fill('a-long-password');
-    await page.getByRole('button', { name: 'Sign in' }).click();
-    await expect(page).toHaveURL(/\/onboarding\/profile$/);
+    await page.getByLabel('Email', { exact: true }).fill('nobody@mova.invalid');
+    await page.getByRole('button', { name: 'Email me a sign-in link' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Check your email' })).toBeVisible();
   });
 
-  test('wrong credentials show the sign-in error and stay on /login', async ({ page }) => {
-    await mockAuth(page, { signIn: 'bad' });
+  test('a failed request shows the sign-in error and stays on /login', async ({ page }) => {
+    await mockAuth(page, { otp: 'error' });
     await page.goto('/login');
     await page.getByLabel('Email', { exact: true }).fill('new-stylist@mova.invalid');
-    await page.getByLabel('Password', { exact: true }).fill('wrong-password');
-    await page.getByRole('button', { name: 'Sign in' }).click();
-    await expect(page.getByRole('alert')).toContainText("We couldn't sign you in.");
+    await page.getByRole('button', { name: 'Email me a sign-in link' }).click();
+    await expect(page.getByRole('alert')).toContainText("We couldn't send a sign-in link.");
     await expect(page).toHaveURL(/\/login$/);
   });
 
@@ -157,21 +161,37 @@ test.describe('stylist sign-in (/login)', () => {
     await page.getByRole('link', { name: 'Create a stylist account' }).click();
     await expect(page).toHaveURL(/\/signup$/);
   });
+
+  test('the retired /reset-password page sends stylists to sign-in', async ({ page }) => {
+    await page.goto('/reset-password');
+    await expect(page).toHaveURL(/\/login/);
+  });
 });
 
-test.describe('password reset (/reset-password)', () => {
-  test('a rejected reset request shows an error instead of claiming the email was sent', async ({ page }) => {
-    let recoveryRequestIntercepted = false;
-    await page.route('**/recover**', async (route) => {
-      recoveryRequestIntercepted = true;
-      return json(route, 429, { code: 'over_email_send_rate_limit', msg: 'Email rate limit exceeded' });
-    });
-    await page.goto('/reset-password');
-    await page.getByLabel('Email', { exact: true }).fill('stylist@example.com');
-    await page.getByRole('button', { name: 'Send reset link' }).click();
-    expect(recoveryRequestIntercepted).toBe(true);
-    await expect(page.getByRole('alert')).toContainText('We couldn’t send the reset link.');
-    await expect(page.getByText('If an account uses that email, a reset link is on its way.')).toHaveCount(0);
+test.describe('email link landing (/auth/confirm)', () => {
+  test('a stylist with one finished business opens that business', async ({ page }) => {
+    await mockAuth(page, { memberships: 1, progress: 'complete' });
+    await landFromEmailLink(page);
+    await expect(page).toHaveURL(/\/BID-1\/?$/);
+  });
+
+  test('a stylist with no business goes to onboarding', async ({ page }) => {
+    await mockAuth(page, { memberships: 0 });
+    await landFromEmailLink(page, '?returnTo=%2Fonboarding%2Fprofile');
+    await expect(page).toHaveURL(/\/onboarding\/profile$/);
+  });
+
+  test('a stylist part-way through setup resumes onboarding', async ({ page }) => {
+    await mockAuth(page, { memberships: 1, progress: 'services' });
+    await landFromEmailLink(page);
+    await expect(page).toHaveURL(/\/onboarding\//);
+  });
+
+  test('an expired link explains itself and offers a new one', async ({ page }) => {
+    await page.goto('/auth/confirm#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await page.getByRole('link', { name: 'Send a new link' }).click();
+    await expect(page).toHaveURL(/\/login$/);
   });
 });
 

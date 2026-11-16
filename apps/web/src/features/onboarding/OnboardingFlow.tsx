@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Chip, StepperProgress, TextArea, TextField } from '../../components';
@@ -6,9 +6,16 @@ import { createMovaSupabaseClient } from '../../lib/supabase';
 import { operatorLocation } from '../../app/operator-url';
 import { displayId } from '../../lib/display-ids';
 import { useLocale } from '../../app/LocaleProvider';
+import { LocationNewPage } from '../scheduling/LocationNewPage';
+import { ServiceSettingsPage } from '../services/ServiceSettingsPage';
+import { PaymentSettingsPage } from '../money/PaymentSettingsPage';
+import { WelcomeStep } from './WelcomeStep';
+import './onboarding.css';
 
-type Step = 'profile' | 'photo' | 'services' | 'publish';
-const stepOrder: Step[] = ['profile', 'photo', 'services', 'publish'];
+// Step 1 (account) lives at /signup. Steps 2–6 are here, then the welcome screen publishes the page.
+type Step = 'profile' | 'photo' | 'location' | 'services' | 'payments' | 'welcome';
+const stepOrder: Step[] = ['profile', 'photo', 'location', 'services', 'payments', 'welcome'];
+type LocationSummary = { id: string; name: string; location_type: string; booking_mode: 'instant' | 'request'; payment_collector: 'artist' | 'salon' | null };
 type ServiceRow = { id: string; name: string; category: string; duration_minutes: number; buffer_minutes: number; base_price_minor: number; deposit_type: 'none' | 'fixed' | 'percent'; deposit_value: number };
 
 export function OnboardingFlow() {
@@ -37,6 +44,13 @@ export function OnboardingFlow() {
   const [photoZoom, setPhotoZoom] = useState(1);
   const [services, setServices] = useState<ServiceRow[]>([]);
   const [searchIndexEnabled, setSearchIndexEnabled] = useState(true);
+  const [locations, setLocations] = useState<LocationSummary[]>([]);
+  const [addingLocation, setAddingLocation] = useState(false);
+  const [addingService, setAddingService] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [setupLoaded, setSetupLoaded] = useState(false);
+  // Where to resume is decided once per visit; after that the stylist moves forward with the buttons.
+  const resumed = useRef(false);
 
   useEffect(() => {
     try {
@@ -69,6 +83,12 @@ export function OnboardingFlow() {
       // Onboarding needs a stylist account. Signed-out visitors start at sign-up.
       if (!session) { navigate('/signup', { replace: true }); return; }
       setSignedIn(true);
+      const meta = session.user.user_metadata as Record<string, unknown> | undefined;
+      const first = typeof meta?.first_name === 'string' ? meta.first_name.trim() : '';
+      const last = typeof meta?.last_name === 'string' ? meta.last_name.trim() : '';
+      setFirstName(first);
+      // The private name only seeds the public display name; the stylist can change it.
+      if (first || last) setDisplayName((current) => current || `${first} ${last}`.trim());
       const { data: membership } = await supabase.from('mova_artist_memberships')
         .select('artist_business_id').eq('user_id', session.user.id).eq('status', 'active').limit(1).maybeSingle();
       if (!active || !membership) return;
@@ -94,6 +114,9 @@ export function OnboardingFlow() {
         if (typeof savedForm.bio === 'string') setBio(savedForm.bio);
         if (Array.isArray(savedForm.specialties)) setSpecialties(savedForm.specialties.filter((value): value is string => typeof value === 'string').slice(0, 5));
       }
+      if (progress?.current_step === 'complete' && nextStep === 'welcome') { setStep('welcome'); return; }
+      if (resumed.current && progress?.current_step !== 'complete') return;
+      resumed.current = true;
       if (progress?.current_step === 'complete') {
         // A stylist who already finished onboarding belongs on Home, not on step 1 (task 2.1).
         const { data: business } = await supabase.from('mova_artist_businesses').select('business_number').eq('id', id).maybeSingle();
@@ -105,25 +128,34 @@ export function OnboardingFlow() {
         return;
       }
       if (progress?.current_step && progress.current_step !== 'complete') {
-        // A location step is completed in the shared Locations editor. If setup is resumed before
-        // it is saved, return to Services so the artist can enter the location again.
-        const mapped = progress.current_step === 'location'
-          ? (location.pathname.endsWith('/publish') ? 'publish' : 'services')
-          : progress.current_step === 'payments' ? 'publish' : progress.current_step;
-        if (mapped === 'profile' || mapped === 'photo' || mapped === 'services' || mapped === 'publish') setStep(mapped);
+        if (progress.current_step === 'profile' || progress.current_step === 'photo') { setStep(progress.current_step); return; }
+        // Location, services and payments resume from what is actually saved, so stylists who started
+        // under the older order (services before location, a separate publish step) land on the right screen.
+        const [{ count: locationCount }, { count: serviceCount }] = await Promise.all([
+          supabase.from('mova_locations').select('id', { count: 'exact', head: true }).eq('artist_business_id', id).eq('is_active', true),
+          supabase.from('mova_services').select('id', { count: 'exact', head: true }).eq('artist_business_id', id),
+        ]);
+        if (!active) return;
+        setStep(!locationCount ? 'location' : !serviceCount ? 'services' : 'payments');
       }
     })();
     return () => { active = false; };
   }, [location.pathname, navigate, supabase]);
 
-  useEffect(() => {
+  const refreshSetup = useCallback(async () => {
     if (!supabase || !businessId) return;
-    let active = true;
-    void supabase.from('mova_services').select('id, name, category, duration_minutes, buffer_minutes, base_price_minor, deposit_type, deposit_value')
-      .eq('artist_business_id', businessId).order('created_at')
-      .then(({ data }) => { if (active && data) setServices(data as ServiceRow[]); });
-    return () => { active = false; };
+    const [{ data: serviceRows }, { data: locationRows }] = await Promise.all([
+      supabase.from('mova_services').select('id, name, category, duration_minutes, buffer_minutes, base_price_minor, deposit_type, deposit_value')
+        .eq('artist_business_id', businessId).order('created_at'),
+      supabase.from('mova_locations').select('id, name, location_type, booking_mode, payment_collector')
+        .eq('artist_business_id', businessId).eq('is_active', true).order('created_at'),
+    ]);
+    if (serviceRows) setServices(serviceRows as ServiceRow[]);
+    if (locationRows) setLocations(locationRows as LocationSummary[]);
+    setSetupLoaded(true);
   }, [businessId, supabase]);
+
+  useEffect(() => { void refreshSetup(); }, [refreshSetup, step]);
 
   useEffect(() => {
     navigate(`/onboarding/${step}`, { replace: true });
@@ -157,7 +189,7 @@ export function OnboardingFlow() {
     return () => URL.revokeObjectURL(objectUrl);
   }, [photoFile]);
 
-  const setProgress = async (next: Step | 'location' | 'payments', complete?: Step | 'location' | 'payments') => {
+  const setProgress = async (next: Exclude<Step, 'welcome'> | 'complete', complete?: Exclude<Step, 'welcome'>) => {
     if (!supabase || !businessId) return;
     const { data: row } = await supabase.from('mova_onboarding_progress').select('completed_steps').eq('artist_business_id', businessId).maybeSingle();
     const completed = new Set<string>(row?.completed_steps ?? []);
@@ -216,7 +248,7 @@ export function OnboardingFlow() {
 
   const continueWithoutPhoto = async () => {
     setError(''); setLoading(true);
-    try { await setProgress('services', 'photo'); setStep('services'); }
+    try { await setProgress('location', 'photo'); setStep('location'); }
     catch { setError(t('onboarding.saveProgressError')); }
     finally { setLoading(false); }
   };
@@ -246,42 +278,43 @@ export function OnboardingFlow() {
       if (storageError) throw storageError;
       const { error: processError } = await supabase.functions.invoke('photo-process', { body: { path, kind: 'profile', zoom: photoZoom } });
       if (processError) throw processError;
-      await setProgress('services', 'photo');
-      setStep('services');
+      await setProgress('location', 'photo');
+      setStep('location');
     } catch { setError(t('onboarding.photoUploadError')); }
     finally { setLoading(false); }
   };
 
-  const continueServices = async () => {
-    if (!supabase || !businessId) return;
+  const continueTo = async (next: 'services' | 'payments', complete: 'location' | 'services') => {
     setLoading(true); setError('');
-    try {
-      await setProgress('location', 'services');
-      // Use the same location editor as Settings for the first location too.
-      navigate(operatorLocation(businessId, 'settings/locations/new?return_to=%2Fonboarding%2Fpublish&back_to=%2Fonboarding%2Fservices'));
-    }
+    try { await setProgress(next, complete); setStep(next); }
     catch { setError(t('onboarding.saveProgressError')); }
     finally { setLoading(false); }
   };
 
-  const publish = async () => {
+  // Last step: publish the page, then show the welcome screen while the account finishes setting up.
+  const finishSetup = async () => {
     if (!supabase || !businessId) return;
-    setError(''); setLoading(true);
-    try {
-      const { error: publishError } = await supabase.rpc('mova_publish_artist_profile', { p_artist_business_id: businessId, p_search_index_enabled: searchIndexEnabled });
-      if (publishError) throw publishError;
-      const { data: business } = await supabase.from('mova_artist_businesses').select('business_number').eq('id',businessId).maybeSingle();
-      if (!business?.business_number) throw new Error('BUSINESS_DISPLAY_ID_MISSING');
-      window.sessionStorage.setItem('mova_active_artist_business_id',businessId);
-      window.sessionStorage.setItem('mova_active_artist_business_display_id',displayId('BID',business.business_number));
-      const target=operatorLocation(businessId,'');
-      if(target.startsWith('https://'))window.location.assign(target);else navigate(target,{replace:true});
-    } catch { setError(t('onboarding.publishError')); }
-    finally { setLoading(false); }
+    setError('');
+    await setProgress('payments', 'payments').catch(() => undefined);
+    const { error: publishError } = await supabase.rpc('mova_publish_artist_profile', { p_artist_business_id: businessId, p_search_index_enabled: searchIndexEnabled });
+    if (publishError) { setError(t('onboarding.publishError')); return; }
+    const { data: business } = await supabase.from('mova_artist_businesses').select('business_number').eq('id', businessId).maybeSingle();
+    if (business?.business_number) {
+      window.sessionStorage.setItem('mova_active_artist_business_id', businessId);
+      window.sessionStorage.setItem('mova_active_artist_business_display_id', displayId('BID', business.business_number));
+    }
+    setStep('welcome');
+  };
+
+  const openWorkspacePath = (path: string) => {
+    const target = operatorLocation(businessId, path);
+    if (target.startsWith('https://')) window.location.assign(target); else navigate(target, { replace: true });
   };
 
   // Step 1 is the account step, now on /signup, so onboarding starts at 2.
-  const current = step === 'publish' ? 6 : stepOrder.indexOf(step) + 2;
+  const current = stepOrder.indexOf(step) + 2;
+  if (step === 'welcome') return <WelcomeStep name={firstName || displayName} handle={handle} locationName={locations[0]?.name ?? ''}
+    onSettings={() => openWorkspacePath('settings')} onHome={() => openWorkspacePath('')} />;
   return <div className="mova-onboarding-page">
     <header className="mova-onboarding-header">
       <span className="mova-wordmark" aria-label="mova">mova</span>
@@ -321,28 +354,59 @@ export function OnboardingFlow() {
         <Button type="button" loading={loading} variant="ghost" onClick={continueWithoutPhoto}>{t('onboarding.later')}</Button>
       </div>}
 
-      {step === 'services' && <section className="mova-form-stack">
-        <h1>{t('onboarding.servicesTitle')}</h1>
-        <p>{t('onboarding.servicesDescription')}</p>
-        {services.length > 0 && <ul className="mova-service-list">{services.map((service) => <li key={service.id}><strong>{service.name}</strong><span>{service.duration_minutes} {t('onboarding.minutes')} · {formatMoney(service.base_price_minor)}</span></li>)}</ul>}
-        <Button type="button" variant="secondary" onClick={() => navigate(operatorLocation(businessId, 'settings/services?return_to=%2Fonboarding%2Fservices&new=1'))}>{t(services.length ? 'onboarding.addAnotherService' : 'onboarding.addFirstService')}</Button>
-        <Button type="button" loading={loading} onClick={continueServices}>{t('onboarding.continue')}</Button>
+      {step === 'location' && <section className="mova-form-stack mova-onboarding-setup" aria-labelledby="onboarding-location-h">
+        <h1 id="onboarding-location-h">{t('onboarding.locationTitle')}</h1>
+        <p>{t('onboarding.locationDescription')}</p>
+        {setupLoaded && (locations.length === 0 || addingLocation)
+          ? <LocationNewPage embedded={{
+            saveLabel: t('onboarding.saveLocation'),
+            onSaved: () => { setAddingLocation(false); void refreshSetup(); },
+            ...(locations.length ? { onCancel: () => setAddingLocation(false) } : {}),
+          }} />
+          : setupLoaded && <>
+            <ul className="mova-onboarding-setup__list">{locations.map((item) => <li key={item.id}>
+              <span className="mova-onboarding-setup__check" aria-hidden="true">✓</span>
+              <span><strong>{item.name}</strong><small>{t(`scheduling.locationNew.kind.${item.location_type}`, { defaultValue: item.location_type })} · {t(`scheduling.mode.${item.booking_mode}`)}</small></span>
+            </li>)}</ul>
+            <Button type="button" variant="secondary" leadingIcon="plus" onClick={() => setAddingLocation(true)}>{t('onboarding.addAnotherLocation')}</Button>
+            {error && <p role="alert">{error}</p>}
+            <Button type="button" loading={loading} onClick={() => void continueTo('services', 'location')}>{t('onboarding.continue')}</Button>
+          </>}
       </section>}
 
-      {step === 'publish' && <div className="mova-form-stack">
-        <h1>{t('onboarding.publishTitle')}</h1>
-        <Card><h2>{displayName}</h2><p>{handle ? `/${handle}` : ''}</p><p>{specialties.join(' · ')}</p>{bio && <p>{bio}</p>}</Card>
-        <ul className="mova-setup-checklist"><li>{t('onboarding.profileSaved')}</li><li>{t('onboarding.photoOptional')}</li><li>{services.length} {t('onboarding.servicesConfigured')}</li><li>{t('onboarding.bookingLater')}</li></ul>
-        <label className="mova-check-row"><input type="checkbox" checked={searchIndexEnabled} onChange={(event) => setSearchIndexEnabled(event.currentTarget.checked)} /><span>{t('onboarding.searchIndex')}</span></label>
+      {step === 'services' && <section className="mova-form-stack mova-onboarding-setup" aria-labelledby="onboarding-services-h">
+        <h1 id="onboarding-services-h">{t('onboarding.servicesTitle')}</h1>
+        <p>{t('onboarding.servicesDescription')}</p>
+        {setupLoaded && (services.length === 0 || addingService)
+          ? <ServiceSettingsPage embedded={{
+            preselectLocationIds: locations.map((item) => item.id),
+            onSaved: () => { setAddingService(false); void refreshSetup(); },
+            ...(services.length ? { onCancel: () => setAddingService(false) } : {}),
+          }} />
+          : setupLoaded && <>
+            <ul className="mova-onboarding-setup__list">{services.map((service) => <li key={service.id}>
+              <span className="mova-onboarding-setup__check" aria-hidden="true">✓</span>
+              <span><strong>{service.name}</strong><small>{service.duration_minutes} {t('onboarding.minutes')} · {formatMoney(service.base_price_minor)}</small></span>
+            </li>)}</ul>
+            <Button type="button" variant="secondary" leadingIcon="plus" onClick={() => setAddingService(true)}>{t('onboarding.addAnotherService')}</Button>
+            {error && <p role="alert">{error}</p>}
+            <Button type="button" loading={loading} onClick={() => void continueTo('payments', 'services')}>{t('onboarding.continue')}</Button>
+          </>}
+      </section>}
+
+      {step === 'payments' && <section className="mova-form-stack mova-onboarding-setup" aria-labelledby="onboarding-payments-h">
+        <h1 id="onboarding-payments-h">{t('onboarding.paymentsTitle')}</h1>
+        <p>{t('onboarding.paymentsDescription')}</p>
+        <PaymentSettingsPage embedded={{ continueLabel: t('onboarding.finishSetup'), onContinue: finishSetup }} />
         {error && <p role="alert">{error}</p>}
-        <Button type="button" loading={loading} onClick={publish}>{t('onboarding.publish')}</Button>
-      </div>}
+      </section>}
     </main>
   </div>;
 }
 
 function routeStep(pathname: string): Step {
   const segment = pathname.split('/').filter(Boolean).at(-1);
+  if (segment === 'publish') return 'payments';
   return segment && stepOrder.includes(segment as Step) ? segment as Step : 'profile';
 }
 

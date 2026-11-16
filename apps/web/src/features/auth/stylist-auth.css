@@ -252,3 +252,24 @@
   .stylist-auth__pitch { padding: 72px clamp(20px, 5vw, 72px); }
   .stylist-auth__form-panel { padding: 72px clamp(20px, 5vw, 72px); }
 }
+
+/* Passwordless sign-up and sign-in: name row and the "Check your email" state. */
+.stylist-auth__name-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 359px) { .stylist-auth__name-row { grid-template-columns: 1fr; } }
+.stylist-auth__check { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.stylist-auth__check-icon {
+  width: 56px; height: 56px; border-radius: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--mint); color: var(--forest);
+}
+.stylist-auth__check .stylist-auth__submit { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+.stylist-auth__secondary {
+  width: 100%; min-height: 52px; border-radius: 26px;
+  border: 1px solid var(--line-control); background: var(--surface); color: var(--forest);
+  font: 700 15px 'DM Sans', sans-serif; cursor: pointer;
+}
+.stylist-auth__secondary:disabled { color: var(--ink-muted); cursor: default; }
+.stylist-auth__text-button {
+  min-height: 44px; padding: 0 4px; border: 0; background: none;
+  color: var(--forest); font: 700 15px 'DM Sans', sans-serif; text-decoration: underline; cursor: pointer;
+}

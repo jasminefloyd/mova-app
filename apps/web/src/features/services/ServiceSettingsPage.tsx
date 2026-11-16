@@ -11,7 +11,15 @@ type LocationOverride={service_id:string;location_id:string;price_minor_override
 type ServiceForm = Omit<ServiceRow, 'id'> & { id?: string; price: string; deposit: string; locationOverrides: Record<string,{enabled:boolean;price:string;duration:string}> };
 const blank: ServiceForm = { name: '', category: '', duration_minutes: 60, buffer_minutes: 0, base_price_minor: 0, status: 'active', deposit_type: 'none', deposit_value: 0, location_assignment_mode: 'all', price: '', deposit: '', locationOverrides:{} };
 
-export function ServiceSettingsPage() {
+export type ServiceEditorEmbed = {
+  /** Locations ticked when the form opens (onboarding pre-selects the locations from step 4). */
+  preselectLocationIds: string[];
+  onSaved: () => void;
+  onCancel?: () => void;
+};
+
+// Onboarding step 5 embeds the same Add a service form as Settings.
+export function ServiceSettingsPage({ embedded }: { embedded?: ServiceEditorEmbed } = {}) {
   const navigate=useNavigate();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get('return_to') === '/onboarding/services' ? '/onboarding/services' : '';
@@ -20,7 +28,7 @@ export function ServiceSettingsPage() {
   const [services, setServices] = useState<ServiceRow[]>([]);
   const [locations,setLocations]=useState<LocationRow[]>([]);
   const [overrides,setOverrides]=useState<LocationOverride[]>([]);
-  const [form, setForm] = useState<ServiceForm | null>(() => searchParams.get('new') === '1' ? blank : null);
+  const [form, setForm] = useState<ServiceForm | null>(() => embedded || searchParams.get('new') === '1' ? blank : null);
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(false);
@@ -36,12 +44,14 @@ export function ServiceSettingsPage() {
       .eq('artist_business_id', businessId).order('created_at'),client.from('mova_locations').select('id,name').eq('artist_business_id',businessId).eq('is_active',true).order('name')]);
     if (queryError||locationError) { setError(true); setReady(true); } else {
       const serviceRows=(data??[]) as ServiceRow[];const activeLocations=(locationData??[]) as LocationRow[];setServices(serviceRows);setLocations(activeLocations);
-      if (activeLocations.length === 1) setForm((current) => current && !current.id && Object.keys(current.locationOverrides).length === 0
-        ? { ...current, locationOverrides: { [activeLocations[0]!.id]: { enabled: true, price: '', duration: '' } } }
+      const preselect = embedded ? activeLocations.filter((item) => embedded.preselectLocationIds.includes(item.id)) : activeLocations.length === 1 ? activeLocations : [];
+      if (preselect.length) setForm((current) => current && !current.id && Object.keys(current.locationOverrides).length === 0
+        ? { ...current, locationOverrides: Object.fromEntries(preselect.map((item) => [item.id, { enabled: true, price: '', duration: '' }])) }
         : current);
       if(serviceRows.length){const {data:overrideData,error:overrideError}=await client.from('mova_service_locations').select('service_id,location_id,price_minor_override,duration_minutes_override').in('service_id',serviceRows.map((item)=>item.id));if(overrideError)setError(true);else setOverrides((overrideData??[]) as LocationOverride[]);}else setOverrides([]);
       setReady(true);
     }
+  // The embed's pre-selection only applies to the first load, so it is deliberately not a dependency.
   }, [businessId, client]);
 
   useEffect(() => { void load(); }, [load]);
@@ -77,7 +87,7 @@ export function ServiceSettingsPage() {
       const upserted=assigned.length?await client.from('mova_service_locations').upsert(assigned,{onConflict:'service_id,location_id'}):{error:null};
       const removedIds=locations.filter((location)=>!form.locationOverrides[location.id]?.enabled).map((location)=>location.id);
       const deleted=removedIds.length?await client.from('mova_service_locations').delete().eq('service_id',serviceId).in('location_id',removedIds):{error:null};
-      if(upserted.error||deleted.error){setError(true);setLocationSaveError(true);}else{setForm(null);await load();if(returnTo)navigate(returnTo);}
+      if(upserted.error||deleted.error){setError(true);setLocationSaveError(true);}else if(embedded){embedded.onSaved();}else{setForm(null);await load();if(returnTo)navigate(returnTo);}
     }
     setLoading(false);
   };
@@ -93,9 +103,25 @@ export function ServiceSettingsPage() {
     ? { [locations[0]!.id]: { enabled: true, price: '', duration: '' } }
     : {} });
 
-  if (identityLoading) return <main className="mova-page"><p role="status">{t('settings.loading')}</p></main>;
-  if (!client || !businessId) return <main className="mova-page"><ErrorState title={t('settings.identityError')} retryLabel={t('settings.retry')} onRetry={() => void load()} /></main>;
-  if (!ready) return <main className="mova-page"><p role="status">{t('settings.loading')}</p></main>;
+  const serviceForm = (form: ServiceForm) => <Card className="mova-service-form"><form className="mova-form-stack" onSubmit={save}>
+      <h1>{t(form.id ? 'settings.editService' : 'settings.addService')}</h1>
+      <TextField label={t('settings.serviceName')} required maxLength={100} value={form.name} onChange={(event) => setForm({ ...form, name: event.currentTarget.value })} />
+      <TextField label={t('settings.category')} required maxLength={80} value={form.category} onChange={(event) => setForm({ ...form, category: event.currentTarget.value })} />
+      <div className="mova-service-numbers mova-service-form__numbers"><TextField label={t('settings.duration')} type="number" min="5" max="1440" step="5" required value={form.duration_minutes} onChange={(event) => setForm({ ...form, duration_minutes: Number(event.currentTarget.value) })} /><TextField label={t('settings.buffer')} type="number" min="0" max="1440" step="5" required value={form.buffer_minutes} onChange={(event) => setForm({ ...form, buffer_minutes: Number(event.currentTarget.value) })} /><TextField label={t('settings.price')} required inputMode="decimal" value={form.price} onChange={(event) => setForm({ ...form, price: event.currentTarget.value })} /></div>
+      <section className="mova-service-form__deposit"><Toggle label={t('settings.depositToggle')} checked={form.deposit_type !== 'none'} onChange={(value)=>setForm({...form,deposit_type:value?'fixed':'none',deposit:value?form.deposit:''})}/>
+        {form.deposit_type !== 'none' && <div className="mova-service-form__deposit-fields"><div role="group" aria-label={t('settings.depositKind')} className="mova-service-form__deposit-kind"><button type="button" aria-pressed={form.deposit_type==='fixed'} onClick={()=>setForm({...form,deposit_type:'fixed'})}>$</button><button type="button" aria-pressed={form.deposit_type==='percent'} onClick={()=>setForm({...form,deposit_type:'percent'})}>%</button></div><TextField label={form.deposit_type === 'fixed' ? t('settings.depositAmount') : t('settings.depositPercent')} required inputMode="decimal" value={form.deposit} onChange={(event) => setForm({ ...form, deposit: event.currentTarget.value })} /></div>}
+        <p>{t('settings.depositLocationNote')}</p>
+      </section>
+      <section className="mova-service-form__locations"><h2>{t('settings.locationOverrides')}</h2><p>{t('settings.locationAssignmentHint')}</p><div className="mova-service-form__location-list">{locations.map((location)=>{const value=form.locationOverrides[location.id]??{enabled:false,price:'',duration:''};return <div className="mova-service-form__location" key={location.id}><label><input type="checkbox" checked={value.enabled} onChange={(event)=>{setLocationAssignmentError(false);setForm({...form,locationOverrides:{...form.locationOverrides,[location.id]:{...value,enabled:event.target.checked}}});}}/><span><strong>{location.name}</strong><small>{value.enabled?t('settings.locationPricing'):t('settings.locationNotAssigned')}</small></span></label>{value.enabled&&<div className="mova-form-grid"><TextField label={t('settings.overridePrice')} inputMode="decimal" value={value.price} onChange={(event)=>setForm({...form,locationOverrides:{...form.locationOverrides,[location.id]:{...value,price:event.target.value}}})}/><TextField label={t('settings.overrideDuration')} type="number" min="5" max="1440" value={value.duration} onChange={(event)=>setForm({...form,locationOverrides:{...form.locationOverrides,[location.id]:{...value,duration:event.target.value}}})}/></div>}</div>;})}</div>{locationAssignmentError&&<p className="mova-field__error" role="alert">{t('settings.locationAssignmentRequired')}</p>}{locationSaveError&&<p className="mova-field__error" role="alert">{t('settings.locationSaveError')}</p>}{locations.length===0&&<p>{t('settings.locationOverridesLater')}</p>}</section>
+      <Toggle label={t('settings.bookable')} description={t('settings.bookableDescription')} checked={form.status==='active'} onChange={(value)=>setForm({...form,status:value?'active':'inactive'})}/>
+      {error && !locationSaveError && <p role="alert">{t('settings.saveError')}</p>}
+      <footer className="mova-service-form__actions">{(!embedded || embedded.onCancel) && <Button type="button" variant="secondary" onClick={() => embedded ? embedded.onCancel?.() : returnTo ? navigate(returnTo) : setForm(null)}>{t('settings.cancel')}</Button>}<Button type="submit" loading={loading}>{t('settings.saveService')}</Button></footer>
+    </form></Card>;
+  const Root = embedded ? 'div' : 'main';
+  if (identityLoading) return <Root className="mova-page"><p role="status">{t('settings.loading')}</p></Root>;
+  if (!client || !businessId) return <Root className="mova-page"><ErrorState title={t('settings.identityError')} retryLabel={t('settings.retry')} onRetry={() => void load()} /></Root>;
+  if (!ready) return <Root className="mova-page"><p role="status">{t('settings.loading')}</p></Root>;
+  if (embedded) return <Root className="mova-services-page mova-services-page--embedded is-editing">{form && serviceForm(form)}</Root>;
   return <main className={`mova-page mova-settings-page mova-services-page${form ? ' is-editing' : ''}`}>
     <ScreenHeader {...(form ? {} : { title: t('navigation.settings') })} onBack={()=>form ? returnTo ? navigate(returnTo) : setForm(null) : navigate(returnTo || operatorUrl(businessId,'settings'))}
       {...(form ? { trailing: <Button type="button" variant="secondary" onClick={()=>navigate(operatorUrl(businessId,'settings/profile/preview'))}>{t('settings.preview')}</Button> } : {})}/>
@@ -115,20 +141,7 @@ export function ServiceSettingsPage() {
       <div className="mova-service-list__footer"><span>{t('settings.bookingPage')}</span><strong>{t(`settings.status.${service.status}`)}</strong></div>
       <div className="mova-photo-actions"><Button variant="secondary" onClick={() => edit(service)}>{t('settings.edit')}</Button><Button variant="ghost" onClick={() => void setStatus(service)}>{service.status === 'active' ? t('settings.deactivate') : t('settings.activate')}</Button></div>
     </li>;})}</ul>}
-    {form ? <Card className="mova-service-form"><form className="mova-form-stack" onSubmit={save}>
-      <h1>{t(form.id ? 'settings.editService' : 'settings.addService')}</h1>
-      <TextField label={t('settings.serviceName')} required maxLength={100} value={form.name} onChange={(event) => setForm({ ...form, name: event.currentTarget.value })} />
-      <TextField label={t('settings.category')} required maxLength={80} value={form.category} onChange={(event) => setForm({ ...form, category: event.currentTarget.value })} />
-      <div className="mova-service-numbers mova-service-form__numbers"><TextField label={t('settings.duration')} type="number" min="5" max="1440" step="5" required value={form.duration_minutes} onChange={(event) => setForm({ ...form, duration_minutes: Number(event.currentTarget.value) })} /><TextField label={t('settings.buffer')} type="number" min="0" max="1440" step="5" required value={form.buffer_minutes} onChange={(event) => setForm({ ...form, buffer_minutes: Number(event.currentTarget.value) })} /><TextField label={t('settings.price')} required inputMode="decimal" value={form.price} onChange={(event) => setForm({ ...form, price: event.currentTarget.value })} /></div>
-      <section className="mova-service-form__deposit"><Toggle label={t('settings.depositToggle')} checked={form.deposit_type !== 'none'} onChange={(value)=>setForm({...form,deposit_type:value?'fixed':'none',deposit:value?form.deposit:''})}/>
-        {form.deposit_type !== 'none' && <div className="mova-service-form__deposit-fields"><div role="group" aria-label={t('settings.depositKind')} className="mova-service-form__deposit-kind"><button type="button" aria-pressed={form.deposit_type==='fixed'} onClick={()=>setForm({...form,deposit_type:'fixed'})}>$</button><button type="button" aria-pressed={form.deposit_type==='percent'} onClick={()=>setForm({...form,deposit_type:'percent'})}>%</button></div><TextField label={form.deposit_type === 'fixed' ? t('settings.depositAmount') : t('settings.depositPercent')} required inputMode="decimal" value={form.deposit} onChange={(event) => setForm({ ...form, deposit: event.currentTarget.value })} /></div>}
-        <p>{t('settings.depositLocationNote')}</p>
-      </section>
-      <section className="mova-service-form__locations"><h2>{t('settings.locationOverrides')}</h2><p>{t('settings.locationAssignmentHint')}</p><div className="mova-service-form__location-list">{locations.map((location)=>{const value=form.locationOverrides[location.id]??{enabled:false,price:'',duration:''};return <div className="mova-service-form__location" key={location.id}><label><input type="checkbox" checked={value.enabled} onChange={(event)=>{setLocationAssignmentError(false);setForm({...form,locationOverrides:{...form.locationOverrides,[location.id]:{...value,enabled:event.target.checked}}});}}/><span><strong>{location.name}</strong><small>{value.enabled?t('settings.locationPricing'):t('settings.locationNotAssigned')}</small></span></label>{value.enabled&&<div className="mova-form-grid"><TextField label={t('settings.overridePrice')} inputMode="decimal" value={value.price} onChange={(event)=>setForm({...form,locationOverrides:{...form.locationOverrides,[location.id]:{...value,price:event.target.value}}})}/><TextField label={t('settings.overrideDuration')} type="number" min="5" max="1440" value={value.duration} onChange={(event)=>setForm({...form,locationOverrides:{...form.locationOverrides,[location.id]:{...value,duration:event.target.value}}})}/></div>}</div>;})}</div>{locationAssignmentError&&<p className="mova-field__error" role="alert">{t('settings.locationAssignmentRequired')}</p>}{locationSaveError&&<p className="mova-field__error" role="alert">{t('settings.locationSaveError')}</p>}{locations.length===0&&<p>{t('settings.locationOverridesLater')}</p>}</section>
-      <Toggle label={t('settings.bookable')} description={t('settings.bookableDescription')} checked={form.status==='active'} onChange={(value)=>setForm({...form,status:value?'active':'inactive'})}/>
-      {error && !locationSaveError && <p role="alert">{t('settings.saveError')}</p>}
-      <footer className="mova-service-form__actions"><Button type="button" variant="secondary" onClick={() => returnTo ? navigate(returnTo) : setForm(null)}>{t('settings.cancel')}</Button><Button type="submit" loading={loading}>{t('settings.saveService')}</Button></footer>
-    </form></Card> : services.length===0 ? <Button onClick={() => setForm(blank)}>{t('settings.addService')}</Button> : null}
+    {form ? serviceForm(form) : services.length===0 ? <Button onClick={() => setForm(blank)}>{t('settings.addService')}</Button> : null}
   </main>;
 }
 
