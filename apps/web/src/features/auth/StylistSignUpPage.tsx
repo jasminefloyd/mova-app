@@ -108,7 +108,7 @@ export default function StylistSignUpPage() {
           <button className="stylist-auth__submit" type="submit" disabled={busy}>{t(busy ? 'stylistAuth.signUp.submitting' : 'stylistAuth.signUp.submit')}</button>
           <p className="stylist-auth__legal">{t('stylistAuth.signUp.legal')}</p>
 
-          <p className="stylist-auth__aside">{t('stylistAuth.signUp.haveAccount')} <Link className="stylist-auth__strong" to="/login">{t('stylistAuth.signUp.signIn')}</Link></p>
+          <div className="stylist-auth__aside"><p>{t('stylistAuth.signUp.haveAccount')} <Link className="stylist-auth__strong" to="/login">{t('stylistAuth.signUp.signIn')}</Link></p></div>
         </form>}
       </section>
     </div>

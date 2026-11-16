@@ -2068,7 +2068,9 @@
     "nextSettingsBody": "You're set up at {{location}}. Add more services, locations and hours in Settings.",
     "nextSettingsBodyNoLocation": "Add more services, locations and hours in Settings.",
     "goToSettings": "Go to Settings",
-    "goHome": "Go to Home"
+    "goHome": "Go to Home",
+    "back": "Back",
+    "stepOf": "Step {{current}} of {{total}}"
   },
   "language": "Language",
   "stylistAuth": {

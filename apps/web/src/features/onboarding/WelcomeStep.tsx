@@ -29,9 +29,8 @@ export function WelcomeStep({ name, handle, locationName, onSettings, onHome }: 
   const link = `mova-beauty.co/a/${handle}`;
 
   return <div className="mova-onboarding-page mova-welcome">
-    <header className="mova-onboarding-header">
-      <span className="mova-wordmark" aria-label="mova">mova</span>
-      <p>{t('onboarding.tagline')}</p>
+    <header className="mova-onboarding-top">
+      <div className="mova-onboarding-top__row"><span className="mova-onboarding-top__wordmark" aria-label="mova">mova</span></div>
     </header>
     <main className="mova-page mova-onboarding-content">
       <section className="mova-welcome__setup" aria-labelledby="mova-welcome-h" aria-live="polite">

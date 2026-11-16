@@ -211,8 +211,8 @@
 }
 .stylist-auth__free strong { font-size: var(--fs-body); }
 .stylist-auth__free span { font-size: var(--fs-body-s); line-height: 1.5; color: var(--mint); }
-.stylist-auth__accent { color: var(--peach); font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
-.stylist-auth__accent:hover { color: var(--surface-warm); }
+.stylist-auth a.stylist-auth__accent, .stylist-auth__accent { color: var(--peach); font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
+.stylist-auth a.stylist-auth__accent:hover, .stylist-auth__accent:hover { color: var(--surface-warm); }
 
 .stylist-auth__form-panel {
   flex: 1 1 440px;
@@ -262,6 +262,7 @@
   display: flex; align-items: center; justify-content: center;
   background: var(--mint); color: var(--forest);
 }
+.stylist-auth a.stylist-auth__submit, .stylist-auth a.stylist-auth__submit:hover { color: var(--ivory); }
 .stylist-auth__check .stylist-auth__submit { display: flex; align-items: center; justify-content: center; text-decoration: none; }
 .stylist-auth__secondary {
   width: 100%; min-height: 52px; border-radius: 26px;

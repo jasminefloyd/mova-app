@@ -57,3 +57,17 @@
   .mova-welcome__next { animation: none !important; }
   .mova-welcome__mark.is-ready .mova-welcome__tick { animation: none; stroke-dashoffset: 0; }
 }
+
+/* Onboarding header (canvas Onb-*): back · Step N of 6 · Sign out, then the 6-step bar. */
+.mova-onboarding-top { display: grid; gap: 14px; width: min(100%, 34rem); margin-inline: auto; padding: 16px 20px 0; }
+.mova-onboarding-top__row { display: grid; grid-template-columns: minmax(44px, 1fr) auto minmax(44px, 1fr); align-items: center; min-height: 44px; }
+.mova-onboarding-top__back { justify-self: start; display: inline-grid; place-items: center; width: 44px; height: 44px; margin-left: -10px; border: 0; background: transparent; color: var(--forest); cursor: pointer; }
+.mova-onboarding-top__wordmark { justify-self: start; font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: -0.5px; color: var(--forest); }
+.mova-onboarding-top__step { font-size: var(--fs-caption); font-weight: 600; color: var(--ink-muted); }
+.mova-onboarding-top__action { justify-self: end; min-height: 44px; border: 0; background: transparent; color: var(--forest); font: 600 15px var(--font-ui, 'DM Sans'), sans-serif; cursor: pointer; }
+.mova-onboarding-top__bar { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.mova-onboarding-top__bar span { height: 4px; border-radius: 2px; background: var(--line-step-off); }
+.mova-onboarding-top__bar span.is-done { background: var(--forest); }
+.mova-onboarding-content { padding-top: var(--space-4); }
+.mova-onboarding-content h1 { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-display-xl); letter-spacing: -0.4px; margin-top: 6px; }
+.mova-welcome .mova-onboarding-top__row { grid-template-columns: 1fr; }

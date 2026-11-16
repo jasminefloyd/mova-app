@@ -2068,7 +2068,9 @@
     "nextSettingsBody": "Ya estás lista en {{location}}. Agrega más servicios, ubicaciones y horarios en Configuración.",
     "nextSettingsBodyNoLocation": "Agrega más servicios, ubicaciones y horarios en Configuración.",
     "goToSettings": "Ir a Configuración",
-    "goHome": "Ir a Inicio"
+    "goHome": "Ir a Inicio",
+    "back": "Atrás",
+    "stepOf": "Paso {{current}} de {{total}}"
   },
   "language": "Idioma",
   "stylistAuth": {

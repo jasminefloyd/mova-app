@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, Chip, StepperProgress, TextArea, TextField } from '../../components';
+import { Button, Card, Chip, Icon, TextArea, TextField } from '../../components';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import { operatorLocation } from '../../app/operator-url';
 import { displayId } from '../../lib/display-ids';
@@ -315,14 +315,21 @@ export function OnboardingFlow() {
   const current = stepOrder.indexOf(step) + 2;
   if (step === 'welcome') return <WelcomeStep name={firstName || displayName} handle={handle} locationName={locations[0]?.name ?? ''}
     onSettings={() => openWorkspacePath('settings')} onHome={() => openWorkspacePath('')} />;
+  const previous = ({ photo: 'profile', location: 'photo', services: 'location', payments: 'services' } as Partial<Record<Step, Step>>)[step];
   return <div className="mova-onboarding-page">
-    <header className="mova-onboarding-header">
-      <span className="mova-wordmark" aria-label="mova">mova</span>
-      <p>{t('onboarding.tagline')}</p>
-      {signedIn && <Button type="button" variant="on-dark" onClick={signOut}>{t('onboarding.signOut')}</Button>}
+    <header className="mova-onboarding-top">
+      <div className="mova-onboarding-top__row">
+        {previous && businessId
+          ? <button type="button" className="mova-onboarding-top__back" aria-label={t('onboarding.back')} onClick={() => { setError(''); setAddingLocation(false); setAddingService(false); setStep(previous); }}><Icon name="back" size={22} /></button>
+          : <span className="mova-onboarding-top__wordmark" aria-label="mova">mova</span>}
+        <span className="mova-onboarding-top__step">{t('onboarding.stepOf', { current, total: 6 })}</span>
+        {signedIn ? <button type="button" className="mova-onboarding-top__action" onClick={signOut}>{t('onboarding.signOut')}</button> : <span />}
+      </div>
+      <div className="mova-onboarding-top__bar" role="progressbar" aria-label={t('onboarding.stepOf', { current, total: 6 })} aria-valuemin={1} aria-valuemax={6} aria-valuenow={current}>
+        {Array.from({ length: 6 }, (_, index) => <span key={index} className={index < current ? 'is-done' : undefined} />)}
+      </div>
     </header>
     <main className="mova-page mova-onboarding-content">
-      <StepperProgress current={current} total={6} label={t('onboarding.step')} />
       {step === 'profile' && <form className="mova-form-stack" onSubmit={saveProfile}>
         <h1>{t('onboarding.profileTitle')}</h1>
         <p>{t('onboarding.profileDescription')}</p>
