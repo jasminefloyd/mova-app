@@ -196,9 +196,12 @@ body {
 .mova-home__header, .mova-calendar__month-header, .mova-clients__header, .mova-services-page__header, .mova-location-settings__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .mova-home { gap: var(--space-3); padding-top: var(--space-4); padding-bottom: calc(var(--tab-bar-h) + var(--space-8) + env(safe-area-inset-bottom)); }
 .mova-home__header { padding-top: 0; }
-.mova-home__header > div { display: grid; gap: 2px; }
+.mova-home__header { padding: 2px 0 0; align-items: center; }
+/* 07 Home: date + greeting on the left, growth and avatar side by side on the right, always one row. */
+.mova-home__greeting { display: grid; flex: 1; min-width: 0; gap: 2px; }
+.mova-home__greeting h1 { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .mova-home__header p { margin: 0; color: var(--ink-muted); font-size: var(--fs-caption); font-weight: 600; }
-.mova-home__header-actions { display: flex; align-items: center; gap: 8px; }
+.mova-home__header-actions { display: flex; flex: none; flex-direction: row; align-items: center; gap: 12px; }
 .mova-home__growth { position: relative; display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--line-control); border-radius: 50%; background: var(--surface); color: var(--forest); }
 .mova-home__growth svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .mova-home__growth span { position: absolute; top: 5px; right: 4px; width: 9px; height: 9px; border-radius: 50%; background: var(--peach); }
@@ -737,7 +740,7 @@ body {
 .mova-visit-notes__save > span { color: var(--ink-secondary); font-size: var(--fs-caption); text-align: center; }
 @media (max-width: 359px) { .mova-page.mova-client-screen, .mova-page.mova-visit-notes { width: min(100% - 32px, 680px); } .mova-client-profile__note-row { grid-template-columns: 78px minmax(0,1fr); gap: 6px; } .mova-client-profile__contact { align-items: flex-start; flex-direction: column; } .mova-client-profile__contact span { text-align: left; } .mova-client-visit__top { align-items: flex-start; flex-wrap: wrap; } }
 .mova-page h1 { margin: var(--space-4) 0 var(--space-6); font-family: var(--font-display); font-size: var(--fs-display-xl); font-weight: 800; letter-spacing: -.4px; }
-.mova-home .mova-home__header h1 { margin: 0; font-size: var(--fs-display-home); }
+.mova-home .mova-home__header h1 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-home); font-weight: 800; letter-spacing: -0.4px; line-height: 1.15; }
 .mova-avatar-link { display: inline-flex; min-width: var(--tap-min); min-height: var(--tap-min); align-items: center; justify-content: center; }
 .mova-settings-sheet { display: grid; gap: var(--space-4); }
 

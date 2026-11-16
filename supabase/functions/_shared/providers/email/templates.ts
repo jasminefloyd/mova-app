@@ -1,4 +1,5 @@
 import type { EmailLocale, EmailTemplateId } from './types.ts';
+import { renderWelcomeEmail, type WelcomeEmailVars } from './welcome.ts';
 
 export const EMAIL_TEMPLATES: EmailTemplateId[] = ['booking_confirmation', 'request_received', 'request_accepted', 'request_declined', 'appointment_reminder'];
 export const PROPOSED_EMAIL_TEMPLATES: EmailTemplateId[] = ['appointment_moved', 'appointment_cancelled', 'review_request', 'stylist_welcome', 'stylist_new_request'];
@@ -8,6 +9,8 @@ export type AppointmentEmailVars = {
   locationName: string; manageUrl?: string | null; previousStartsAt?: string | null; stylistName?: string | null;
   clientCount?: number; clientLastVisit?: string | null; clientNote?: string | null; postalAddress?: string | null;
   bookingUrl?: string | null; stylistUrl?: string | null; duration?: string | null; amount?: string | null;
+  /** stylist_welcome only: page and Settings links for EM11. */
+  welcome?: Omit<WelcomeEmailVars, 'firstName' | 'postalAddress'> & { firstName?: string | null };
 };
 
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
@@ -51,6 +54,9 @@ const COPY: Record<EmailLocale, Record<EmailTemplateId, (v: AppointmentEmailVars
 
 export function renderEmail(id: EmailTemplateId, locale: EmailLocale, vars: AppointmentEmailVars) {
   const lang = locale === 'es-US' ? 'es-US' : 'en-US';
+  if (id === 'stylist_welcome') {
+    return renderWelcomeEmail(lang, { ...vars.welcome, firstName: vars.welcome?.firstName || vars.stylistName || vars.businessName, postalAddress: vars.postalAddress ?? null });
+  }
   const d = dateParts(vars.startsAt, vars.timeZone || 'UTC', lang);
   const copy = COPY[lang][id](vars, d);
   const link = safeLink(id.startsWith('stylist_') ? vars.stylistUrl ?? vars.bookingUrl ?? vars.manageUrl : id === 'review_request' ? vars.manageUrl : vars.manageUrl ?? vars.bookingUrl);
@@ -65,7 +71,7 @@ export function renderEmail(id: EmailTemplateId, locale: EmailLocale, vars: Appo
   const chipStyle = copy.state === 'request' ? 'background:#f4e3d4;border:1px dashed #d08c61' : copy.state === 'white' ? 'background:#fff;border:1px solid #d9dfd8' : 'background:#c7e6d4';
   const dayTile = `<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td style="width:70px;height:76px;text-align:center;background:#f7f5f0;border-radius:16px;color:#18392f"><span style="font-size:11px;font-weight:bold">${escapeHtml(d.weekday)}</span><br><strong style="font-size:30px;line-height:34px">${escapeHtml(d.day)}</strong><br><span style="font-size:11px;font-weight:bold">${escapeHtml(d.month)}</span></td><td style="padding-left:16px;color:${tileText}"><span style="display:inline-block;padding:5px 10px;border-radius:99px;color:#18392f;font-size:12px;font-weight:bold;${chipStyle}">${statusText}</span><br><strong style="font-size:17px">${escapeHtml(d.time)} · ${escapeHtml(vars.serviceName)}</strong><br><span style="font-size:14px">${escapeHtml(vars.locationName)}</span></td></tr></table>`;
   const heroStyle = copy.state === 'request' ? 'background:#f4e3d4;border:1px dashed #d08c61' : forest ? 'background:#18392f;color:#f7f5f0' : 'background:#fff;border:1px solid #d9dfd8';
-  const stateContent = id === 'stylist_welcome' ? '' : id === 'review_request' ? `<div style="font-size:30px;color:#d08c61;text-align:center">★　★　★　★　★</div>` : `<div style="background:${forest ? '#244d40' : '#fff'};border-radius:18px;padding:16px">${dayTile}</div>`;
+  const stateContent = id === 'review_request' ? `<div style="font-size:30px;color:#d08c61;text-align:center">★　★　★　★　★</div>` : `<div style="background:${forest ? '#244d40' : '#fff'};border-radius:18px;padding:16px">${dayTile}</div>`;
   const hero = `<div style="${heroStyle};border-radius:22px;padding:26px;overflow:hidden"><div style="color:${forest ? '#f7f5f0' : '#18392f'};font-size:34px;line-height:1.12;font-weight:800;letter-spacing:-.5px">${escapeHtml(copy.headline)}</div><p style="margin:12px 0 20px;font-size:16px;line-height:1.5;color:${forest ? '#d5e8dc' : '#43564e'}">${escapeHtml(copy.lead)}</p>${stateContent}</div>`;
   const extraRows: [string, string][] = id.startsWith('stylist_') ? [] : [[lang === 'es-US' ? 'Servicio' : 'Service', vars.serviceName], [lang === 'es-US' ? 'Dónde' : 'Where', vars.locationName], [lang === 'es-US' ? 'Estilista' : 'Stylist', vars.businessName]];
   const details = extraRows.length ? `<div style="margin:18px 16px;background:#fff;border:1px solid #d9dfd8;border-radius:18px;padding:8px 20px">${extraRows.map(([k,v]) => `<div style="padding:12px 0;border-bottom:1px solid #e8ebe5;font-size:14px"><span style="display:inline-block;width:82px;color:#52655c">${escapeHtml(k)}</span><strong>${escapeHtml(v)}</strong></div>`).join('')}</div>` : '';

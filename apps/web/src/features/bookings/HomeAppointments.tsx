@@ -85,6 +85,25 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
   const [slotNeeds, setSlotNeeds] = useState<SlotNeed[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [firstName, setFirstName] = useState('');
+
+  // The greeting uses the stylist's private first name (07 Home: "Good morning, Ari"), never shown to clients.
+  // Falls back to the sign-up metadata, then to the public display name.
+  useEffect(() => {
+    if (!client) return;
+    let active = true;
+    void (async () => {
+      const { data: { session } } = await client.auth.getSession();
+      const user = session?.user;
+      if (!user || !active) return;
+      const meta = user.user_metadata as Record<string, unknown> | undefined;
+      const fromMeta = typeof meta?.first_name === 'string' ? meta.first_name.trim() : '';
+      if (fromMeta) setFirstName(fromMeta);
+      const { data } = await client.from('mova_account_names').select('first_name').eq('user_id', user.id).maybeSingle();
+      if (active && typeof data?.first_name === 'string' && data.first_name.trim()) setFirstName(data.first_name.trim());
+    })().catch(() => undefined);
+    return () => { active = false; };
+  }, [client]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [needsError, setNeedsError] = useState(false);
@@ -207,11 +226,11 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
 
   const currentDate = new Date(now);
   const dateLabel = new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'long', month: 'short', day: 'numeric' }).format(currentDate);
-  const name = profile?.display_name ?? '';
+  const name = firstName || profile?.display_name || '';
 
   return <main className="mova-page mova-home">
     <header className="mova-home__header">
-      <div><p>{dateLabel}</p><h1>{t(greetingKey(currentDate.getHours()), { name })}</h1></div>
+      <div className="mova-home__greeting"><p>{dateLabel}</p><h1 title={t(greetingKey(currentDate.getHours()), { name })}>{t(greetingKey(currentDate.getHours()), { name })}</h1></div>
       <div className="mova-home__header-actions">
         <Link className="mova-home__growth" to={operatorUrl(businessId, 'growth')} aria-label={t('navigation.growthTitle')}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17.5 9 12l3.5 3.5L20 7.5M14.5 7.5H20v5.5" /></svg>

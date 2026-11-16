@@ -94,13 +94,25 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
     if (!welcomeEmailProvider) throw new Error('WELCOME_EMAIL_PROVIDER_NOT_CONFIGURED');
     const { data: context, error } = await db.rpc('mova_stylist_welcome_email_context', { p_artist_business_id: outboxEvent.artist_business_id });
     if (error) throw new Error('STYLIST_EMAIL_CONTEXT_FAILED');
-    const value = context as { recipients?: Array<{ email: string; name: string }>; vars?: AppointmentEmailVars; artist_business_id?: string; locale?: string } | null;
+    const value = context as { recipients?: Array<{ email: string; name: string; first_name?: string | null }>; vars?: AppointmentEmailVars; artist_business_id?: string; locale?: string; handle?: string | null; business_number?: number | null } | null;
+    const base = (Deno.env.get('MOVA_EMAIL_PUBLIC_BASE_URL') ?? 'https://mova-beauty.co').replace(/\/$/, '');
+    // EM11 links: the live page, then Settings screens for adding more services and places and for the QR code.
+    const operator = value?.business_number ? `${base}/BID-${value.business_number}` : null;
     for (const recipient of value?.recipients ?? []) {
       const sent = await sendEmail(db as unknown as EmailDb, welcomeEmailProvider, {
         artistBusinessId: value?.artist_business_id ?? outboxEvent.artist_business_id!, clientId: null,
         to: recipient.email, templateId: 'stylist_welcome', locale: value?.locale === 'es-US' ? 'es-US' : 'en-US',
-        vars: { ...(value?.vars as AppointmentEmailVars), clientName: recipient.name, stylistName: recipient.name,
-          bookingUrl: `${Deno.env.get('MOVA_EMAIL_PUBLIC_BASE_URL') ?? 'https://mova-beauty.co'}/onboarding/profile`,
+        vars: { ...(value?.vars as AppointmentEmailVars), clientName: recipient.name, stylistName: recipient.first_name || recipient.name,
+          bookingUrl: operator ? `${operator}/settings` : `${base}/login`,
+          welcome: {
+            firstName: recipient.first_name || recipient.name,
+            pageUrl: value?.handle ? `${base}/a/${encodeURIComponent(value.handle)}` : null,
+            settingsUrl: operator ? `${operator}/settings` : `${base}/login`,
+            servicesUrl: operator ? `${operator}/settings/services` : null,
+            locationsUrl: operator ? `${operator}/settings/locations` : null,
+            qrUrl: operator ? `${operator}/settings/qr` : null,
+            assetBaseUrl: base,
+          },
           postalAddress: Deno.env.get('MOVA_EMAIL_POSTAL_ADDRESS') },
         idempotencyKey: `email:${outboxEvent.id}:stylist:${recipient.email.toLowerCase()}`,
       });

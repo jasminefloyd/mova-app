@@ -49,6 +49,33 @@ describe('appointment email templates (task 4.3)', () => {
   });
 });
 
+describe('EM11 welcome email', () => {
+  const welcome = { ...vars, stylistName: 'Ari Monroe', postalAddress: '1 Main St', welcome: {
+    firstName: 'Ari', pageUrl: 'https://mova-beauty.co/a/ari', settingsUrl: 'https://mova-beauty.co/BID-1/settings',
+    servicesUrl: 'https://mova-beauty.co/BID-1/settings/services', locationsUrl: 'https://mova-beauty.co/BID-1/settings/locations',
+    qrUrl: 'https://mova-beauty.co/BID-1/settings/qr', assetBaseUrl: 'https://mova-beauty.co' } };
+  it('greets by first name and shows the live page, the three steps and Finish setting up', () => {
+    const email = renderEmail('stylist_welcome', 'en-US', welcome);
+    expect(email.subject).toBe('Welcome to Mova, Ari');
+    expect(email.preview).toBe('Your business moves with you. Three steps to your first booking.');
+    expect(email.html).toContain('Welcome to Mova, Ari.');
+    expect(email.html).toContain('mova-beauty.co/a/ari');
+    for (const step of ['Add more services and prices', 'Add every place you work', 'Share your link or QR code']) expect(email.html).toContain(step);
+    expect(email.html).toContain('href="https://mova-beauty.co/BID-1/settings/qr"');
+    expect(email.html).toContain('Finish setting up');
+    expect(email.html).toContain('https://mova-beauty.co/email/welcome-leaf.png');
+    expect(email.html).not.toContain('For Ari');
+    expect(email.text).toContain('Finish setting up: https://mova-beauty.co/BID-1/settings');
+  });
+  it('has a Spanish version and never links to a non-https page', () => {
+    const es = renderEmail('stylist_welcome', 'es-US', welcome);
+    expect(es.subject).toBe('Te damos la bienvenida a Mova, Ari');
+    expect(es.html).toContain('lang="es"');
+    const unsafe = renderEmail('stylist_welcome', 'en-US', { ...welcome, welcome: { ...welcome.welcome, pageUrl: 'javascript:alert(1)' } });
+    expect(unsafe.html).not.toContain('javascript:');
+  });
+});
+
 describe('sendEmail with the fake (task 4.3)', () => {
   const input = { artistBusinessId: 'b1', clientId: 'c1', to: 'Jordan@Example.com ', templateId: 'booking_confirmation' as const, locale: 'en-US' as const, vars, idempotencyKey: 'email:evt-1' };
   it('records the email and never sends twice for the same key', async () => {
