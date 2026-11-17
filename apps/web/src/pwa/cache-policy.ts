@@ -6,12 +6,16 @@ export const PRIVATE_API_NAVIGATION_DENYLIST = [
   /^\/graphql\/v1\//,
 ] as const;
 
-export const PWA_WORKBOX_POLICY = {
-  cacheId: 'mova-app',
+/** Files precached by the service worker (the app build and /offline.html). */
+export const PWA_PRECACHE_POLICY: { globPatterns: string[] } = {
   globPatterns: ['**/*.{css,html,ico,js,png,svg,webmanifest,woff2}'],
-  navigateFallback: '/index.html',
-  navigateFallbackDenylist: [...PRIVATE_API_NAVIGATION_DENYLIST],
-  cleanupOutdatedCaches: true,
-  clientsClaim: false,
-  skipWaiting: false,
 };
+
+/**
+ * Read-only offline (P4–P7): only Supabase table reads are kept, so the last schedule, clients and appointments
+ * stay readable. Auth, edge functions (payments, messages, writes), storage and every non-GET request always go
+ * to the network. The data cache is wiped on sign-out.
+ */
+export function isCacheableDataRequest(method: string, url: URL): boolean {
+  return method === 'GET' && /^\/rest\/v1\/[a-z_]+$/.test(url.pathname);
+}

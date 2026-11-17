@@ -35,6 +35,9 @@ Deno.serve(withSystemRequestLogging('job-dispatch', async (request) => {
     // Task 4.3: reminder emails ~24 hours ahead, as jobs (sent only while the email provider is the fake).
     const { data: reminders, error: reminderError } = await db.rpc('mova_enqueue_appointment_reminders', { p_now: new Date().toISOString() });
     if (reminderError) return respond({ code: 'JOB_DISPATCH_FAILED' }, 503);
+    // Stylist alert ~1 hour before each confirmed appointment (push/email per Settings › Language & notifications).
+    const { data: stylistReminders, error: stylistReminderError } = await db.rpc('mova_enqueue_stylist_reminders', { p_now: new Date().toISOString() });
+    if (stylistReminderError) return respond({ code: 'JOB_DISPATCH_FAILED' }, 503);
     // Task 5.1: close ended seat-filler campaigns and send waves that are due (flag MOVA_SEAT_FILLER_ENABLED).
     const { data: expired } = await db.rpc('mova_slot_expire', { p_now: new Date().toISOString() });
     let waves = 0;
@@ -58,7 +61,7 @@ Deno.serve(withSystemRequestLogging('job-dispatch', async (request) => {
         autopilot += result.sent;
       }
     }
-    return respond({ enqueued: data, reminders, expired_market_locations: expiredMarketLocations ?? 0, seat_filler: { expired: expired ?? 0, waves }, autopilot });
+    return respond({ enqueued: data, reminders, stylist_reminders: stylistReminders ?? 0, expired_market_locations: expiredMarketLocations ?? 0, seat_filler: { expired: expired ?? 0, waves }, autopilot });
   } catch {
     return respond({ code: 'JOB_DISPATCH_FAILED' }, 503);
   }

@@ -1,6 +1,6 @@
 import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient,corsHeaders,respond,serviceClient } from '../_shared/booking.ts';
-import {resolveNotificationPreferences} from '../_shared/notification-preferences.ts';
+import {isEventPreferences,resolveEventPreferences,resolveNotificationPreferences} from '../_shared/notification-preferences.ts';
 
 Deno.serve(withSystemRequestLogging('messaging-settings', async(request)=>{
  if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
@@ -8,13 +8,18 @@ Deno.serve(withSystemRequestLogging('messaging-settings', async(request)=>{
  if(body.action==='status'){
   const {data,error}=await db.from('mova_notification_preferences').select('preferences').eq('artist_business_id',actor.businessId).eq('user_id',actor.user.id).maybeSingle();
   const resolved=resolveNotificationPreferences({data,error});if(!resolved.ok)return respond({code:'MESSAGING_SETTINGS_READ_FAILED'},500);
-  return respond({preferences:resolved.preferences,live:{sms:false,email:false,push:false}});
+  return respond({preferences:resolved.preferences,events:resolveEventPreferences(data?.preferences),live:{sms:false,email:false,push:Boolean(Deno.env.get('MOVA_VAPID_PUBLIC_KEY')&&Deno.env.get('MOVA_VAPID_PRIVATE_KEY'))}});
  }
  if(body.action==='preferences'){
-  const prefs=body.preferences;if(!prefs||typeof prefs!=='object'||Array.isArray(prefs)||Object.keys(prefs).some((key)=>!['in_app','email','push'].includes(key))||Object.values(prefs).some((value)=>typeof value!=='boolean'))return respond({code:'INVALID_PREFERENCES'},422);
-  if(prefs.push===true)return respond({code:'PUSH_NOT_CONFIGURED'},409);
-  const {error}=await db.from('mova_notification_preferences').upsert({artist_business_id:actor.businessId,user_id:actor.user.id,preferences:prefs,updated_at:new Date().toISOString()},{onConflict:'artist_business_id,user_id'});
-  return error?respond({code:'MESSAGING_SETTINGS_SAVE_FAILED'},500):respond({preferences:prefs});
+  // Accepts the account-wide switches and/or the per-event email + push choices; merges into what is stored.
+  const prefs=body.preferences;if(!prefs||typeof prefs!=='object'||Array.isArray(prefs)||Object.keys(prefs).some((key)=>!['in_app','email','push','events'].includes(key))||Object.entries(prefs).some(([key,value])=>key==='events'?!isEventPreferences(value):typeof value!=='boolean'))return respond({code:'INVALID_PREFERENCES'},422);
+  const {data:current,error:readError}=await db.from('mova_notification_preferences').select('preferences').eq('artist_business_id',actor.businessId).eq('user_id',actor.user.id).maybeSingle();
+  if(readError)return respond({code:'MESSAGING_SETTINGS_READ_FAILED'},500);
+  const stored=(current?.preferences&&typeof current.preferences==='object'?current.preferences:{}) as Record<string,unknown>;
+  const events={...resolveEventPreferences(stored),...(prefs.events??{})};
+  const next={...stored,...prefs,events};
+  const {error}=await db.from('mova_notification_preferences').upsert({artist_business_id:actor.businessId,user_id:actor.user.id,preferences:next,updated_at:new Date().toISOString()},{onConflict:'artist_business_id,user_id'});
+  return error?respond({code:'MESSAGING_SETTINGS_SAVE_FAILED'},500):respond({preferences:resolveNotificationPreferences({data:{preferences:next},error:null}),events:resolveEventPreferences(next)});
  }
  if(body.action==='save-template'){
   const {type,locale,body:templateBody}=body;if(!['rebooking_reminder','slot_offer','slot_taken','win_back','review_request','running_late','transactional_confirmation','transactional_change','transactional_request_outcome'].includes(type)||!['en-US','es-US'].includes(locale)||typeof templateBody!=='string'||templateBody.trim().length<1||templateBody.length>2000)return respond({code:'INVALID_TEMPLATE'},422);

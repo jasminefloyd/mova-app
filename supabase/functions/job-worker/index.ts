@@ -6,6 +6,9 @@ import { StripeTestClient } from '../_shared/providers/stripe/client.ts';
 import { sendAppointmentEmail } from '../_shared/appointment-emails.ts';
 import { consumeSlotOpened } from '../_shared/seat-filler.ts';
 import { smsProviderFromEnv } from '../_shared/providers/sms/index.ts';
+import { deliverStylistAlert, wantsEmail } from '../_shared/stylist-alerts.ts';
+import { notificationEventFor } from '../_shared/notification-preferences.ts';
+import { vapidFromEnv } from '../_shared/web-push.ts';
 import { emailProviderFromEnv, sendEmail, type AppointmentEmailVars, type EmailDb, type EmailTemplateId } from '../_shared/providers/email/index.ts';
 
 const equal = (left: string, right: string) => {
@@ -29,7 +32,8 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
 
   const eventAgeMs = Date.now() - Date.parse(outboxEvent.occurred_at);
   // Do not create fresh-looking inbox alerts for events that sat in the queue for a day.
-  if (Number.isFinite(eventAgeMs) && eventAgeMs >= 0 && eventAgeMs <= 24 * 60 * 60 * 1000) {
+  const fresh = Number.isFinite(eventAgeMs) && eventAgeMs >= 0 && eventAgeMs <= 24 * 60 * 60 * 1000;
+  if (fresh && outboxEvent.event_type !== 'appointment.stylist_reminder') {
     const { data: members, error: memberError } = await db.from('mova_artist_memberships')
       .select('user_id').eq('artist_business_id', outboxEvent.artist_business_id).eq('status', 'active');
     if (memberError) throw new Error('MEMBERSHIP_READ_FAILED');
@@ -56,6 +60,21 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
   // Transactional appointment emails use the global email-send switch.
   const env = (name: string) => Deno.env.get(name);
   const emailProvider = emailProviderFromEnv(env);
+
+  // The five stylist alerts (Settings › Language & notifications): push to each subscribed device, plus email
+  // for cancellations, client messages, reminders and reviews while MOVA_EMAIL_STYLIST_ALERTS_ENABLED is on.
+  // Stale events (queued over a day ago) and reminders for a time that has passed are not sent.
+  const aggregateRef = event as { aggregate_id?: string };
+  if (fresh && notificationEventFor(outboxEvent.event_type) && aggregateRef.aggregate_id) {
+    const alertEmail = env('MOVA_EMAIL_STYLIST_ALERTS_ENABLED') === 'true'
+      ? emailProvider ?? emailProviderFromEnv((name) => name === 'MOVA_MESSAGING_LIVE_EMAIL' ? 'true' : env(name))
+      : null;
+    await deliverStylistAlert(db as never, {
+      eventType: outboxEvent.event_type, aggregateId: aggregateRef.aggregate_id, outboxEventId: outboxEvent.id,
+      vapid: vapidFromEnv(env), email: alertEmail, baseUrl: env('MOVA_EMAIL_PUBLIC_BASE_URL') ?? 'https://mova-beauty.co',
+      postalAddress: env('MOVA_EMAIL_POSTAL_ADDRESS') ?? null,
+    });
+  }
   // Welcome mail has its own switch so enabling it does not turn on appointment or
   // other proposed email templates. It reuses the configured Resend sender/key.
   const welcomeEnabled = env('MOVA_EMAIL_STYLIST_WELCOME_ENABLED') === 'true';
@@ -79,6 +98,8 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
       if (error) throw new Error('STYLIST_EMAIL_CONTEXT_FAILED');
       const value = context as { recipients?: Array<{ email: string; name: string }>; vars?: AppointmentEmailVars; artist_business_id?: string; locale?: string } | null;
       for (const recipient of value?.recipients ?? []) {
+        const { data: recipientUser } = await db.rpc('mova_member_preferences_by_email', { p_artist_business_id: value?.artist_business_id ?? outboxEvent.artist_business_id, p_email: recipient.email });
+        if (recipientUser && !wantsEmail((recipientUser as { preferences?: unknown }).preferences, 'booking_request')) continue;
         const sent = await sendEmail(db as unknown as EmailDb, emailProvider, {
           artistBusinessId: value?.artist_business_id ?? outboxEvent.artist_business_id!, clientId: null,
           to: recipient.email, templateId: 'stylist_new_request', locale: value?.locale === 'es-US' ? 'es-US' : 'en-US',

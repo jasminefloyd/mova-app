@@ -29,6 +29,7 @@ create policy mova_account_names_update_own on public.mova_account_names
   for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 revoke all on public.mova_account_names from anon;
+revoke delete, truncate on public.mova_account_names from authenticated;
 grant select, insert, update on public.mova_account_names to authenticated;
 
 drop trigger if exists mova_account_names_touch_updated_at on public.mova_account_names;

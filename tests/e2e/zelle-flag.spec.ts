@@ -62,8 +62,8 @@ test('A-16 hides Zelle and maps old records to Other in payment surfaces for EN 
   await assertNoZelle();
 
   await page.goto('/BID-1/settings');
-  await page.getByRole('button', { name: /Language & notifications/ }).click();
-  await page.getByRole('combobox', { name: 'Language' }).selectOption('es-US');
+  await page.getByRole('link', { name: /Language & notifications/ }).click();
+  await page.getByRole('radio', { name: 'Español' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-US');
   await page.goto('/BID-1/settings/payments');
   await assertNoZelle();

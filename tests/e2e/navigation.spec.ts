@@ -49,14 +49,13 @@ test('language selection lives in Settings and Settings matches its menu structu
   await expect(page.getByRole('combobox', { name: 'Language' })).toHaveCount(0);
   await openOperatorPage(page, '/settings');
   await expect(page.getByText('Settings', { exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Language & notifications/ })).toHaveCount(1);
+  await expect(page.getByRole('link', { name: /Language & notifications/ })).toHaveCount(1);
   await expect(page.getByText('Notifications', { exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: /Language & notifications/ }).click();
-  const language = page.getByRole('combobox', { name: 'Language' });
-  await expect(language).toHaveValue('en-US');
-  await language.selectOption('es-US');
+  await page.getByRole('link', { name: /Language & notifications/ }).click();
+  await expect(page.getByRole('radio', { name: 'English' })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('radio', { name: 'Español' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-US');
-  await expect(page.getByText('Configuración', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Idioma y notificaciones' })).toBeVisible();
 });
 
 test('payment settings is reachable from Settings and Money is reachable from Reports', async ({ page }) => {

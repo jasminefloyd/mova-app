@@ -1464,13 +1464,6 @@
     "goodMorning": "Buenos días, {{name}}",
     "goodAfternoon": "Buenas tardes, {{name}}",
     "goodEvening": "Buenas noches, {{name}}",
-    "installTitle": "Lleva Mova contigo",
-    "installBody": "Agrega Mova a tu teléfono para acceder con un toque a tu agenda y clientes desde una ventana de app.",
-    "installAction": "Agregar a inicio",
-    "installHow": "Cómo instalar",
-    "installDismiss": "Cerrar sugerencia de instalación",
-    "installIosHelp": "En Safari, toca Compartir y luego Agregar a pantalla de inicio.",
-    "installBrowserHelp": "Abre el menú del navegador y elige Instalar app o Agregar a pantalla de inicio.",
     "loading": "Cargando tu día…",
     "noIdentity": "Inicia sesión para ver tu inicio.",
     "retry": "Intentar de nuevo",
@@ -1544,6 +1537,14 @@
     "update": {
       "title": "Actualización del negocio",
       "body": "Hay una nueva actualización para tu negocio."
+    },
+    "review": {
+      "title": "Nueva reseña",
+      "body": "Un cliente te dejó una reseña."
+    },
+    "message": {
+      "title": "Nuevo mensaje",
+      "body": "Un cliente te envió un mensaje."
     }
   },
   "components": {
@@ -2913,5 +2914,107 @@
     "chooseTime": "Elegir una hora disponible",
     "loadingDots": "…",
     "moreClients": "+ {{count}} más"
+  },
+  "offline": {
+    "title": "Estás sin conexión.",
+    "savedAt": "Mostrando lo guardado a las {{time}}. Los cambios necesitan conexión.",
+    "saved": "Mostrando lo guardado. Los cambios necesitan conexión.",
+    "paused": "Los cambios necesitan conexión."
+  },
+  "homeBanner": {
+    "installTitle": "Descarga la app de Mova",
+    "installBody": "Tu agenda y tus clientes, a un toque.",
+    "install": "Instalar",
+    "how": "Cómo",
+    "dismiss": "Ocultar por 15 días",
+    "iosHelpBefore": "En Safari, toca",
+    "share": "Compartir",
+    "iosHelpMiddle": " y luego ",
+    "addToHomeScreen": "Agregar a inicio",
+    "browserHelp": "Abre el menú del navegador y elige Instalar app o Agregar a la pantalla de inicio.",
+    "upsellRegion": "IA + Crecimiento",
+    "upsellTitle": "Deja que Mova maneje",
+    "upsellBody": "IA + Crecimiento llena tu agenda y te promociona.",
+    "upgrade": "Mejorar"
+  },
+  "pushPrompt": {
+    "title": "Entérate en cuanto te reserven",
+    "body": "Acabas de recibir tu primera solicitud de reserva. Activa las notificaciones para que la próxima no espere.",
+    "bullet1": "Nuevas solicitudes de reserva y cancelaciones",
+    "bullet2": "Mensajes de clientes y nuevas reseñas",
+    "bullet3": "Un recordatorio antes de cada cita",
+    "turnOn": "Activar notificaciones",
+    "notNow": "Ahora no",
+    "settingsNote": "Elige cuáles en Ajustes › Idioma y notificaciones."
+  },
+  "notificationSettings": {
+    "title": "Idioma y notificaciones",
+    "back": "Volver a ajustes",
+    "languageHeading": "Idioma de la app",
+    "languageNote": "Menús y correos de Mova para ti. Los mensajes a tus clientes mantienen el idioma de cada cliente.",
+    "english": "English",
+    "spanish": "Español",
+    "notificationsHeading": "Notificaciones",
+    "pushOnTitle": "Las notificaciones push están activas en este dispositivo",
+    "pushOnBody": "Cada teléfono o computadora se configura una vez.",
+    "pushOffTitle": "Las notificaciones push están desactivadas",
+    "pushOffBody": "Entérate al instante cuando te reserven o te escriban.",
+    "allow": "Permitir",
+    "installTitle": "Instala la app de Mova",
+    "iosHelpBefore": "En Safari, toca",
+    "share": "Compartir",
+    "iosHelpMiddle": " y luego ",
+    "addToHomeScreen": "Agregar a inicio",
+    "blockedTitle": "Las notificaciones están bloqueadas",
+    "blockedBody": "Permite las notificaciones de Mova en los ajustes del navegador y vuelve aquí.",
+    "unsupportedTitle": "Este navegador no admite notificaciones push",
+    "unsupportedBody": "Seguirás recibiendo correos de los eventos que actives.",
+    "unavailableTitle": "Las notificaciones push llegarán pronto",
+    "unavailableBody": "Seguirás recibiendo correos de los eventos que actives.",
+    "sendMe": "Enviarme",
+    "email": "Correo",
+    "push": "Push",
+    "byEmail": "{{event}} por correo",
+    "byPush": "{{event}} por push",
+    "events": {
+      "booking_request": {
+        "title": "Nueva solicitud de reserva",
+        "body": "Cuando un cliente pide reservar"
+      },
+      "cancellation": {
+        "title": "Cancelación",
+        "body": "Cuando un cliente cancela"
+      },
+      "client_message": {
+        "title": "Mensaje de cliente",
+        "body": "Textos y chats de clientes"
+      },
+      "appointment_reminder": {
+        "title": "Recordatorio de cita",
+        "body": "1 hora antes de cada cita"
+      },
+      "new_review": {
+        "title": "Nueva reseña",
+        "body": "Cuando un cliente deja una reseña"
+      }
+    },
+    "loading": "Cargando tus ajustes…",
+    "loadError": "No pudimos cargar tus ajustes de notificaciones.",
+    "saveError": "No pudimos guardar ese cambio. Inténtalo de nuevo.",
+    "retry": "Intentar de nuevo"
+  },
+  "signInCode": {
+    "title": "Ingresa tu código",
+    "body": "Enviamos un código de 6 dígitos a <strong>{{email}}</strong>. Ingrésalo aquí para entrar a la app de Mova.",
+    "bodyBrowser": "O ingresa el código de 6 dígitos del correo.",
+    "group": "Código de 6 dígitos",
+    "digit": "Dígito {{index}}",
+    "note": "El enlace del mismo correo abre tu navegador. En la app, usa el código.",
+    "submit": "Entrar",
+    "resendIn": "Enviar un código nuevo en {{seconds}} s",
+    "resend": "Enviar un código nuevo",
+    "differentEmail": "Usar otro correo",
+    "invalid": "Ese código no funcionó. Revisa el correo o envía un código nuevo.",
+    "sent": "Enviamos un código nuevo."
   }
 }

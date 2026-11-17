@@ -9,6 +9,8 @@ export type OutboxEvent = {
 export function notificationKeys(eventType: string) {
   if (eventType.startsWith('appointment.')) return { title: 'notifications.appointment.title', body: 'notifications.appointment.body' };
   if (eventType === 'slot.opened') return { title: 'notifications.slotOpened.title', body: 'notifications.slotOpened.body' };
+  if (eventType === 'review.created') return { title: 'notifications.review.title', body: 'notifications.review.body' };
+  if (eventType === 'message.received') return { title: 'notifications.message.title', body: 'notifications.message.body' };
   if (eventType.startsWith('payment.')) return { title: 'notifications.payment.title', body: 'notifications.payment.body' };
   return { title: 'notifications.update.title', body: 'notifications.update.body' };
 }

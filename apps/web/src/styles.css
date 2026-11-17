@@ -209,18 +209,6 @@ body {
 .mova-home__header h1, .mova-calendar__month-header h1, .mova-clients__header h1, .mova-services-page__header h1, .mova-location-settings__header h1 { margin: 0; font-size: var(--fs-display-xl); line-height: 1.1; }
 .mova-home__settings { display: inline-flex; min-width: var(--tap-min); min-height: var(--tap-min); align-items: center; justify-content: center; border: 0; border-radius: 50%; padding: 0; background: transparent; }
 .mova-home__settings .mova-avatar { width: 44px; height: 44px; border: 1px solid var(--line-control); outline: 2px solid var(--surface-page); outline-offset: 1px; }
-.mova-home-install { display: none; }
-.mova-home-install__icon { display: none; }
-.mova-home-install__copy > strong { display: block; font-size: var(--fs-body-s); }
-.mova-home-install__copy > p { margin: var(--space-1) 0 0; color: var(--ink-secondary); font-size: var(--fs-caption); line-height: 1.45; }
-.mova-home-install__actions { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); }
-.mova-home-install__action { min-height: 40px; font-size: var(--fs-caption); }
-.mova-home-install__actions .mova-icon-button { margin-left: auto; }
-.mova-home-install__copy > .mova-home-install__help { margin-top: var(--space-2); border-top: 1px solid var(--line-subtle); padding-top: var(--space-2); }
-@media (max-width: 699px) {
-  .mova-home-install { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: start; gap: var(--space-3); border-color: var(--line-subtle); border-radius: var(--radius-xl); padding: var(--space-3); }
-  .mova-home-install__icon { display: grid; width: 36px; height: 36px; place-items: center; border-radius: var(--radius-pill); background: var(--mint); color: var(--forest); }
-}
 .mova-home__metrics { display: grid; min-height: 83px; grid-template-columns: 1.3fr 1fr 1fr; gap: 1px; overflow: hidden; border-radius: var(--radius-xl); background: var(--botanical); color: var(--ink-inverse); text-decoration: none; }
 .mova-home__metrics .mova-kpi { min-height: 83px; align-content: center; gap: 2px; border-radius: 0; padding: var(--space-3); }
 .mova-home__metrics .mova-kpi__label { color: var(--mint); font-size: var(--fs-tab); text-transform: none; }
@@ -1342,3 +1330,93 @@ select,
 .mova-price-pilot__service-row>div:last-child{justify-items:end}
 .mova-price-pilot__planned-list li>.mova-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--space-2)}
 @media(min-width:720px){.mova-price-pilot__service-list{grid-template-columns:repeat(2,minmax(0,1fr))}.mova-price-pilot__sources ul{grid-template-columns:repeat(2,minmax(0,1fr))}.mova-price-pilot__sources li{border:1px solid var(--line-subtle);border-radius:var(--radius-l);padding:var(--space-3)}}
+
+/* PWA: Home banner slot (07a–07c install, P13 AI + Growth) */
+.mova-home-banner { border: 1px solid var(--line); border-radius: 18px; padding: 10px 6px 10px 10px; background: var(--surface); }
+.mova-home-banner--install { border-color: var(--mint); background: var(--surface-alt); }
+.mova-home-banner--upsell { box-shadow: 0 1px 0 rgba(24, 57, 47, .04); }
+.mova-home-banner__row { display: flex; align-items: center; gap: 12px; }
+.mova-home-banner__tile { position: relative; display: flex; flex: none; width: 40px; height: 40px; align-items: center; justify-content: center; overflow: hidden; border-radius: 11px; background: var(--forest); color: var(--ivory); font: 800 12px/1 var(--font-display, Manrope), sans-serif; letter-spacing: -.4px; box-shadow: 0 1px 2px rgba(24, 57, 47, .18); }
+.mova-home-banner__tile--growth { color: var(--mint); box-shadow: none; }
+.mova-home-banner__tile--growth .mova-icon, .mova-home-banner__tile--growth > svg:not(.mova-home-banner__leaf) { position: relative; }
+.mova-home-banner__leaf { position: absolute; inset: 0; fill: var(--botanical); }
+.mova-home-banner__copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 1px; }
+.mova-home-banner__copy > strong { color: var(--ink-primary); font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mova-home-banner__copy > span { color: var(--ink-secondary); font-size: 12px; line-height: 1.35; }
+.mova-home-banner__action { flex: none; height: 34px; border: 1.5px solid var(--forest); border-radius: 17px; padding: 0 14px; background: var(--surface); color: var(--forest); font: 700 13px var(--font-ui, "DM Sans"), sans-serif; cursor: pointer; }
+.mova-home-banner__action--solid { border: 0; padding: 0 16px; background: var(--forest); color: var(--ivory); }
+.mova-home-banner__close { display: flex; flex: none; width: 32px; height: 32px; align-items: center; justify-content: center; border: 0; border-radius: 16px; background: transparent; color: var(--ink-muted); cursor: pointer; }
+.mova-home-banner__help { margin: 10px 0 2px 52px; border-top: 1px solid var(--mint); padding-top: 9px; color: var(--ink-primary); font-size: 12px; line-height: 1.4; }
+.mova-home-banner__help svg { display: inline-block; vertical-align: -2px; }
+
+/* PWA: offline bar (P4–P7) and paused actions */
+html[data-mova-offline-bar] .mova-offline-notice { display: none; }
+.mova-offline-banner { display: flex; align-items: center; gap: 10px; border-radius: 14px; padding: 10px 14px; background: var(--forest); color: var(--ivory); font-size: 13px; line-height: 1.35; }
+.mova-offline-banner > svg { flex: none; color: var(--mint); }
+.mova-offline-banner > span { flex: 1; color: var(--mint); }
+.mova-offline-banner strong { color: var(--ivory); font-weight: 700; }
+.mova-calendar__offline { margin: var(--space-2) 0; }
+.mova-offline-fieldset { display: contents; min-width: 0; margin: 0; border: 0; padding: 0; }
+.mova-offline-fieldset:disabled button, .mova-offline-fieldset:disabled input, .mova-offline-fieldset:disabled select, .mova-offline-fieldset:disabled textarea { cursor: not-allowed; }
+.mova-offline-fieldset:disabled .mova-button { opacity: .45; }
+
+/* PWA: push permission sheet (P8) */
+.mova-push-prompt__body { display: flex; flex-direction: column; gap: 14px; padding: 0 20px 28px; }
+.mova-push-prompt__icon { display: flex; width: 56px; height: 56px; align-items: center; justify-content: center; border-radius: 28px; background: var(--mint); color: var(--forest); }
+.mova-push-prompt__body h2 { margin: 0; font-family: var(--font-display, Manrope), sans-serif; font-size: 24px; font-weight: 800; letter-spacing: -.4px; }
+.mova-push-prompt__body > p { margin: 0; color: var(--ink-secondary); font-size: 15px; line-height: 1.5; }
+.mova-push-prompt__body ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.mova-push-prompt__body li { display: flex; align-items: center; gap: 10px; }
+.mova-push-prompt__body li .mova-icon { color: var(--botanical); }
+.mova-push-prompt__body .mova-button { margin-top: 4px; min-height: 54px; }
+.mova-push-prompt__later { height: 40px; border: 0; background: transparent; color: var(--forest); font: 600 15px var(--font-ui, "DM Sans"), sans-serif; cursor: pointer; }
+.mova-push-prompt__body > small { color: var(--ink-muted); font-size: 12px; text-align: center; }
+
+/* PWA: Settings › Language & notifications (P10–P12) */
+.mova-notification-settings { display: flex; flex-direction: column; gap: 14px; }
+.mova-notification-settings > h1 { margin: 0; font-size: var(--fs-display-xl); line-height: 1.1; letter-spacing: -.4px; }
+.mova-notification-settings__section { display: flex; flex-direction: column; gap: 8px; }
+.mova-notification-settings__section > h2 { margin: 0; }
+.mova-notification-settings__note { margin: 0; color: var(--ink-muted); font-size: 12px; }
+.mova-language-toggle { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 24px; padding: 4px; background: var(--surface); }
+.mova-language-toggle > button { display: flex; height: 40px; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 20px; background: transparent; color: var(--ink-primary); font: 600 14px var(--font-ui, "DM Sans"), sans-serif; cursor: pointer; }
+.mova-language-toggle > button.is-selected { background: var(--forest); color: var(--ivory); font-weight: 700; }
+.mova-push-device { display: flex; align-items: center; gap: 12px; border: 1px solid #EBD3C1; border-radius: 16px; padding: 12px 14px; background: var(--surface-warm); }
+.mova-push-device--on { border-color: var(--mint); background: var(--surface-alt); }
+.mova-push-device--install { display: block; }
+.mova-push-device__row { display: flex; align-items: center; gap: 12px; }
+.mova-push-device__icon { display: flex; flex: none; width: 32px; height: 32px; align-items: center; justify-content: center; border-radius: 16px; background: var(--surface); color: var(--forest); }
+.mova-push-device--on .mova-push-device__icon { background: var(--mint); }
+.mova-push-device__copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 1px; font-size: 14px; line-height: 1.35; }
+.mova-push-device__copy > span { color: var(--ink-muted); font-size: 12px; }
+.mova-push-device__check { display: flex; flex: none; color: var(--botanical); }
+.mova-push-device__action { flex: none; height: 34px; border: 0; border-radius: 17px; padding: 0 14px; background: var(--forest); color: var(--ivory); font: 700 13px var(--font-ui, "DM Sans"), sans-serif; cursor: pointer; }
+.mova-push-device__action:disabled { opacity: .6; }
+.mova-push-device__help { margin: 2px 0 0 44px; border-top: 1px solid #EBD3C1; padding-top: 9px; color: var(--ink-primary); font-size: 12px; line-height: 1.4; }
+.mova-push-device__help svg { display: inline-block; vertical-align: -2px; }
+.mova-event-matrix { border: 1px solid var(--line); border-radius: 20px; padding: 4px 16px; background: var(--surface); }
+.mova-event-matrix__head, .mova-event-matrix__row { display: flex; align-items: center; gap: 12px; }
+.mova-event-matrix__head { height: 36px; border-bottom: 1px solid var(--line-subtle); color: var(--ink-muted); font-size: 12px; }
+.mova-event-matrix__head > span:first-child { flex: 1; }
+.mova-event-matrix__head > span:not(:first-child) { display: flex; width: 46px; flex-direction: column; align-items: center; font-size: 11px; font-weight: 700; }
+.mova-event-matrix__row { min-height: 58px; }
+.mova-event-matrix__row + .mova-event-matrix__row { border-top: 1px solid var(--line-subtle); }
+.mova-event-matrix__copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 1px; }
+.mova-event-matrix__copy > strong { font-size: 15px; font-weight: 600; }
+.mova-event-matrix__copy > small { color: var(--ink-muted); font-size: 12px; }
+.mova-event-matrix__cell { display: flex; width: 46px; justify-content: center; }
+.mova-mini-switch { position: relative; display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; cursor: pointer; }
+.mova-mini-switch > input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: inherit; }
+.mova-mini-switch > span { position: relative; display: inline-block; width: 38px; height: 22px; border-radius: 11px; background: #D5DBD2; transition: background .15s; pointer-events: none; }
+.mova-mini-switch > span > span { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 9px; background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, .15); transition: left .15s; }
+.mova-mini-switch > input:checked + span { background: var(--forest); }
+.mova-mini-switch > input:checked + span > span { left: 18px; }
+.mova-mini-switch > input:focus-visible + span { outline: 2px solid var(--forest); outline-offset: 2px; }
+.mova-mini-switch.is-disabled { opacity: .4; cursor: not-allowed; }
+
+/* Sign-in code (P2) */
+.mova-code-entry { display: flex; flex-direction: column; gap: 16px; }
+.mova-code-entry__digits { display: flex; justify-content: space-between; gap: 8px; }
+.mova-code-entry__digits input { width: 46px; height: 56px; min-width: 0; flex: 1 1 0; max-width: 52px; border: 1px solid var(--line-control); border-radius: 14px; background: var(--surface); color: var(--ink-primary); font: 800 24px var(--font-display, Manrope), sans-serif; text-align: center; }
+.mova-code-entry__digits input:focus { border: 2px solid var(--forest); outline: none; }
+.mova-code-entry__note { margin: 0; color: var(--ink-muted); font-size: 13px; }

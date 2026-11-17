@@ -2,6 +2,7 @@ import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, 
 import { useEffect } from 'react';
 import type { LinksFunction } from 'react-router';
 import stylesheet from '../src/styles.css?url';
+import launchScreens from '../src/pwa/launch-screens.json';
 import { AppErrorBoundary } from '../src/app/AppErrorBoundary';
 import { PwaInstallProvider } from '../src/pwa/PwaInstallProvider';
 
@@ -15,7 +16,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return <html lang={lang}>
     <head><meta charSet="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       <meta name="theme-color" content="#18392F" /><link rel="manifest" href="/manifest.webmanifest" />
-      <link rel="icon" href="/icons/mova-192.svg" type="image/svg+xml" /><link rel="apple-touch-icon" href="/icons/mova-192.svg" /><Meta /><Links /></head>
+      <link rel="icon" href="/icons/favicon-48.png" type="image/png" sizes="48x48" /><link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32" />
+      <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-title" content="Mova Beauty" /><meta name="apple-mobile-web-app-status-bar-style" content="default" />
+      {launchScreens.map((screen) => <link key={screen.href} rel="apple-touch-startup-image" href={screen.href} media={screen.media} />)}<Meta /><Links /></head>
     <body>{children}<ScrollRestoration /><Scripts /></body>
   </html>;
 }

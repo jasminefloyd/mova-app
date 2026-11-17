@@ -1,5 +1,6 @@
 import type { EmailLocale, EmailTemplateId } from './types.ts';
 import { renderWelcomeEmail, type WelcomeEmailVars } from './welcome.ts';
+import { renderStylistAlertEmail, type StylistAlertEmailVars } from './stylist-alert.ts';
 
 export const EMAIL_TEMPLATES: EmailTemplateId[] = ['booking_confirmation', 'request_received', 'request_accepted', 'request_declined', 'appointment_reminder'];
 export const PROPOSED_EMAIL_TEMPLATES: EmailTemplateId[] = ['appointment_moved', 'appointment_cancelled', 'review_request', 'stylist_welcome', 'stylist_new_request'];
@@ -11,6 +12,8 @@ export type AppointmentEmailVars = {
   bookingUrl?: string | null; stylistUrl?: string | null; duration?: string | null; amount?: string | null;
   /** stylist_welcome only: page and Settings links for EM11. */
   welcome?: Omit<WelcomeEmailVars, 'firstName' | 'postalAddress'> & { firstName?: string | null };
+  /** stylist_alert only. */
+  alert?: Omit<StylistAlertEmailVars, 'postalAddress'>;
 };
 
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
@@ -36,6 +39,7 @@ const COPY: Record<EmailLocale, Record<EmailTemplateId, (v: AppointmentEmailVars
     appointment_cancelled: (v,d) => ({ subject: `Your appointment with ${v.businessName} is cancelled`, preview: `${v.serviceName} on ${d.full} is cancelled.`, headline: 'Your appointment is cancelled.', lead: `${v.serviceName} with ${v.businessName} on ${d.full} is cancelled.`, action: 'Book again', footer: 'If you think this was a mistake, contact the stylist.', state: 'white' }),
     review_request: (v,d) => ({ subject: `How was your visit with ${v.businessName}?`, preview: `Tell us how your ${v.serviceName} went. It takes less than a minute.`, headline: `How was your ${v.serviceName}?`, lead: `Your visit with ${v.businessName} on ${d.full} is ready for a review.`, action: 'Write a review', footer: 'Reviews come only from real visits. You can opt out of review requests below.', state: 'review' }),
     stylist_welcome: (v) => ({ subject: `Welcome to Mova · ${v.businessName}`, preview: 'Your business moves with you. Three steps to your first booking.', headline: `Welcome to Mova, ${firstName(v.stylistName || v.businessName)}.`, lead: 'Your clients follow you. Now your business can too.', action: 'Finish setting up', footer: 'You are on the Free plan. No Mova fee on cash or payments the salon collects.', state: 'forest' }),
+    stylist_alert: (v) => ({ subject: v.alert?.title ?? 'Mova', preview: v.alert?.body ?? '', headline: v.alert?.title ?? 'Mova', lead: v.alert?.body ?? '', action: v.alert?.actionLabel ?? 'Open in Mova', footer: '', state: 'forest' }),
     stylist_new_request: (v,d) => ({ subject: `New request for ${v.businessName}: ${v.clientName} · ${d.full}`, preview: `${v.serviceName} at ${v.locationName}. Reply within 24 hours.`, headline: `${firstName(v.clientName)} wants a time at the salon.`, lead: `Check the salon's book, then accept or suggest another time. The request expires in 24 hours.`, action: 'Open request', footer: v.clientNote ? `Client note: “${v.clientNote}”` : 'Open Mova to answer this request.', state: 'request' }),
   },
   'es-US': {
@@ -48,12 +52,14 @@ const COPY: Record<EmailLocale, Record<EmailTemplateId, (v: AppointmentEmailVars
     appointment_cancelled: (v,d) => ({ subject: `Tu cita con ${v.businessName} fue cancelada`, preview: `${v.serviceName} el ${d.full} fue cancelada.`, headline: 'Tu cita fue cancelada.', lead: `Tu cita de ${v.serviceName} con ${v.businessName} para ${d.full} fue cancelada.`, action: 'Reservar otra vez', footer: 'Si crees que fue un error, comunícate con tu estilista.', state: 'white' }),
     review_request: (v,d) => ({ subject: `¿Cómo fue tu visita con ${v.businessName}?`, preview: `Cuéntanos cómo te fue con ${v.serviceName}.`, headline: `¿Cómo estuvo tu ${v.serviceName}?`, lead: `Tu visita con ${v.businessName} el ${d.full} está lista para una reseña.`, action: 'Escribir una reseña', footer: 'Las reseñas son solo de visitas reales. Puedes dejar de recibir estas solicitudes abajo.', state: 'review' }),
     stylist_welcome: (v) => ({ subject: `Te damos la bienvenida a Mova · ${v.businessName}`, preview: 'Tu negocio se mueve contigo. Tres pasos para tu primera reserva.', headline: `Te damos la bienvenida a Mova, ${firstName(v.stylistName || v.businessName)}.`, lead: 'Tus clientes te siguen. Ahora tu negocio también.', action: 'Terminar configuración', footer: 'Estás en el plan Gratis. Mova no cobra por efectivo ni pagos que cobre el salón.', state: 'forest' }),
+    stylist_alert: (v) => ({ subject: v.alert?.title ?? 'Mova', preview: v.alert?.body ?? '', headline: v.alert?.title ?? 'Mova', lead: v.alert?.body ?? '', action: v.alert?.actionLabel ?? 'Abrir en Mova', footer: '', state: 'forest' }),
     stylist_new_request: (v,d) => ({ subject: `Nueva solicitud para ${v.businessName}: ${v.clientName} · ${d.full}`, preview: `${v.serviceName} en ${v.locationName}. Responde en 24 horas.`, headline: `${firstName(v.clientName)} quiere una cita en el salón.`, lead: 'Revisa la agenda del salón y acepta o sugiere otro horario. La solicitud vence en 24 horas.', action: 'Abrir solicitud', footer: v.clientNote ? `Nota del cliente: “${v.clientNote}”` : 'Abre Mova para responder.', state: 'request' }),
   },
 };
 
 export function renderEmail(id: EmailTemplateId, locale: EmailLocale, vars: AppointmentEmailVars) {
   const lang = locale === 'es-US' ? 'es-US' : 'en-US';
+  if (id === 'stylist_alert' && vars.alert) return renderStylistAlertEmail(lang, { ...vars.alert, postalAddress: vars.postalAddress ?? null });
   if (id === 'stylist_welcome') {
     return renderWelcomeEmail(lang, { ...vars.welcome, firstName: vars.welcome?.firstName || vars.stylistName || vars.businessName, postalAddress: vars.postalAddress ?? null });
   }

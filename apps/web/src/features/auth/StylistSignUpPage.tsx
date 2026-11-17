@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import type { ReactNode } from 'react';
@@ -22,6 +22,15 @@ export default function StylistSignUpPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+  const navigate = useNavigate();
+
+  const verify = async (code: string) => {
+    if (!supabase) return false;
+    const { error: verifyError } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: 'email' });
+    if (verifyError) return false;
+    navigate('/auth/confirm?returnTo=%2Fonboarding%2Fprofile', { replace: true });
+    return true;
+  };
 
   const send = async () => {
     if (!supabase) return false;
@@ -80,7 +89,7 @@ export default function StylistSignUpPage() {
             {[0, 1, 2, 3, 4, 5].map((index) => <span key={index} className={index === 0 ? 'is-current' : undefined} />)}
           </div>
           <span className="stylist-auth__step">{t('stylistAuth.signUp.step')}</span>
-          <CheckEmailPanel email={email.trim()} onResend={send} onChangeEmail={() => setSent(false)} />
+          <CheckEmailPanel email={email.trim()} onResend={send} onVerify={verify} onChangeEmail={() => setSent(false)} />
         </div> : <form className="stylist-auth__form-column" onSubmit={(event) => void submit(event)}>
           <div className="stylist-auth__progress" aria-hidden="true">
             {[0, 1, 2, 3, 4, 5].map((index) => <span key={index} className={index === 0 ? 'is-current' : undefined} />)}

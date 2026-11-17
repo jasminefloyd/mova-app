@@ -6,6 +6,7 @@ import { DayStrip, EmptyState, ErrorState, HonestyBanner, IconButton } from '../
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { operatorUrl } from '../../app/operator-url';
 import { displayId } from '../../lib/display-ids';
+import { OfflineBanner } from '../../pwa/OfflineBanner';
 import { BLOCK_REASONS } from '../scheduling/rules';
 
 type Location = { id: string; name: string; time_zone: string; booking_mode: string; calendar_ownership: string; payment_collector: string; display_color_index: number };
@@ -155,6 +156,7 @@ export function CalendarPage() {
           <IconButton label={t('calendar.nextWeek')} icon="chevron" onClick={() => selectDay(addDays(day, 7))} />
         </div>
       </div>
+      <OfflineBanner className="mova-calendar__offline" />
 
       <DayStrip variant="calendar" label={t('calendar.days')} days={days} selected={day} onSelect={selectDay} />
       <div className="mova-calendar__view-tabs" role="group" aria-label={t('calendar.viewLabel')}>

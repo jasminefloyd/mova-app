@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Avatar, Button, Card, EmptyState, Icon, IconButton, ListRow, ScreenHeader } from '../components';
 import { HomeAppointments } from '../features/bookings/HomeAppointments';
 import { useArtistBusiness } from '../features/settings/useArtistBusiness';
-import { LocaleSwitcher } from './LocaleSwitcher';
+import { clearOfflineData } from '../pwa/offline-data';
 import { operatorUrl } from './operator-url';
 import { ReportsPage } from '../features/reports/ReportsPage';
 import { FeedbackSheet } from '../features/settings/FeedbackSheet';
@@ -34,7 +34,6 @@ export function SettingsPage() {
   const [paymentSummary, setPaymentSummary] = useState<string>('—');
   const [calendarSummary, setCalendarSummary] = useState<string>('—');
   const [googleSummary, setGoogleSummary] = useState<string>('—');
-  const [languageExpanded, setLanguageExpanded] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -64,6 +63,7 @@ export function SettingsPage() {
     try {
       const { error } = await client.auth.signOut();
       if (error) { setSignOutError(true); setSigningOut(false); return; }
+      await clearOfflineData();
       window.sessionStorage.removeItem('mova_active_artist_business_id');
       window.sessionStorage.removeItem('mova_active_artist_business_display_id');
       if (window.location.hostname === 'ops.mova-beauty.co') {
@@ -113,10 +113,9 @@ export function SettingsPage() {
       <ListRow title={t('settings.reviewsGoogle')} trailing={t('settings.notConnected')} href={operatorUrl(businessId,'settings/reviews')} />
       <ListRow title={t('google.account.settingsRow')} trailing={googleSummary} href={operatorUrl(businessId,'settings/google')} />
       <ListRow title={t('settings.plan')} trailing={t('settings.planNotConfigured')} href={operatorUrl(businessId,'settings/plan')} />
-      <button type="button" className="mova-list-row mova-settings-language-row" aria-expanded={languageExpanded} onClick={()=>setLanguageExpanded(value=>!value)}><span className="mova-list-row__copy"><strong>{t('settings.languageNotifications')}</strong></span><span className="mova-list-row__trailing">{localeName}</span></button>
+      <ListRow title={t('settings.languageNotifications')} trailing={localeName} href={operatorUrl(businessId,'settings/notifications')} />
       <ListRow title={t('settings.privacyData')} href={operatorUrl(businessId,'settings/privacy')} />
     </Card>
-    {languageExpanded&&<section className="mova-settings-language" id="mova-settings-language" aria-label={t('settings.languageNotifications')}><LocaleSwitcher /></section>}
     <button type="button" className="mova-settings-feedback" onClick={()=>setFeedbackOpen(true)}><Icon name="message" size={16}/>{t('feedback.link')} <span>{t('feedback.linkAction')}</span></button>
     <FeedbackSheet open={feedbackOpen} onClose={()=>setFeedbackOpen(false)} />
     {signOutError && <p role="alert">{t('settings.signOutError')}</p>}

@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Avatar, Button, Card, EmptyState, ErrorState, Icon, IconButton, KPITile, SectionOverline, StatusChip } from '../../components';
+import { Avatar, Card, EmptyState, ErrorState, Icon, KPITile, SectionOverline, StatusChip } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { operatorUrl } from '../../app/operator-url';
 import { displayId } from '../../lib/display-ids';
-import { usePwaInstall } from '../../pwa/PwaInstallProvider';
+import { HomeBanner } from './HomeBanner';
+import { PushPromptSheet } from './PushPromptSheet';
+import { OfflineBanner } from '../../pwa/OfflineBanner';
+import { useOnlineStatus } from '../../pwa/useOnlineStatus';
+import { rememberHome } from '../../pwa/offline-data';
+import { setAppBadge } from '../../pwa/usePushDevice';
 
 type Booking = { id: string; appointment_number:number; location_id: string; service_name_snapshot: string; service_names?:string[]; client_name: string; status: string; starts_at: string; ends_at: string; request_expires_at: string | null };
 type QuoteNeed = { id: string; conversation_id: string; service_category: string; created_at: string };
@@ -77,9 +82,7 @@ export function HomeNeedsSection({ businessId, needsYou, quoteNeeds, slotNeeds, 
 export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => void }) {
   const { t, i18n } = useTranslation();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
-  const { ready: installReady, installed, canPrompt, promptInstall } = usePwaInstall();
-  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
-  const [showInstallHelp, setShowInstallHelp] = useState(false);
+  const { online } = useOnlineStatus();
   const [items, setItems] = useState<Booking[]>([]);
   const [quoteNeeds, setQuoteNeeds] = useState<QuoteNeed[]>([]);
   const [slotNeeds, setSlotNeeds] = useState<SlotNeed[]>([]);
@@ -109,32 +112,7 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
   const [needsError, setNeedsError] = useState(false);
   const [metrics, setMetrics] = useState<HomeMetrics>({ revenue: '—', revenueDelta: '—', booked: '—', rating: '—', ratingCount: '—' });
 
-  useEffect(() => {
-    if (!installReady || !businessId || installed || !window.matchMedia('(max-width: 699px)').matches) return;
-    const key = 'mova_home_install_prompt_shown';
-    try {
-      if (window.sessionStorage.getItem(key)) return;
-      window.sessionStorage.setItem(key, '1');
-    } catch { /* The banner still works when browser storage is unavailable. */ }
-    setShowInstallPrompt(true);
-  }, [businessId, installReady, installed]);
-
-  useEffect(() => { if (installed) setShowInstallPrompt(false); }, [installed]);
-
-  const dismissInstallPrompt = () => {
-    setShowInstallPrompt(false);
-    setShowInstallHelp(false);
-  };
-
-  const installOrExplain = async () => {
-    if (canPrompt) {
-      const accepted = await promptInstall();
-      if (accepted) dismissInstallPrompt();
-      else setShowInstallHelp(true);
-      return;
-    }
-    setShowInstallHelp((shown) => !shown);
-  };
+  useEffect(() => { if (businessId) rememberHome(operatorUrl(businessId, '')); }, [businessId]);
 
   const load = useCallback(async () => {
     if (!client || !businessId) { setLoading(false); return; }
@@ -206,6 +184,8 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
   const now = Date.now();
   const needsYou = items.filter((item) => item.status === 'pending_artist' && (!item.request_expires_at || new Date(item.request_expires_at).getTime() > now));
   const needsCount = needsYou.length + quoteNeeds.length + slotNeeds.length;
+  // App-icon badge = the Needs you count (installed app only; other browsers ignore it).
+  useEffect(() => { if (!loading && !error) setAppBadge(needsCount); }, [error, loading, needsCount]);
   const upcomingGroups = useMemo(() => {
     const groups = new Map<string, { date: Date; locationId: string; items: Booking[] }>();
     for (const item of items) {
@@ -242,18 +222,9 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
       </div>
     </header>
 
-    {showInstallPrompt && <div role="region" aria-label={t('homeAppointments.installTitle')}><Card tone="warm" className="mova-home-install">
-      <span className="mova-home-install__icon" aria-hidden="true"><Icon name="sparkle" size={20} /></span>
-      <div className="mova-home-install__copy">
-        <strong>{t('homeAppointments.installTitle')}</strong>
-        <p>{t('homeAppointments.installBody')}</p>
-        <div className="mova-home-install__actions">
-          <Button variant="secondary" className="mova-home-install__action" onClick={() => void installOrExplain()}>{t(canPrompt ? 'homeAppointments.installAction' : 'homeAppointments.installHow')}</Button>
-          <IconButton icon="close" label={t('homeAppointments.installDismiss')} onClick={dismissInstallPrompt} />
-        </div>
-        {showInstallHelp && <p className="mova-home-install__help">{t(/iPad|iPhone|iPod/i.test(navigator.userAgent) ? 'homeAppointments.installIosHelp' : 'homeAppointments.installBrowserHelp')}</p>}
-      </div>
-    </Card></div>}
+    <OfflineBanner />
+    <HomeBanner client={client} businessId={businessId} />
+    <PushPromptSheet client={client} businessId={businessId} hasBookingRequest={needsYou.length > 0} />
 
     <Link className="mova-home__metrics" to={operatorUrl(businessId, 'reports')} aria-label={t('homeAppointments.openReports')}>
       <KPITile label={t('homeAppointments.thisWeek')} value={metrics.revenue} delta={metrics.revenueDelta} tone="inverse" />
@@ -261,7 +232,7 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
       <KPITile label={t('homeAppointments.rating')} value={metrics.rating} delta={metrics.ratingCount} tone="inverse" />
     </Link>
 
-    {needsError
+    {needsError && online
       ? <section className="mova-home__section"><SectionOverline>{t('homeAppointments.needsYou', { count: needsCount })}</SectionOverline><ErrorState title={t('homeAppointments.needsError')} retryLabel={t('homeAppointments.retry')} onRetry={() => void load()} /></section>
       : <HomeNeedsSection businessId={businessId} needsYou={needsYou} quoteNeeds={quoteNeeds} slotNeeds={slotNeeds} locationById={locationById} now={now} />}
 

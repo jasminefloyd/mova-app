@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { clearOfflineData } from '../../pwa/offline-data';
 import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Chip, Icon, TextArea, TextField } from '../../components';
@@ -201,6 +202,7 @@ export function OnboardingFlow() {
   const signOut = async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
+    await clearOfflineData();
     window.sessionStorage.removeItem('mova_active_artist_business_id');
     window.sessionStorage.removeItem('mova_active_artist_business_display_id');
     window.sessionStorage.removeItem('mova_active_artist_business_id');

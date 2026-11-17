@@ -46,3 +46,31 @@ describe('in-app notification preference resolution', () => {
     });
   });
 });
+
+import { isEventPreferences, notificationEventFor, resolveEventPreferences } from './notification-preferences.ts';
+
+describe('per-event notification preferences', () => {
+  it('starts every event with email and push on', () => {
+    const events = resolveEventPreferences(null);
+    expect(Object.values(events).every((row) => row.email && row.push)).toBe(true);
+    expect(Object.keys(events)).toEqual(['booking_request', 'cancellation', 'client_message', 'appointment_reminder', 'new_review']);
+  });
+
+  it('keeps a legacy account-wide email opt-out until an event is turned back on', () => {
+    const events = resolveEventPreferences({ email: false, events: { new_review: { email: true } } });
+    expect(events.booking_request.email).toBe(false);
+    expect(events.new_review.email).toBe(true);
+  });
+
+  it('rejects unknown events or channels', () => {
+    expect(isEventPreferences({ booking_request: { email: true, push: false } })).toBe(true);
+    expect(isEventPreferences({ marketing: { email: true } })).toBe(false);
+    expect(isEventPreferences({ booking_request: { sms: true } })).toBe(false);
+  });
+
+  it('maps outbox events to stylist alerts', () => {
+    expect(notificationEventFor('appointment.pending_artist')).toBe('booking_request');
+    expect(notificationEventFor('review.created')).toBe('new_review');
+    expect(notificationEventFor('appointment.confirmed')).toBeNull();
+  });
+});

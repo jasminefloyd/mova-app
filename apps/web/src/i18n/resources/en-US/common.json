@@ -1464,13 +1464,6 @@
     "goodMorning": "Good morning, {{name}}",
     "goodAfternoon": "Good afternoon, {{name}}",
     "goodEvening": "Good evening, {{name}}",
-    "installTitle": "Keep Mova close",
-    "installBody": "Add Mova to your phone for one-tap access to your schedule and clients, in a focused app window.",
-    "installAction": "Add to Home Screen",
-    "installHow": "How to install",
-    "installDismiss": "Dismiss app install prompt",
-    "installIosHelp": "In Safari, tap Share, then Add to Home Screen.",
-    "installBrowserHelp": "Open your browser menu and choose Install app or Add to Home Screen.",
     "loading": "Loading your day…",
     "noIdentity": "Sign in to view your home screen.",
     "retry": "Try again",
@@ -1544,6 +1537,14 @@
     "update": {
       "title": "Business update",
       "body": "There’s a new update for your business."
+    },
+    "review": {
+      "title": "New review",
+      "body": "A client left you a review."
+    },
+    "message": {
+      "title": "New message",
+      "body": "A client sent you a message."
     }
   },
   "components": {
@@ -2913,5 +2914,107 @@
     "notSetReplyTo": "Not set",
     "openingsFallback": "Choose an opening later.",
     "channelsIntro": "Where your messages go. Set up once, reuse every time."
+  },
+  "offline": {
+    "title": "You’re offline.",
+    "savedAt": "Showing what was saved at {{time}}. Changes need a connection.",
+    "saved": "Showing what was saved. Changes need a connection.",
+    "paused": "Changes need a connection."
+  },
+  "homeBanner": {
+    "installTitle": "Get the Mova app",
+    "installBody": "Your schedule and clients, one tap away.",
+    "install": "Install",
+    "how": "How",
+    "dismiss": "Dismiss for 15 days",
+    "iosHelpBefore": "In Safari, tap",
+    "share": "Share",
+    "iosHelpMiddle": ", then ",
+    "addToHomeScreen": "Add to Home Screen",
+    "browserHelp": "Open your browser menu and choose Install app or Add to Home Screen.",
+    "upsellRegion": "AI + Growth",
+    "upsellTitle": "Let Mova drive",
+    "upsellBody": "AI + Growth fills your chair and markets you.",
+    "upgrade": "Upgrade"
+  },
+  "pushPrompt": {
+    "title": "Know the moment clients book",
+    "body": "You just got your first booking request. Turn on notifications so the next one doesn’t wait.",
+    "bullet1": "New booking requests and cancellations",
+    "bullet2": "Client messages and new reviews",
+    "bullet3": "A reminder before each appointment",
+    "turnOn": "Turn on notifications",
+    "notNow": "Not now",
+    "settingsNote": "Choose which ones in Settings › Language & notifications."
+  },
+  "notificationSettings": {
+    "title": "Language & notifications",
+    "back": "Back to settings",
+    "languageHeading": "App language",
+    "languageNote": "Menus and Mova emails to you. Your client messages keep each client’s language.",
+    "english": "English",
+    "spanish": "Español",
+    "notificationsHeading": "Notifications",
+    "pushOnTitle": "Push is on for this device",
+    "pushOnBody": "Each phone or computer you use is set up once.",
+    "pushOffTitle": "Push notifications are off",
+    "pushOffBody": "Know right away when clients book or message.",
+    "allow": "Allow",
+    "installTitle": "Install the Mova app",
+    "iosHelpBefore": "In Safari, tap",
+    "share": "Share",
+    "iosHelpMiddle": ", then ",
+    "addToHomeScreen": "Add to Home Screen",
+    "blockedTitle": "Notifications are blocked",
+    "blockedBody": "Allow notifications for Mova in your browser settings, then come back.",
+    "unsupportedTitle": "Push isn’t available in this browser",
+    "unsupportedBody": "You’ll still get emails for the events you turn on.",
+    "unavailableTitle": "Push is coming soon",
+    "unavailableBody": "You’ll still get emails for the events you turn on.",
+    "sendMe": "Send me",
+    "email": "Email",
+    "push": "Push",
+    "byEmail": "{{event}} by email",
+    "byPush": "{{event}} by push",
+    "events": {
+      "booking_request": {
+        "title": "New booking request",
+        "body": "When a client asks to book"
+      },
+      "cancellation": {
+        "title": "Cancellation",
+        "body": "When a client cancels"
+      },
+      "client_message": {
+        "title": "Client message",
+        "body": "Texts and chats from clients"
+      },
+      "appointment_reminder": {
+        "title": "Appointment reminder",
+        "body": "1 hour before each appointment"
+      },
+      "new_review": {
+        "title": "New review",
+        "body": "When a client leaves a review"
+      }
+    },
+    "loading": "Loading your settings…",
+    "loadError": "We couldn’t load your notification settings.",
+    "saveError": "We couldn’t save that change. Try again.",
+    "retry": "Try again"
+  },
+  "signInCode": {
+    "title": "Enter your code",
+    "body": "We emailed a 6-digit code to <strong>{{email}}</strong>. Enter it here to sign in to the Mova app.",
+    "bodyBrowser": "Or enter the 6-digit code from the email.",
+    "group": "6-digit code",
+    "digit": "Digit {{index}}",
+    "note": "The link in the same email opens your browser instead. In the app, use the code.",
+    "submit": "Sign in",
+    "resendIn": "Send a new code in {{seconds}} s",
+    "resend": "Send a new code",
+    "differentEmail": "Use a different email",
+    "invalid": "That code didn’t work. Check the email or send a new code.",
+    "sent": "We sent a new code."
   }
 }

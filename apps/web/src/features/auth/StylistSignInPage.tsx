@@ -1,5 +1,5 @@
-import { useMemo, useState, type FormEvent } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { LocaleSwitcher } from '../../app/LocaleSwitcher';
 import { createMovaSupabaseClient } from '../../lib/supabase';
@@ -18,6 +18,26 @@ export default function StylistSignInPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+  const navigate = useNavigate();
+  const confirmPath = `/auth/confirm${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`;
+
+  // Opening Mova (or the installed app, which starts here) with a live session goes straight to Home or onboarding.
+  useEffect(() => {
+    if (!supabase) return;
+    let active = true;
+    void supabase.auth.getSession()
+      .then(({ data: { session } }) => { if (active && session) navigate(confirmPath, { replace: true }); })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, [confirmPath, navigate, supabase]);
+
+  const verify = async (code: string) => {
+    if (!supabase) return false;
+    const { error: verifyError } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: 'email' });
+    if (verifyError) return false;
+    navigate(confirmPath, { replace: true });
+    return true;
+  };
 
   const send = async () => {
     if (!supabase) return false;
@@ -47,7 +67,7 @@ export default function StylistSignInPage() {
     <div className="stylist-auth__rule" aria-hidden="true" />
 
     <div className="stylist-auth__column">
-      {sent ? <CheckEmailPanel email={email.trim()} message={t('stylistAuth.checkEmail.signInSent', { email: email.trim() })} onResend={send} onChangeEmail={() => setSent(false)} /> : <>
+      {sent ? <CheckEmailPanel email={email.trim()} message={t('stylistAuth.checkEmail.signInSent', { email: email.trim() })} onResend={send} onVerify={verify} onChangeEmail={() => setSent(false)} /> : <>
       <div className="stylist-auth__intro">
         <span className="stylist-auth__badge">{t('stylistAuth.signIn.badge')}</span>
         <h1 className="stylist-auth__title">{t('stylistAuth.signIn.title')}</h1>

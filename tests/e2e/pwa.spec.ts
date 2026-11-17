@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 import { openOperatorPage } from './operator-session';
 
+test.use({ serviceWorkers: 'allow' });
+
 test('PWA manifest and service worker are available at the standalone start route', async ({ page }) => {
   await page.goto('/login');
   await expect(page.getByRole('heading', { level: 1, name: 'Welcome back' })).toBeVisible();
@@ -42,10 +44,11 @@ test('the temporary home page has no waitlist form', async ({ page }) => {
 test('artist locale is selected in Settings without a landing-page selector', async ({ page }) => {
   await page.goto('/');
   await openOperatorPage(page, '/settings');
-  await page.getByRole('button', { name: /Language & notifications/ }).click();
-  await expect(page.getByLabel('Language', { exact: true })).toHaveValue('en-US');
+  await page.getByRole('link', { name: /Language & notifications/ }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Language & notifications' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'English' })).toHaveAttribute('aria-checked', 'true');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
-  await page.getByLabel('Language', { exact: true }).selectOption('es-US');
+  await page.getByRole('radio', { name: 'Español' }).click();
   await openOperatorPage(page, '/settings');
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-US');
 });
@@ -85,7 +88,7 @@ test('public guest locale persists across pages and explicit URL locale takes pr
   await expect(page.getByRole('button', { name: 'Book with Nia' })).toBeVisible();
 });
 
-test('service worker does not put private API responses in CacheStorage', async ({ page }) => {
+test('service worker never caches auth, function or storage responses, and keeps saved table reads separate', async ({ page }) => {
   await page.goto('/login');
   await page.evaluate(async () => {
     if (!('serviceWorker' in navigator)) throw new Error('Service workers are unavailable');
@@ -99,5 +102,7 @@ test('service worker does not put private API responses in CacheStorage', async 
   });
 
   expect(cachedUrls.length).toBeGreaterThan(0);
-  expect(cachedUrls.every((path) => !/^\/(functions|rest|auth|storage|graphql)\/v1\//.test(path))).toBe(true);
+  expect(cachedUrls.every((path) => !/^\/(functions|auth|storage|graphql)\/v1\//.test(path))).toBe(true);
+  const cacheNames = await page.evaluate(() => caches.keys());
+  expect(cacheNames.some((name) => /^workbox-precache/.test(name))).toBe(true);
 });

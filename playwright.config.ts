@@ -9,6 +9,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',
+    // Mocks use page.route, which can't see requests the service worker makes. Only pwa.spec runs with it.
+    serviceWorkers: 'block',
     ...devices['Desktop Chrome'],
   },
   webServer: [
