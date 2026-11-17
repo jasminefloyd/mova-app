@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { adminRpc } from './admin-api';
@@ -6,6 +6,53 @@ import { createMovaSupabaseClient } from '../../lib/supabase';
 import { currentAdminSession, deviceLabel, safeReturnTo, signOutAdmin } from './admin-session';
 
 type Step = 'email' | 'email-code' | 'authenticator';
+
+function AdminCodeDigits({ value, onChange, disabled, label }: { value: string; onChange: (value: string) => void; disabled: boolean; label: string }) {
+  const refs = useRef<Array<HTMLInputElement | null>>([]);
+  const digits = Array.from({ length: 6 }, (_, index) => value[index] ?? '');
+  const update = (raw: string, focusIndex: number) => {
+    const next = raw.replace(/\D/g, '').slice(0, 6);
+    onChange(next);
+    refs.current[Math.min(focusIndex, 5)]?.focus();
+  };
+  const type = (index: number, raw: string) => {
+    const entered = raw.replace(/\D/g, '');
+    if (!entered) return;
+    if (entered.length > 1) { update(entered, entered.length); return; }
+    update(value.slice(0, index) + entered + value.slice(index + 1), index + 1);
+  };
+  const keyDown = (index: number, event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Backspace') {
+      event.preventDefault();
+      update(digits[index] ? value.slice(0, index) + value.slice(index + 1) : value.slice(0, Math.max(index - 1, 0)) + value.slice(index), digits[index] ? index : Math.max(index - 1, 0));
+    } else if (event.key === 'ArrowLeft' && index > 0) refs.current[index - 1]?.focus();
+    else if (event.key === 'ArrowRight' && index < 5) refs.current[index + 1]?.focus();
+  };
+  const paste = (event: ClipboardEvent<HTMLInputElement>) => {
+    const pasted = event.clipboardData.getData('text').replace(/\D/g, '');
+    if (!pasted) return;
+    event.preventDefault();
+    update(pasted, pasted.length);
+  };
+
+  return <div className="adm-code-grid" role="group" aria-label={label}>
+    {digits.map((digit, index) => <input
+      key={index}
+      ref={(node) => { refs.current[index] = node; }}
+      aria-label={`${label}, digit ${index + 1}`}
+      inputMode="numeric"
+      autoComplete={index === 0 ? 'one-time-code' : 'off'}
+      pattern="[0-9]*"
+      maxLength={index === 0 ? 6 : 1}
+      className="input"
+      value={digit}
+      disabled={disabled}
+      onChange={(event) => type(index, event.currentTarget.value)}
+      onKeyDown={(event) => keyDown(index, event)}
+      onPaste={paste}
+    />)}
+  </div>;
+}
 
 /** Passwordless email link/code followed by the required authenticator factor. */
 export default function AdminSignInPage() {
@@ -161,8 +208,8 @@ export default function AdminSignInPage() {
             <h1 id="as-h" className="h1">Check your email</h1>
             <p className="sub">Enter the six-digit code sent to <strong>{email.trim()}</strong>.</p>
             <div className="field">
-              <label htmlFor="as-c">Email code</label>
-              <input id="as-c" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} className="input big-input" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))} required />
+              <label>Email code</label>
+              <AdminCodeDigits value={code} onChange={setCode} disabled={busy} label="Email code" />
             </div>
             {message ? <p className="error-text" role="status">{message}</p> : null}
             <button type="submit" className="btn pri" disabled={busy || code.length !== 6}>{busy ? 'Verifying…' : 'Verify email'}</button>
@@ -175,8 +222,8 @@ export default function AdminSignInPage() {
             <p className="sub">{enrolling ? 'Scan this code with your authenticator app, then enter the six-digit code it shows.' : 'Enter the six-digit code from your Mova admin authenticator app.'}</p>
             {enrolling ? <div className="adm-enroll"><img src={enrolling.qr} alt="Authenticator setup QR code" width={180} height={180} /><p className="small">Can’t scan? Enter this key: <span className="mono">{enrolling.secret}</span></p></div> : null}
             <div className="field">
-              <label htmlFor="as-totp">6-digit authenticator code</label>
-              <input id="as-totp" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} className="input big-input" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))} required />
+              <label>6-digit authenticator code</label>
+              <AdminCodeDigits value={code} onChange={setCode} disabled={busy} label="Authenticator code" />
             </div>
             {message ? <p className="error-text" role="alert">{message}</p> : null}
             <button type="submit" className="btn pri" disabled={busy || code.length !== 6}>{busy ? 'Verifying…' : 'Verify and sign in'}</button>

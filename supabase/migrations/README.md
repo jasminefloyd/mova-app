@@ -112,4 +112,6 @@ Marketing and autopilot follow-up (2026-11-14): 0097 `mova_marketing_rebooking_a
 
 Passwordless onboarding (owner direction 2026-11-16): 0098 `mova_stylist_account_names` in `20261116120000_mova_0098_stylist_account_names.sql` adds the private `mova_account_names` table (first and last name, readable and editable only by the account holder), copies names from sign-up metadata when an auth user is created, and backfills existing accounts that already carry them. Not yet applied; the owner runs it manually.
 
+Admin sign-in bootstrap (2026-11-17): 0104 `mova_admin_whoami_before_mfa` lets `mova_admin_whoami()` confirm roster membership after email OTP but before authenticator verification. All privileged admin RPCs remain gated by `mova_require_platform_admin()` and AAL2. Apply after the 0103 email-sender migration.
+
 Welcome email on publish (owner direction 2026-11-16): 0099 `mova_welcome_email_on_publish` in `20261116130000_mova_0099_welcome_email_on_publish.sql` queues the EM11 welcome email when onboarding reaches `complete` (the page is published) instead of when the profile is first claimed, and adds `first_name`, `handle` and `business_number` to `mova_stylist_welcome_email_context`. The idempotency key is unchanged, so no one is welcomed twice. Requires 0098. Not yet applied; the owner runs it manually and redeploys `job-worker`.
