@@ -1220,7 +1220,11 @@
     "saveReschedule": "Guardar nuevo horario",
     "cancel": "Cancelar",
     "bookedInstantly": "confirmada al instante",
-    "runningLateUnavailable": "Los avisos de retraso aún no están disponibles."
+    "runningLateUnavailable": "Los avisos de retraso aún no están disponibles.",
+    "moreTitle": "Más",
+    "noShowHint": "El cliente no llegó. Puedes revisar los cargos después.",
+    "allNotes": "Todas las notas",
+    "notesForToday": "Notas de hoy"
   },
   "clientDetails": {
     "back": "Volver a clientes",
@@ -3001,7 +3005,15 @@
     "loading": "Cargando tus ajustes…",
     "loadError": "No pudimos cargar tus ajustes de notificaciones.",
     "saveError": "No pudimos guardar ese cambio. Inténtalo de nuevo.",
-    "retry": "Intentar de nuevo"
+    "retry": "Intentar de nuevo",
+    "clientEmailsHeading": "Correos a tus clientes",
+    "sentFrom": "Se envían desde",
+    "repliesGoTo": "Las respuestas llegan a",
+    "save": "Guardar",
+    "replyToDefault": "Es el correo con el que te registraste. Cámbialo si prefieres recibir las respuestas en otro.",
+    "replyToCustom": "Bórralo para volver al correo con el que te registraste.",
+    "replyToSaved": "Guardado. Los correos nuevos usan esta dirección.",
+    "replyToInvalid": "Ingresa un correo válido."
   },
   "signInCode": {
     "title": "Ingresa tu código",

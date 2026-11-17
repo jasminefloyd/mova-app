@@ -11,6 +11,15 @@ export type ResendConfig = {
   costMicros?: number;     // estimate reserved against the monthly cap; default $0.001 per email
 };
 
+const emailAddress = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+
+/** The requested address when it is on the verified sender's domain, otherwise the verified sender. */
+export function senderAddress(from: string, verified: string): string {
+  const requested = (from.match(/<([^<>]+)>/)?.[1] ?? from).trim().toLowerCase();
+  const domain = verified.slice(verified.lastIndexOf('@') + 1).toLowerCase();
+  return emailAddress.test(requested) && requested.endsWith(`@${domain}`) && /^[a-z0-9][a-z0-9-]{0,63}@/.test(requested) ? requested : verified;
+}
+
 // Resend tag names and values allow only ASCII letters, numbers, underscores and dashes (256 characters).
 const tagValue = (value: string) => value.replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 256);
 
@@ -27,8 +36,10 @@ export class ResendEmailProvider implements EmailProvider {
   async send(input: EmailSendInput): Promise<EmailSendResult> {
     const requestedName = input.from.match(/^\s*(.*?)\s*</)?.[1]?.replace(/[<>"\r\n]/g, '').trim();
     const payload = {
-      // Preserve the approved display name while always using the verified Resend sender address.
-      from: `${requestedName || this.config.fromName || 'Mova'} <${this.config.fromAddress}>`,
+      // Preserve the approved display name. The address is the verified default, or another address on the
+      // same verified domain (a stylist's {handle}@ address for client emails).
+      from: `${requestedName || this.config.fromName || 'Mova'} <${senderAddress(input.from, this.config.fromAddress)}>`,
+      ...(input.replyTo && emailAddress.test(input.replyTo) ? { reply_to: input.replyTo } : {}),
       to: [input.to],
       subject: input.subject,
       text: input.text,

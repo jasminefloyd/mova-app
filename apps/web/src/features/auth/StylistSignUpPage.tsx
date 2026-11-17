@@ -24,6 +24,12 @@ export default function StylistSignUpPage() {
   const [sent, setSent] = useState(false);
   const navigate = useNavigate();
 
+  // "Start free" in the pitch scrolls down to the form and puts the cursor in First name.
+  const startFree = () => {
+    document.getElementById('stylist-signup-h')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.setTimeout(() => document.getElementById('stylist-signup-first')?.focus({ preventScroll: true }), 350);
+  };
+
   const verify = async (code: string) => {
     if (!supabase) return false;
     const { error: verifyError } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: 'email' });
@@ -60,7 +66,7 @@ export default function StylistSignUpPage() {
     </header>
 
     <div className="stylist-auth__split">
-      <section className="stylist-auth__pitch" aria-labelledby="stylist-signup-why">
+      {!sent && <section className="stylist-auth__pitch" aria-labelledby="stylist-signup-why">
         <svg className="stylist-auth__leaf" aria-hidden="true" width="260" height="280" viewBox="0 0 210 230" fill="none">
           <path d="M150 220C150 140 120 80 60 30" stroke="var(--botanical)" strokeWidth="2" />
           <path d="M128 150C90 150 62 128 52 92C88 92 116 112 128 150Z" fill="var(--botanical)" />
@@ -78,10 +84,10 @@ export default function StylistSignUpPage() {
           <li><FeatureIcon><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" /><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" /></FeatureIcon><span><strong>{t('stylistAuth.signUp.featureChairTitle')}</strong><span>{t('stylistAuth.signUp.featureChairBody')}</span></span></li>
         </ul>
         <div className="stylist-auth__free">
-          <strong>{t('stylistAuth.signUp.freeTitle')}</strong>
+          <button type="button" className="stylist-auth__start" onClick={startFree}>{t('stylistAuth.signUp.freeTitle')}</button>
           <span>{t('stylistAuth.signUp.freeBody')} <Link className="stylist-auth__accent" to="/pricing">{t('stylistAuth.signUp.seePlans')}</Link></span>
         </div>
-      </section>
+      </section>}
 
       <section className="stylist-auth__form-panel" aria-labelledby="stylist-signup-h">
         {sent ? <div className="stylist-auth__form-column">

@@ -1420,3 +1420,24 @@ html[data-mova-offline-bar] .mova-offline-notice { display: none; }
 .mova-code-entry__digits input { width: 46px; height: 56px; min-width: 0; flex: 1 1 0; max-width: 52px; border: 1px solid var(--line-control); border-radius: 14px; background: var(--surface); color: var(--ink-primary); font: 800 24px var(--font-display, Manrope), sans-serif; text-align: center; }
 .mova-code-entry__digits input:focus { border: 2px solid var(--forest); outline: none; }
 .mova-code-entry__note { margin: 0; color: var(--ink-muted); font-size: 13px; }
+
+/* 09 Appointment detail: AID tucked under the title; Running late and No-show live in the ··· menu */
+.mova-page.mova-appointment-detail .mova-appointment-detail__hero h1, .mova-page.mova-booking-request .mova-booking-request__hero h1 { margin: 0; }
+.mova-appointment-detail__hero > small { margin-top: -4px; color: var(--ink-muted); font-size: var(--fs-micro); font-weight: 600; letter-spacing: .2px; }
+.mova-appointment-detail__more { display: grid; gap: 8px; padding-bottom: var(--space-4); }
+.mova-appointment-detail__more > button { display: flex; align-items: center; gap: 14px; min-height: 64px; border: 1px solid var(--line); border-radius: 18px; padding: 12px 16px; background: var(--surface); color: var(--ink-primary); text-align: left; font: inherit; cursor: pointer; }
+.mova-appointment-detail__more > button > span { display: grid; gap: 2px; }
+.mova-appointment-detail__more strong { font-size: var(--fs-body); }
+.mova-appointment-detail__more small { color: var(--ink-muted); font-size: var(--fs-caption); }
+
+/* Settings › Emails to your clients */
+.mova-client-emails { display: grid; gap: 8px; border: 1px solid var(--line); border-radius: 20px; padding: 14px 16px; background: var(--surface); }
+.mova-client-emails__row { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--line-subtle); font-size: 14px; }
+.mova-client-emails__row > span { color: var(--ink-muted); }
+.mova-client-emails__row > strong { overflow-wrap: anywhere; text-align: right; }
+.mova-client-emails__field { font-size: 13px; font-weight: 600; }
+.mova-client-emails__edit { display: flex; gap: 8px; align-items: center; }
+.mova-client-emails__edit input { flex: 1; min-width: 0; height: 44px; border: 1px solid var(--line-control); border-radius: 12px; padding: 0 12px; background: var(--surface); color: var(--ink-primary); font: 15px var(--font-ui, "DM Sans"), sans-serif; }
+.mova-client-emails__edit input[aria-invalid="true"] { border-color: var(--danger); }
+.mova-client-emails__edit .mova-push-device__action { height: 44px; border-radius: 22px; padding: 0 18px; }
+.mova-client-emails__edit .mova-push-device__action:disabled { opacity: .45; }

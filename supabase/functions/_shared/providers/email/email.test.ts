@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { FakeEmailProvider } from './fake.ts';
-import { emailProviderFromEnv, sendEmail, type EmailDb } from './send.ts';
+import { emailProviderFromEnv, emailSender, sendEmail, type EmailDb } from './send.ts';
 import { EMAIL_TEMPLATES, renderEmail } from './templates.ts';
 import { sendAppointmentEmail } from '../../appointment-emails.ts';
-import { ResendEmailProvider } from './resend.ts';
+import { ResendEmailProvider, senderAddress } from './resend.ts';
 import { vi } from 'vitest';
 
 const vars = { clientName: 'Jordan Lee', businessName: 'Rooted Beauty', serviceName: 'Silk press', startsAt: '2026-11-12T20:00:00.000Z', timeZone: 'America/New_York', locationName: 'Rooted Beauty Studio' };
@@ -163,5 +163,35 @@ describe('Resend and the spend cap', () => {
     expect(emailProviderFromEnv(env({ ...full, MOVA_MESSAGING_LIVE_EMAIL: 'true', RESEND_API_KEY: 'nope' }))).toBeNull();
     // The retired provider name no longer selects anything.
     expect(emailProviderFromEnv(env({ ...full, MOVA_EMAIL_PROVIDER: 'sendgrid', MOVA_MESSAGING_LIVE_EMAIL: 'true' }))).toBeNull();
+  });
+});
+
+describe('who client emails come from', () => {
+  const vars = { businessName: 'Ari Monroe Hair' } as never;
+  const dbWith = (data: Record<string, unknown> | null) => ({ rpc: async () => ({ data, error: null }), from: () => ({}) }) as unknown as EmailDb;
+
+  it('sends client emails from the stylist handle with replies to the stylist', async () => {
+    expect(await emailSender(dbWith({ handle: 'ari', reply_to: 'ari@example.com' }), { artistBusinessId: 'b', templateId: 'booking_confirmation', vars }))
+      .toEqual({ name: 'Ari Monroe Hair', address: 'ari@mova-beauty.co', replyTo: 'ari@example.com' });
+  });
+
+  it('keeps emails to the stylist on hello@ with no reply-to', async () => {
+    expect(await emailSender(dbWith({ handle: 'ari', reply_to: 'ari@example.com' }), { artistBusinessId: 'b', templateId: 'stylist_alert', vars }))
+      .toEqual({ name: 'Mova', address: 'hello@mova-beauty.co', replyTo: null });
+  });
+
+  it('falls back to bookings@ when the handle is missing', async () => {
+    expect((await emailSender(dbWith(null), { artistBusinessId: 'b', templateId: 'appointment_reminder', vars })).address).toBe('bookings@mova-beauty.co');
+  });
+
+  it('Resend uses a same-domain address and passes reply_to, but never another domain', async () => {
+    expect(senderAddress('Ari <ari@mova-beauty.co>', 'hello@mova-beauty.co')).toBe('ari@mova-beauty.co');
+    expect(senderAddress('Ari <ari@evil.example>', 'hello@mova-beauty.co')).toBe('hello@mova-beauty.co');
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({ id: 'email-12345678' }), { status: 200 }));
+    await new ResendEmailProvider({ apiKey: 're_test_0000000000000000', fromAddress: 'hello@mova-beauty.co' }, fetcher as unknown as typeof fetch)
+      .send({ to: 'guest@example.com', from: 'Ari Monroe Hair <ari@mova-beauty.co>', replyTo: 'ari@example.com', subject: 's', text: 't', html: 'h', templateId: 'booking_confirmation', locale: 'en-US', idempotencyKey: 'k' });
+    const body = JSON.parse(String((fetcher.mock.calls[0] as unknown as [string, RequestInit])[1].body));
+    expect(body.from).toBe('Ari Monroe Hair <ari@mova-beauty.co>');
+    expect(body.reply_to).toBe('ari@example.com');
   });
 });

@@ -350,7 +350,7 @@ export function OnboardingFlow() {
       {step === 'photo' && <div className="mova-form-stack">
         <h1>{t('onboarding.photoTitle')}</h1>
         <p>{t('onboarding.photoDescription')}</p>
-        {photoPreview ? <Card className="mova-photo-preview"><img src={photoPreview} alt={t('onboarding.photoPreviewAlt')} style={{ transform: `scale(${photoZoom})` }} /><span>{t('onboarding.cropPreview')}</span></Card> : <Card className="mova-photo-placeholder"><span aria-hidden="true">＋</span><strong>{t('onboarding.photoPlaceholder')}</strong><small>{t('onboarding.photoRequirements')}</small></Card>}
+        {photoPreview ? <Card className="mova-photo-preview"><img src={photoPreview} alt={t('onboarding.photoPreviewAlt')} style={{ transform: `scale(${photoZoom})` }} /><span>{t('onboarding.cropPreview')}</span></Card> : <Card className="mova-photo-placeholder"><button type="button" className="mova-photo-placeholder__add" aria-label={t('onboarding.choosePhoto')} onClick={() => document.getElementById('onboarding-photo')?.click()}><span aria-hidden="true">＋</span></button><strong>{t('onboarding.photoPlaceholder')}</strong><small>{t('onboarding.photoRequirements')}</small></Card>}
         {photoPreview && <label className="mova-zoom-control">{t('onboarding.zoom')}<input type="range" min="1" max="2" step="0.05" value={photoZoom} onChange={(event) => setPhotoZoom(Number(event.currentTarget.value))} /></label>}
         {error && <p role="alert">{error}</p>}
         <div className="mova-photo-actions">

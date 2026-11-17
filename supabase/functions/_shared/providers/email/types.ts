@@ -7,6 +7,8 @@ export type EmailSendInput = {
   to: string;
   /** Sender address; the fake ignores it. */
   from: string;
+  /** Where replies go (the stylist's own email for client emails). */
+  replyTo?: string;
   subject: string;
   text: string;
   html: string;

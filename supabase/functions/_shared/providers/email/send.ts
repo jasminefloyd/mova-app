@@ -41,6 +41,24 @@ async function logEmailProvider(db: EmailDb, input: SendEmailInput, provider: st
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const MOVA_EMAIL_DOMAIN = 'mova-beauty.co';
+
+/**
+ * Who an email is from. Emails to the stylist (stylist_*) come from Mova at hello@. Client emails come from
+ * the stylist's own Mova address, {handle}@mova-beauty.co, with replies going to the stylist's email.
+ */
+export async function emailSender(db: EmailDb, input: Pick<SendEmailInput, 'artistBusinessId' | 'templateId' | 'vars'>): Promise<{ name: string; address: string; replyTo: string | null }> {
+  if (input.templateId.startsWith('stylist_')) return { name: 'Mova', address: `hello@${MOVA_EMAIL_DOMAIN}`, replyTo: null };
+  const name = input.vars.businessName || 'Mova';
+  try {
+    const { data } = await db.rpc('mova_artist_email_sender', { p_artist_business_id: input.artistBusinessId });
+    const handle = typeof data?.handle === 'string' && /^[a-z0-9-]{3,30}$/.test(data.handle) ? data.handle : null;
+    const replyTo = typeof data?.reply_to === 'string' && emailPattern.test(data.reply_to) ? data.reply_to : null;
+    return { name, address: handle ? `${handle}@${MOVA_EMAIL_DOMAIN}` : `bookings@${MOVA_EMAIL_DOMAIN}`, replyTo };
+  } catch {
+    return { name, address: `bookings@${MOVA_EMAIL_DOMAIN}`, replyTo: null };
+  }
+}
 
 /**
  * The one way to send an email (task 4.3): suppression check (bounce/complaint/manual) via
@@ -62,8 +80,8 @@ export async function sendEmail(db: EmailDb, provider: EmailProvider, input: Sen
   }).select('id').single();
   if (insertError && /duplicate|23505/i.test(insertError.message)) return { status: 'duplicate' };
   if (insertError || !row) return { status: 'failed', messageId: null, error: 'MESSAGE_SAVE_FAILED' };
-  const fromName = input.templateId.startsWith('stylist_') ? 'Mova' : `${input.vars.businessName} via Mova`;
-  const sendInput = { to, from: `${fromName.replace(/[<>\r\n]/g, '')} <bookings@mova-beauty.co>`, ...rendered, templateId: input.templateId, locale: input.locale, idempotencyKey: input.idempotencyKey };
+  const sender = await emailSender(db, input);
+  const sendInput = { to, from: `${sender.name.replace(/[<>\r\n]/g, '')} <${sender.address}>`, ...(sender.replyTo ? { replyTo: sender.replyTo } : {}), ...rendered, templateId: input.templateId, locale: input.locale, idempotencyKey: input.idempotencyKey };
   const spend = await reserveSpend(db, row.id, provider.estimateCostMicros?.(sendInput) ?? 0, now);
   if (!spend.allowed) {
     if (spend.reason === 'spend_cap_reached') return { status: 'suppressed', reason: 'spend_cap_reached' };

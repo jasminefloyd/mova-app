@@ -71,3 +71,12 @@
 .mova-onboarding-content { padding-top: var(--space-4); }
 .mova-onboarding-content h1 { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-display-xl); letter-spacing: -0.4px; margin-top: 6px; }
 .mova-welcome .mova-onboarding-top__row { grid-template-columns: 1fr; }
+
+/* 07 / 07b: white ticks on the filled forest dots */
+.mova-welcome__steps li.is-done .mova-welcome__dot .mova-icon { filter: brightness(0) invert(1); }
+
+/* 03 Profile photo: the + opens the photo picker; actions centered under the box */
+.mova-photo-placeholder__add { display: grid; width: 56px; height: 56px; margin: 0 auto; place-items: center; border: 0; border-radius: var(--radius-pill); background: transparent; color: var(--botanical); font-size: var(--fs-display-l); line-height: 1; cursor: pointer; }
+.mova-photo-placeholder__add:hover { background: var(--mint); }
+.mova-photo-placeholder__add:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
+.mova-onboarding-content .mova-photo-actions { justify-content: center; }

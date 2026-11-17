@@ -1220,7 +1220,11 @@
     "saveReschedule": "Save new time",
     "cancel": "Cancel",
     "bookedInstantly": "booked instantly",
-    "runningLateUnavailable": "Running-late messages are not available yet."
+    "runningLateUnavailable": "Running-late messages are not available yet.",
+    "moreTitle": "More",
+    "noShowHint": "The client didn’t come. You can review fees after.",
+    "allNotes": "All notes",
+    "notesForToday": "Notes for today"
   },
   "clientDetails": {
     "back": "Back to clients",
@@ -3001,7 +3005,15 @@
     "loading": "Loading your settings…",
     "loadError": "We couldn’t load your notification settings.",
     "saveError": "We couldn’t save that change. Try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "clientEmailsHeading": "Emails to your clients",
+    "sentFrom": "Sent from",
+    "repliesGoTo": "Replies go to",
+    "save": "Save",
+    "replyToDefault": "This is the email you signed up with. Change it if you’d like replies somewhere else.",
+    "replyToCustom": "Clear it to go back to the email you signed up with.",
+    "replyToSaved": "Saved. New emails use this address.",
+    "replyToInvalid": "Enter a valid email address."
   },
   "signInCode": {
     "title": "Enter your code",

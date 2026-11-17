@@ -210,6 +210,9 @@
   gap: 4px;
 }
 .stylist-auth__free strong { font-size: var(--fs-body); }
+.stylist-auth__start { align-self: stretch; min-height: 52px; margin-bottom: 8px; border: 0; border-radius: var(--radius-pill); background: var(--mint); color: var(--forest); font: 700 var(--fs-body) var(--font-ui, "DM Sans"), sans-serif; cursor: pointer; }
+.stylist-auth__start:hover { background: var(--ivory); }
+.stylist-auth__start:focus-visible { outline: 2px solid var(--peach); outline-offset: 3px; }
 .stylist-auth__free span { font-size: var(--fs-body-s); line-height: 1.5; color: var(--mint); }
 .stylist-auth a.stylist-auth__accent, .stylist-auth__accent { color: var(--peach); font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
 .stylist-auth a.stylist-auth__accent:hover, .stylist-auth__accent:hover { color: var(--surface-warm); }

@@ -52,6 +52,58 @@ function PushDeviceBanner({ state, busy, onAllow }: { state: PushDeviceState; bu
   </div>;
 }
 
+type ClientEmailSettings = { sender: string; reply_to: string | null; reply_to_is_default: boolean };
+
+/** Client emails come from the stylist's {handle}@mova-beauty.co address; replies go where they choose. */
+function ClientEmailsSection({ client, businessId }: { client: ReturnType<typeof useArtistBusiness>['client']; businessId: string | null | undefined }) {
+  const { t } = useTranslation();
+  const [settings, setSettings] = useState<ClientEmailSettings | null>(null);
+  const [replyTo, setReplyTo] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'saved' | 'error' | 'invalid'>('idle');
+
+  useEffect(() => {
+    if (!client || !businessId) return;
+    let active = true;
+    void client.rpc('mova_client_email_settings', { p_artist_business_id: businessId }).then(({ data, error }) => {
+      if (!active || error || !data) return;
+      const next = data as ClientEmailSettings;
+      setSettings(next); setReplyTo(next.reply_to ?? '');
+    });
+    return () => { active = false; };
+  }, [businessId, client]);
+
+  if (!settings) return null;
+  const save = async () => {
+    if (!client || !businessId) return;
+    const value = replyTo.trim();
+    if (value && !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(value)) { setStatus('invalid'); return; }
+    setBusy(true); setStatus('idle');
+    const { data, error } = await client.rpc('mova_set_client_reply_to', { p_artist_business_id: businessId, p_email: value });
+    setBusy(false);
+    if (error || !data) { setStatus(/INVALID_EMAIL/.test(error?.message ?? '') ? 'invalid' : 'error'); return; }
+    const next = data as ClientEmailSettings;
+    setSettings(next); setReplyTo(next.reply_to ?? ''); setStatus('saved');
+  };
+  const changed = replyTo.trim().toLowerCase() !== (settings.reply_to ?? '').toLowerCase();
+
+  return <section className="mova-notification-settings__section" aria-labelledby="mova-client-emails-heading">
+    <h2 id="mova-client-emails-heading" className="mova-overline">{t('notificationSettings.clientEmailsHeading')}</h2>
+    <div className="mova-client-emails">
+      <div className="mova-client-emails__row"><span>{t('notificationSettings.sentFrom')}</span><strong>{settings.sender}</strong></div>
+      <label className="mova-client-emails__field" htmlFor="mova-reply-to">{t('notificationSettings.repliesGoTo')}</label>
+      <div className="mova-client-emails__edit">
+        <input id="mova-reply-to" type="email" autoComplete="email" value={replyTo} aria-invalid={status === 'invalid'} onChange={(event) => { setReplyTo(event.currentTarget.value); setStatus('idle'); }} />
+        <button type="button" className="mova-push-device__action" disabled={!changed || busy} onClick={() => void save()}>{t('notificationSettings.save')}</button>
+      </div>
+      <p className="mova-notification-settings__note">{settings.reply_to_is_default ? t('notificationSettings.replyToDefault') : t('notificationSettings.replyToCustom')}</p>
+      {status === 'saved' && <p className="mova-notification-settings__note" role="status">{t('notificationSettings.replyToSaved')}</p>}
+      {status === 'invalid' && <p role="alert">{t('notificationSettings.replyToInvalid')}</p>}
+      {status === 'error' && <p role="alert">{t('notificationSettings.saveError')}</p>}
+    </div>
+  </section>;
+}
+
 /** Settings › Language & notifications: app language plus Email/Push per event. Everything starts on. */
 export function NotificationSettingsPage() {
   const { t } = useTranslation();
@@ -125,5 +177,6 @@ export function NotificationSettingsPage() {
         </div>}
       {saveError && <p role="alert">{t('notificationSettings.saveError')}</p>}
     </section>
+    <ClientEmailsSection client={client} businessId={businessId} />
   </main>;
 }

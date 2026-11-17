@@ -78,7 +78,7 @@
       "permanent": false
     },
     {
-      "source": "/:path((?!admin(?:/|$)|assets/|api/|icons/|favicon|__manifest|manifest\\.webmanifest|robots\\.txt|sitemap\\.xml).+)",
+      "source": "/:path((?!admin(?:/|$)|assets/|api/|icons/|splash/|favicon|__manifest|manifest\\.webmanifest|sw\\.js|registerSW\\.js|workbox-|offline\\.html|robots\\.txt|sitemap\\.xml).+)",
       "has": [
         {
           "type": "host",
