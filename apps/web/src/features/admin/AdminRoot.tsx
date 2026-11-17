@@ -4,9 +4,16 @@ import type { LoaderFunctionArgs } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './admin.css';
 
-// The admin portal is served from admin.mova-beauty.co (see vercel.json). Anywhere else it does not exist.
+// The admin portal is available on the dedicated host and at /admin on the main site.
+// Vercel's host redirects are convenience routing only; this route still relies on the
+// staff sign-in, MFA session, and server-side platform-admin checks for access control.
 export function isAdminHost(hostname: string): boolean {
-  return hostname === 'admin.mova-beauty.co' || hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.vercel.app');
+  return hostname === 'admin.mova-beauty.co'
+    || hostname === 'mova-beauty.co'
+    || hostname === 'www.mova-beauty.co'
+    || hostname === 'localhost'
+    || hostname === '127.0.0.1'
+    || hostname.endsWith('.vercel.app');
 }
 
 export function loader({ request }: LoaderFunctionArgs) {
