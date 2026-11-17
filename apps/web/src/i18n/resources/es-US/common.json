@@ -1739,6 +1739,7 @@
     "runningLateIntro": "Elige el retraso y revisa lo que se pondrá en cola.",
     "runningLateSelectDelay": "¿Cuánto tiempo de retraso tendrás?",
     "runningLateNextClient": "Siguiente cliente: {{name}}",
+    "runningLateNoNext": "No hay otra cita confirmada más tarde hoy para avisarle.",
     "runningLatePreview": "Retraso: {{minutes}} minutos",
     "runningLateOfferPreview": "La actualización en cola ofrecerá un nuevo horario.",
     "runningLateKeepPreview": "La actualización en cola mantendrá el horario actual.",

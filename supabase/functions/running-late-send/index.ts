@@ -9,8 +9,9 @@ Deno.serve(withSystemRequestLogging('running-late-send', async(request)=>{
   if(!body||typeof body.appointment_id!=='string'||![5,10,15,20].includes(minutes))return respond({code:'INVALID_REQUEST'},422);
   const db=serviceClient();const {data:current,error}=await db.from('mova_appointments').select('id,artist_business_id,location_id,starts_at,status').eq('id',body.appointment_id).eq('artist_business_id',actor.businessId).maybeSingle();
   if(error||!current||current.status!=='confirmed')return respond({code:'APPOINTMENT_NOT_FOUND'},404);
-  const {data:next}=await db.from('mova_appointments').select('id,starts_at,client_locale,location_id').eq('artist_business_id',actor.businessId).eq('status','confirmed').gt('starts_at',current.starts_at).order('starts_at').limit(1).maybeSingle();
-  if(!next)return respond({code:'NEXT_APPOINTMENT_NOT_FOUND'},404);
+  const {data:next,error:nextError}=await db.from('mova_appointments').select('id,starts_at,client_locale,location_id').eq('artist_business_id',actor.businessId).eq('status','confirmed').gt('starts_at',current.starts_at).order('starts_at').limit(1).maybeSingle();
+  if(nextError)return respond({code:'NEXT_APPOINTMENT_LOOKUP_FAILED'},503);
+  if(!next)return respond({code:'NEXT_APPOINTMENT_NOT_FOUND'},409);
   const {data:location}=await db.from('mova_locations').select('time_zone').eq('id',next.location_id).maybeSingle();
   const zone=location?.time_zone??'UTC';const now=new Date();const sameLocalDay=new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit'}).format(now)===new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(next.starts_at));
   if(!sameLocalDay)return respond({code:'NEXT_APPOINTMENT_NOT_TODAY'},409);

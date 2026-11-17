@@ -1739,6 +1739,7 @@
     "runningLateIntro": "Choose a delay and review what will be queued.",
     "runningLateSelectDelay": "How late will you be?",
     "runningLateNextClient": "Next client: {{name}}",
+    "runningLateNoNext": "There isn't another confirmed appointment later today to notify.",
     "runningLatePreview": "Delay: {{minutes}} minutes",
     "runningLateOfferPreview": "A new appointment time will be offered in the queued update.",
     "runningLateKeepPreview": "The queued update will keep the current appointment time.",
