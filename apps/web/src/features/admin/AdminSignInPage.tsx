@@ -86,11 +86,15 @@ export default function AdminSignInPage() {
     setBusy(true);
     setMessage(null);
     try {
+      // Use the existing Supabase allowlisted callback. The app then routes admin sessions back here.
+      const callbackOrigin = window.location.hostname.endsWith('mova-beauty.co')
+        ? 'https://mova-beauty.co'
+        : window.location.origin;
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
           shouldCreateUser: false,
-          emailRedirectTo: `${window.location.origin}/admin/signin`,
+          emailRedirectTo: `${callbackOrigin}/auth/confirm?returnTo=%2Fadmin%2Fsignin`,
         },
       });
       if (error) {
@@ -100,7 +104,7 @@ export default function AdminSignInPage() {
       setStep('email-code');
       setMessage('If this email belongs to a System Admin, a secure sign-in link and code are on the way.');
     } catch {
-      setMessage('Could not send the sign-in email. Check the address and try again.');
+      setMessage('Could not send the sign-in email. Check that this is your System Admin email and try again.');
     } finally { setBusy(false); }
   }
 

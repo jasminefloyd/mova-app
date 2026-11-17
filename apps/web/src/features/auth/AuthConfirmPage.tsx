@@ -36,6 +36,11 @@ export default function AuthConfirmPage() {
       if (done) return;
       done = true;
       try {
+        // Admin email links use the existing allowlisted callback, then return to the MFA gate.
+        if (returnTo === '/admin/signin') {
+          navigate('/admin/signin', { replace: true });
+          return;
+        }
         const workspaceReturn = returnTo.startsWith('/onboarding') ? '' : returnTo;
         const resolution = await resolveWorkspaces(supabase, userId, workspaceReturn);
         if (resolution.kind === 'none') navigate('/onboarding/profile', { replace: true });
