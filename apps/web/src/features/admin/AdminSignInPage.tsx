@@ -81,28 +81,21 @@ export default function AdminSignInPage() {
 
   const idleNotice = params.get('reason') === 'idle' ? 'You were signed out after 30 minutes without activity.' : null;
 
-  async function sendLink(event?: FormEvent<HTMLFormElement>) {
+  async function sendCode(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
     setBusy(true);
     setMessage(null);
     try {
-      // Use the existing Supabase allowlisted callback. The app then routes admin sessions back here.
-      const callbackOrigin = window.location.hostname.endsWith('mova-beauty.co')
-        ? 'https://mova-beauty.co'
-        : window.location.origin;
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
-        options: {
-          shouldCreateUser: false,
-          emailRedirectTo: `${callbackOrigin}/auth/confirm?returnTo=%2Fadmin%2Fsignin`,
-        },
+        options: { shouldCreateUser: false },
       });
       if (error) {
         // Supabase may suppress unknown-account responses; keep the user-facing result generic.
         if (!/signups? not allowed|user not found/i.test(error.message)) throw error;
       }
       setStep('email-code');
-      setMessage('If this email belongs to a System Admin, a secure sign-in link and code are on the way.');
+      setMessage('If this email belongs to a System Admin, a six-digit sign-in code is on the way.');
     } catch {
       setMessage('Could not send the sign-in email. Check that this is your System Admin email and try again.');
     } finally { setBusy(false); }
@@ -152,28 +145,28 @@ export default function AdminSignInPage() {
       <div className="adm-signin-wrap">
         <div className="adm-signin-brand"><b>mova</b><span className="pill">Admin</span></div>
         {step === 'email' ? (
-          <form className="adm-signin-card" aria-labelledby="as-h" onSubmit={(event) => void sendLink(event)}>
+            <form className="adm-signin-card" aria-labelledby="as-h" onSubmit={(event) => void sendCode(event)}>
             <h1 id="as-h" className="h1">Sign in</h1>
-            <p className="sub">For Mova System Admins. We’ll email you a secure link and a one-time code.</p>
+            <p className="sub">For Mova System Admins. We’ll email you a six-digit sign-in code.</p>
             {idleNotice ? <p className="notice" role="status">{idleNotice}</p> : null}
             <div className="field">
               <label htmlFor="as-e">Work email</label>
               <input id="as-e" type="email" autoComplete="email" className="input" value={email} onChange={(event) => setEmail(event.target.value)} required />
             </div>
             {message ? <p className="error-text" role="status">{message}</p> : null}
-            <button type="submit" className="btn pri" disabled={busy}>{busy ? 'Sending…' : 'Email me a sign-in link'}</button>
+            <button type="submit" className="btn pri" disabled={busy}>{busy ? 'Sending…' : 'Email me a sign-in code'}</button>
           </form>
         ) : step === 'email-code' ? (
           <form className="adm-signin-card" aria-labelledby="as-h" onSubmit={(event) => void submitEmailCode(event)}>
             <h1 id="as-h" className="h1">Check your email</h1>
-            <p className="sub">Enter the six-digit code sent to <strong>{email.trim()}</strong>. You can also use the secure link in that email.</p>
+            <p className="sub">Enter the six-digit code sent to <strong>{email.trim()}</strong>.</p>
             <div className="field">
               <label htmlFor="as-c">Email code</label>
               <input id="as-c" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} className="input big-input" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))} required />
             </div>
             {message ? <p className="error-text" role="status">{message}</p> : null}
             <button type="submit" className="btn pri" disabled={busy || code.length !== 6}>{busy ? 'Verifying…' : 'Verify email'}</button>
-            <button type="button" className="btn sm ghost" disabled={busy} onClick={() => void sendLink()}>{busy ? 'Sending…' : 'Resend email'}</button>
+            <button type="button" className="btn sm ghost" disabled={busy} onClick={() => void sendCode()}>{busy ? 'Sending…' : 'Resend code'}</button>
             <button type="button" className="btn sm ghost" onClick={() => { setStep('email'); setCode(''); setMessage(null); }}>Change email</button>
           </form>
         ) : (

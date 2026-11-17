@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { LocaleSwitcher } from '../../app/LocaleSwitcher';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import { CheckEmailPanel } from './CheckEmailPanel';
-import { sendStylistEmailLink } from './email-link';
+import { sendStylistEmailCode } from './email-code';
 import './stylist-auth.css';
 
-/** W9 · /login: stylist sign-in (existing accounts) with a passwordless email link. The link lands on
- * /auth/confirm, which opens the right workspace. Client sign-in lives at /signin. */
+/** W9 · /login: stylist sign-in (existing accounts) with a passwordless one-time email code. Client sign-in lives at /signin. */
 export default function StylistSignInPage() {
   const { t } = useTranslation();
   const [params] = useSearchParams();
@@ -41,7 +40,7 @@ export default function StylistSignInPage() {
 
   const send = async () => {
     if (!supabase) return false;
-    return (await sendStylistEmailLink(supabase, { email, create: false, returnTo })).ok;
+    return (await sendStylistEmailCode(supabase, { email, create: false })).ok;
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {

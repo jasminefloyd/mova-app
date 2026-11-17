@@ -5,12 +5,15 @@ project_id = "mova-app"
 enabled = false
 uri = "pg-functions://postgres/public/mova_before_user_created"
 
+[auth.email]
+otp_length = 6
+
 [auth.email.template.confirmation]
-subject = "Confirm your email to finish setting up Mova"
+subject = "Your Mova email confirmation code"
 content_path = "./supabase/templates/confirmation.html"
 
 [auth.email.template.magic_link]
-subject = "Your Mova sign-in link and code"
+subject = "Your Mova sign-in code"
 content_path = "./supabase/templates/magic_link.html"
 
 [auth.email.template.recovery]

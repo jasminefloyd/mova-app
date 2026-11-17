@@ -19,11 +19,11 @@ function render(path: string, node: ReactElement) {
 describe('stylist sign-in (/login, W9)', () => {
   beforeAll(async () => { await i18nReady; });
 
-  it('renders a passwordless email-link form with no password or sign-up fields', () => {
+  it('renders a passwordless email-code form with no password or sign-up fields', () => {
     const markup = render('/login', <StylistSignInPage />);
     expect(markup).toContain('Welcome back');
     expect(markup).toContain('aria-label="Sign in"');
-    expect(markup).toContain('Email me a sign-in link');
+    expect(markup).toContain('Email me a sign-in code');
     expect(markup).not.toContain('type="password"');
     expect(markup).not.toContain('Forgot');
     expect(markup).not.toContain('name="stylist-signup-language"');

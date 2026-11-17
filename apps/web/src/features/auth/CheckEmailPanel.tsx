@@ -55,9 +55,8 @@ function CodeDigits({ value, onChange, onComplete, disabled }: { value: string; 
 }
 
 /**
- * "Check your email" state after a passwordless link is requested. The same email carries a 6-digit code:
- * the installed app can't open the link (it opens the browser), so it asks for the code (P2); the browser
- * shows the link message with the code boxes underneath.
+ * "Check your email" state after a passwordless one-time code is requested. The six-digit code is
+ * the only sign-in method in both the browser and installed app.
  */
 export function CheckEmailPanel({ email, message, onResend, onVerify, onChangeEmail }: {
   email: string;

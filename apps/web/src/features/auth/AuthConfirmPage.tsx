@@ -15,8 +15,8 @@ function linkError(): string | null {
 }
 
 /**
- * /auth/confirm: where every stylist email link lands (sign-up and sign-in). The Supabase client finishes the
- * sign-in from the link, then a new stylist continues onboarding and a returning stylist opens their workspace.
+ * /auth/confirm: continuation after a stylist enters their one-time email code. The established session routes
+ * a new stylist into onboarding and a returning stylist into their workspace.
  */
 export default function AuthConfirmPage() {
   const { t } = useTranslation();
@@ -36,11 +36,6 @@ export default function AuthConfirmPage() {
       if (done) return;
       done = true;
       try {
-        // Admin email links use the existing allowlisted callback, then return to the MFA gate.
-        if (returnTo === '/admin/signin') {
-          navigate('/admin/signin', { replace: true });
-          return;
-        }
         const workspaceReturn = returnTo.startsWith('/onboarding') ? '' : returnTo;
         const resolution = await resolveWorkspaces(supabase, userId, workspaceReturn);
         if (resolution.kind === 'none') navigate('/onboarding/profile', { replace: true });

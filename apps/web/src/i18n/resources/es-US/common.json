@@ -2008,7 +2008,7 @@
     "signIn": "Iniciar sesión",
     "haveAccount": "¿Ya tienes una cuenta?",
     "noAccount": "¿Primera vez en mova.?",
-    "verifyEmail": "Revisa tu correo para encontrar el enlace de verificación. Tu perfil estará listo cuando regreses.",
+    "verifyEmail": "Revisa tu correo para encontrar el código de verificación. Ingrésalo para continuar configurando tu perfil.",
     "configurationError": "Supabase aún no está configurado. Agrega la URL del proyecto y la clave pública al archivo de entorno local.",
     "accountError": "No pudimos completar la solicitud de cuenta. Revisa tus datos e inténtalo de nuevo.",
     "profileTitle": "Tu perfil profesional",
@@ -2101,18 +2101,18 @@
     "signIn": {
       "badge": "Inicio de sesión para estilistas",
       "title": "Qué bueno verte de nuevo",
-      "intro": "Te enviaremos un enlace seguro por correo para iniciar sesión. No necesitas contraseña.",
+      "intro": "Te enviaremos un código de seis dígitos por correo para iniciar sesión. No necesitas contraseña.",
       "formLabel": "Iniciar sesión",
       "email": "Correo electrónico",
-      "submit": "Envíame un enlace para entrar",
-      "submitting": "Enviando enlace",
+      "submit": "Envíame un código para entrar",
+      "submitting": "Enviando código",
       "newToMova": "¿Eres nuevo en Mova?",
       "createLink": "Crea una cuenta de estilista",
       "clientPrompt": "¿Te reservó un estilista en Mova?",
       "clientLink": "Inicio de sesión de clientes",
       "clientNote": "usa un código de un solo uso, sin contraseña.",
       "chooseTitle": "Elige un negocio",
-      "error": "No pudimos enviar el enlace. Revisa el correo e inténtalo de nuevo."
+      "error": "No pudimos enviar el código. Revisa el correo e inténtalo de nuevo."
     },
     "signUp": {
       "forIndependent": "Para estilistas independientes",
@@ -2132,11 +2132,11 @@
       "formLabel": "Crea tu cuenta",
       "email": "Correo electrónico",
       "submit": "Crear cuenta",
-      "submitting": "Enviando enlace",
-      "legal": "Al crear una cuenta aceptas los Términos y la Política de privacidad. Te enviaremos un enlace seguro por correo para terminar. No necesitas contraseña.",
+      "submitting": "Enviando código",
+      "legal": "Al crear una cuenta aceptas los Términos y la Política de privacidad. Te enviaremos un código de un solo uso por correo para terminar. No necesitas contraseña.",
       "haveAccount": "¿Ya tienes una cuenta?",
       "signIn": "Iniciar sesión",
-      "verifyEmail": "Revisa tu correo para ver el enlace de verificación. Tu perfil estará listo cuando regreses.",
+      "verifyEmail": "Revisa tu correo para ver el código de verificación. Ingrésalo para continuar configurando tu perfil.",
       "error": "No pudimos crear tu cuenta. Revisa tus datos e inténtalo de nuevo.",
       "firstName": "Nombre",
       "lastName": "Apellido",
@@ -2150,21 +2150,21 @@
     },
     "checkEmail": {
       "title": "Revisa tu correo",
-      "body": "Enviamos un enlace seguro a {{email}}. Ábrelo en este dispositivo para continuar.",
-      "once": "El enlace funciona una sola vez y vence en poco tiempo.",
+      "body": "Enviamos un código de seis dígitos a {{email}}. Ingrésalo abajo para continuar.",
+      "once": "El código funciona una sola vez y vence en poco tiempo.",
       "spam": "¿No lo encuentras? Revisa la carpeta de spam o promociones.",
-      "resend": "Enviar el enlace de nuevo",
+      "resend": "Enviar un código nuevo",
       "resendIn": "Enviar de nuevo en {{seconds}} s",
-      "resent": "Un nuevo enlace va en camino.",
+      "resent": "Un código nuevo va en camino.",
       "different": "Usar otro correo",
-      "signInSent": "Si hay una cuenta de Mova con {{email}}, te enviamos un enlace para entrar."
+      "signInSent": "Si hay una cuenta de Mova con {{email}}, te enviamos un código para entrar."
     },
     "confirm": {
       "working": "Iniciando sesión…",
-      "expiredTitle": "Este enlace venció o ya se usó",
-      "expiredBody": "Los enlaces funcionan una sola vez y vencen en poco tiempo. Envíate uno nuevo.",
-      "newLink": "Enviar un enlace nuevo",
-      "error": "No pudimos iniciar sesión con ese enlace."
+      "expiredTitle": "Este código venció o ya se usó",
+      "expiredBody": "Los códigos funcionan una sola vez y vencen en poco tiempo. Envíate uno nuevo.",
+      "newLink": "Enviar un código nuevo",
+      "error": "No pudimos iniciar sesión con ese código."
     }
   },
   "showcase": {
@@ -3018,10 +3018,10 @@
   "signInCode": {
     "title": "Ingresa tu código",
     "body": "Enviamos un código de 6 dígitos a <strong>{{email}}</strong>. Ingrésalo aquí para entrar a la app de Mova.",
-    "bodyBrowser": "O ingresa el código de 6 dígitos del correo.",
+    "bodyBrowser": "Ingresa el código de seis dígitos de tu correo.",
     "group": "Código de 6 dígitos",
     "digit": "Dígito {{index}}",
-    "note": "El enlace del mismo correo abre tu navegador. En la app, usa el código.",
+    "note": "Este código funciona una sola vez y vence en poco tiempo.",
     "submit": "Entrar",
     "resendIn": "Enviar un código nuevo en {{seconds}} s",
     "resend": "Enviar un código nuevo",

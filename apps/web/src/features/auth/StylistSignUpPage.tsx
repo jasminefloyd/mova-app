@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import type { ReactNode } from 'react';
 import { CheckEmailPanel } from './CheckEmailPanel';
-import { sendStylistEmailLink } from './email-link';
+import { sendStylistEmailCode } from './email-code';
 import './stylist-auth.css';
 
 function FeatureIcon({ children }: { children: ReactNode }) {
@@ -12,7 +12,7 @@ function FeatureIcon({ children }: { children: ReactNode }) {
 }
 
 /** W8 · /signup: stylist sign-up (onboarding step 1). Passwordless: first name, last name and email,
- * then a secure email link verifies the address and signs the stylist in. No invite or waitlist step. */
+ * then a one-time email code verifies the address and signs the stylist in. No invite or waitlist step. */
 export default function StylistSignUpPage() {
   const { t } = useTranslation();
   const supabase = useMemo(() => { try { return createMovaSupabaseClient(); } catch { return null; } }, []);
@@ -40,7 +40,7 @@ export default function StylistSignUpPage() {
 
   const send = async () => {
     if (!supabase) return false;
-    const result = await sendStylistEmailLink(supabase, { email, create: true, firstName, lastName, locale: 'en-US', returnTo: '/onboarding/profile' });
+    const result = await sendStylistEmailCode(supabase, { email, create: true, firstName, lastName, locale: 'en-US' });
     return result.ok;
   };
 
