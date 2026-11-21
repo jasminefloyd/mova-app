@@ -225,3 +225,6 @@ verify_jwt = false
 
 [functions.push-subscription]
 verify_jwt = false
+
+[functions.running-late-send]
+verify_jwt = false

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { conciergeEnabled } from '../../lib/env';
 import { Link } from 'react-router';
 import type { MetaFunction } from 'react-router';
 import { ButtonLink, Check, Eyebrow, JsonLd, useSiteShell } from './parts';
@@ -88,14 +89,14 @@ export default function LandingPage() {
           </div>
           <div className="mova-site__split-art"><LandingPhone screen="revenue" alt={t('website.landing.revenueScreenAlt')} /></div>
         </article>
-        <article className="mova-site__split mova-site__split--reverse">
+        {conciergeEnabled && <article className="mova-site__split mova-site__split--reverse">
           <div className="mova-site__split-art"><LandingPhone screen="concierge" alt={t('website.landing.conciergeScreenAlt')} className="mova-site__landing-phone--concierge" /></div>
           <div className="mova-site__split-copy">
             <Eyebrow>{t('website.landing.conciergeEyebrow')}</Eyebrow>
             <h2 className="mova-site__h2">{t('website.landing.conciergeTitleA')} <span className="mova-site__accent">{t('website.landing.conciergeTitleB')}</span></h2>
             <p className="mova-site__lead">{t('website.landing.conciergeBody')}</p>
           </div>
-        </article>
+        </article>}
         <article className="mova-site__split">
           <div className="mova-site__split-copy">
             <Eyebrow>{t('website.landing.notesEyebrow')}</Eyebrow>

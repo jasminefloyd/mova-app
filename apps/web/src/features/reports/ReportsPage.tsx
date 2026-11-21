@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Card, ErrorState, Segmented } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
+import { seatFillerEnabled } from '../../lib/env';
 import { operatorUrl } from '../../app/operator-url';
 import './reports-board.css';
 
@@ -116,9 +117,9 @@ export function ReportsPage() {
 
         <Card className="mova-report-card mova-report-card--marketing">
           <h2 className="mova-report-card__label">{t('reports.marketing')}</h2>
-          <Link className="mova-report-row" to={operatorUrl(businessId, 'growth/slots')}>
+          {seatFillerEnabled && <Link className="mova-report-row" to={operatorUrl(businessId, 'growth/slots')}>
             <span>{t('screens.reports.seatFillerRow', { count: c.slot_fills ?? 0 })}</span><strong>{money(c.slot_recovered_minor ?? 0)}</strong>
-          </Link>
+          </Link>}
           <Link className="mova-report-row" to={operatorUrl(businessId, 'growth/pipeline')}>
             <span>{t('screens.reports.rebookingRow', { booked: c.rebooking_count ?? 0, sent: c.rebooking_reminders_sent ?? 0 })}</span><strong>{money(c.rebooking_value_minor ?? 0)}</strong>
           </Link>

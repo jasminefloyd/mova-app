@@ -1,15 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router';
+import { redirect, useLocation, useNavigate, useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import type { LoaderFunctionArgs } from 'react-router';
 import { ErrorState } from '../components';
 import { createMovaSupabaseClient } from '../lib/supabase';
+import { conciergeEnabled, rebookingAutopilotEnabled, seatFillerEnabled } from '../lib/env';
+import { operatorUrl } from './operator-url';
 import { ArtistShell } from './ArtistShell';
 import { displayId, parseDisplayId } from '../lib/display-ids';
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  const host = new URL(request.url).hostname;
+export async function loader({ params, request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const host = url.hostname;
   if (host !== 'ops.mova-beauty.co' && host !== 'mova-beauty.co' && host !== 'localhost' && host !== '127.0.0.1' && !host.endsWith('.vercel.app')) throw new Response('Not found', { status: 404 });
+  const [, , section, feature] = url.pathname.split('/');
+  if (section === 'growth' && (
+    (feature === 'concierge' && !conciergeEnabled) ||
+    (feature === 'slots' && !seatFillerEnabled) ||
+    (feature === 'autopilot' && !rebookingAutopilotEnabled)
+  )) return redirect(operatorUrl(params.businessId, 'growth'));
   return null;
 }
 

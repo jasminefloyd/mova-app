@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { MetaFunction } from 'react-router';
+import { clientProfilesEnabled, conciergeEnabled } from '../../lib/env';
 import { ButtonLink, Bullets, Eyebrow, JsonLd, useSiteShell } from './parts';
 import { breadcrumbLd, pageMeta, shellFromMatches, softwareLd } from './seo';
 
@@ -44,6 +45,7 @@ const titleKeys: Record<FeatureKey, { eyebrow: string; a: string; b: string; bod
 export default function FeaturesPage() {
   const { t } = useTranslation();
   const shell = useSiteShell();
+  const visibleFeatures = features.filter(({ id }) => (id !== 'concierge' || conciergeEnabled) && (id !== 'clientCard' || clientProfilesEnabled));
   return <div>
     <JsonLd data={softwareLd(shell)} />
     <JsonLd data={breadcrumbLd(shell, [[t('website.nav.features'), '/features']])} />
@@ -52,11 +54,11 @@ export default function FeaturesPage() {
       <h1 id="feat-h" className="mova-site__h1" style={{ maxWidth: 860, fontSize: 'clamp(36px, 4.8vw, 60px)' }}>{t('website.features.headlineA')} <span className="mova-site__accent">{t('website.features.headlineB')}</span></h1>
       <p className="mova-site__lead" style={{ maxWidth: 680 }}>{t('website.features.intro')}</p>
       <nav aria-label={t('website.features.jumpLabel')} className="mova-site__feature-anchors" style={{ marginTop: 8 }}>
-        {features.map(({ id, anchor }) => <a className="mova-site__chip" key={id} href={`#${anchor}`}>{t(`website.features.${titleKeys[id].jump}`)}</a>)}
+        {visibleFeatures.map(({ id, anchor }) => <a className="mova-site__chip" key={id} href={`#${anchor}`}>{t(`website.features.${titleKeys[id].jump}`)}</a>)}
       </nav>
     </section>
 
-    {features.map(({ id, anchor, screen, alt, reverse, band }) => {
+    {visibleFeatures.map(({ id, anchor, screen, alt, reverse, band }) => {
       const keys = titleKeys[id];
       const copy = <div className="mova-site__split-copy">
         <Eyebrow>{t(`website.features.${keys.eyebrow}`)}</Eyebrow>

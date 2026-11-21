@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, ErrorState, Icon, IconButton, TextArea, TextField } from '../../components';
-import { clientProfilesEnabled, hcaptchaSiteKey, publicEnv, stripeTestModeEnabled } from '../../lib/env';
+import { clientProfilesEnabled, hcaptchaSiteKey, publicEnv, stripeTestModeEnabled, textsEnabled } from '../../lib/env';
 import { HCaptcha } from '../../components/HCaptcha';
 import type { PublicArtist } from '../showcase/PublicArtistPage';
 import { createMovaSupabaseClient } from '../../lib/supabase';
@@ -164,9 +164,9 @@ export function BookingRoute() {
         <fieldset className="mova-booking__consents"><legend>{i18n.t('booking.communicationChoices')}</legend><p>{i18n.t('booking.appointmentUpdatesNotice')}</p>
           {Boolean(email)&&<label><input type="checkbox" checked={consents.review_requests.email} onChange={(event)=>setConsent('review_requests','email',event.target.checked)}/><span>{i18n.t('booking.reviewRequestsChoice')}</span></label>}
           {Boolean(email)&&<label><input type="checkbox" checked={consents.rebooking_reminders.email} onChange={(event)=>setConsent('rebooking_reminders','email',event.target.checked)}/><span>{i18n.t('booking.rebookingEmailChoice')}</span></label>}
-          {Boolean(phone)&&<label><input type="checkbox" checked={consents.rebooking_reminders.sms} onChange={(event)=>setConsent('rebooking_reminders','sms',event.target.checked)}/><span>{i18n.t('booking.rebookingSmsChoice')}</span></label>}
+          {textsEnabled&&Boolean(phone)&&<label><input type="checkbox" checked={consents.rebooking_reminders.sms} onChange={(event)=>setConsent('rebooking_reminders','sms',event.target.checked)}/><span>{i18n.t('booking.rebookingSmsChoice')}</span></label>}
           {Boolean(email)&&<label><input type="checkbox" checked={consents.offers.email} onChange={(event)=>setConsent('offers','email',event.target.checked)}/><span>{i18n.t('booking.offersEmailChoice')}</span></label>}
-          {Boolean(phone)&&<label><input type="checkbox" checked={consents.offers.sms} onChange={(event)=>setConsent('offers','sms',event.target.checked)}/><span>{i18n.t('booking.offersSmsChoice')}</span></label>}
+          {textsEnabled&&Boolean(phone)&&<label><input type="checkbox" checked={consents.offers.sms} onChange={(event)=>setConsent('offers','sms',event.target.checked)}/><span>{i18n.t('booking.offersSmsChoice')}</span></label>}
         </fieldset>
         <HCaptcha siteKey={hcaptchaSiteKey} locale={locale} onToken={setCaptchaToken} resetKey={captchaReset} />
         <Button loading={busy} disabled={!name.trim()||(!email.trim()&&!phone.trim())||(Boolean(hcaptchaSiteKey)&&!captchaToken)} onClick={()=>void create()}>{slot?.booking_mode==='instant'?i18n.t('booking.bookAppointment'):i18n.t('booking.submit')}</Button>

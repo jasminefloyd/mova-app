@@ -5,6 +5,7 @@ import { Avatar, Card, EmptyState, ErrorState, Icon, KPITile, SectionOverline, S
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { operatorUrl } from '../../app/operator-url';
 import { displayId } from '../../lib/display-ids';
+import { conciergeEnabled, seatFillerEnabled } from '../../lib/env';
 import { HomeBanner } from './HomeBanner';
 import { PushPromptSheet } from './PushPromptSheet';
 import { OfflineBanner } from '../../pwa/OfflineBanner';
@@ -126,8 +127,8 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
         .gte('starts_at', start.toISOString()).lt('starts_at', end.toISOString()).order('starts_at').limit(100),
       client.from('mova_locations').select('id,name,time_zone,display_color_index').eq('artist_business_id', businessId).eq('is_active', true).order('display_color_index'),
       client.from('mova_artist_profiles').select('display_name,handle,is_published').eq('artist_business_id', businessId).maybeSingle(),
-      client.functions.invoke<{ data?: { quotes?: QuoteNeed[] } }>('concierge-artist', { body: { action: 'home-needs' }, headers: { 'x-mova-artist-business-id': businessId } }),
-      client.functions.invoke<{ data?: { slots?: SlotNeed[] } }>('slot-campaign', { body: { action: 'home-needs' }, headers: { 'x-mova-artist-business-id': businessId } }),
+      conciergeEnabled ? client.functions.invoke<{ data?: { quotes?: QuoteNeed[] } }>('concierge-artist', { body: { action: 'home-needs' }, headers: { 'x-mova-artist-business-id': businessId } }) : Promise.resolve({ data: null, error: null }),
+      seatFillerEnabled ? client.functions.invoke<{ data?: { slots?: SlotNeed[] } }>('slot-campaign', { body: { action: 'home-needs' }, headers: { 'x-mova-artist-business-id': businessId } }) : Promise.resolve({ data: null, error: null }),
     ]);
     if (bookings.error || locationRows.error || profileRow.error) {
       setError(true);

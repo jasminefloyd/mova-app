@@ -26,6 +26,11 @@ export const clientProfilesEnabled = publicEnv.VITE_CLIENT_PROFILES_ENABLED === 
 export const walletClientCardEnabled = publicEnv.VITE_WALLET_CLIENT_CARD_ENABLED === 'true';
 export const stripeTestModeEnabled = publicEnv.VITE_STRIPE_TEST_MODE === 'true';
 export const webChatEnabled = publicEnv.VITE_CONCIERGE_WEB_CHAT_ENABLED === 'true';
+export const conciergeEnabled = import.meta.env.VITE_AI_CONCIERGE_ENABLED === 'true';
+export const seatFillerEnabled = import.meta.env.VITE_SEAT_FILLER_ENABLED === 'true';
+export const rebookingAutopilotEnabled = import.meta.env.VITE_REBOOKING_AUTOPILOT_ENABLED === 'true';
+export const textsEnabled = import.meta.env.VITE_SMS_ENABLED === 'true';
+export const publicReviewsEnabled = import.meta.env.VITE_PUBLIC_REVIEWS_ENABLED === 'true';
 /** Shown on feedback so the team knows which build a stylist used. */
 export const appVersion = String(import.meta.env.VITE_APP_VERSION || import.meta.env.MODE || 'web').slice(0, 60);
 

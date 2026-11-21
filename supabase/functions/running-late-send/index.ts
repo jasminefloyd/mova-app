@@ -5,6 +5,7 @@ Deno.serve(withSystemRequestLogging('running-late-send', async(request)=>{
   if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});
   if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
   const actor=await artistClient(request);if(!actor)return respond({code:'AUTH_REQUIRED'},401);
+  if(Deno.env.get('MOVA_MESSAGING_LIVE_SMS')!=='true')return respond({code:'OUTBOUND_DISABLED'},503);
   const body=await request.json().catch(()=>null);const minutes=Number(body?.minutes);
   if(!body||typeof body.appointment_id!=='string'||![5,10,15,20].includes(minutes))return respond({code:'INVALID_REQUEST'},422);
   const db=serviceClient();const {data:current,error}=await db.from('mova_appointments').select('id,artist_business_id,location_id,starts_at,status').eq('id',body.appointment_id).eq('artist_business_id',actor.businessId).maybeSingle();

@@ -45,9 +45,11 @@ Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
 
   // Only expose reviews the stylist has approved for public display. Never infer
   // a rating from private, pending, or rejected review rows.
-  const { data: publicReviewGate } = await supabase.rpc('mova_feature_gate', {
-    p_artist_business_id: profile.artist_business_id, p_feature_key: 'reviews_public', p_customer_account_id: null,
-  });
+  const { data: publicReviewGate } = Deno.env.get('MOVA_PUBLIC_REVIEWS_ENABLED') === 'true'
+    ? await supabase.rpc('mova_feature_gate', {
+      p_artist_business_id: profile.artist_business_id, p_feature_key: 'reviews_public', p_customer_account_id: null,
+    })
+    : { data: null };
   const { data: publicRatings } = publicReviewGate?.enabled === true
     ? await supabase.from('mova_reviews').select('rating').eq('artist_business_id', profile.artist_business_id).eq('moderation_status', 'approved').eq('public_display_enabled', true).limit(1000)
     : { data: [] };

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, ErrorState, Icon } from '../../components';
-import { publicEnv, stripeTestModeEnabled, webChatEnabled } from '../../lib/env';
+import { publicEnv, publicReviewsEnabled, stripeTestModeEnabled, webChatEnabled } from '../../lib/env';
 import { ErrorFallback } from '../../app/ErrorFallback';
 import { PublicLocaleToggle } from '../../app/PublicLocaleToggle';
 import { WebChat } from '../concierge/WebChat';
@@ -85,7 +85,7 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
   const bookingUrl = `/a/${encodeURIComponent(handle)}/book?${new URLSearchParams({ locale })}`;
   const profilePhoto = artist.profile.photo_urls.profile?.['512'];
   const locationsLabel = artist.locations.map((location) => location.name).join(' · ');
-  const reputation = artist.profile.rating_average != null && (artist.profile.rating_count ?? 0) > 0
+  const reputation = publicReviewsEnabled && artist.profile.rating_average != null && (artist.profile.rating_count ?? 0) > 0
     ? <span className="mova-public-artist__rating"><span aria-hidden="true">★</span> {artist.profile.rating_average.toFixed(1)} ({artist.profile.rating_count})</span>
     : null;
   return <main lang={locale} className="mova-page mova-public-artist">

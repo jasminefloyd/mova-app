@@ -1,6 +1,7 @@
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { MetaFunction } from 'react-router';
+import { conciergeEnabled, publicReviewsEnabled, rebookingAutopilotEnabled, seatFillerEnabled, textsEnabled, walletClientCardEnabled } from '../../lib/env';
 import { ButtonLink, JsonLd, useSiteShell } from './parts';
 import { breadcrumbLd, faqLd, pageMeta, shellFromMatches, softwareLd } from './seo';
 
@@ -17,6 +18,18 @@ const includedFeatures = {
   pro: ['publicReviews', 'advancedReports', 'seatFiller', 'textAutopilot', 'textReminders', 'rebookingAssist', 'googleCalendar', 'customCover'],
   growth: ['rebookingAutopilot', 'concierge', 'instagramConcierge', 'walletCard', 'revenueCenter', 'missedCallTextback'],
 } as const;
+
+const rolloutVisibility: Readonly<Record<string, boolean>> = {
+  publicReviews: publicReviewsEnabled,
+  seatFiller: seatFillerEnabled,
+  textAutopilot: textsEnabled,
+  textReminders: textsEnabled,
+  rebookingAutopilot: rebookingAutopilotEnabled,
+  concierge: conciergeEnabled,
+  instagramConcierge: conciergeEnabled,
+  walletCard: walletClientCardEnabled,
+  missedCallTextback: textsEnabled,
+};
 
 export default function PricingPage() {
   const { t } = useTranslation();
@@ -48,7 +61,7 @@ export default function PricingPage() {
           <p><strong>{t(`website.pricing.${fee}`)}</strong></p>
           <div className="mova-site__plan-features">
             <p className="mova-site__feature-heading">{t('website.pricing.includedTitle')}</p>
-            <ul>{includedFeatures[key].map((feature) => <li key={feature}>{t(`website.pricing.features.${feature}`)}</li>)}</ul>
+            <ul>{includedFeatures[key].filter((feature) => rolloutVisibility[feature] ?? true).map((feature) => <li key={feature}>{t(`website.pricing.features.${feature}`)}</li>)}</ul>
             {key === 'growth' && <p className="mova-site__coming-soon"><span>{t('website.pricing.comingSoon')}</span> {t('website.pricing.features.aiPricePilot')}</p>}
           </div>
           <ButtonLink to="/signup" variant={featured ? 'peach' : 'plan'}>{t('website.pricing.startFree')}</ButtonLink>
