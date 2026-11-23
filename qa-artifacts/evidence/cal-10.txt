@@ -1,0 +1,25 @@
+Path: /BID-1/appointments/AID-9/pay
+
+Get paid
+
+Silk Press · Demo Guest 02 · $120.00 balance
+
+Amount
+Payment method
+Card
+Cash
+Other
+
+Processed by Stripe
+
+Show a pay QR code
+Client scans it at the chair and pays on their phone
+Text Demo Guest 02 a pay link
+They pay on their own phone
+
+Mova fee 1.5% ($1.80) plus Stripe processing. Both show in Money.
+
+Connect Stripe before taking a card payment.
+
+Payment settings
+Send $120.00 pay link

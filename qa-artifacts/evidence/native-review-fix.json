@@ -1,0 +1,88 @@
+{
+  "BKG-17": [
+    "PASS",
+    "The saved reply and its edit rendered under the review and persisted in PostgreSQL.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/calendar-google-connect",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/review-management",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/review-management",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/calendar-google-connect",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/review-management",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/review-management",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/calendar-google-connect",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/review-management",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ]
+}

@@ -1,0 +1,29 @@
+Path: /BID-1/growth/concierge/setup
+
+Teach your concierge
+
+It always says it's your AI assistant.
+
+WHERE IT ANSWERS
+Instagram messages
+Off
+Mova text number
+Not assigned
+Text back missed calls
+Off
+Chat on your page
+Off
+WHAT IT CAN DO WITHOUT YOU
+Answer questions from your info
+Book open times at Rooted Beauty Studio
+Send requests for Rooted Beauty Salon times
+Reschedule within your policy
+Quotes, exceptions, complaints
+Always you
+WHAT IT KNOWS
+FAQs & how to prep
+1 answer
+Location details
+Parking, door codes, who collects
+Tone
+Warm & brief · EN + ES

@@ -1,0 +1,191 @@
+{
+  "ONB-19": [
+    "FAIL",
+    "The verified guest appointment linked in PostgreSQL, and unrelated accounts could not see it. After claiming, the profile listed the stylist but no longer displayed the past appointment itself.",
+    [
+      {
+        "path": "/auth/v1/otp",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/auth/v1/verify",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-token",
+        "method": "POST",
+        "status": 403,
+        "code": "PLAN_FEATURE_NOT_INCLUDED"
+      },
+      {
+        "path": "/auth/v1/otp",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/auth/v1/verify",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-18": [
+    "FAIL",
+    "After claiming a past Silk Press appointment, Book again opened the correct stylist but selected a different service. The profile offered the link only at the stylist level.",
+    [
+      {
+        "path": "/auth/v1/otp",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/auth/v1/verify",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-token",
+        "method": "POST",
+        "status": 403,
+        "code": "PLAN_FEATURE_NOT_INCLUDED"
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ]
+}

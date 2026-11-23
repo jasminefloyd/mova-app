@@ -1,0 +1,1561 @@
+{
+  "SET-09": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. /rest/v1/mova_client_notes returned 400 42703",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-notes",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-consents",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-notes",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "SET-10": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.click: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByRole('link', { name: /contact preferences/i }).or(getByRole('button', { name: /contact preferences/i })).first()\u001b[22m ",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-notes",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-consents",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "SET-11": [
+    "BLOCKED",
+    "Stylist booked a client in the real app and the confirmed appointment persisted. Client notifications were unavailable.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_availability_blocks",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_service_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_availability_blocks",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/artist-appointment-create",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "SET-12": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.click: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByRole('button', { name: /Rooted Beauty Studio/i }).or(getByLabel(/Rooted Beauty Studio/)).first()\u001b[22m \u001b[2m - locator resolved to <button type=\"button\" class=\"mova-chip\" aria-pressed=\"false\">…</button>\u001b[22m \u001b[2m - attempting click action\u001b[22m \u001b[2m 2 × waiting for ele",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_availability_blocks",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_service_locations",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "SET-13": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.fill: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByLabel(/display name/i)\u001b[22m ",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_portfolio_items",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-03": [
+    "BLOCKED",
+    "Opened the real reschedule workflow. The selected new time was not confirmed in PostgreSQL.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/before-you-start",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-04": [
+    "BLOCKED",
+    "Confirmed a real deposit-free cancellation, verified persisted status and saw the deposit-policy wording. Paid-deposit and delivery portions need sandbox providers.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/before-you-start",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-transition",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/before-you-start",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-05": [
+    "BLOCKED",
+    "Confirmed No show in browser and PostgreSQL. Weekly reports and offerable-slot state were not both confirmed.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/before-you-start",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-transition",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/before-you-start",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-06": [
+    "BLOCKED",
+    "Completion worked and persisted. The consented post-visit review invitation requires outbound test delivery.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/before-you-start",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-transition",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/before-you-start",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-07": [
+    "BLOCKED",
+    "Opened the visit notes screen and exercised the text field. The required photo round trip depends on the missing local Storage service.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/visit-notes",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-19": [
+    "BLOCKED",
+    "Opened the real notification inbox and found 0 persisted rows for the fixture. Booking, cancellation and no-show worker delivery as a complete set was not verified.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/notification-inbox",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-07": [
+    "BLOCKED",
+    "Reached the relevant local screen. Required for transaction verification: Test-mode Stripe Connect account, sandbox API key, signed locally forwarded Stripe webhook, and an eligible deposit service. Only live Stripe credentials were present in the project, and they were excluded.",
+    [
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-08": [
+    "BLOCKED",
+    "Reached the relevant local screen. Required for transaction verification: Test-mode Stripe Connect account and local signing secret for deposit Checkout decline and 3DS cases. Only live Stripe credentials were present in the project, and they were excluded.",
+    [
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-09": [
+    "BLOCKED",
+    "Reached the relevant local screen. Required for transaction verification: Test-mode Stripe Connect account, signed test webhook and QR scan or paired local browser context. Only live Stripe credentials were present in the project, and they were excluded.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_stripe_connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payment_method_settings",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-10": [
+    "BLOCKED",
+    "Reached the relevant local screen. Required for transaction verification: Test-mode Stripe Connect and approved test SMS transport or controlled loopback recipient. Only live Stripe credentials were present in the project, and they were excluded.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_stripe_connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payment_method_settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-11": [
+    "BLOCKED",
+    "Reached the relevant local screen. Required for transaction verification: Test-mode Stripe Connect and signed webhook for decline then success. Only live Stripe credentials were present in the project, and they were excluded.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payment_method_settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_stripe_connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-12": [
+    "BLOCKED",
+    "Reached the relevant local screen. Required for transaction verification: Test-mode Stripe Connect and signed webhook for 3DS approval and failure. Only live Stripe credentials were present in the project, and they were excluded.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payment_method_settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_stripe_connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-15": [
+    "BLOCKED",
+    "Reached the relevant local screen. Required for transaction verification: A real sandbox paid-deposit fixture and test Connect balance checkout/webhook. Only live Stripe credentials were present in the project, and they were excluded.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_stripe_connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payment_method_settings",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-17": [
+    "BLOCKED",
+    "Reached the relevant local screen. Required for transaction verification: A Stripe sandbox charge and test Connect refund event source. Only live Stripe credentials were present in the project, and they were excluded.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/money-summary",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ]
+}

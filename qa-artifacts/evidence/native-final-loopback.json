@@ -1,0 +1,903 @@
+{
+  "BKG-02": [
+    "BLOCKED",
+    "Browser booked an instant appointment, manage page confirmed it, and the real database and stylist appointment matched. Delivery of the client’s confirmation message was not configured.",
+    [
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-create",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-status",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-status",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/before-you-start",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-04": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. The input did not match the regular expression /request|waiting/i. Input: 'Loading appointment…' ",
+    [
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-create",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-status",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-status",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-13": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.waitFor: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByText(/contact preferences/i).first() to be visible\u001b[22m ",
+    [
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-create",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-status",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-status",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-notes",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-consents",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-08": [
+    "PASS",
+    "Cash was recorded against real appointment balance, with zero platform fee. The Money page rendered the Recorded by you category.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_stripe_connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payment_method_settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/manual-payment-record",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payment_refunds",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/before-you-start",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/money-summary",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-13": [
+    "PASS",
+    "Other payment persisted with the exact supplied method label and zero platform fee.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_stripe_connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payment_method_settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/manual-payment-record",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payment_refunds",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/before-you-start",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-14": [
+    "PASS",
+    "Salon checkout hid Card, persisted a salon-collected payment with zero fee, and Money showed the salon category.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_stripe_connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payment_method_settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/manual-payment-record",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payment_refunds",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/before-you-start",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/money-summary",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ]
+}

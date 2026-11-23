@@ -1,0 +1,48 @@
+Path: /BID-1/growth/slots
+
+Fill open slots
+Fill open slots
+$80
+Recovered
+1
+Needs approval
+0
+Active
+3
+Filled
+Sat, Dec 19, 11:00 AM
+Rooted Beauty Studio · Silk Press · $120
+Filled
+Details
+Sat, Dec 19, 9:00 AM
+Rooted Beauty Studio · Silk Press · $120
+Filled
+
+Demo Guest 02 booked it · 7:07 PM
+
+Details
+Sun, Dec 6, 6:53 PM
+Rooted Beauty Salon · $80
+Open slot found
+Stop campaign
+Details
+Fri, Dec 4, 6:53 PM
+Rooted Beauty Studio · $120
+Needs approval
+
+2 clients fit this slot Due to rebook or lapsed, agreed to texts. Waves of 2, every 20 min. Stops when booked.
+
+Text message · personalized per client
+
+A silk press opening is available in 12 days. Reply if you would like to request it.
+
+If it fills first, the rest get: "This opening has been claimed. We can help you find another time."
+Wave 1 · 2 clients
+Demo G. 0., Demo G. 0.
+Approve text & send wave 1
+Stop campaign
+Ends 2 hours before the slot if no one books.
+Wed, Nov 11, 10:00 AM
+Rooted Beauty Studio · $80
+Filled
+Details

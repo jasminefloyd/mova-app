@@ -1,0 +1,36 @@
+Path: /BID-1/growth/pipeline
+
+Rebooking pipeline
+Rebooking pipeline
+5
+Due
+0
+Contacted
+0
+Rebooked
+Refresh pipeline
+Due · 5
+Demo Guest 04
+Last visit Nov 15, 2026 · low confidence
+Due
+Demo Guest 02
+Last visit Nov 22, 2026 · low confidence
+Due
+Demo Guest 03
+Last visit Nov 22, 2026 · low confidence
+Due
+Demo Guest 04
+Last visit Nov 22, 2026 · low confidence
+Due
+Demo Guest 03
+Last visit Nov 10, 2026 · low confidence
+Due
+Contacted · 0
+
+No clients in this group.
+
+Rebooked · 0
+
+No clients in this group.
+
+Rules saved.

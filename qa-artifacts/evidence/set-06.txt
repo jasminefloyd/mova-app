@@ -1,0 +1,56 @@
+Path: /BID-1/clients
+
+Clients
+Import
+Search name or phone
+All · 11
+Due to rebook · 0
+New
+DG
+Demo Guest 01
+CID 1 · No visits yet
+New
+DG
+Demo Guest 02
+CID 2 · Silk Press · Nov 22, 2026
+Today
+DG
+Demo Guest 03
+CID 3 · Hydration Treatment · Nov 22, 2026
+Today
+DG
+Demo Guest 04
+CID 4 · Protective Style Consultation · Nov 22, 2026
+Today
+DG
+Demo Guest 05
+CID 5 · Hydration Treatment · Nov 11, 2026 · Opted out
+QA
+QA Accept-booking
+CID 7 · No visits yet
+New
+QC
+QA CancelGuest-booking
+CID 10 · No visits yet
+New
+QD
+QA Decline-booking
+CID 8 · No visits yet
+New
+QI
+QA Instant-booking
+CID 6 · No visits yet
+New
+QM
+QA Move-booking
+CID 9 · No visits yet
+New
+QM
+Quinn Manual-booking
+CID 11 · No visits yet
+New
+Home
+Calendar
+Clients
+Reviews
+Reports

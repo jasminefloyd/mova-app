@@ -20,7 +20,7 @@ type ShellFrameProps = PropsWithChildren<{
 export function ShellFrame({ queryClient, localeStorageKey, showBrandHeader = true, showLocaleSwitcher = false, fixedLocale, children }: ShellFrameProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <LocaleProvider storageKey={localeStorageKey} fixedLocale={fixedLocale}>
+      <LocaleProvider storageKey={localeStorageKey} {...(fixedLocale ? { fixedLocale } : {})}>
         {showBrandHeader && <header className="flex items-center justify-between p-4">
           <span className="font-display font-bold" aria-label="mova">mova</span>
           {showLocaleSwitcher && <LocaleSwitcher />}

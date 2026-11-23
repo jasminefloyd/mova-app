@@ -1,0 +1,25 @@
+[
+  {
+    "A": "CAL-01b",
+    "B": "Calendar times outside 9 to 5",
+    "C": "New issue",
+    "D": "Already in the earlier build, found while reviewing the new calendar. The grid always runs 9 AM to 5 PM. A 7:00 AM appointment is drawn in the 9 AM row, and a 6:00 PM appointment is drawn below the grid. Two appointments at the same time are drawn exactly on top of each other, so one is hidden.",
+    "E": "Fit the hour range to the day's first and last items (or use a scrolling 24-hour grid), and place overlapping items side by side. Shown in the new calendar design on the canvas.",
+    "F": "High"
+  },
+  {
+    "A": "TESTS",
+    "B": "Unit tests on main",
+    "C": "Fixed in 22f1565",
+    "D": "6 of 359 unit tests fail on 9cb554a and all passed on eeac673. rules.test.ts (3) still expects the old Tue/Thu/Fri default days. PublicArtistPage.test.tsx (1) expects the bio, which is now hidden (see BKG-01). PublicLocaleToggle.test.tsx (2) expects a 'Full' day, but full days are now removed from the booking day picker.",
+    "E": "Update the 3 rules tests. Fix the bio (BKG-01). Decide whether full days should still show as 'Full' (the canvas board does) and update either the code or the 2 tests.",
+    "F": "Medium",
+    "G": "All 360 unit tests pass. Full days show again as disabled 'Full' in the booking day picker."
+  },
+  {
+    "A": "BUILD",
+    "B": "Build and type check",
+    "C": "Pass",
+    "D": "The web build passes and locale validation passes. The type check shows the 2 errors that were already there (ShellFrame, StylistAuthShell); the MarketingPage error is gone."
+  }
+]

@@ -1,0 +1,106 @@
+
+> mova-app@0.0.0 fn:check [workspace home]/Desktop/Vibes/Projects/mova-app
+> node scripts/fn-check.mjs
+
+deno check: 73 functions (0 folders without index.ts)
+Check supabase/functions/artist-appointment-create/index.ts
+Check supabase/functions/artist-data-export/index.ts
+Check supabase/functions/availability-search/index.ts
+Check supabase/functions/before-you-start/index.ts
+Check supabase/functions/booking-create/index.ts
+Check supabase/functions/booking-reschedule/index.ts
+Check supabase/functions/booking-status/index.ts
+Check supabase/functions/booking-transition/index.ts
+Check supabase/functions/calendar-google-callback/index.ts
+Check supabase/functions/calendar-google-connect/index.ts
+Check supabase/functions/calendar-ics-feed/index.ts
+Check supabase/functions/calendar-sync-run/index.ts
+Check supabase/functions/client-card-landing/index.ts
+Check supabase/functions/client-card-token/index.ts
+Check supabase/functions/client-consents/index.ts
+Check supabase/functions/client-crud/index.ts
+Check supabase/functions/client-import/index.ts
+Check supabase/functions/client-log/index.ts
+Check supabase/functions/client-notes/index.ts
+Check supabase/functions/concierge-artist/index.ts
+Check supabase/functions/concierge-web-chat/index.ts
+Check supabase/functions/customer-profile/index.ts
+Check supabase/functions/forecast-summary/index.ts
+Check supabase/functions/google-business-sync/index.ts
+Check supabase/functions/google-reviews-sync/index.ts
+Check supabase/functions/guides-public/index.ts
+Check supabase/functions/instagram-webhook/index.ts
+Check supabase/functions/job-dispatch/index.ts
+Check supabase/functions/job-worker/index.ts
+Check supabase/functions/location-address-search/index.ts
+Check supabase/functions/location-save/index.ts
+Check supabase/functions/manual-payment-record/index.ts
+Check supabase/functions/marketing-campaign/index.ts
+Check supabase/functions/messaging-dispatch/index.ts
+Check supabase/functions/messaging-events/index.ts
+Check supabase/functions/messaging-inbound-sms/index.ts
+Check supabase/functions/messaging-settings/index.ts
+Check supabase/functions/messaging-status/index.ts
+Check supabase/functions/missed-call-webhook/index.ts
+Check supabase/functions/money-summary/index.ts
+Check supabase/functions/notification-dispatch/index.ts
+Check supabase/functions/notification-inbox/index.ts
+Check supabase/functions/paylink-create/index.ts
+Check supabase/functions/paylink-redirect/index.ts
+Check supabase/functions/payment-intent-create/index.ts
+Check supabase/functions/payment-settings/index.ts
+Check supabase/functions/photo-process/index.ts
+Check supabase/functions/photo-upload-url/index.ts
+Check supabase/functions/plan-management/index.ts
+Check supabase/functions/price-pilot/index.ts
+Check supabase/functions/privacy-management/index.ts
+Check supabase/functions/profile-cover/index.ts
+Check supabase/functions/public-artist/index.ts
+Check supabase/functions/push-subscription/index.ts
+Check supabase/functions/refund-request/index.ts
+Check supabase/functions/reports-refresh/index.ts
+Check supabase/functions/reports-summary/index.ts
+Check supabase/functions/reports-track/index.ts
+Check supabase/functions/revenue-center/index.ts
+Check supabase/functions/review-management/index.ts
+Check supabase/functions/review-public-context/index.ts
+Check supabase/functions/review-submit/index.ts
+Check supabase/functions/running-late-send/index.ts
+Check supabase/functions/scan-landing/index.ts
+Check supabase/functions/slot-campaign/index.ts
+Check supabase/functions/slot-claim/index.ts
+Check supabase/functions/stripe-connect-onboard/index.ts
+Check supabase/functions/stripe-webhook/index.ts
+Check supabase/functions/subscription-checkout/index.ts
+Check supabase/functions/subscription-portal/index.ts
+Check supabase/functions/support-feedback/index.ts
+Check supabase/functions/visit-notes/index.ts
+Check supabase/functions/wallet-pass-create/index.ts
+deno test: 4 files
+running 4 tests from ./supabase/functions/availability-search/rules.test.ts
+TC-B01-AVAIL-01 single service uses base duration plus buffer ... ok (261µs)
+TC-B01-AVAIL-02 two services add up and honour a per-location override ... ok (65µs)
+TC-B01-AVAIL-03 unknown service is rejected ... ok (640µs)
+TC-H06-DEPOSIT-01 deposit only applies where the stylist collects ... ok (212µs)
+running 4 tests from ./supabase/functions/support-feedback/rules.test.ts
+TC-SUPPORT-04 accepts each type and strips query strings from the screen ... ok (415µs)
+TC-SUPPORT-04 rejects bad types and empty or long messages ... ok (46µs)
+TC-SUPPORT-04 only accepts screenshots under the caller folder ... ok (478µs)
+TC-SUPPORT-04 keeps the device header printable ... ok (181µs)
+running 12 tests from ./supabase/functions/guides-public/rules.test.ts
+GUIDES-PUB-01 only published posts whose time has arrived are visible ... ok (267µs)
+GUIDES-PUB-02 list hides drafts and future posts and sorts newest first ... ok (205µs)
+GUIDES-PUB-03 category filter, limit and cursor paging ... ok (272µs)
+GUIDES-PUB-04 limit is clamped to 1..50 with a default of 24 ... ok (242µs)
+GUIDES-PUB-05 cursors round-trip and reject tampering ... ok (983µs)
+GUIDES-PUB-06 slugs are lowercase words joined by hyphens ... ok (112µs)
+GUIDES-PUB-07 hrefs allow http, https and relative paths only ... ok (1ms)
+GUIDES-PUB-08 body keeps only contract block shapes and drops anything else ... ok (623µs)
+GUIDES-PUB-09 SEO fields fall back to title and summary when empty ... ok (247µs)
+GUIDES-PUB-10 related posts share the category, exclude the post and cap at three ... ok (205µs)
+GUIDES-PUB-11 categories list only visible posts, sorted and unique ... ok (8ms)
+GUIDES-PUB-12 summary shape carries cover only when the URL is safe ... ok (399µs)
+running 1 test from ./supabase/functions/_shared/tenant.test.ts
+TC-SEC-FUZZ-01 artistClient constrains service-role scope to the selected membership ... ok (18ms)
+
+ok | 21 passed | 0 failed (153ms)

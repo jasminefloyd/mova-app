@@ -1,0 +1,34 @@
+Path: /BID-1/settings/payments
+
+Payments & payouts
+How you get paid
+
+Choose the payment methods you accept and record in Mova.
+
+Online deposits & payments
+Not set up
+
+Take deposits and payments by card through Stripe when you collect payment.
+
+Ask for a deposit when clients book
+Send a pay link or show a pay QR at checkout
+Clients pay by card, Apple Pay or Google Pay
+
+Mova fee 0.75% per card payment, plus Stripe processing. Taken out before the payout.
+
+Connect with Stripe
+Stripe setup is unavailable until the Connect account and charge settings are approved.
+Stripe asks for your ID and a bank account. Mova never sees your bank login.
+Payments you record yourself
+
+You mark these as paid. Mova does not process or verify them.
+
+Cash
+Record cash you take at the chair
+Other
+Cash App, check, gift card — you name it at checkout
+
+Rooted Beauty Salon collects for you. Record those visits as salon collected. Mova charges no fee on recorded or salon-collected payments.
+
+Change in Locations & hours
+Save payment settings

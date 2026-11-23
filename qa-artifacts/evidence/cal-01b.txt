@@ -1,0 +1,57 @@
+Path: /BID-1/calendar
+
+December
+Sun
+29
+Mon
+30
+Tue
+1
+Wed
+2
+Thu
+3
+Fri
+4
+Sat
+5
+Day
+Week
+Requests · 4
+All locations
+QA Suite-setup
+Rooted Beauty Studio
+Rooted Beauty Salon
+
+Appointments booked in salon systems or personal calendars outside Mova don't appear here.
+
+7 AM
+8
+9
+10
+11
+12 PM
+1
+2
+3
+4
+5
+6
+7
+Silk Press · QA Overlap-retest
+7:00 AM – 8:00 AM · Rooted Beauty Salon
+Silk Press · QA Early-setup
+7:00 AM – 8:00 AM · Rooted Beauty Studio
+Silk Press · QA Early-retest
+7:00 AM – 8:00 AM · Rooted Beauty Studio
+Silk Press · QA Overlap-setup
+7:00 AM – 8:00 AM · Rooted Beauty Salon
+Silk Press · QA Late-setup
+6:00 PM – 7:00 PM · Rooted Beauty Studio
+Silk Press · QA Late-retest
+6:00 PM – 7:00 PM · Rooted Beauty Studio
+Home
+Calendar
+Clients
+Reviews
+Reports

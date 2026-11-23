@@ -1,0 +1,347 @@
+{
+  "ONB-16": [
+    "FAIL",
+    "Stylist sign-in linked to client sign-in, but the client sign-in page offered no link back to stylist sign-in.",
+    []
+  ],
+  "ONB-18": [
+    "FAIL",
+    "Continue as a guest sent an unsigned visitor to /me, which is the account-only profile.",
+    []
+  ],
+  "BKG-01": [
+    "PASS",
+    "The real public profile, services and prices rendered at 390 px and 1280 px. Book opened the correct route.",
+    [
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-18": [
+    "PASS",
+    "The seeded Home showed Needs you and This week, and an appointment link opened the appointment detail.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_account_names",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/slot-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/concierge-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-summary",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_user_app_state",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_user_app_state",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/plan-management",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-04": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.isDisabled: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByRole('button', { name: /^(Book appointment|Send request|Request appointment|Submit request|Confirm booking|Request this time|Submit booking request)$/i }).first()\u001b[22m ",
+    [
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-06": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. The booking request remained pending_artist",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-crud",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/before-you-start",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-11": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.click: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByRole('button', { name: /reschedule/i }).first()\u001b[22m ",
+    [
+      {
+        "path": "/functions/v1/booking-status",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-status",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-12": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. /functions/v1/booking-create returned 409 ",
+    []
+  ]
+}

@@ -1,0 +1,88 @@
+
+> mova-app@0.0.0 test:e2e [workspace home]/Desktop/Vibes/Projects/mova-app
+> node scripts/run-e2e.mjs "--" "--workers=5" "--timeout=12000"
+
+
+> mova-app@0.0.0 build [workspace home]/Desktop/Vibes/Projects/mova-app
+> corepack pnpm check-locales && corepack pnpm --filter @mova/contracts build && corepack pnpm --filter @mova/web build
+
+
+> mova-app@0.0.0 check-locales [workspace home]/Desktop/Vibes/Projects/mova-app
+> node scripts/check-locales.mjs
+
+Locale validation passed: en-US and es-US have matching keys, all literal translation calls resolve, and 6 critical strings exist.
+
+> @mova/contracts@0.0.0 build [workspace home]/Desktop/Vibes/Projects/mova-app/packages/contracts
+> tsc -p tsconfig.json
+
+
+> @mova/web@0.0.0 build [workspace home]/Desktop/Vibes/Projects/mova-app/apps/web
+> react-router build
+
+The `envFile` option is deprecated, please use `envDir: false` instead.
+The `envFile` option is deprecated, please use `envDir: false` instead.
+The `envFile` option is deprecated, please use `envDir: false` instead.
+The `envFile` option is deprecated, please use `envDir: false` instead.
+The `envFile` option is deprecated, please use `envDir: false` instead.
+The `envFile` option is deprecated, please use `envDir: false` instead.
+The `envFile` option is deprecated, please use `envDir: false` instead.
+vite v8.3.6 building client environment for production...
+transforming...
+✓ 552 modules transformed.
+rendering chunks...
+computing gzip size...
+build/client/manifest.webmanifest                              0.51 kB
+build/client/.vite/manifest.json                              58.00 kB │ gzip:  5.95 kB
+
+✓ built in 1.04s
+
+PWA v2.0.0
+Building src/sw.ts service worker ("es" format)...
+vite v8.3.6 building client environment for production...
+
+ WARN  inlineDynamicImports option is deprecated, please use codeSplitting: false instead.
+
+transforming...
+✓ 79 modules transformed.
+rendering chunks...
+computing gzip size...
+build/client/sw.mjs  25.26 kB │ gzip: 8.37 kB
+
+✓ built in 17ms
+
+PWA v2.0.0
+mode      injectManifest
+format:   es
+precache  190 entries (2165.69 KiB)
+files generated
+  build/client/sw.js
+The `envFile` option is deprecated, please use `envDir: false` instead.
+  ⚠️  Future Flag Warning: Route middleware support is changing in React Router v8.
+     You can use the `future.v8_middleware` flag to opt in early.
+     -> https://reactrouter.com/v7/upgrading/future#futurev8_middleware
+  ⚠️  Future Flag Warning: Route module splitting behavior is changing in React Router v8.
+     You can use the `future.v8_splitRouteModules` flag to opt in early.
+     -> https://reactrouter.com/v7/upgrading/future#futurev8_splitroutemodules
+  ⚠️  Future Flag Warning: Vite Environment API usage is changing in React Router v8.
+     You can use the `future.v8_viteEnvironmentApi` flag to opt in early.
+     -> https://reactrouter.com/v7/upgrading/future#futurev8_viteenvironmentapi
+  ⚠️  Future Flag Warning: Request handling behavior is changing in React Router v8.
+     You can use the `future.v8_passThroughRequests` flag to opt in early.
+     -> https://reactrouter.com/v7/upgrading/future#futurev8_passthroughrequests
+  ⚠️  Future Flag Warning: Data request URL formats are changing in React Router v8.
+     You can use the `future.v8_trailingSlashAwareDataRequests` flag to opt in early.
+     -> https://reactrouter.com/v7/upgrading/future#futurev8_trailingslashawaredatarequests
+The `envFile` option is deprecated, please use `envDir: false` instead.
+vite v8.3.6 building ssr environment for production...
+transforming...
+✓ 211 modules transformed.
+rendering chunks...
+
+✓ 9 assets cleaned from React Router server build.
+
+computing gzip size...
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/manifest.webmanifest                                0.51 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/.vite/manifest.json                                 3.36 kB │ gzip:   0.62 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/index.js                                        1,694.06 kB │ gzip: 354.01 kB
+
+✓ built in 567ms

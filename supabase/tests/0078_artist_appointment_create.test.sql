@@ -20,7 +20,8 @@ insert into public.mova_services(id,artist_business_id,name,category,duration_mi
 values('e7800000-0000-4000-8000-000000000301','e7800000-0000-4000-8000-000000000101','Silk press','Styling',90,0,15000,'active','none',0),
       ('e7800000-0000-4000-8000-000000000302','e7800000-0000-4000-8000-000000000102','Other tenant service','Styling',60,0,8000,'active','none',0);
 insert into public.mova_service_locations(artist_business_id,service_id,location_id)
-values('e7800000-0000-4000-8000-000000000101','e7800000-0000-4000-8000-000000000301','e7800000-0000-4000-8000-000000000201');
+values('e7800000-0000-4000-8000-000000000101','e7800000-0000-4000-8000-000000000301','e7800000-0000-4000-8000-000000000201')
+on conflict (service_id, location_id) do nothing;
 insert into public.mova_clients(id,artist_business_id,display_name,email,phone,preferred_locale)
 values('e7800000-0000-4000-8000-000000000401','e7800000-0000-4000-8000-000000000101','Simone A.','simone@example.invalid','+15555550100','en-US'),
       ('e7800000-0000-4000-8000-000000000402','e7800000-0000-4000-8000-000000000102','Other client','other@example.invalid',null,'en-US');
@@ -42,7 +43,7 @@ select throws_ok($$select public.mova_artist_appointment_create('e7800000-0000-4
 select throws_ok($$select public.mova_artist_appointment_create('e7800000-0000-4000-8000-000000000101','e7800000-0000-4000-8000-000000000401','e7800000-0000-4000-8000-000000000201','e7800000-0000-4000-8000-000000000302','2030-03-05 11:00+00','p6-key-service')$$,
   '22023', 'SERVICE_NOT_FOUND', 'TC-SCR-08C-03 another business service is not found');
 select throws_ok($$select public.mova_artist_appointment_create('e7800000-0000-4000-8000-000000000101','e7800000-0000-4000-8000-000000000401','e7800000-0000-4000-8000-000000000201','e7800000-0000-4000-8000-000000000301','2020-01-01 11:00+00','p6-key-past')$$,
-  '22023', 'SLOT_IN_PAST', 'TC-SCR-08C-04 a time in the past is refused');
+  '22023', 'SLOT_OUTSIDE_BOOKING_WINDOW', 'TC-SCR-08C-04 a time in the past is refused');
 select throws_ok($$select public.mova_artist_appointment_create('e7800000-0000-4000-8000-000000000101','e7800000-0000-4000-8000-000000000401','e7800000-0000-4000-8000-000000000201','e7800000-0000-4000-8000-000000000301','2030-03-05 20:00+00','p6-key-late')$$,
   '22023', 'SLOT_OUTSIDE_LOCATION_HOURS', 'TC-SCR-08C-04 a time outside location hours is refused');
 

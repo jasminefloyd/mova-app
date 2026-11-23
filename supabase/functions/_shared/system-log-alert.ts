@@ -1,6 +1,6 @@
 import { loggedProviderFetch, writeSystemLog } from './system-log.ts';
 
-type AlertDb = { rpc(name: string, args?: Record<string, unknown>): Promise<{ data: unknown; error: { message: string } | null }> };
+type AlertDb = { rpc(name: string, args?: Record<string, unknown>): PromiseLike<{ data: unknown; error: { message: string } | null }> };
 
 /** Thresholds: 20 application/function errors in 15m, or one dead background job. */
 export async function sendSystemLogAlert(db: AlertDb, env: (name: string) => string | undefined, request: Request) {

@@ -1,0 +1,74 @@
+
+> mova-app@0.0.0 db:test [workspace home]/Desktop/Vibes/Projects/mova-app
+> node scripts/db-test.mjs
+
+Template ready: 96 migrations.
+PASS  0003_artist_profile_claim.test.sql               14/14
+PASS  0003_artist_profile_update.test.sql              4/4
+PASS  0005_locations_policies_availability.test.sql    8/8
+PASS  0007_appointments_holds_events.test.sql          14/14
+PASS  0007_booking_expiry.test.sql                     9/9
+PASS  0010_calendar_integrations.test.sql              16/16
+PASS  0011_customer_identity.test.sql                  18/18
+PASS  0012_wallet_passes_qr.test.sql                   14/14
+PASS  0021_acquisition_waitlist.test.sql               9/9
+PASS  0024_reports_reviews.test.sql                    19/19
+PASS  0025_plans_entitlements.test.sql                 10/10
+PASS  0026_privacy_ops.test.sql                        8/8
+PASS  0027_zelle_hidden.test.sql                       6/6
+PASS  0031_booking_deposit_gate.test.sql               7/7
+PASS  0032_anon_tenant_select.test.sql                 11/11
+PASS  0033_booking_consents.test.sql                   10/10
+PASS  0034_durable_jobs.test.sql                       18/18
+PASS  0035_stripe_test_checkout.test.sql               25/25
+PASS  0036_quote_appointment_link.test.sql             4/4
+PASS  0037_multi_service_appointments.test.sql         14/14
+PASS  0039_deposit_bookings_flag.test.sql              5/5
+PASS  0041_support_messages.test.sql                   12/12
+PASS  0042_missed_call.test.sql                        6/6
+PASS  0042_sms_policy.test.sql                         16/16
+PASS  0043_appointment_emails.test.sql                 9/9
+PASS  0044_payment_fee_rate.test.sql                   9/9
+PASS  0045_money_reconciliation.test.sql               17/17
+PASS  0046_job_dead_letters.test.sql                   12/12
+PASS  0047_messaging_spend_cap.test.sql                9/9
+PASS  0050_client_account_actions.test.sql             11/11
+PASS  0051_concierge_web_chat.test.sql                 4/4
+PASS  0052_concierge_spend_cap.test.sql                5/5
+PASS  0053_stylist_feature_defaults.test.sql           6/6
+PASS  0054_google_review_import.test.sql               3/3
+PASS  0055_plans_billing.test.sql                      7/7
+PASS  0056_seat_filler.test.sql                        16/16
+PASS  0057_autopilot_attribution.test.sql              5/5
+PASS  0058_plan_fee_rate.test.sql                      9/9
+PASS  0059_waitlist_invites.test.sql                   4/4
+PASS  0060_open_signup.test.sql                        6/6
+PASS  0061_retire_waitlist.test.sql                    11/11
+PASS  0066_admin_foundation.test.sql                   17/17
+PASS  0067_blog_posts.test.sql                         9/9
+PASS  0068_blog_admin_functions.test.sql               31/31
+PASS  0069_admin_reads.test.sql                        16/16
+PASS  0070_admin_operations.test.sql                   30/30
+PASS  0071_admin_health.test.sql                       10/10
+PASS  0072_google_connection.test.sql                  19/19
+PASS  0073_google_listing_sync.test.sql                9/9
+PASS  0074_google_review_replies.test.sql              6/6
+PASS  0075_profile_unsplash_cover.test.sql             7/7
+PASS  0076_location_type_home_studio.test.sql          4/4
+PASS  0077_block_time_label.test.sql                   4/4
+PASS  0078_artist_appointment_create.test.sql          15/15
+PASS  0082_artist_reschedule_confirmed.test.sql        5/5
+PASS  0085_system_logs.test.sql                        15/15
+PASS  0086_price_pilot.test.sql                        9/9
+PASS  0087_marketing_campaigns.test.sql                15/15
+PASS  0089_artist_contact.test.sql                     8/8
+PASS  0090_marketing_plan_and_switch_keys.test.sql     3/3
+PASS  0091_price_pilot_plans_metering.test.sql         4/4
+PASS  0102_pwa_push_notifications.test.sql             7/7
+PASS  0103_stylist_email_sender.test.sql               6/6
+PASS  20261107_early_access_invites.test.sql           9/9
+PASS  outbox-slot-opened.test.sql                      8/8
+PASS  rls_customer_adversaries.test.sql                153/153
+PASS  rls_matrix.test.sql                              367/367
+
+67/67 files pass, 1206/1206 assertions.

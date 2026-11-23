@@ -216,10 +216,10 @@ export function ReputationPage() {
                 {review.tags.length > 0 && <p className="mova-review-tags">{review.tags.map((tag) => t(`reviews.tags.${tag}`)).join(' · ')}</p>}
                 {review.body && <p>{review.body}</p>}
                 <p className="mova-review-status">{t(`reviews.moderation.${review.moderation_status}`)}</p>
-                {review.artist_reply
-                  ? <blockquote><strong>{t('reviews.yourReply')}</strong><p>{review.artist_reply}</p><Button variant="secondary" onClick={() => startReply(review)}>{t('reviews.editReply')}</Button></blockquote>
-                  : replyId === review.id
-                    ? <div className="mova-review-reply"><TextArea label={t('reviews.replyLabel')} value={reply} maxLength={2000} onChange={(event) => setReply(event.currentTarget.value)} /><Button loading={busy} disabled={!reply.trim()} onClick={() => void saveReply()}>{t('reviews.saveReply')}</Button></div>
+                {replyId === review.id
+                  ? <div className="mova-review-reply"><TextArea label={t('reviews.replyLabel')} value={reply} maxLength={2000} onChange={(event) => setReply(event.currentTarget.value)} /><Button loading={busy} disabled={!reply.trim()} onClick={() => void saveReply()}>{t('reviews.saveReply')}</Button></div>
+                  : review.artist_reply
+                    ? <blockquote><strong>{t('reviews.yourReply')}</strong><p>{review.artist_reply}</p><Button variant="secondary" onClick={() => startReply(review)}>{t('reviews.editReply')}</Button></blockquote>
                     : <Button variant="secondary" onClick={() => startReply(review)}>{t('reviews.reply')}</Button>}
                 <Button variant="ghost" disabled={busy} onClick={() => void report(review)}>{t('reviews.report')}</Button>
               </Card>)}

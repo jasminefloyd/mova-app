@@ -262,7 +262,7 @@ body {
 .mova-calendar > .mova-honesty { min-height: var(--tap-min); margin: var(--space-3) 0 0; border-radius: var(--radius-l); padding: var(--space-3); align-items: center; gap: var(--space-2); }
 .mova-calendar > .mova-honesty .mova-icon { width: 18px; height: 18px; }
 .mova-calendar > .mova-honesty p { font-size: var(--fs-micro); line-height: 1.4; }
-.mova-calendar__timeline { position: relative; height: calc(var(--calendar-hour-height) * 9); margin: 12px 0 0; }
+.mova-calendar__timeline { position: relative; height: calc(var(--calendar-hour-height) * var(--calendar-hours, 9)); margin: 12px 0 0; }
 .mova-calendar__hour { position: absolute; right: 0; left: 0; height: var(--calendar-hour-height); border-top: 1px solid var(--line-subtle); }
 .mova-calendar__hour time { position: absolute; top: 2px; left: 0; color: var(--ink-muted); font-size: var(--fs-tab); font-weight: 600; }
 .mova-calendar__event { position: absolute; right: 0; left: 48px; z-index: 1; box-sizing: border-box; display: grid; align-content: start; gap: 2px; overflow: hidden; border-radius: var(--radius-l); padding: 6px 10px; background: var(--botanical); color: var(--ink-inverse); text-decoration: none; }

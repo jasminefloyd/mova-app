@@ -415,3 +415,23 @@ Applied migration 0096 individually through the Supabase Management API (product
 ## 2026-11-14 QA Run 2 follow-up
 
 Fixed the issues found when re-testing 9cb554a: the booking request screen now shows the decline confirmation sheet (Decline previously did nothing there); the public profile shows the bio on both tabs, so stylists without looks keep their bio; fully booked days are listed again as disabled "Full" days in the booking day picker, and the no-times state still appears when no day has openings; the new-location rules tests now enter owner hours explicitly and assert that defaults start empty. Unit tests (360) and the web build pass. Calendar redesign boards C0–C6 are on the design canvas; the calendar layout itself is not changed in code yet.
+
+## 2026-11-21 dedicated database migration planning
+
+Documented the proposed [Mova extraction scope](../database-migration-scope.md) and [dedicated destination](../database-migration-destination.md) against repository revision `875aed0`. Source catalog, Auth ownership, Storage object counts, live integration settings and destination decisions remain open. Planning used repository evidence and provider documentation. No environment was provisioned and no production system was accessed or changed.
+
+Reviewed the documents against the repository and clarified row ownership rules, Auth audit separation, database settings, key compatibility, source write fencing and cutover acceptance. Live verification remains open.
+
+## 2026-11-21 production checklist items 2, 12 and 13
+
+Item 2 is verified. Production `notification-dispatch` v13, `running-late-send` v14 and `public-artist` v22 match the deployed source, with gateway JWT verification off. Item 12 is verified. The live default Stripe Billing Portal lists the active Pro and AI + Growth price options when fetched with expanded products. No charge or subscription action was performed.
+
+Item 13 is partially live. Production platform switches for Concierge, seat filler and autopilot are off, the remaining stylist automation settings are disabled, and the public artist function suppresses public ratings unless explicitly enabled. Private review workflows retain their existing gate. Commit `56ec1a1` gates the associated web entry points and promotional surfaces. Local build, 15 focused unit tests, four static checks, and built pricing, features and deep-link smoke checks passed. Full typecheck and unit/Edge suites encountered existing failures outside the release files. Targeted Deno checks passed. Local DB tests could not start without PostgreSQL tooling. Automatic approval review rejected pushing `56ec1a1` to `main` because a push triggers a production deployment and required explicit release approval. The production web deploy and live UI verification remain pending.
+
+## 2026-11-22 local product QA
+
+Executed browser and local-service checks against the November 22 key flows workbook and CSVs using a disposable native PostgreSQL/Auth/PostgREST/Deno stack. The 103 product rows concluded with 31 pass, four fail, 63 blocked and five password-flow checks inapplicable to the current OTP flow. Workbook technical checks passed. The independent mock-backed Playwright suite had 96 pass and 16 fail. Type checking, build, 382 Vitest tests, four static Node checks, 1,206 pgTAP assertions, 73 Edge checks, 21 Deno tests and four visual tests passed.
+
+Local fixes cover persona sign-in navigation, guest continuation, calendar positioning, booking availability buffers, preserving pending booking requests on Home, review reply editing, and the Auth log SQL projection. Onboarding step order, the missing upcoming guest booking after OTP, and claimed history and same-service rebooking remain open. Cash, Other and salon-collected payments persisted locally with zero platform fees. Stripe subscription and appointment card paths remain blocked on sandbox access. See the [QA report](../../qa-artifacts/qa-report.md) and [individual outcomes](../../qa-artifacts/test-results.md). No production action was taken during this QA run.
+
+The product owner explicitly authorized committing the working tree, pushing to GitHub and deploying the web application to Vercel production. The local QA results above remain the record of test coverage and open defects. This authorization covers the Vercel web deployment.

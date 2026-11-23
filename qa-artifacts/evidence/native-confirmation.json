@@ -1,0 +1,837 @@
+{
+  "BKG-04": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.click: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for locator('.mova-booking__day:not(:disabled)').nth(1)\u001b[22m ",
+    [
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 404,
+        "code": "SERVICE_NOT_BOOKABLE"
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 404,
+        "code": "SERVICE_NOT_BOOKABLE"
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 404,
+        "code": "SERVICE_NOT_BOOKABLE"
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 404,
+        "code": "SERVICE_NOT_BOOKABLE"
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 404,
+        "code": "SERVICE_NOT_BOOKABLE"
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 404,
+        "code": "SERVICE_NOT_BOOKABLE"
+      }
+    ]
+  ],
+  "CAL-08": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. /functions/v1/availability-search returned 404 SERVICE_NOT_BOOKABLE",
+    []
+  ],
+  "CAL-13": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. /functions/v1/availability-search returned 404 SERVICE_NOT_BOOKABLE",
+    []
+  ],
+  "CAL-14": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. /functions/v1/availability-search returned 404 SERVICE_NOT_BOOKABLE",
+    []
+  ],
+  "SET-17": [
+    "PASS",
+    "Cash and Other settings were checked and the real configuration and appointment checkout displayed both methods.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/stripe-connect-onboard",
+        "method": "POST",
+        "status": 503,
+        "code": "STRIPE_TEST_MODE_DISABLED"
+      },
+      {
+        "path": "/functions/v1/stripe-connect-onboard",
+        "method": "POST",
+        "status": 503,
+        "code": "STRIPE_TEST_MODE_DISABLED"
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/stripe-connect-onboard",
+        "method": "POST",
+        "status": 503,
+        "code": "STRIPE_TEST_MODE_DISABLED"
+      },
+      {
+        "path": "/functions/v1/payment-settings",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/payment-settings",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/payment-settings",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_payment_method_settings",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_stripe_connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "MKT-02": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.waitFor: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByRole('button', { name: /^Continue$/i }).first() to be visible\u001b[22m ",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "MKT-03": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.waitFor: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByRole('button', { name: /^Continue$/i }).first() to be visible\u001b[22m ",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "MKT-04": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.click: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByRole('button', { name: /Edit draft/i }).first().first()\u001b[22m ",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "MKT-05": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.click: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByRole('button', { name: /^Cancel$/i }).first().first()\u001b[22m ",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "MKT-07": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.waitFor: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByRole('button', { name: /^Continue$/i }).first() to be visible\u001b[22m ",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/marketing-campaign",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "AI-01": [
+    "BLOCKED",
+    "Growth and the real forecast rendered. Confirmed the requested destinations are linked. Each linked action and mature-data forecast were not independently checked in this case.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/revenue-center",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/forecast-summary",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "AI-02": [
+    "BLOCKED",
+    "Opened the real pipeline and exercised Refresh. Confidence presentation on a representative due-client cohort was not established.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/revenue-center",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/forecast-summary",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/revenue-center",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/forecast-summary",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/revenue-center",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "AI-08": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.waitFor: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByText(/Appointments booked/i).first() to be visible\u001b[22m ",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/concierge-artist",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "ONB-17": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. /functions/v1/availability-search returned 404 SERVICE_NOT_BOOKABLE",
+    []
+  ],
+  "ONB-19": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. /functions/v1/availability-search returned 404 SERVICE_NOT_BOOKABLE",
+    []
+  ],
+  "ONB-20": [
+    "BLOCKED",
+    "Issued a local card token via SQL fixture and verified identity, no-upcoming state and guest booking at mobile and desktop widths. An upcoming-visit card was not tested.",
+    [
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-15": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. /functions/v1/availability-search returned 404 SERVICE_NOT_BOOKABLE",
+    []
+  ]
+}

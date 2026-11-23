@@ -1,0 +1,23 @@
+{
+  "early": {
+    "top": "0px",
+    "offsetTop": 0,
+    "offsetLeft": 48,
+    "offsetHeight": 72,
+    "timelineHeight": 648
+  },
+  "late": {
+    "top": "648px",
+    "offsetTop": 648,
+    "offsetLeft": 48,
+    "offsetHeight": 72,
+    "timelineHeight": 648
+  },
+  "overlap": {
+    "top": "0px",
+    "offsetTop": 0,
+    "offsetLeft": 48,
+    "offsetHeight": 72,
+    "timelineHeight": 648
+  }
+}

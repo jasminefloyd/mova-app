@@ -1,0 +1,34 @@
+
+> mova-app@0.0.0 test [workspace home]/Desktop/Vibes/Projects/mova-app
+> corepack pnpm --filter @mova/contracts build && vitest run --config apps/web/vitest.config.ts && node --test scripts/check-direct-reads.test.mjs scripts/check-public-locale-contrast.test.mjs
+
+
+> @mova/contracts@0.0.0 build [workspace home]/Desktop/Vibes/Projects/mova-app/packages/contracts
+> tsc -p tsconfig.json
+
+
+ RUN  v5.1.0 [workspace home]/Desktop/Vibes/Projects/mova-app
+
+Not implemented: navigation to another Document
+
+ Test Files  72 passed (72)
+      Tests  382 passed (382)
+   Start at  19:14:13
+   Duration  4.54s (environment 83%, import 7%, transform 5%, tests 4%, worker 1%)
+
+Environment  jsdom was created 72 times · 33.61s total, 83% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+✔ TC-STATIC-GRANTS-01 rejects the former Home quote and slot direct reads (5.544167ms)
+✔ TC-STATIC-GRANTS-01 accepts authenticated table grants and excludes Storage buckets (3.157958ms)
+✔ TC-STATIC-GRANTS-01 respects later authenticated SELECT revokes (2.015ms)
+✔ TC-F13-V1-04 public language toggle labels meet WCAG AA in both states (2.818958ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 55.653625

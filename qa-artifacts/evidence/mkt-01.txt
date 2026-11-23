@@ -1,0 +1,31 @@
+Path: /BID-1/growth/marketing
+
+Choose channels
+
+Where your messages go. Set up once, reuse every time.
+
+✉
+Email
+Sends from your name
+Paused
+◎
+Instagram & Facebook
+Post to your page
+Paused
+🔔
+Web push
+Clients who allow alerts
+Paused
+▣
+Wallet
+Pass updates for clients
+AI + Growth
+Email setup
+Sender name
+Rooted Beauty
+Reply-to
+Not set
+Postal address
+Needs verification
+
+Every email includes an unsubscribe link. Clients who opt out are never contacted again.

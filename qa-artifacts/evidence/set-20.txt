@@ -1,0 +1,25 @@
+Path: /BID-1/settings/plan
+
+Your plan
+Your plan
+Free
+
+$0
+/month + 1.5% per Mova payment
+
+Choose Free
+Pro
+
+$19
+/month + 1.0% per Mova payment
+
+Choose Pro
+AI + Growth
+Current plan
+
+$39
+/month + 0.75% per Mova payment
+
+Plan changes open when billing is set up.
+
+Percent fees apply only to payments Mova processes. Stripe processing is extra. No Mova fee on cash, other recorded payments, or salon-collected payments.

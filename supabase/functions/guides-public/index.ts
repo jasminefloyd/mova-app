@@ -22,7 +22,9 @@ function respond(data: unknown, status = 200, extraHeaders: Record<string, strin
 
 const cacheHeaders = { 'Cache-Control': 'public, max-age=60, s-maxage=300' };
 
-async function countGuides(supabase: ReturnType<typeof createClient>, category: string | null, search: string, nowIso: string) {
+const guideClient = (url: string, key: string) => createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+
+async function countGuides(supabase: ReturnType<typeof guideClient>, category: string | null, search: string, nowIso: string) {
   let query = supabase.from(TABLE).select('slug', { count: 'exact', head: true })
     .eq('status', 'published').lte('published_at', nowIso);
   if (category) query = query.eq('category', category);
@@ -41,7 +43,7 @@ Deno.serve(withSystemRequestLogging('guides-public', async (request) => {
   const url = Deno.env.get('SUPABASE_URL');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!url || !serviceKey) return respond({ code: 'SERVER_CONFIGURATION_MISSING' }, 500);
-  const supabase = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  const supabase = guideClient(url, serviceKey);
   const now = new Date();
   const nowIso = now.toISOString();
 

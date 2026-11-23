@@ -36,6 +36,11 @@ create table if not exists auth.users (
   updated_at timestamptz default now(),
   deleted_at timestamptz
 );
+create table if not exists auth.audit_log_entries (
+  id uuid primary key default gen_random_uuid(),
+  payload json,
+  created_at timestamptz default now()
+);
 -- Same lookup order as Supabase: legacy per-claim setting first, then the claims JSON.
 create or replace function auth.jwt() returns jsonb language sql stable as $$
   select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb $$;

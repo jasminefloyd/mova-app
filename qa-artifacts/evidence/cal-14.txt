@@ -1,0 +1,53 @@
+Path: /BID-1/money
+
+Month
+November 2026
+Money
+Service value
+$6,140.00
+Processed by Mova
+Stripe deposits and payments
+$0.00
+Recorded by you
+Cash and other recorded payments · not verified by Mova
+$480.00
+Collected by salons
+Tracked only · no Mova fee
+$320.00
+Service value by payment collection method
+Processed by Mova	$0.00
+Recorded by you	$480.00
+Collected by salons	$320.00
+Mova platform fee · 1.5%
+$0.00
+Stripe processing
+$0.00
+Refunds
+$0.00
+Estimated money to you
+$480.00
+
+An estimate, not a payout statement. Leaves out what salons pay you under your agreement, and taxes.
+
+Recent activity
+Salon payment · QA Salon-final-loopback
+Nov 22 · Cash
+$120.00
+Recorded payment · QA Other-final-loopback
+Nov 22 · Other
+$120.00
+Recorded payment · QA Cash-final-loopback
+Nov 22 · Cash
+$120.00
+Salon payment · QA Salon-isolated
+Nov 22 · Cash
+$120.00
+Recorded payment · QA Cash-isolated
+Nov 22 · Cash
+$120.00
+Recorded payment · Demo Guest 02
+Nov 22 · Cash
+$120.00
+Salon payment · Demo Guest 04
+Nov 22 · Salon
+$80.00

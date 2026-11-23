@@ -101,9 +101,10 @@ Deno.serve(withSystemRequestLogging('marketing-campaign', async (request) => {
   }
 
   if (body.action === 'preview') {
-    if (!validChannel(body.channel)) return respond({ code: 'INVALID_CHANNEL' }, 422);
-    if (!await planFeatureEnabled(actor.businessId, channelSpec[body.channel].feature)) return respond({ code: 'CHANNEL_NOT_IN_PLAN' }, 403);
-    const platform = await platformSwitchEnabled(channelSpec[body.channel].platform);
+    const channel: unknown = body.channel;
+    if (!validChannel(channel)) return respond({ code: 'INVALID_CHANNEL' }, 422);
+    if (!await planFeatureEnabled(actor.businessId, channelSpec[channel].feature)) return respond({ code: 'CHANNEL_NOT_IN_PLAN' }, 403);
+    const platform = await platformSwitchEnabled(channelSpec[channel].platform);
     if (body.channel === 'social') return respond({ channel: body.channel, eligible: null, audience: 'Public followers', ready: false, reason: 'SOCIAL_CONNECTION_NOT_CONFIGURED' });
     if (body.channel === 'wallet') return respond({ channel: body.channel, eligible: null, audience: 'Clients with an eligible saved pass', ready: false, reason: 'WALLET_PROVIDER_NOT_CONFIGURED' });
     const purpose = ['rebook', 'rebooking_reminder'].includes(String(body.goal)) ? 'rebooking_reminders' : 'offers';
@@ -115,7 +116,7 @@ Deno.serve(withSystemRequestLogging('marketing-campaign', async (request) => {
     if (linksError) return respond({ code: 'AUDIENCE_PREVIEW_FAILED' }, 500);
     const linkedAccounts = [...new Set((links ?? []).map((link) => link.customer_account_id))];
     const { data: clientOverrides, error: overridesError } = linkedAccounts.length ? await db.from('mova_client_feature_overrides').select('customer_account_id')
-      .eq('artist_business_id', actor.businessId).eq('feature_key', channelSpec[body.channel].feature).eq('enabled', false).in('customer_account_id', linkedAccounts) : { data: [], error: null };
+      .eq('artist_business_id', actor.businessId).eq('feature_key', channelSpec[channel].feature).eq('enabled', false).in('customer_account_id', linkedAccounts) : { data: [], error: null };
     if (overridesError) return respond({ code: 'AUDIENCE_PREVIEW_FAILED' }, 500);
     const disabledAccounts = new Set((clientOverrides ?? []).map((override) => override.customer_account_id));
     const disabledClientIds = new Set((links ?? []).filter((link) => disabledAccounts.has(link.customer_account_id)).map((link) => link.client_id));

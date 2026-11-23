@@ -1,0 +1,257 @@
+{
+  "ONB-19": [
+    "PASS",
+    "Claimed the verified guest booking from the browser, observed the linked visit, and confirmed a different user could not see it and the unrelated booking stayed unlinked.",
+    [
+      {
+        "path": "/auth/v1/otp",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/auth/v1/verify",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-token",
+        "method": "POST",
+        "status": 403,
+        "code": "PLAN_FEATURE_NOT_INCLUDED"
+      },
+      {
+        "path": "/auth/v1/otp",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/auth/v1/verify",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-18": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. The expression evaluated to a falsy value: assert(new URL(page.url()).search.includes(seed.service)) ",
+    [
+      {
+        "path": "/auth/v1/otp",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/auth/v1/verify",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/customer-profile",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-token",
+        "method": "POST",
+        "status": 403,
+        "code": "PLAN_FEATURE_NOT_INCLUDED"
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-03": [
+    "PASS",
+    "Booked both services and verified the visible $150 quote, persisted $150 total, both service line items and the 135-minute reservation.",
+    [
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/availability-search",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-create",
+        "method": "POST",
+        "status": 201
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-status",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/booking-status",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ]
+}

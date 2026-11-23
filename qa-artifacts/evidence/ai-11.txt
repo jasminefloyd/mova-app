@@ -1,0 +1,82 @@
+Path: /BID-1/growth/price-pilot
+
+PricePilot
+
+PRICEPILOT · EARLY ACCESS
+
+Enabled
+Know where your prices sit.
+
+Compare your service prices with verified menus and see the evidence behind each comparison. Your prices stay yours to change.
+
+YOUR SERVICES
+
+Choose a service
+Location
+QA Suite-setup
+Rooted Beauty Salon
+Rooted Beauty Studio
+Service
+Hydration Treatment
+Protective Style Consultation
+QA Closed Service booking
+Silk Press
+Hydration Treatment
+$80.00
+
+Treatment · 60 min · QA Suite-setup
+
+REVIEW YOUR PRICES
+
+Services with useful market evidence
+Only show prices below the observed middle range
+
+This is a comparison signal, not a pricing instruction. Each service uses the price and duration set for the selected location. Only menus with a matching published postal code and state or region count as local evidence.
+
+Hydration Treatment
+$80.00 · More verified menus needed
+Selected
+Protective Style Consultation
+$25.00 · More verified menus needed
+Review
+QA Closed Service booking
+$120.00 · More verified menus needed
+Review
+Silk Press
+$120.00 · More verified menus needed
+Review
+
+LOCAL-MARKET MENU EVIDENCE
+
+What similar services charge
+Comparison needs more evidence
+Not enough verified menus to compare yet.
+
+We need at least five recent menus with a matching service category, duration, postal code and state or region before showing local-market evidence.
+
+EVIDENCE SOURCES
+
+Add a menu
+
+PricePilot couldn’t complete that action. Try again. Reference: 5e1127aa-1120-4673-8416-c4d9fadfe1ed
+
+Comparison settings
+Check your own menu
+
+Add your website on your profile to check your menu. Only pages on your own website can be checked.
+
+Find local businesses
+
+We search public listings for businesses near you. Results are candidates only: a menu's price and its postal code must be verified before any comparison.
+
+City or ZIP code
+Find businesses
+
+THE APPROACH
+
+A recommendation needs evidence
+Match service category, duration, currency, freshness, postal code and state or region before comparing prices.
+Show the source, last checked date, number of comparable menus and confidence with every result.
+If evidence is thin, outdated or mismatched, show that clearly and hold the recommendation.
+
+Mova won’t change your service prices automatically. You review a suggestion and decide what to do.

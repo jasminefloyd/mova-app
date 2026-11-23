@@ -1,0 +1,24 @@
+Path: /BID-1/growth/templates
+
+Approved messages
+Approved messages
+Rebooking reminder
+English
+Needs approval
+Save template
+Spanish (optional)
+Open slot offer
+English
+Needs approval
+Save template
+Spanish (optional)
+Slot filled
+English
+Needs approval
+Save template
+Spanish (optional)
+Win-back message
+English
+Needs approval
+Save template
+Spanish (optional)

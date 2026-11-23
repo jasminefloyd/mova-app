@@ -1,0 +1,175 @@
+{
+  "ONB-01": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.waitFor: Timeout 4200ms exceeded.",
+    []
+  ],
+  "ONB-02": [
+    "NOT APPLICABLE",
+    "Password-specific validation is retired. The browser prevented empty name/email submission.",
+    []
+  ],
+  "ONB-03": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.waitFor: Timeout 4200ms exceeded.",
+    []
+  ],
+  "ONB-04": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. page.waitForResponse: Timeout 4200ms exceeded while waiting for event \"response\"",
+    []
+  ],
+  "ONB-05": [
+    "NOT APPLICABLE",
+    "The retired reset route redirects to passwordless sign-in.",
+    []
+  ],
+  "ONB-14": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. page.waitForURL: Timeout 4200ms exceeded.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 401
+      }
+    ]
+  ],
+  "ONB-16": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.click: Timeout 4200ms exceeded.",
+    []
+  ],
+  "ONB-18": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.click: Timeout 4200ms exceeded.",
+    []
+  ],
+  "ONB-21": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.waitFor: Timeout 4200ms exceeded.",
+    [
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 404
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 404
+      }
+    ]
+  ],
+  "ONB-22": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.click: Timeout 4200ms exceeded.",
+    [
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/scan-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/scan-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-01": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.click: Timeout 4200ms exceeded.",
+    [
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "SET-20": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.waitFor: Timeout 4200ms exceeded.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 401
+      }
+    ]
+  ],
+  "SET-16": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.waitFor: Timeout 4200ms exceeded.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 401
+      }
+    ]
+  ],
+  "CAL-18": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.waitFor: Timeout 4200ms exceeded.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 401
+      }
+    ]
+  ],
+  "SET-14": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.waitFor: Timeout 4200ms exceeded.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 401
+      }
+    ]
+  ]
+}

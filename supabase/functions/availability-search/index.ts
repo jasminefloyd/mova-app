@@ -30,15 +30,18 @@ Deno.serve(withSystemRequestLogging('availability-search', async(request)=>{
   const {data:depositsEnabled,error:depositFlagError}=await db.rpc('mova_deposit_bookings_enabled');
   if(depositFlagError)return respond({code:'AVAILABILITY_UNAVAILABLE'},503);
   const endDate=plusDays(input.from_date,input.days-1);
+  // Cover overnight hours, time zones, and buffered appointments around the local dates.
+  const appointmentStart=plusDays(input.from_date,-3);
+  const appointmentEnd=plusDays(endDate,5);
   const groups=await Promise.all((locations as Row[]).map(async(location)=>{
     if(depositsEnabled!==true&&requiresCardDeposit(location.payment_collector,services as ServiceRule[]))return {location_id:location.id,location_name:location.name,booking_mode:location.booking_mode,unavailable_reason:'requires_card_deposit',slots:[] as Array<{local_date:string}>};
     const [hours,policies,exceptions,appointments,holds,blocks,override]=await Promise.all([
       db.from('mova_location_hours').select('weekday,opens_at,closes_at').eq('location_id',location.id),
       db.from('mova_location_policies').select('*').eq('location_id',location.id).maybeSingle(),
       db.from('mova_location_exceptions').select('exception_date,is_closed,hours').eq('location_id',location.id).gte('exception_date',input.from_date).lte('exception_date',endDate),
-      db.from('mova_appointments').select('starts_at,ends_at').eq('location_id',location.id).in('status',['pending_payment','pending_artist','confirmed','completed']).lt('starts_at',`${endDate}T23:59:59.999Z`).gt('ends_at',`${input.from_date}T00:00:00.000Z`),
+      db.from('mova_appointments').select('starts_at,ends_at,buffer_before_minutes,buffer_after_minutes').eq('location_id',location.id).in('status',['pending_payment','pending_artist','confirmed','completed']).lt('starts_at',`${appointmentEnd}T00:00:00.000Z`).gt('ends_at',`${appointmentStart}T00:00:00.000Z`),
       db.from('mova_booking_holds').select('starts_at,ends_at').eq('location_id',location.id).eq('status','active').gt('expires_at',new Date().toISOString()),
-      db.from('mova_availability_blocks').select('starts_at,ends_at').eq('location_id',location.id).lt('starts_at',`${endDate}T23:59:59.999Z`).gt('ends_at',`${input.from_date}T00:00:00.000Z`),
+      db.from('mova_availability_blocks').select('starts_at,ends_at').eq('location_id',location.id).lt('starts_at',`${appointmentEnd}T00:00:00.000Z`).gt('ends_at',`${appointmentStart}T00:00:00.000Z`),
       db.from('mova_service_locations').select('service_id,price_minor_override,duration_minutes_override').in('service_id',serviceIds).eq('location_id',location.id),
     ]);
     if([hours,policies,exceptions,appointments,holds,blocks,override].some((result)=>result.error))throw new Error('AVAILABILITY_QUERY_FAILED');
@@ -46,7 +49,7 @@ Deno.serve(withSystemRequestLogging('availability-search', async(request)=>{
     if((services as Array<{id:string;location_assignment_mode:string}>).some((service)=>service.location_assignment_mode==='selected'&&!assignedServiceIds.has(service.id)))return {location_id:location.id,location_name:location.name,booking_mode:location.booking_mode,unavailable_reason:'service_not_offered',slots:[] as Array<{local_date:string}>};
     const exceptionHours=Object.fromEntries((exceptions.data??[]).map((row)=>[row.exception_date,row.is_closed?null:(row.hours as Array<{opens_at:string;closes_at:string}>).map((item)=>({opensAt:item.opens_at,closesAt:item.closes_at}))]));
     const totalDuration=combinedDurationMinutes(serviceIds as string[],services as ServiceRule[],(override.data??[]) as Array<{service_id:string;duration_minutes_override:number|null}>);
-    const slots=searchAvailability({location:{id:location.id,timeZone:location.time_zone,bookingMode:location.booking_mode,active:location.is_active,leadMinutes:policies.data?.lead_time_minutes??60,horizonDays:policies.data?.booking_horizon_days??60,bufferBeforeMinutes:policies.data?.buffer_before_minutes??0,bufferAfterMinutes:policies.data?.buffer_after_minutes??0},service:{active:true,durationMinutes:totalDuration,bufferMinutes:0},hours:(hours.data??[]).map((row)=>({weekday:row.weekday,opensAt:row.opens_at,closesAt:row.closes_at})),exceptions:exceptionHours,busy:(appointments.data??[]).map((row)=>({startsAt:row.starts_at,endsAt:row.ends_at})),holds:(holds.data??[]).map((row)=>({startsAt:row.starts_at,endsAt:row.ends_at})),blocked:(blocks.data??[]).map((row)=>({startsAt:row.starts_at,endsAt:row.ends_at})),now:new Date().toISOString(),fromDate:input.from_date,days:input.days});
+    const slots=searchAvailability({location:{id:location.id,timeZone:location.time_zone,bookingMode:location.booking_mode,active:location.is_active,leadMinutes:policies.data?.lead_time_minutes??60,horizonDays:policies.data?.booking_horizon_days??60,bufferBeforeMinutes:policies.data?.buffer_before_minutes??0,bufferAfterMinutes:policies.data?.buffer_after_minutes??0},service:{active:true,durationMinutes:totalDuration,bufferMinutes:0},hours:(hours.data??[]).map((row)=>({weekday:row.weekday,opensAt:row.opens_at,closesAt:row.closes_at})),exceptions:exceptionHours,busy:(appointments.data??[]).map((row)=>({startsAt:row.starts_at,endsAt:row.ends_at,bufferBeforeMinutes:row.buffer_before_minutes,bufferAfterMinutes:row.buffer_after_minutes})),holds:(holds.data??[]).map((row)=>({startsAt:row.starts_at,endsAt:row.ends_at})),blocked:(blocks.data??[]).map((row)=>({startsAt:row.starts_at,endsAt:row.ends_at})),now:new Date().toISOString(),fromDate:input.from_date,days:input.days});
     return {location_id:location.id,location_name:location.name,booking_mode:location.booking_mode,slots:slots.map((slot)=>({starts_at:slot.startsAt,ends_at:slot.endsAt,local_date:slot.localDate,local_time:slot.localTime,time_zone:slot.timeZone,utc_offset:slot.utcOffset,booking_mode:slot.bookingMode}))};
   })).catch(()=>null);
   if(!groups)return respond({code:'AVAILABILITY_UNAVAILABLE'},503);

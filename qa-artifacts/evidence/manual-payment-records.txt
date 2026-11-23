@@ -1,0 +1,5 @@
+appointment|method|collector|status|amount_minor|platform_fee_minor|balance_due_minor|method_label
+AID-65|cash|artist|succeeded|12000|0|0|
+AID-66|other|artist|succeeded|12000|0|0|QA Transfer
+AID-67|cash|salon|succeeded|12000|0|0|
+(3 rows)

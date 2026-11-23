@@ -1,0 +1,19 @@
+  16 failed
+    tests/e2e/admin-signin.spec.ts:12:7 › admin sign-in gate › refuses a signed-in account that is not on the admin roster
+    tests/e2e/admin-signin.spec.ts:25:7 › admin sign-in gate › lets a platform admin through after the authenticator code
+    tests/e2e/onboarding-flow.spec.ts:16:5 › new stylist completes onboarding: profile, photo, where you work, what you offer, how you get paid, welcome
+    tests/e2e/profile-settings.spec.ts:23:5 › TC-PROFILE-16C-01 edits each field and saves once something changes
+    tests/e2e/profile-settings.spec.ts:60:9 › TC-PROFILE-16C-03 HANDLE_RESERVED shows an error in en-US
+    tests/e2e/profile-settings.spec.ts:60:9 › TC-PROFILE-16C-03 HANDLE_RESERVED shows an error in es-US
+    tests/e2e/profile-settings.spec.ts:60:9 › TC-PROFILE-16C-03 HANDLE_TAKEN shows an error in en-US
+    tests/e2e/profile-settings.spec.ts:60:9 › TC-PROFILE-16C-03 HANDLE_TAKEN shows an error in es-US
+    tests/e2e/scheduling-screens.spec.ts:112:5 › TC-SCR-08C-02 New appointment says when the time is taken and does not book it
+    tests/e2e/scheduling-screens.spec.ts:152:5 › TC-SCR-19A-01 New location needs a type of place, then saves with the board defaults
+    tests/e2e/stylist-auth.spec.ts:77:7 › stylist sign-up (/signup) › asks for first name, last name and email, then emails a secure link (no password)
+    tests/e2e/stylist-auth.spec.ts:130:7 › stylist sign-in (/login) › emails a sign-in link without creating an account
+    tests/e2e/stylist-auth.spec.ts:140:7 › stylist sign-in (/login) › an email with no account gets the same answer, so the page never reveals who has an account
+    tests/e2e/stylist-auth.spec.ts:148:7 › stylist sign-in (/login) › a failed request shows the sign-in error and stays on /login
+    tests/e2e/stylist-auth.spec.ts:190:7 › email link landing (/auth/confirm) › an expired link explains itself and offers a new one
+    tests/e2e/website.spec.ts:135:7 › guides › article renders blocks, SEO tags and related guides, and drops unsafe links
+  96 passed (41.3s)
+ ELIFECYCLE  Command failed with exit code 1.

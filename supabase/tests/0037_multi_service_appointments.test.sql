@@ -23,7 +23,10 @@ values
 insert into public.mova_service_locations(artist_business_id,service_id,location_id,price_minor_override,duration_minutes_override)
 values
  ('e3700000-0000-4000-8000-000000000001','e3700000-0000-4000-8000-000000000201','e3700000-0000-4000-8000-000000000101',14000,90),
- ('e3700000-0000-4000-8000-000000000001','e3700000-0000-4000-8000-000000000202','e3700000-0000-4000-8000-000000000101',9000,50);
+ ('e3700000-0000-4000-8000-000000000001','e3700000-0000-4000-8000-000000000202','e3700000-0000-4000-8000-000000000101',9000,50)
+on conflict (service_id, location_id) do update set
+  price_minor_override = excluded.price_minor_override,
+  duration_minutes_override = excluded.duration_minutes_override;
 
 select set_config('mova.allow_deposit_bookings','on',true);
 create temporary table e1_test_booking as

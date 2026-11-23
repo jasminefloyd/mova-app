@@ -1,0 +1,32 @@
+Path: /BID-1/settings/notifications
+
+Language & notifications
+APP LANGUAGE
+English
+Español
+
+Menus and Mova emails to you. Your client messages keep each client’s language.
+
+NOTIFICATIONS
+Notifications are blocked
+Allow notifications for Mova in your browser settings, then come back.
+Send me
+Email
+Push
+New booking request
+When a client asks to book
+Cancellation
+When a client cancels
+Client message
+Texts and chats from clients
+Appointment reminder
+1 hour before each appointment
+New review
+When a client leaves a review
+EMAILS TO YOUR CLIENTS
+Sent from
+[redacted]
+Replies go to
+Save
+
+This is the email you signed up with. Change it if you’d like replies somewhere else.

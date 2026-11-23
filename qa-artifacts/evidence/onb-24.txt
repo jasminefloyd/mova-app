@@ -1,0 +1,17 @@
+Path: /me
+
+mova
+My profile
+My stylists
+Your stylists will show up here
+Edit details · Download my data · Sign out · Delete profile
+Delete your profile?
+
+This permanently deletes your Mova profile and removes its links to stylist records. Your stylists' client and appointment records remain in their accounts. You will need to create a new profile to use Mova again.
+
+Enter the six-digit code sent to your verified contact.
+
+Enter your 6-digit code
+Delete profile
+Send another code
+Cancel

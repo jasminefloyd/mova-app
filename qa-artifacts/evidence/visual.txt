@@ -1,0 +1,296 @@
+
+> mova-app@0.0.0 test:visual [workspace home]/Desktop/Vibes/Projects/mova-app
+> node scripts/run-e2e.mjs -- --config playwright.visual.config.ts
+
+
+> mova-app@0.0.0 build [workspace home]/Desktop/Vibes/Projects/mova-app
+> corepack pnpm check-locales && corepack pnpm --filter @mova/contracts build && corepack pnpm --filter @mova/web build
+
+
+> mova-app@0.0.0 check-locales [workspace home]/Desktop/Vibes/Projects/mova-app
+> node scripts/check-locales.mjs
+
+Locale validation passed: en-US and es-US have matching keys, all literal translation calls resolve, and 6 critical strings exist.
+
+> @mova/contracts@0.0.0 build [workspace home]/Desktop/Vibes/Projects/mova-app/packages/contracts
+> tsc -p tsconfig.json
+
+
+> @mova/web@0.0.0 build [workspace home]/Desktop/Vibes/Projects/mova-app/apps/web
+> react-router build
+
+The `envFile` option is deprecated, please use `envDir: false` instead.
+The `envFile` option is deprecated, please use `envDir: false` instead.
+The `envFile` option is deprecated, please use `envDir: false` instead.
+The `envFile` option is deprecated, please use `envDir: false` instead.
+The `envFile` option is deprecated, please use `envDir: false` instead.
+The `envFile` option is deprecated, please use `envDir: false` instead.
+The `envFile` option is deprecated, please use `envDir: false` instead.
+vite v8.3.6 building client environment for production...
+transforming...
+✓ 552 modules transformed.
+rendering chunks...
+computing gzip size...
+build/client/manifest.webmanifest                              0.51 kB
+build/client/assets/manrope-latin-800-normal-CTuzW-HK.woff2   13.68 kB
+build/client/assets/dm-sans-latin-400-normal-COF6noiJ.woff2   14.11 kB
+build/client/assets/dm-sans-latin-600-normal-DrBIvsIy.woff2   14.14 kB
+build/client/assets/manrope-latin-600-normal-ZV4JKEZQ.woff2   14.15 kB
+build/client/assets/manrope-latin-700-normal-CvykrKJY.woff2   14.21 kB
+build/client/assets/dm-sans-latin-700-normal-1DREuLwQ.woff2   14.30 kB
+build/client/assets/dm-sans-latin-500-normal-kGSpR5A9.woff2   14.30 kB
+build/client/.vite/manifest.json                              58.00 kB │ gzip:  5.95 kB
+build/client/assets/CoverPickerPage-CEXb4olm.css               3.43 kB │ gzip:  1.05 kB
+build/client/assets/ArtistPages-k_NxdY52.css                   3.95 kB │ gzip:  1.06 kB
+build/client/assets/OnboardingShell-BZyWeDt2.css               6.09 kB │ gzip:  1.64 kB
+build/client/assets/ConciergeBoard-Baxv-TZm.css                7.07 kB │ gzip:  1.49 kB
+build/client/assets/google-BMzICaXm.css                        8.39 kB │ gzip:  1.65 kB
+build/client/assets/stylist-auth-BJOeGp3Q.css                  9.29 kB │ gzip:  2.01 kB
+build/client/assets/scheduling-UzncdCXO.css                   10.39 kB │ gzip:  2.09 kB
+build/client/assets/MarketingPage-DBiQ4MgD.css                15.16 kB │ gzip:  2.65 kB
+build/client/assets/AdminRoot-CShSSvGI.css                    24.38 kB │ gzip:  4.69 kB
+build/client/assets/WebsiteLayout-B0pMYjGw.css                28.29 kB │ gzip:  5.08 kB
+build/client/assets/components-S2QDwLx7.css                   30.47 kB │ gzip:  5.60 kB
+build/client/assets/styles-By9UgNq9.css                      178.40 kB │ gzip: 27.15 kB
+build/client/assets/booking-expiry-BvRk9kiK.js                 0.00 kB │ gzip:  0.02 kB
+build/client/assets/calendar-feed-BvRk9kiK.js                  0.00 kB │ gzip:  0.02 kB
+build/client/assets/calendar-sync-BvRk9kiK.js                  0.00 kB │ gzip:  0.02 kB
+build/client/assets/job-dispatch-BvRk9kiK.js                   0.00 kB │ gzip:  0.02 kB
+build/client/assets/paylink-redirect-BvRk9kiK.js               0.00 kB │ gzip:  0.02 kB
+build/client/assets/reports-refresh-BvRk9kiK.js                0.00 kB │ gzip:  0.02 kB
+build/client/assets/robots-BvRk9kiK.js                         0.00 kB │ gzip:  0.02 kB
+build/client/assets/sitemap-BvRk9kiK.js                        0.00 kB │ gzip:  0.02 kB
+build/client/assets/llms-CtS7KKfW.js                           0.05 kB │ gzip:  0.06 kB
+build/client/assets/LocationNewPage-BJ4FkBOq.js                0.05 kB │ gzip:  0.07 kB
+build/client/assets/PaymentSettingsPage-BayAZg86.js            0.06 kB │ gzip:  0.08 kB
+build/client/assets/ServiceSettingsRoute-BDWDD4G6.js           0.06 kB │ gzip:  0.08 kB
+build/client/assets/NotificationSettingsRoute-B8Xhe9sc.js      0.06 kB │ gzip:  0.08 kB
+build/client/assets/Settings-DbDb-vyB.js                       0.15 kB │ gzip:  0.15 kB
+build/client/assets/Growth-DsTX0MKJ.js                         0.16 kB │ gzip:  0.15 kB
+build/client/assets/Clients-CGS4wbvO.js                        0.16 kB │ gzip:  0.15 kB
+build/client/assets/ConciergeSetupRoute-BpsSzf1f.js            0.16 kB │ gzip:  0.15 kB
+build/client/assets/ClientDetailRoute-lGqizD1f.js              0.16 kB │ gzip:  0.15 kB
+build/client/assets/ClientImportRoute-BTsX5R3s.js              0.16 kB │ gzip:  0.15 kB
+build/client/assets/ConciergeInboxRoute-DOPdxBFU.js            0.16 kB │ gzip:  0.15 kB
+build/client/assets/ConciergeThreadRoute-WTwyKRkb.js           0.16 kB │ gzip:  0.15 kB
+build/client/assets/VisitNotesRoute-CI4V84qG.js                0.16 kB │ gzip:  0.15 kB
+build/client/assets/Home-uCtFM1Eo.js                           0.17 kB │ gzip:  0.16 kB
+build/client/assets/AuthRedirect-C9VJtnI8.js                   0.18 kB │ gzip:  0.17 kB
+build/client/assets/Reports-BtbB7X0S.js                        0.18 kB │ gzip:  0.16 kB
+build/client/assets/MoneyAlias-DcOagT_C.js                     0.20 kB │ gzip:  0.17 kB
+build/client/assets/ReportsAlias-Dk54j42y.js                   0.20 kB │ gzip:  0.17 kB
+build/client/assets/GrowthAlias-DtpPRw6i.js                    0.21 kB │ gzip:  0.18 kB
+build/client/assets/GrowthActivityAlias-DsFf-yLv.js            0.24 kB │ gzip:  0.21 kB
+build/client/assets/GrowthTemplatesAlias--v2omfMf.js           0.24 kB │ gzip:  0.20 kB
+build/client/assets/Components-BM9boT1h.js                     0.26 kB │ gzip:  0.22 kB
+build/client/assets/logger-CdEwYzsU.js                         0.36 kB │ gzip:  0.24 kB
+build/client/assets/ClientShell-D0VzHbRC.js                    0.36 kB │ gzip:  0.28 kB
+build/client/assets/QueryClientProvider-DfGvVMSP.js            0.37 kB │ gzip:  0.27 kB
+build/client/assets/RouteTrail-CjrkvRTv.js                     0.38 kB │ gzip:  0.26 kB
+build/client/assets/operator-url-DblBzNnB.js                   0.39 kB │ gzip:  0.26 kB
+build/client/assets/StylistAuthShell-DvE_U21N.js               0.40 kB │ gzip:  0.31 kB
+build/client/assets/guide-format-ChRQSpbd.js                   0.45 kB │ gzip:  0.32 kB
+build/client/assets/ErrorFallback-DvkxOeFH.js                  0.49 kB │ gzip:  0.31 kB
+build/client/assets/display-ids-SVwq51BR.js                    0.52 kB │ gzip:  0.27 kB
+build/client/assets/device-lMs8tJsq.js                         0.52 kB │ gzip:  0.28 kB
+build/client/assets/AdminRoot-hR0jV3Yp.js                      0.54 kB │ gzip:  0.37 kB
+build/client/assets/offline-data-DLNuOsUL.js                   0.60 kB │ gzip:  0.35 kB
+build/client/assets/PublicShell-BisNH9Tw.js                    0.61 kB │ gzip:  0.41 kB
+build/client/assets/PublicLocaleToggle-CQyCErIv.js             0.73 kB │ gzip:  0.47 kB
+build/client/assets/track-DwDXKGh0.js                          0.75 kB │ gzip:  0.49 kB
+build/client/assets/LocaleSwitcher-ClscDst4.js                 0.80 kB │ gzip:  0.46 kB
+build/client/assets/admin-session-DnLhO9w_.js                  0.90 kB │ gzip:  0.52 kB
+build/client/assets/OperatorAlias-CsABtdFx.js                  0.91 kB │ gzip:  0.53 kB
+build/client/assets/googleApi-Cj4kGjo5.js                      0.95 kB │ gzip:  0.54 kB
+build/client/assets/LocaleProvider-Ds3XEWJH.js                 1.02 kB │ gzip:  0.56 kB
+build/client/assets/PwaInstallProvider-DSpS3wrT.js             1.08 kB │ gzip:  0.55 kB
+build/client/assets/virtual_pwa-register-BuJe9x9V.js           1.13 kB │ gzip:  0.60 kB
+build/client/assets/env-DSZpt_3u.js                            1.20 kB │ gzip:  0.53 kB
+build/client/assets/parts-C0SgRw79.js                          1.25 kB │ gzip:  0.68 kB
+build/client/assets/useArtistBusiness-BPKCWbdh.js              1.26 kB │ gzip:  0.58 kB
+build/client/assets/stylist-workspace-Bk1NbLJ6.js              1.70 kB │ gzip:  0.82 kB
+build/client/assets/api-DOngcQej.js                            1.83 kB │ gzip:  0.85 kB
+build/client/assets/OfflineBanner-CJdnMq-b.js                  1.95 kB │ gzip:  0.94 kB
+build/client/assets/GoogleConnectPage-CfFL-GU4.js              2.20 kB │ gzip:  0.97 kB
+build/client/assets/usePushDevice-DU1FgLqS.js                  2.35 kB │ gzip:  1.16 kB
+build/client/assets/NotificationInboxRoute-BwZCg-Xi.js         2.36 kB │ gzip:  1.17 kB
+build/client/assets/ClientCardLandingPage-sU3cYlHe.js          2.74 kB │ gzip:  1.19 kB
+build/client/assets/CalendarAddPage-D8p9Gop6.js                2.82 kB │ gzip:  1.06 kB
+build/client/assets/PrivacyPage-D9CLa-2R.js                    2.83 kB │ gzip:  1.13 kB
+build/client/assets/AuthConfirmPage-5y4g0xE2.js                2.87 kB │ gzip:  1.20 kB
+build/client/assets/OperatorShellRoute-CqGlZC30.js             2.92 kB │ gzip:  1.36 kB
+build/client/assets/AdminActivityPage-BxuX0O-D.js              3.03 kB │ gzip:  1.19 kB
+build/client/assets/PublicArtistRoute-AP7zMp5h.js              3.19 kB │ gzip:  1.38 kB
+build/client/assets/AdminLayout-K3nFsnfW.js                    3.49 kB │ gzip:  1.40 kB
+build/client/assets/StylistSignInPage-B42Eb_FW.js              3.59 kB │ gzip:  1.30 kB
+build/client/assets/ScanLandingPage-BVhsXfSR.js                3.79 kB │ gzip:  1.46 kB
+build/client/assets/ShellFrame-rjv_HgEo.js                     3.81 kB │ gzip:  1.76 kB
+build/client/assets/ClaimSlotPage-D1Go8fyS.js                  3.88 kB │ gzip:  1.53 kB
+build/client/assets/AdminAuditLogPage-Cvht7p6r.js              3.98 kB │ gzip:  1.53 kB
+build/client/assets/PlanPage-CQpw0zdS.js                       4.01 kB │ gzip:  1.70 kB
+build/client/assets/ShowMyQrPage-BFByvG0r.js                   4.01 kB │ gzip:  1.74 kB
+build/client/assets/admin-api-DlD3bYQs.js                      4.04 kB │ gzip:  1.78 kB
+build/client/assets/WebsiteLayout-CtvEaqaY.js                  4.12 kB │ gzip:  1.32 kB
+build/client/assets/rules-GEjmqoMc.js                          4.16 kB │ gzip:  1.92 kB
+build/client/assets/AdminHealthPage-Cz-kXv9A.js                4.34 kB │ gzip:  1.61 kB
+build/client/assets/SignInPage-DOOlZeRk.js                     4.53 kB │ gzip:  1.92 kB
+build/client/assets/AdminStylistsPage-CCZmbbcA.js              4.55 kB │ gzip:  1.52 kB
+build/client/assets/AdminBlogListPage-bzXfpxyk.js              4.61 kB │ gzip:  1.81 kB
+build/client/assets/ArtistProfilePreviewRoute-DMwyd4Mw.js      4.64 kB │ gzip:  1.85 kB
+build/client/assets/AdminFlagsPage-B0_WxlVS.js                 4.69 kB │ gzip:  2.03 kB
+build/client/assets/PricingPage-D4e6Oovz.js                    4.82 kB │ gzip:  1.56 kB
+build/client/assets/ReviewPage-CdxXuTSv.js                     4.95 kB │ gzip:  1.72 kB
+build/client/assets/ConciergeQuotePage-BpAdeSWg.js             5.07 kB │ gzip:  2.10 kB
+build/client/assets/ConciergePages-DGIr9Deg.js                 5.07 kB │ gzip:  2.06 kB
+build/client/assets/email-code-Bo7X3rz5.js                     5.08 kB │ gzip:  1.84 kB
+build/client/assets/FeaturesPage-VI6Vxcwq.js                   5.09 kB │ gzip:  1.56 kB
+build/client/assets/AdminInboxPage-DhMFrhEd.js                 5.30 kB │ gzip:  1.99 kB
+build/client/assets/Money-Df8ZyA47.js                          5.33 kB │ gzip:  1.81 kB
+build/client/assets/CoverPickerPage-lUfFP1QE.js                5.49 kB │ gzip:  2.07 kB
+build/client/assets/useTranslation-BFdogrce.js                 5.56 kB │ gzip:  2.64 kB
+build/client/assets/workbox-window.prod.es5-Bd17z0YL.js        5.65 kB │ gzip:  2.20 kB
+build/client/assets/GuidesPage-BQ2o6QKj.js                     5.66 kB │ gzip:  1.86 kB
+build/client/assets/CalculatorPage-CgJL1coJ.js                 5.98 kB │ gzip:  1.75 kB
+build/client/assets/BlockTimePage-CPI8-hJE.js                  5.99 kB │ gzip:  2.06 kB
+build/client/assets/GuideArticlePage-CG8aJRt-.js               6.06 kB │ gzip:  2.10 kB
+build/client/assets/seo-CRiS2FVs.js                            6.26 kB │ gzip:  2.29 kB
+build/client/assets/GoogleListingPage-Bfi-0W-W.js              6.32 kB │ gzip:  1.95 kB
+build/client/assets/NewClientPage-9eANport.js                  6.51 kB │ gzip:  2.06 kB
+build/client/assets/CalendarSyncPage-CEgc42_Q.js               6.64 kB │ gzip:  2.20 kB
+build/client/assets/AdminOverviewPage-CSnOs45X.js              6.66 kB │ gzip:  2.15 kB
+build/client/assets/GetPaidPage-CJUX3-cb.js                    6.74 kB │ gzip:  2.60 kB
+build/client/assets/GoogleAccountPage-XvN2GlVp.js              6.93 kB │ gzip:  2.05 kB
+build/client/assets/LocationsRoute-DmMHW1o7.js                 6.93 kB │ gzip:  2.32 kB
+build/client/assets/StylistSignUpPage-CtxMpdoZ.js              7.00 kB │ gzip:  2.11 kB
+build/client/assets/AdminSignInPage-DlaWBZmk.js                7.24 kB │ gzip:  2.67 kB
+build/client/assets/AdminFeesPage-DWQ9k3pQ.js                  7.26 kB │ gzip:  2.28 kB
+build/client/assets/PortfolioSettingsRoute-C4TIYjXH.js         7.45 kB │ gzip:  2.72 kB
+build/client/assets/AdminLogsPage-CLLKKoA8.js                  7.84 kB │ gzip:  2.58 kB
+build/client/assets/root-34XMDQIg.js                           7.94 kB │ gzip:  2.69 kB
+build/client/assets/blog-model-BnwcCuZH.js                     8.12 kB │ gzip:  2.97 kB
+build/client/assets/NewAppointmentPage-DvWvVei_.js             8.50 kB │ gzip:  2.99 kB
+build/client/assets/HomeEntryRoute-e621YcfB.js                 9.59 kB │ gzip:  2.11 kB
+build/client/assets/PaymentSettingsPage-BwyVI0QY.js            9.74 kB │ gzip:  3.13 kB
+build/client/assets/queryClient-BdOwiSEY.js                   10.29 kB │ gzip:  3.02 kB
+build/client/assets/NotificationSettingsPage-CJ_PsmYY.js      10.44 kB │ gzip:  2.92 kB
+build/client/assets/BookingManageRoute-CM8ivV1u.js            10.56 kB │ gzip:  3.18 kB
+build/client/assets/CalendarPage-BvmEDsNM.js                  10.77 kB │ gzip:  3.78 kB
+build/client/assets/ReputationPage-Du0sKrVx.js                11.09 kB │ gzip:  3.36 kB
+build/client/assets/Trans-D40QYhms.js                         11.52 kB │ gzip:  4.85 kB
+build/client/assets/components-C4PjAGQu.js                    11.87 kB │ gzip:  3.52 kB
+build/client/assets/PublicArtistPage-BDEJybwx.js              12.20 kB │ gzip:  3.84 kB
+build/client/assets/ClientProfilePage-Do6E0W3f.js             12.99 kB │ gzip:  4.01 kB
+build/client/assets/ConciergeBoard-BD_DoTH6.js                13.00 kB │ gzip:  3.60 kB
+build/client/assets/AdminPrimitives-fWGovhUl.js               13.24 kB │ gzip:  4.91 kB
+build/client/assets/ProfileSettingsPage-DD46zRMz.js           13.84 kB │ gzip:  4.75 kB
+build/client/assets/LocationNewPage-kYTuh4qY.js               14.10 kB │ gzip:  4.05 kB
+build/client/assets/query-DMvJFZNa.js                         14.82 kB │ gzip:  5.05 kB
+build/client/assets/ServiceSettingsPage-5uRbOTlN.js           14.87 kB │ gzip:  4.36 kB
+build/client/assets/AdminBlogEditorPage-D6epDMHP.js           15.99 kB │ gzip:  4.41 kB
+build/client/assets/AdminStylistDetailPage-BYMYuPEs.js        18.01 kB │ gzip:  5.21 kB
+build/client/assets/OnboardingShell-DyDJln1h.js               19.85 kB │ gzip:  5.79 kB
+build/client/assets/BookingRoute-vGWNWkla.js                  20.67 kB │ gzip:  6.31 kB
+build/client/assets/RevenuePages-BVpEiFxV.js                  22.24 kB │ gzip:  5.95 kB
+build/client/assets/QrCode-BAkZKe-g.js                        24.26 kB │ gzip:  9.23 kB
+build/client/assets/GrowthDetail-Ckf8SOHd.js                  25.73 kB │ gzip:  6.93 kB
+build/client/assets/AppointmentRoute-Cy4Ms2mD.js              26.81 kB │ gzip:  6.28 kB
+build/client/assets/MarketingPage-CB6hbeWH.js                 26.83 kB │ gzip:  6.78 kB
+build/client/assets/ClientsFeature-Dgz1qAs6.js                32.54 kB │ gzip:  8.64 kB
+build/client/assets/ArtistPages-Dv0aKwwU.js                   34.30 kB │ gzip:  9.85 kB
+build/client/assets/i18nInstance-B-8esDV3.js                  50.31 kB │ gzip: 16.17 kB
+build/client/assets/schemas-SakuH3mo.js                       78.57 kB │ gzip: 22.65 kB
+build/client/assets/jsx-runtime-wBUD7RWR.js                  130.70 kB │ gzip: 43.17 kB
+build/client/assets/entry.client-CLsw-IFd.js                 214.79 kB │ gzip: 67.23 kB
+build/client/assets/supabase-DmIg4oL0.js                     216.74 kB │ gzip: 55.94 kB
+build/client/assets/i18n-CaXEfQAH.js                         252.84 kB │ gzip: 82.63 kB
+
+✓ built in 1.23s
+
+PWA v2.0.0
+Building src/sw.ts service worker ("es" format)...
+vite v8.3.6 building client environment for production...
+
+ WARN  inlineDynamicImports option is deprecated, please use codeSplitting: false instead.
+
+transforming...
+✓ 79 modules transformed.
+rendering chunks...
+computing gzip size...
+build/client/sw.mjs  25.26 kB │ gzip: 8.37 kB
+
+✓ built in 18ms
+
+PWA v2.0.0
+mode      injectManifest
+format:   es
+precache  190 entries (2165.69 KiB)
+files generated
+  build/client/sw.js
+The `envFile` option is deprecated, please use `envDir: false` instead.
+  ⚠️  Future Flag Warning: Route middleware support is changing in React Router v8.
+     You can use the `future.v8_middleware` flag to opt in early.
+     -> https://reactrouter.com/v7/upgrading/future#futurev8_middleware
+  ⚠️  Future Flag Warning: Route module splitting behavior is changing in React Router v8.
+     You can use the `future.v8_splitRouteModules` flag to opt in early.
+     -> https://reactrouter.com/v7/upgrading/future#futurev8_splitroutemodules
+  ⚠️  Future Flag Warning: Vite Environment API usage is changing in React Router v8.
+     You can use the `future.v8_viteEnvironmentApi` flag to opt in early.
+     -> https://reactrouter.com/v7/upgrading/future#futurev8_viteenvironmentapi
+  ⚠️  Future Flag Warning: Request handling behavior is changing in React Router v8.
+     You can use the `future.v8_passThroughRequests` flag to opt in early.
+     -> https://reactrouter.com/v7/upgrading/future#futurev8_passthroughrequests
+  ⚠️  Future Flag Warning: Data request URL formats are changing in React Router v8.
+     You can use the `future.v8_trailingSlashAwareDataRequests` flag to opt in early.
+     -> https://reactrouter.com/v7/upgrading/future#futurev8_trailingslashawaredatarequests
+The `envFile` option is deprecated, please use `envDir: false` instead.
+vite v8.3.6 building ssr environment for production...
+transforming...
+✓ 211 modules transformed.
+rendering chunks...
+
+✓ 9 assets cleaned from React Router server build.
+build/client/assets/styles-By9UgNq9.css
+build/client/assets/manrope-latin-600-normal-ZV4JKEZQ.woff2
+build/client/assets/manrope-latin-700-normal-CvykrKJY.woff2
+build/client/assets/manrope-latin-800-normal-CTuzW-HK.woff2
+build/client/assets/dm-sans-latin-400-normal-COF6noiJ.woff2
+build/client/assets/dm-sans-latin-500-normal-kGSpR5A9.woff2
+build/client/assets/dm-sans-latin-600-normal-DrBIvsIy.woff2
+build/client/assets/dm-sans-latin-700-normal-1DREuLwQ.woff2
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/assets/server-build-DgWjMSsU.css
+
+computing gzip size...
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/manifest.webmanifest                                0.51 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/.vite/manifest.json                                 3.36 kB │ gzip:   0.62 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/assets/manrope-latin-800-normal-CTuzW-HK.woff2     13.68 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/assets/dm-sans-latin-400-normal-COF6noiJ.woff2     14.11 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/assets/dm-sans-latin-600-normal-DrBIvsIy.woff2     14.14 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/assets/manrope-latin-600-normal-ZV4JKEZQ.woff2     14.15 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/assets/manrope-latin-700-normal-CvykrKJY.woff2     14.21 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/assets/dm-sans-latin-700-normal-1DREuLwQ.woff2     14.30 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/assets/dm-sans-latin-500-normal-kGSpR5A9.woff2     14.30 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/assets/server-build-DgWjMSsU.css                  146.95 kB │ gzip:  22.82 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/assets/styles-By9UgNq9.css                        178.40 kB │ gzip:  27.15 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/assets/virtual_pwa-register-DHczJqK2.js             2.36 kB │ gzip:   0.81 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/assets/workbox-window.prod.es5-BCPlqN6M.js          7.42 kB │ gzip:   2.61 kB
+build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/index.js                                        1,694.05 kB │ gzip: 354.01 kB
+
+✓ built in 492ms
+[WebServer] (node:43011) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:43027) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] The `envFile` option is deprecated, please use `envDir: false` instead.
+[WebServer] The `envFile` option is deprecated, please use `envDir: false` instead.
+[WebServer] The `envFile` option is deprecated, please use `envDir: false` instead.
+
+Running 4 tests using 1 worker
+
+(node:43043) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/visual/design-system.spec.ts:4:5 › component gallery visual baselines at 320, 360, 390 and 430 px (2.5s)
+  ✓  2 tests/visual/design-system.spec.ts:20:5 › sheet traps focus, closes with Escape, and restores focus to its trigger (677ms)
+  ✓  3 tests/visual/design-system.spec.ts:33:5 › form validation, character count and chart table remain accessible (642ms)
+  ✓  4 tests/visual/design-system.spec.ts:48:5 › focus ring, touch-sized chart link, unread dot and photo states are represented (607ms)
+
+  4 passed (7.0s)

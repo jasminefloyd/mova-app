@@ -1,0 +1,176 @@
+{
+  "ONB-20": [
+    "PASS",
+    "Opened an issued local client card with and without an upcoming visit, verified the visit on mobile and desktop, and continued to the correct stylist booking page.",
+    [
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "ONB-21": [
+    "PASS",
+    "Malformed and oversized URLs and a previously valid card for a deleted synthetic client all showed the unavailable message without exposing client details.",
+    [
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 404,
+        "code": "CARD_NOT_AVAILABLE"
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 404,
+        "code": "CARD_NOT_AVAILABLE"
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 404,
+        "code": "CARD_NOT_AVAILABLE"
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 404,
+        "code": "CARD_NOT_AVAILABLE"
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 404,
+        "code": "CARD_NOT_AVAILABLE"
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 404,
+        "code": "CARD_NOT_AVAILABLE"
+      }
+    ]
+  ],
+  "BKG-17": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. locator.fill: Timeout 4200ms exceeded. Call log: \u001b[2m - waiting for getByRole('textbox', { name: 'Your reply' })\u001b[22m ",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/review-management",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/calendar-google-connect",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/review-management",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/review-management",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/calendar-google-connect",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ]
+}

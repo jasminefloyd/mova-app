@@ -1,0 +1,26 @@
+Path: /BID-1/appointments/AID-33
+
+Appointment
+Confirmed · booked instantly
+Silk Press
+AID 33
+When
+Tue, Nov 24 · 11:00 AM – 12:30 PM ET
+Where
+QA Suite-setup
+Client
+Demo Guest 02
+Payment
+You collect here
+Service value
+$120.00
+No deposit required
+$0.00
+Balance due at visit
+$120.00
+Before you start
+
+Loading private notes…
+
+Mark complete
+Record payRescheduleCancel

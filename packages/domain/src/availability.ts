@@ -10,7 +10,12 @@ export type AvailabilityLocation = {
   bufferAfterMinutes: number;
 };
 export type AvailabilityService = { active: boolean; durationMinutes: number; bufferMinutes: number };
-export type BusyRange = { startsAt: string; endsAt: string };
+export type BusyRange = {
+  startsAt: string;
+  endsAt: string;
+  bufferBeforeMinutes?: number;
+  bufferAfterMinutes?: number;
+};
 export type Slot = { startsAt: string; endsAt: string; localDate: string; localTime: string; timeZone: string; utcOffset: string; bookingMode: 'instant' | 'request' };
 
 const formatterCache = new Map<string, Intl.DateTimeFormat>();
@@ -89,7 +94,11 @@ export function searchAvailability(input: {
   const interval = input.slotIntervalMinutes ?? 15;
   if (interval < 5 || interval > 120) throw new RangeError('slotIntervalMinutes must be 5–120');
   const duration = service.durationMinutes + service.bufferMinutes;
-  const blocked = [...(input.busy ?? []), ...(input.holds ?? []), ...(input.blocked ?? [])].map((range) => [Date.parse(range.startsAt) - location.bufferBeforeMinutes * 60_000, Date.parse(range.endsAt) + location.bufferAfterMinutes * 60_000] as const);
+  // Match the booking RPC's collision window so advertised times can be booked.
+  const blocked = [...(input.busy ?? []), ...(input.holds ?? []), ...(input.blocked ?? [])].map((range) => [
+    Date.parse(range.startsAt) - (location.bufferAfterMinutes + (range.bufferAfterMinutes ?? 0)) * 60_000,
+    Date.parse(range.endsAt) + (location.bufferBeforeMinutes + (range.bufferBeforeMinutes ?? 0)) * 60_000,
+  ] as const);
   const now = Date.parse(input.now);
   const earliest = now + location.leadMinutes * 60_000 + BOOKING_WINDOW_EDGE_BUFFER_MS;
   const latest = now + location.horizonDays * 86_400_000 - BOOKING_WINDOW_EDGE_BUFFER_MS;

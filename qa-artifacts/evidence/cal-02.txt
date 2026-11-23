@@ -1,0 +1,26 @@
+Path: /BID-1/appointments/AID-2
+
+Appointment
+Completed
+Hydration Treatment
+AID 2
+When
+Tue, Nov 17 · 10:00 AM – 11:00 AM ET
+Where
+Rooted Beauty Studio
+Client
+Demo Guest 03
+Payment
+You collect here
+Service value
+$80.00
+Deposit due
+$20.00
+Balance due at visit
+$60.00
+Before you start
+
+No private notes yet.
+
+All notes
+Notes for today

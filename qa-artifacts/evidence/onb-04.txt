@@ -1,0 +1,22 @@
+Path: /login
+
+mova
+Language
+English (US)
+Español (EE. UU.)
+Check your email
+
+If there's a Mova account for [redacted], a sign-in code is on its way.
+
+The code works once and expires after a short time. Can't find it? Check your spam or promotions folder.
+
+Enter the six-digit code from your email.
+
+Send again in 60 s
+Use a different email
+
+New to Mova? Create a stylist account
+
+Booked with a stylist on Mova? Client sign-in uses a one-time code, no password.
+
+Terms · Privacy · Help

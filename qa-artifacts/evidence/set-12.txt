@@ -1,0 +1,63 @@
+Path: /BID-1/calendar/block-time
+
+December
+Sun
+29
+Mon
+30
+Tue
+1
+Wed
+2
+Thu
+3
+Fri
+4
+Sat
+5
+Day
+Week
+Requests · 4
+All locations
+QA Suite-setup
+Rooted Beauty Studio
+Rooted Beauty Salon
+
+Appointments booked in salon systems or personal calendars outside Mova don't appear here.
+
+9 AM
+10
+11
+12 PM
+1
+2
+3
+4
+5
+No appointments for this day.
+Block time
+What's it for?
+Personal break
+Holiday
+Time off
+Other
+Label (only you see this)
+All day
+Date
+From
+To
+Repeats
+Doesn't repeat
+Every week for 2 weeks
+Every week for 4 weeks
+Every week for 8 weeks
+Every week for 12 weeks
+Where
+All locations
+QA Suite-setup
+Rooted Beauty Studio
+Rooted Beauty Salon
+
+Clients can't book during blocked time. If an appointment already falls inside it, we'll ask what to do before saving.
+
+Block this time

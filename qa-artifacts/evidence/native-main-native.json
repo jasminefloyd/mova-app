@@ -1,0 +1,678 @@
+{
+  "ONB-01": [
+    "NOT APPLICABLE",
+    "The supplied password sign-up path was retired. Browser alternative verified a new stylist received the local OTP and reached onboarding.",
+    [
+      {
+        "path": "/auth/v1/otp",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/auth/v1/verify",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "ONB-02": [
+    "NOT APPLICABLE",
+    "Password-specific validation is retired. The browser prevented empty name/email submission.",
+    []
+  ],
+  "ONB-03": [
+    "NOT APPLICABLE",
+    "The supplied password sign-in path was retired. The supported six-digit email code reached the finished test business Home.",
+    [
+      {
+        "path": "/auth/v1/otp",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/auth/v1/verify",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_onboarding_progress",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_onboarding_progress",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      }
+    ]
+  ],
+  "ONB-04": [
+    "NOT APPLICABLE",
+    "The wrong-password path was retired. Attempted the email-code request for a synthetic unknown address.",
+    [
+      {
+        "path": "/auth/v1/otp",
+        "method": "POST",
+        "status": 422
+      }
+    ]
+  ],
+  "ONB-05": [
+    "NOT APPLICABLE",
+    "The retired reset route redirects to passwordless sign-in.",
+    []
+  ],
+  "ONB-14": [
+    "PASS",
+    "A finished stylist was redirected to Home when opening an onboarding URL.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_onboarding_progress",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_account_names",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/concierge-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/slot-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-summary",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_user_app_state",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_user_app_state",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/plan-management",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "ONB-16": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. Expected values to be strictly equal:",
+    []
+  ],
+  "ONB-18": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. The input was expected to not match the regular expression /^\\/signin/. Input:",
+    []
+  ],
+  "ONB-21": [
+    "BLOCKED",
+    "The malformed token was handled without client data. The deleted-client token variant still needs a previously issued card.",
+    [
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 404
+      },
+      {
+        "path": "/functions/v1/client-card-landing",
+        "method": "POST",
+        "status": 404
+      }
+    ]
+  ],
+  "ONB-22": [
+    "PASS",
+    "Signed-out client opened the stylist QR route and continued to booking.",
+    [
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/public-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/scan-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/scan-landing",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-01": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. The input did not match the regular expression /\\/book$/. Input:",
+    [
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "SET-20": [
+    "BLOCKED",
+    "Local plan screen rendered Free, Pro and AI + Growth. No Stripe sandbox key or sandbox price IDs exist in the supplied configuration.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/plan-management",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "SET-16": [
+    "BLOCKED",
+    "Reached payment settings. Stripe test API and Connect application credentials are unavailable.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/stripe-connect-onboard",
+        "method": "POST",
+        "status": 503
+      },
+      {
+        "path": "/functions/v1/stripe-connect-onboard",
+        "method": "POST",
+        "status": 503
+      },
+      {
+        "path": "/functions/v1/stripe-connect-onboard",
+        "method": "POST",
+        "status": 503
+      },
+      {
+        "path": "/functions/v1/payment-settings",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/payment-settings",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/payment-settings",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "CAL-18": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. The input did not match the regular expression /\\/appointments\\/AID-/. Input:",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_account_names",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointments",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/concierge-artist",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/slot-campaign",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-summary",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_appointment_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_user_app_state",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_user_app_state",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/plan-management",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "SET-14": [
+    "PASS",
+    "The operator preview and public page showed the same seeded artist and Silk Press offering.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_profiles",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_location_hours",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_portfolio_items",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_service_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ]
+}

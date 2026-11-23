@@ -3,11 +3,12 @@ import { isAdminHost } from './AdminRoot';
 import { deviceLabel, safeReturnTo } from './admin-session';
 
 describe('admin host gate', () => {
-  it('serves the admin only on the admin subdomain and local development hosts', () => {
+  it('serves the admin on the main site, admin subdomain, and local development hosts', () => {
     expect(isAdminHost('admin.mova-beauty.co')).toBe(true);
     expect(isAdminHost('localhost')).toBe(true);
     expect(isAdminHost('mova-p6-admin-preview.vercel.app')).toBe(true);
-    expect(isAdminHost('mova-beauty.co')).toBe(false);
+    expect(isAdminHost('mova-beauty.co')).toBe(true);
+    expect(isAdminHost('www.mova-beauty.co')).toBe(true);
     expect(isAdminHost('ops.mova-beauty.co')).toBe(false);
   });
 });

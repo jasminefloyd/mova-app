@@ -1,0 +1,64 @@
+Path: /onboarding/location
+
+Step 4 of 6
+Sign out
+Where you work
+
+Add the place clients book you. You can add more locations later in Settings.
+
+Type of place
+Suite rental
+Booth rental
+Salon
+Home studio
+I travel to clients
+Location name
+Address
+Clients see the full address only after they book. Suite or unit number goes on its own line.
+
+Time zone: Eastern Time
+Change
+
+How do clients book here?
+Instant booking
+Mova holds your calendar here, so clients get confirmed right away.
+Request to book
+The salon keeps its own book. You confirm each request.
+Who collects payment here?
+I do
+The salon
+
+This location uses your connected Stripe account. Set up Stripe once in Payments & payouts. Service deposits apply only at artist-collected locations.
+
+Days and hours
+S
+M
+T
+W
+T
+F
+S
+
+Choose your open days, then enter your hours. No days or hours are preselected.
+
+Different hours on some days
+Booking rules
+Buffer
+No buffer
+5 min
+10 min
+15 min
+30 min
+Notice
+1 h
+2 h
+6 h
+12 h
+24 h
+48 h
+Book ahead
+4 wks
+8 wks
+12 wks
+26 wks
+Save location

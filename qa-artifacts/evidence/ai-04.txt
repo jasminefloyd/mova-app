@@ -1,0 +1,16 @@
+Path: /BID-1/growth/autopilot
+
+Autopilot rules
+Autopilot rules
+Rebooking autopilot
+Texts clients when they're due to rebook, using your approved messages and these rules.
+
+Up to 10 messages per day, with at least 14 days between messages per client.
+
+Texts are off until the messaging provider is live. Your settings are saved and take effect then.
+
+Daily message cap
+Days between reminders
+Save rules
+
+Only clients who agreed to reminders, are due to rebook and have nothing booked get a text. Quiet hours are 9 AM–8 PM in the client's time zone. Every decision shows in Activity.

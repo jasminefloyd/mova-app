@@ -1,0 +1,26 @@
+Path: /BID-1/appointments/AID-54
+
+Appointment
+Declined
+Silk Press
+AID 54
+When
+Sun, Dec 6 · 1:00 PM – 2:45 PM ET
+Where
+Rooted Beauty Salon
+Client
+QA Decline-isolated
+Payment
+Salon collects
+Service value
+$120.00
+No deposit required
+$0.00
+Balance due at visit
+$120.00
+Before you start
+
+No private notes yet.
+
+All notes
+Notes for today

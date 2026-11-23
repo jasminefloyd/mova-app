@@ -1,0 +1,11 @@
+
+> mova-app@0.0.0 typecheck [workspace home]/Desktop/Vibes/Projects/mova-app
+> corepack pnpm --filter @mova/contracts build && tsc -p apps/web/tsconfig.json && corepack pnpm --filter @mova/contracts typecheck
+
+
+> @mova/contracts@0.0.0 build [workspace home]/Desktop/Vibes/Projects/mova-app/packages/contracts
+> tsc -p tsconfig.json
+
+
+> @mova/contracts@0.0.0 typecheck [workspace home]/Desktop/Vibes/Projects/mova-app/packages/contracts
+> tsc -p tsconfig.json --noEmit

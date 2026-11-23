@@ -44,7 +44,7 @@ function pageName(pathname: string): string {
   if (path.startsWith('/settings/')) {
     if (path === '/settings/profile/preview') return 'Preview Profile';
     if (path === '/settings/locations/new') return 'Add Location';
-    const section = path.slice('/settings/'.length).split('/')[0];
+    const section = path.slice('/settings/'.length).split('/')[0] ?? '';
     const labels: Record<string, string> = { profile: 'Profile', services: 'Services', portfolio: 'Portfolio', locations: 'Locations', payments: 'Payments', 'calendar-sync': 'Calendar Sync', google: 'Google', notifications: 'Notifications', reviews: 'Reviews', plan: 'Plan', privacy: 'Privacy', qr: 'My QR Code' };
     return labels[section] ?? 'Settings';
   }

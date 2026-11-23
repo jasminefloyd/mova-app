@@ -1,0 +1,28 @@
+Path: /BID-1/appointments/AID-66
+
+Appointment
+Confirmed · booked instantly
+Silk Press
+AID 66
+When
+Sun, Dec 13 · 1:00 PM – 2:45 PM ET
+Where
+Rooted Beauty Studio
+Client
+QA Other-final-loopback
+Payment
+You collect here
+Service value
+$120.00
+No deposit required
+$0.00
+Balance due at visit
+$0.00
+Before you start
+
+No private notes yet.
+
+All notes
+Notes for today
+Mark complete
+Record payRescheduleCancel

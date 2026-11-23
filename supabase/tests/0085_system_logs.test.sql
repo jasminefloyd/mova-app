@@ -1,11 +1,13 @@
 begin;
-select plan(14);
+select plan(15);
 
 insert into auth.users (id,email) values
  ('ad850000-0000-4000-8000-000000000001','logs-admin@mova.invalid'),
  ('ad850000-0000-4000-8000-000000000002','logs-stylist@mova.invalid');
 select public.mova_grant_platform_admin('ad850000-0000-4000-8000-000000000001','Logs Admin');
 insert into public.mova_artist_businesses(id,name,status) values('ad850000-0000-4000-8000-000000000101','Logs Studio','active');
+insert into auth.audit_log_entries(id,payload,created_at)
+values('ad850000-0000-4000-8000-000000000201','{"action":"login","request_id":"auth-0085","actor_id":"ad850000-0000-4000-8000-000000000002"}',now());
 
 select ok((select relrowsecurity from pg_class where oid='public.mova_system_logs'::regclass),'system log table has RLS enabled');
 select ok(not has_table_privilege('anon','public.mova_system_logs','SELECT'),'anon cannot read system logs');
@@ -38,6 +40,11 @@ reset role;
 select set_config('request.jwt.claims','{"sub":"ad850000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',true);
 set local role authenticated;
 select is((public.mova_admin_logs_search(p_source=>'function',p_request_id=>'req-0085')->'rows'->0->>'event_name'),'function.exception','System Admin can filter by source and request ID');
+select is(
+  public.mova_admin_logs_search(p_source=>'auth',p_request_id=>'auth-0085')->'rows'->0->>'user_id',
+  'ad850000-0000-4000-8000-000000000002',
+  'System Admin can query a managed Auth audit event with its actor intact'
+);
 select lives_ok($$select public.mova_admin_logs_exported(1,'text')$$,'System Admin copy/export audit is accepted');
 reset role;
 select ok((select count(*)>=1 from public.mova_admin_activity where action='logs.viewed') and (select count(*)=1 from public.mova_admin_activity where action='logs.copied'),'admin log reads and copies are recorded in admin activity');

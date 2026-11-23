@@ -1,0 +1,207 @@
+{
+  "SET-05": [
+    "PASS",
+    "Deactivated the service in real stylist settings. PostgreSQL stored inactive and the signed-out showcase no longer listed the service.",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_portfolio_items",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_service_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_services",
+        "method": "PATCH",
+        "status": 204
+      },
+      {
+        "path": "/rest/v1/mova_portfolio_items",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_services",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_service_locations",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/reports-track",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ],
+  "BKG-15": [
+    "PASS",
+    "Taken and ended offers explained their status and linked to alternatives. A malformed offer displayed a clear invalid-link explanation.",
+    [
+      {
+        "path": "/functions/v1/slot-claim",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/slot-claim",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/slot-claim",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/slot-claim",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/slot-claim",
+        "method": "POST",
+        "status": 422,
+        "code": "INVALID_TOKEN"
+      },
+      {
+        "path": "/functions/v1/slot-claim",
+        "method": "POST",
+        "status": 422,
+        "code": "INVALID_TOKEN"
+      }
+    ]
+  ],
+  "BKG-17": [
+    "BLOCKED",
+    "Execution did not establish the full expected result. The expression evaluated to a falsy value: assert(rows.some(r=>r.artist_reply===tagged('QA reply'))) ",
+    [
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_memberships",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/rest/v1/mova_artist_businesses",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/review-management",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/calendar-google-connect",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/review-management",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/calendar-google-connect",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/functions/v1/review-management",
+        "method": "POST",
+        "status": 200
+      }
+    ]
+  ]
+}

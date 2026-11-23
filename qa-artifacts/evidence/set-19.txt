@@ -1,0 +1,20 @@
+Path: /BID-1/settings/calendar-sync
+
+Calendar sync
+
+One way: Mova → your calendars. Events you add in Google or Apple do not block times clients can book in Mova.
+
+Google Calendar
+Not connected
+
+Connect your Google Calendar to sync Mova appointments.
+
+Connect Google Calendar
+Apple Calendar
+
+Subscribe with your private link. Apple refreshes on its own schedule, so changes can take a few hours to appear.
+
+▣
+webcal://mova-beauty.co/feed/••••••••
+Copy link
+Reset link

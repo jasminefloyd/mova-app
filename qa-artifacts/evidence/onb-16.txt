@@ -1,0 +1,19 @@
+Path: /login
+
+mova
+Language
+English (US)
+Español (EE. UU.)
+Stylist sign-in
+Welcome back
+
+We'll email you a six-digit code to sign in. No password needed.
+
+Email
+Email me a sign-in code
+
+New to Mova? Create a stylist account
+
+Booked with a stylist on Mova? Client sign-in uses a one-time code, no password.
+
+Terms · Privacy · Help

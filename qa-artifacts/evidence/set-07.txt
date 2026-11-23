@@ -1,0 +1,34 @@
+Path: /BID-1/clients/import
+
+Import
+Import
+
+Preview and resolve duplicates before importing. Preview does not write client records.
+
+CSV file
+
+4 rows
+
+Preview import
+
+We couldn't load this client information.
+
+Imported clients are not opted in to marketing.
+
+4 new · 0 one match · 0 need review
+
+QA Imported One
+
+New client
+
+QA Imported Two
+
+New client
+
+QA Imported One
+
+New client
+
+New client
+
+Import clients

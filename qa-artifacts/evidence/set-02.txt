@@ -1,0 +1,58 @@
+Path: /BID-1/settings/locations
+
+Locations & hours
+Rooted Beauty Studio
+Booking on
+
+Suite rental · Eastern Time
+
+Instant booking
+You collect · deposits set per service
+
+Sun
+9:00 AM – 5:00 PM
+
+Mon
+9:00 AM – 5:00 PM
+
+Tue
+9:00 AM – 5:00 PM
+
+Wed
+9:00 AM – 5:00 PM
+
+Thu
+9:00 AM – 5:00 PM
+
+Fri
+9:00 AM – 5:00 PM
+
+Sat
+9:00 AM – 5:00 PM
+
+Edit hours & rules
+Turn off booking
+Rooted Beauty Salon
+Booking on
+
+Commission salon · Eastern Time
+
+Request to book
+Salon collects
+QA Suite-setup
+Booking on
+
+Suite rental · Eastern Time
+
+Instant booking
+You collect · deposits set per service
+Turn off bookings here?
+
+Clients will no longer be able to book at Rooted Beauty Studio. First close out every open booking at this location.
+
+7 open bookings still need to be closed out.
+
+Complete, cancel, or resolve each one in your calendar. This won't cancel bookings for you.
+
+Open calendar
+Check again

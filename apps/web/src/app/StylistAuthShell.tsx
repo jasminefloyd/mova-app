@@ -10,7 +10,7 @@ export function StylistAuthShell() {
   const [queryClient] = useState(createArtistQueryClient);
   const { pathname } = useLocation();
   const fixedLocale: Locale | undefined = pathname === '/signup' ? 'en-US' : undefined;
-  return <ShellFrame queryClient={queryClient} localeStorageKey={ONBOARDING_LOCALE_KEY} showBrandHeader={false} fixedLocale={fixedLocale} />;
+  return <ShellFrame queryClient={queryClient} localeStorageKey={ONBOARDING_LOCALE_KEY} showBrandHeader={false} {...(fixedLocale ? { fixedLocale } : {})} />;
 }
 
 export default StylistAuthShell;

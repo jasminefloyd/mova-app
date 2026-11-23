@@ -1,0 +1,8 @@
+Path: /BID-1/settings/portfolio
+
+Looks
+
+Looks clients see on your page. Link a look to a service and clients can tap "Book this look".
+
+Upload photos
+No looks yet

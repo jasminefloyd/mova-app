@@ -27,4 +27,16 @@ describe('availability', () => {
     expect(slots.some((slot) => slot.startsAt === '2026-03-08T06:00:00.000Z')).toBe(false);
     expect(searchAvailability({ ...base, service: { ...base.service, active: false } })).toEqual([]);
   });
+
+  it('reserves both the location and stored appointment buffers used by the booking RPC', () => {
+    const slots = searchAvailability({
+      ...base,
+      fromDate: '2026-03-15',
+      location: { ...base.location, bufferBeforeMinutes: 15, bufferAfterMinutes: 30 },
+      service: { ...base.service, durationMinutes: 30 },
+      hours: [{ weekday: 0, opensAt: '09:00', closesAt: '13:00' }],
+      busy: [{ startsAt: '2026-03-15T15:00:00Z', endsAt: '2026-03-15T15:30:00Z', bufferBeforeMinutes: 15, bufferAfterMinutes: 30 }],
+    });
+    expect(slots.map((slot) => slot.localTime)).toEqual(['09:00', '09:15', '09:30', '12:00', '12:15', '12:30']);
+  });
 });

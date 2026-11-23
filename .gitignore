@@ -23,5 +23,9 @@ test-results/
 tests/visual/**/__diff__/
 tests/ai-evals/**/runs/
 docs/
+!/docs/
+/docs/*
+!/docs/database-migration-scope.md
+!/docs/database-migration-destination.md
 .vercel
 .env*

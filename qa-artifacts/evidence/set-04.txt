@@ -1,0 +1,45 @@
+Path: /BID-1/settings/services
+
+Preview
+Edit service
+Service name
+What clients see
+0/140
+Duration
+Buffer
+Price
+Require a deposit
+
+Deposits are collected only where you collect payment. Salon-collected bookings do not charge a deposit.
+
+Where it’s offered
+
+Choose each location where clients can book this service.
+
+QA Suite-setup
+You collect · instant booking · No deposit
+Price override (USD, optional)
+Duration override (minutes, optional)
+Rooted Beauty Salon
+Salon collects · request to book · No deposit
+Price override (USD, optional)
+Duration override (minutes, optional)
+Rooted Beauty Studio
+You collect · instant booking · No deposit
+Price override (USD, optional)
+Duration override (minutes, optional)
+Looks for this service
+
+Clients can book this service from linked looks.
+
+No looks linked yet.
+
+Add or edit looks
+Bookable
+Turn off to pause it. Existing appointments stay.
+Delete service
+
+This hides the service from booking. Past appointments keep the name and price they were booked at.
+
+Cancel
+Save service

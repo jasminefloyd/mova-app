@@ -406,6 +406,7 @@
     "verify": "Verify code",
     "changeContact": "Use a different number or email",
     "continueGuest": "Continue as a guest",
+    "stylistSignIn": "Sign in as a stylist",
     "terms": "By continuing you agree to the Terms and Privacy Policy.",
     "optIn": "Send me rebooking reminders and offers from this stylist. Optional, and you can stop anytime.",
     "sendCodeError": "We couldn't send a code. Check your contact details and try again.",

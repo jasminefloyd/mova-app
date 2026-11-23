@@ -1,0 +1,67 @@
+Path: /BID-1/growth
+
+AI Revenue Center
+AI Revenue Center
+This month forecast · Estimate
+Booked
+$225.00
+Likely
+$684.00
+Usual month
+$542.00
+Booked progress toward your usual month
+How Mova estimates this
+How Mova estimates this
+
+Every figure is calculated from your own bookings and history. Nothing is guessed by AI.
+
+Booked
+$225
+Confirmed and requested appointments this month, at their listed prices.
+Open time you're likely to fill
+$3,155
+18 open hours × 55% usually filled × $90 per hour = $891
+16 open hours × 60% usually filled × $90 per hour = $864
+14 open hours × 58% usually filled × $90 per hour = $731
+12 open hours × 62% usually filled × $90 per hour = $670
+Clients likely to rebook
+$100
+3 clients due × 35% usually rebook × $95 average visit
+Likely
+$3,480
+Booked + open time + rebooks.
+Likely range
+$445–$805
+Booked plus a low ($180 open time, $40 rebooks) and a high ($460, $120) from your past months.
+Usual month
+$542
+Average of your last three complete months: $510, $548, $568.
+PricePilot
+Coming soon
+Compare your service prices with verified menu sources.
+Marketing
+Drafts only
+No messages are sent automatically. Sending is unavailable until approvals and a provider are configured.
+Concierge
+Off
+No messages are sent automatically. Sending is unavailable until approvals and a provider are configured.
+Fill open slots
+Not ready
+No messages are sent automatically. Sending is unavailable until approvals and a provider are configured.
+Rebooking pipeline
+5
+No messages are sent automatically. Sending is unavailable until approvals and a provider are configured.
+Win back
+0
+No messages are sent automatically. Sending is unavailable until approvals and a provider are configured.
+Autopilot rules
+Autopilot is off
+No messages are sent automatically. Sending is unavailable until approvals and a provider are configured.
+Approved messages
+Open
+No messages are sent automatically. Sending is unavailable until approvals and a provider are configured.
+Activity
+Open
+No messages are sent automatically. Sending is unavailable until approvals and a provider are configured.
+
+How Mova estimates this: Estimate.

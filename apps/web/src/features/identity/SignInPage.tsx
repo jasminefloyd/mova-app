@@ -10,6 +10,11 @@ export function SignInPage(){
   const dialogRef=useRef<HTMLDialogElement>(null);
   useEffect(()=>{const dialog=dialogRef.current;if(dialog&&!dialog.open)dialog.showModal();return()=>{if(dialog?.open)dialog.close();};},[]);
   const returnTo=params.get('returnTo');const safeReturn=returnTo?.startsWith('/')&&!returnTo.startsWith('//')?returnTo:'/me';
+  const artist = params.get('artist');
+  const guestReturn = /^\/me(?:[/?#]|$)/.test(safeReturn)
+    ? artist ? `/a/${encodeURIComponent(artist)}/book` : '/'
+    : safeReturn;
+  const stylistSignIn = returnTo && safeReturn === returnTo ? `/login?returnTo=${encodeURIComponent(safeReturn)}` : '/login';
   const submit=async(event:FormEvent)=>{event.preventDefault();setBusy(true);setError('');try{
     const auth=createMovaSupabaseClient();const normalized=contact.trim();const phone=!normalized.includes('@');const digits=normalized.replace(/\D/g,'');const phoneNumber=normalized.startsWith('+')?`+${digits}`:digits.length===10?`+1${digits}`:digits.length===11&&digits.startsWith('1')?`+${digits}`:'';if(phone&&!phoneNumber)throw new Error('INVALID_CONTACT');
     if(step==='contact'){
@@ -38,7 +43,8 @@ export function SignInPage(){
         </form>
         {step==='code'&&<button className="mova-link-button" type="button" onClick={()=>{setStep('contact');setCode('');}}>{t('identity.changeContact')}</button>}
       </>}
-      <Link className="mova-client-auth__guest" to={safeReturn}>{t('identity.continueGuest')}</Link>
+      <Link className="mova-client-auth__guest" to={guestReturn}>{t('identity.continueGuest')}</Link>
+      <Link className="mova-client-auth__guest" to={stylistSignIn}>{t('identity.stylistSignIn')}</Link>
       {clientProfilesEnabled&&<small className="mova-client-auth__terms">{t('identity.terms')}</small>}
     </dialog>
   </main>;

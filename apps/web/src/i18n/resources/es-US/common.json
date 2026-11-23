@@ -406,6 +406,7 @@
     "verify": "Verificar código",
     "changeContact": "Usar otro número o correo",
     "continueGuest": "Continuar como invitado",
+    "stylistSignIn": "Iniciar sesión como estilista",
     "terms": "Al continuar, aceptas los Términos y la Política de privacidad.",
     "optIn": "Envíame recordatorios para volver y ofertas de esta estilista. Es opcional y puedes dejar de recibirlos cuando quieras.",
     "sendCodeError": "No pudimos enviar un código. Revisa tus datos e inténtalo de nuevo.",

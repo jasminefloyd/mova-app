@@ -1,0 +1,152 @@
+Path: /BID-1/clients
+
+Clients
+Import
+Search name or phone
+All · 36
+Due to rebook · 0
+New
+DG
+Demo Guest 01
+CID 1 · No visits yet
+New
+DG
+Demo Guest 02
+CID 2 · Silk Press · Nov 22, 2026
+Today
+DG
+Demo Guest 03
+CID 3 · Hydration Treatment · Nov 22, 2026
+Today
+DG
+Demo Guest 04
+CID 4 · Protective Style Consultation · Nov 22, 2026
+Today
+DG
+Demo Guest 05
+CID 5 · Hydration Treatment · Nov 11, 2026 · Opted out
+QA
+QA Accept-booking
+CID 7 · No visits yet
+New
+QA
+QA ArtistCancel-operations
+CID 19 · No visits yet
+New
+QB
+QA BookedIdentity-remaining
+CID 23 · No visits yet
+New
+QC
+QA CancelGuest-booking
+CID 10 · No visits yet
+New
+QC
+QA CancelGuest-retest
+CID 30 · No visits yet
+New
+QC
+QA Card Name
+CID 26 · No visits yet
+New
+QC
+QA Cash-retest
+CID 31 · No visits yet
+New
+QC
+QA ClaimIdentity-remaining
+CID 24 · Silk Press · Nov 20, 2026
+QC
+QA Complete-operations
+CID 21 · Silk Press · Nov 21, 2026
+QD
+QA Decline-booking
+CID 8 · No visits yet
+New
+QD
+QA Decline-reproduction
+CID 13 · No visits yet
+New
+QD
+QA Decline-retest
+CID 27 · No visits yet
+New
+QE
+QA Early-retest
+CID 34 · No visits yet
+New
+QE
+QA Early-setup
+CID 15 · No visits yet
+New
+QI
+QA Instant-booking
+CID 6 · No visits yet
+New
+QL
+QA Late-retest
+CID 35 · No visits yet
+New
+QL
+QA Late-setup
+CID 16 · No visits yet
+New
+QM
+QA Move-booking
+CID 9 · No visits yet
+New
+QM
+QA Move-reproduction
+CID 14 · No visits yet
+New
+QM
+QA Move-retest
+CID 28 · No visits yet
+New
+QN
+QA NoShow-operations
+CID 20 · No visits yet
+New
+QN
+QA Notes-operations
+CID 22 · No visits yet
+New
+QO
+QA Other-retest
+CID 32 · No visits yet
+New
+QO
+QA Overlap-retest
+CID 36 · No visits yet
+New
+QO
+QA Overlap-setup
+CID 17 · No visits yet
+New
+QR
+QA RebookIdentity-remaining
+CID 25 · Silk Press · Nov 19, 2026
+QR
+QA Review-remaining
+CID 29 · Silk Press · Nov 21, 2026
+QS
+QA Salon-booking
+CID 12 · No visits yet
+New
+QS
+QA Salon-retest
+CID 33 · No visits yet
+New
+QS
+QA StylistMove-operations
+CID 18 · No visits yet
+New
+QM
+Quinn Manual-booking
+CID 11 · No visits yet
+New
+Home
+Calendar
+Clients
+Reviews
+Reports

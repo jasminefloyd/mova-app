@@ -1,0 +1,80 @@
+Path: /BID-1/settings/services
+
+Settings
+
+Manage what clients can book
+
+Services
+Add
+Silk Press
+Styling
+$120.00
+90 min · 15 min buffer
+Deposit
+No deposit
+Location pricing
+Base price at 3 locations
+Shown on booking page
+Active
+Edit
+Deactivate
+Hydration Treatment
+Treatment
+$80.00
+60 min · 10 min buffer
+Deposit
+$20.00
+Location pricing
+Base price at 3 locations
+Shown on booking page
+Active
+Edit
+Deactivate
+Protective Style Consultation
+Consultation
+$25.00
+30 min · 0 min buffer
+Deposit
+25%
+Location pricing
+Base price at 3 locations
+Shown on booking page
+Active
+Edit
+Deactivate
+QA Closed Service booking
+Styling
+$120.00
+360 min · 15 min buffer
+Deposit
+No deposit
+Location pricing
+1 locations assigned · Rooted Beauty Studio custom pricing or time
+Shown on booking page
+Active
+Edit
+Deactivate
+QA second service-remaining
+Styling
+$30.00
+30 min · 0 min buffer
+Deposit
+No deposit
+Location pricing
+Base price at 3 locations
+Shown on booking page
+Active
+Edit
+Deactivate
+QA New Service-retest
+Synthetic salon service
+$95.00
+45 min · 0 min buffer
+Deposit
+No deposit
+Location pricing
+1 locations assigned
+Shown on booking page
+Active
+Edit
+Deactivate

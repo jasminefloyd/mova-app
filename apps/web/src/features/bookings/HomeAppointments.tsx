@@ -233,7 +233,7 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
       <KPITile label={t('homeAppointments.rating')} value={metrics.rating} delta={metrics.ratingCount} tone="inverse" />
     </Link>
 
-    {needsError && online
+    {needsError && online && !needsCount
       ? <section className="mova-home__section"><SectionOverline>{t('homeAppointments.needsYou', { count: needsCount })}</SectionOverline><ErrorState title={t('homeAppointments.needsError')} retryLabel={t('homeAppointments.retry')} onRetry={() => void load()} /></section>
       : <HomeNeedsSection businessId={businessId} needsYou={needsYou} quoteNeeds={quoteNeeds} slotNeeds={slotNeeds} locationById={locationById} now={now} />}
 
