@@ -70,7 +70,7 @@ export function RevenueHomePage() {
         { path: 'growth/marketing', icon: 'send', title: t('marketing.title'), detail: t('marketing.draftsOnly') },
         { path: 'growth/templates', icon: 'check', title: t('revenue.templates') },
         { path: 'growth/activity', icon: 'clock', title: t('revenue.activity'), detail: t('revenue.hub.activityDetail') },
-        { path: 'growth/price-pilot', icon: 'reports', variant: 'muted', title: t('revenue.pricePilot.title'), detail: t('revenue.pricePilot.shortStatus') },
+        { path: 'growth/price-pilot', icon: 'reports', title: t('revenue.pricePilot.title'), detail: t('revenue.pricePilot.shortStatus') },
       ],
     },
   ];

@@ -45,7 +45,7 @@ test('Revenue Center lays out tappable tiles and keeps the forecast readable at 
   await expect(winback).toBeVisible();
   const concierge = followUp.getByRole('link', { name: /Concierge/ });
   const tools = page.getByRole('region', { name: 'Tools & activity' }).getByRole('link');
-  await expect(tools).toHaveText([/Marketing.*Drafts only/, /Approved messages/, /Activity/, /PricePilot.*Coming soon/]);
+  await expect(tools).toHaveText([/Marketing.*Drafts only/, /Approved messages/, /Activity/, /PricePilot.*Early access/]);
 
   for (const width of [320, 390, 430]) {
     await page.setViewportSize({ width, height: 780 });

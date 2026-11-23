@@ -7,6 +7,7 @@ import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 import { processAccountClosures } from '../_shared/account-closure-mail.ts';
 import { sendSystemLogAlert } from '../_shared/system-log-alert.ts';
+import { runPricePilotTick } from '../_shared/price-pilot-worker.ts';
 
 const equal = (left: string, right: string) => {
   if (left.length !== right.length) return false;
@@ -70,7 +71,10 @@ Deno.serve(withSystemRequestLogging('job-dispatch', async (request) => {
         autopilot += result.sent;
       }
     }
-    return respond({ enqueued: data, reminders, stylist_reminders: stylistReminders ?? 0, trial_messages: trialMessages ?? 0, expired_market_locations: expiredMarketLocations ?? 0, seat_filler: { expired: expired ?? 0, waves }, autopilot });
+    // PricePilot (CR-019): weekly nearby-salon search and menu reading for stylists who turned it on.
+    // Its own budget keeps the tick short; a provider outage leaves work queued for the next tick.
+    const pricePilot = await runPricePilotTick(db, (name) => Deno.env.get(name)).catch(() => null);
+    return respond({ enqueued: data, reminders, stylist_reminders: stylistReminders ?? 0, trial_messages: trialMessages ?? 0, expired_market_locations: expiredMarketLocations ?? 0, seat_filler: { expired: expired ?? 0, waves }, autopilot, price_pilot: pricePilot });
   } catch {
     return respond({ code: 'JOB_DISPATCH_FAILED' }, 503);
   }

@@ -76,7 +76,7 @@ export function normalizePlace(raw: RawPlace): PlaceCandidate | null {
  */
 export async function searchGooglePlaces(
   textQuery: string,
-  options: { apiKey: string | undefined; maxResults?: number; fetchImpl?: typeof fetch },
+  options: { apiKey: string | undefined; maxResults?: number; fetchImpl?: typeof fetch; near?: { lat: number; lng: number; radiusMeters: number } },
 ): Promise<PlacesSearchResult> {
   const apiKey = options.apiKey?.trim();
   if (!apiKey) return { configured: false, results: [] };
@@ -84,10 +84,38 @@ export async function searchGooglePlaces(
   const response = await fetchImpl(ENDPOINT, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey, 'x-goog-fieldmask': FIELD_MASK },
-    body: JSON.stringify({ textQuery, maxResultCount: Math.min(20, Math.max(1, options.maxResults ?? 10)), languageCode: 'en-US' }),
+    body: JSON.stringify({
+      textQuery, maxResultCount: Math.min(20, Math.max(1, options.maxResults ?? 10)), languageCode: 'en-US',
+      ...(options.near ? { locationBias: { circle: { center: { latitude: options.near.lat, longitude: options.near.lng }, radius: Math.min(50000, Math.max(100, options.near.radiusMeters)) } } } : {}),
+    }),
   });
   if (!response.ok) throw new Error(`GOOGLE_PLACES_HTTP_${response.status}`);
   const payload = (await response.json()) as { places?: RawPlace[] };
   const results = (payload.places ?? []).map(normalizePlace).filter((item): item is PlaceCandidate => item !== null);
   return { configured: true, results };
+}
+
+/**
+ * Live ratings for known places (PP2 "Reviews at nearby salons", PP5 stars). Ratings are read when the
+ * screen opens and never stored (Google Maps Platform terms); only place IDs are kept. Unknown places are skipped.
+ */
+export async function placeRatings(
+  placeIds: string[],
+  options: { apiKey: string | undefined; fetchImpl?: typeof fetch },
+): Promise<Map<string, { rating: number | null; reviewCount: number | null }>> {
+  const out = new Map<string, { rating: number | null; reviewCount: number | null }>();
+  const apiKey = options.apiKey?.trim();
+  if (!apiKey) return out;
+  const fetchImpl = options.fetchImpl ?? fetch;
+  await Promise.all([...new Set(placeIds)].slice(0, 12).map(async (id) => {
+    try {
+      const response = await fetchImpl(`https://places.googleapis.com/v1/places/${encodeURIComponent(id)}`, {
+        headers: { 'x-goog-api-key': apiKey, 'x-goog-fieldmask': 'id,rating,userRatingCount' }, signal: AbortSignal.timeout(8000),
+      });
+      if (!response.ok) return;
+      const raw = (await response.json()) as RawPlace;
+      out.set(id, { rating: finiteOrNull(raw.rating), reviewCount: finiteOrNull(raw.userRatingCount) });
+    } catch { /* a missing rating only hides the line */ }
+  }));
+  return out;
 }

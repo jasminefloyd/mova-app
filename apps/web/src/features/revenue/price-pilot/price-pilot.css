@@ -1,0 +1,161 @@
+/* PricePilot PP1–PP8, to the boards. Tokens only. */
+.mova-pp { display: flex; flex-direction: column; gap: 14px; padding-bottom: var(--space-6); }
+.mova-pp .mova-screen-header { margin-bottom: -6px; }
+.mova-pp-head { display: grid; gap: 4px; }
+.mova-pp-head h1 { margin: 0; font: 800 28px/1.15 var(--font-display); letter-spacing: -0.4px; color: var(--ink-primary); }
+.mova-pp h2 { margin: 0; font: 800 18px/1.25 var(--font-display); letter-spacing: -0.2px; color: var(--ink-primary); }
+.mova-pp-sub { margin: 0; color: var(--ink-muted); font-size: 14px; line-height: 1.4; }
+.mova-pp-small { font-size: 13px; }
+.mova-pp-tiny { font-size: 12px; }
+.mova-pp-center { text-align: center; padding: 0 8px; }
+.mova-pp-label { display: block; color: var(--ink-muted); font-size: 12.5px; font-weight: 600; letter-spacing: 0.2px; }
+.mova-pp-overline { margin: 0; color: var(--ink-muted); font-size: 12px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; }
+.mova-pp-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.mova-pp-right { text-align: right; }
+.mova-pp-h2 { margin: 4px 0 -4px; }
+.mova-pp-num { display: block; font: 800 24px/1.1 var(--font-display); letter-spacing: -0.5px; color: var(--ink-primary); }
+.mova-pp-num-s { font: 800 18px/1.1 var(--font-display); letter-spacing: -0.4px; color: var(--ink-primary); }
+.mova-pp-chevron { flex: none; color: var(--ink-muted); }
+
+.mova-pp-card.mova-card, .mova-pp-card { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); color: var(--ink-primary); text-decoration: none; }
+.mova-pp-main { gap: 14px; padding: 18px; }
+
+/* Chips */
+.mova-pp-chip { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 13px; font-size: 12.5px; font-weight: 700; white-space: nowrap; color: var(--ink-primary); }
+.mova-pp-chip--raise { background: color-mix(in srgb, var(--mint) 70%, var(--surface-alt)); }
+.mova-pp-chip--hold { background: var(--line-subtle); color: var(--ink-muted); }
+.mova-pp-chip--needs_data { background: var(--surface); border: 1px solid var(--line-control); color: var(--ink-muted); }
+
+/* Hero */
+.mova-pp-hero.mova-card { display: flex; flex-direction: column; gap: 14px; padding: 20px; border-radius: 24px; background: var(--forest); color: var(--ivory); }
+.mova-pp-hero h2 { color: var(--ivory); font-size: 22px; line-height: 1.2; }
+.mova-pp-hero p { margin: 0; color: var(--ivory); font-size: 14px; line-height: 1.45; opacity: 0.9; }
+.mova-pp-hero__label { font-size: 13px; font-weight: 600; opacity: 0.75; }
+.mova-pp-hero__big { margin-top: -12px; font: 800 34px/1.15 var(--font-display); letter-spacing: -0.5px; }
+.mova-pp-hero .mova-button { min-height: 52px; }
+.mova-pp-hero__error { color: var(--peach); }
+
+/* Filter pills (PP1) and service pills (PP5) */
+.mova-pp .mova-segmented { display: flex; gap: 8px; overflow-x: auto; padding: 0; border: 0; background: transparent; scrollbar-width: none; }
+.mova-pp .mova-segmented button { flex: none; height: 36px; min-height: 36px; padding: 0 14px; border: 0; border-radius: 18px; background: var(--line-subtle); color: var(--ink-primary); font-size: 14px; font-weight: 600; white-space: nowrap; box-shadow: none; }
+.mova-pp .mova-segmented button.is-selected { background: var(--forest); color: var(--ivory); }
+
+/* Service cards (PP1) */
+.mova-pp-list { display: flex; flex-direction: column; gap: 14px; }
+.mova-pp-service { gap: 10px; padding: 14px 16px; }
+.mova-pp-service strong { display: block; font-size: 16px; font-weight: 700; }
+.mova-pp-service small { display: block; color: var(--ink-muted); font-size: 13px; }
+.mova-pp-service > .mova-pp-row:last-child small { font-size: 12.5px; }
+.mova-pp-service--thin { gap: 6px; }
+.mova-pp-prices { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.mova-pp-prices > span:last-child { text-align: right; }
+.mova-pp-prices small { display: block; color: var(--ink-muted); font-size: 12.5px; font-weight: 600; letter-spacing: 0.2px; }
+.mova-pp-prices b { display: block; font: 800 20px/1.2 var(--font-display); letter-spacing: -0.5px; }
+.mova-pp-link { display: inline-flex; align-items: center; gap: 2px; min-height: 24px; color: var(--ink-primary); font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.mova-pp-foot { align-items: flex-start; padding: 2px 2px 0; }
+.mova-pp-foot .mova-pp-sub { max-width: 240px; font-size: 13px; }
+.mova-pp-foot .mova-pp-link { min-height: 44px; margin-top: -10px; }
+
+/* Price bar */
+.mova-pp-bar { position: relative; height: 10px; border-radius: 5px; background: var(--line-subtle); }
+.mova-pp-main .mova-pp-bar { margin: 12px 0 2px; }
+.mova-pp-bar__band { position: absolute; top: 0; bottom: 0; border-radius: 5px; background: color-mix(in srgb, var(--mint) 55%, var(--sage)); }
+.mova-pp-bar__you { position: absolute; top: -4px; width: 18px; height: 18px; margin-left: -9px; border: 3px solid var(--ivory); border-radius: 50%; background: var(--forest); }
+.mova-pp-bar__suggested { position: absolute; top: -3px; width: 16px; height: 16px; margin-left: -8px; border: 2.5px solid var(--forest); border-radius: 5px; background: var(--surface); transform: rotate(45deg); }
+.mova-pp-bar__median { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--ink-muted); }
+.mova-pp-edges { color: var(--ink-muted); font-size: 12px; }
+.mova-pp-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--ink-muted); font-size: 12.5px; }
+.mova-pp-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.mova-pp-legend i { display: inline-block; }
+.mova-pp-legend .is-you { width: 12px; height: 12px; border-radius: 50%; background: var(--forest); }
+.mova-pp-legend .is-suggested { width: 10px; height: 10px; border: 2px solid var(--forest); border-radius: 3px; transform: rotate(45deg); }
+.mova-pp-legend .is-range { width: 18px; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--mint) 55%, var(--sage)); }
+
+/* PP2 */
+.mova-pp-suggested { display: flex; align-items: baseline; gap: 10px; }
+.mova-pp-suggested strong { font: 800 40px/1.1 var(--font-display); letter-spacing: -0.5px; }
+.mova-pp-main > .mova-button, .mova-pp-apply > .mova-button, .mova-pp > .mova-button, .mova-pp-card > .mova-button { min-height: 52px; width: 100%; }
+.mova-pp-actions { justify-content: space-between; }
+.mova-pp-textbtn { min-height: 44px; padding: 0 8px; border: 0; background: transparent; color: var(--ink-primary); font: 700 15px var(--font-ui); cursor: pointer; }
+.mova-pp-textbtn.is-muted { color: var(--ink-muted); font-weight: 600; }
+.mova-pp-why { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; font-size: 15px; line-height: 1.4; }
+.mova-pp-why li { display: flex; gap: 12px; }
+.mova-pp-tickdot { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-top: 1px; border-radius: 50%; background: var(--forest); color: var(--surface); }
+.mova-pp-impact { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mova-pp-impact > div { display: grid; padding: 12px; border-radius: 14px; background: var(--line-subtle); }
+.mova-pp-impact > div.is-new { background: color-mix(in srgb, var(--mint) 70%, var(--surface-alt)); }
+.mova-pp-impact b { font: 800 22px/1.25 var(--font-display); letter-spacing: -0.5px; }
+.mova-pp-impact small { color: var(--ink-muted); font-size: 12.5px; }
+.mova-pp-rows.mova-card, .mova-pp-rows { gap: 0; padding: 0; }
+.mova-pp-linkrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 64px; padding: 14px 16px; border: 0; background: transparent; color: var(--ink-primary); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+.mova-pp-linkrow + .mova-pp-linkrow, .mova-pp-checks + .mova-pp-linkrow { border-top: 1px solid var(--line); }
+.mova-pp-linkrow strong { display: block; font-weight: 700; }
+.mova-pp-linkrow small { display: block; color: var(--ink-muted); font-size: 13px; }
+.mova-pp-linkrow[aria-expanded="true"] .mova-pp-chevron { transform: rotate(90deg); }
+.mova-pp-checks { display: grid; gap: 8px; margin: 0; padding: 0 16px 14px; list-style: none; font-size: 14px; }
+.mova-pp-checks li { display: flex; gap: 10px; }
+.mova-pp-checks li > span:first-child { width: 18px; font-weight: 800; text-align: center; }
+.mova-pp-checks li.is-fail { color: var(--ink-muted); }
+.mova-pp-title-m { font-size: 20px !important; }
+.mova-pp-progress { height: 10px; margin-top: 8px; border-radius: 5px; background: var(--line-subtle); overflow: hidden; }
+.mova-pp-progress i { display: block; height: 100%; border-radius: 5px; background: var(--forest); }
+
+/* PP3 sheet */
+.mova-sheet:has(.mova-pp-apply) .mova-sheet__panel { background: var(--ivory); }
+.mova-sheet:has(.mova-pp-apply) header h2 { font: 800 22px/1.2 var(--font-display); letter-spacing: -0.3px; }
+.mova-sheet:has(.mova-pp-apply) header .mova-icon-button { display: none; }
+.mova-pp-apply { display: flex; flex-direction: column; gap: 14px; }
+.mova-pp-apply__compare { display: flex; align-items: center; justify-content: space-around; padding: 16px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); text-align: center; }
+.mova-pp-apply__compare small { display: block; color: var(--ink-muted); font-size: 12.5px; font-weight: 600; }
+.mova-pp-apply__compare s, .mova-pp-apply__compare b { display: block; font: 800 26px/1.2 var(--font-display); letter-spacing: -0.5px; }
+.mova-pp-apply__compare s { color: var(--ink-muted); }
+.mova-pp-rules { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.mova-pp-rules li { display: flex; gap: 10px; }
+.mova-pp-rules svg { flex: none; margin-top: 2px; color: var(--forest); }
+
+/* PP4 */
+.mova-pp-pick { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
+.mova-pp-pick + .mova-pp-pick { border-top: 1px solid var(--line); }
+.mova-pp-pick input, .mova-pp-consent input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.mova-pp-pick__box { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 2px solid var(--forest); border-radius: 7px; background: var(--surface); color: var(--surface); }
+.mova-pp-pick input:checked + .mova-pp-pick__box, .mova-pp-consent input:checked + .mova-pp-pick__box { background: var(--forest); }
+.mova-pp-pick input:focus-visible + .mova-pp-pick__box, .mova-pp-consent input:focus-visible + .mova-pp-pick__box { outline: 2px solid var(--forest); outline-offset: 2px; }
+.mova-pp-pick__copy { flex: 1; min-width: 0; }
+.mova-pp-pick__copy strong { display: block; font-weight: 700; }
+.mova-pp-pick__copy small { display: block; color: var(--ink-muted); font-size: 13px; }
+.mova-pp-total.mova-card, .mova-pp-total { gap: 6px; border: 0; background: var(--line-subtle); }
+.mova-pp-total__big { font: 800 20px/1.2 var(--font-display); letter-spacing: -0.5px; }
+
+/* PP5 */
+.mova-pp-listrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; }
+.mova-pp-listrow + .mova-pp-listrow { border-top: 1px solid var(--line); }
+.mova-pp-listrow > span { min-width: 0; }
+.mova-pp-listrow strong { display: block; font-size: 15px; font-weight: 700; }
+.mova-pp-listrow small { display: block; color: var(--ink-muted); font-size: 12.5px; }
+.mova-pp-pill { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border: 1px solid var(--line-control); border-radius: 18px; background: var(--surface); color: var(--ink-primary); font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+
+/* PP7 */
+.mova-pp-where { gap: 14px; }
+.mova-pp-where .mova-toggle { padding: 0; }
+.mova-pp-where .mova-toggle + .mova-toggle { padding-top: 14px; border-top: 1px solid var(--line); }
+.mova-pp-where .mova-toggle > span:first-child { font-weight: 700; }
+.mova-pp-where .mova-toggle small { color: var(--ink-muted); font-size: 13px; font-weight: 400; }
+.mova-pp-add { display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 16px; }
+.mova-pp-consent { position: relative; display: flex; align-items: flex-start; gap: 12px; font-size: 14px; cursor: pointer; }
+.mova-pp-consent .mova-pp-pick__box { margin-top: 1px; }
+
+/* PP8 */
+.mova-pp--off .mova-pp-hero h2 { font-size: 24px; letter-spacing: -0.5px; }
+.mova-pp-preview.mova-card { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); opacity: 0.9; }
+.mova-pp-preview .mova-pp-label { text-transform: uppercase; }
+.mova-pp-how ol { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; font-size: 15px; line-height: 1.4; }
+.mova-pp-how li { display: flex; gap: 10px; }
+.mova-pp--off .mova-pp-tiny { font-size: 12.5px; }
+
+/* Board-size pills keep a 44px hit area. */
+.mova-pp .mova-segmented button, .mova-pp-pill { position: relative; }
+.mova-pp .mova-segmented button::after, .mova-pp-pill::after { content: ''; position: absolute; inset: -4px 0; }
+.mova-pp-card .mova-pp-link, .mova-pp-foot .mova-pp-link { min-height: 44px; }
+.mova-pp-main > a.mova-button { min-height: 52px; width: 100%; }
+.mova-pp-where .mova-toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; }
+.mova-pp-where .mova-toggle > span:first-child { display: grid; gap: 2px; }
