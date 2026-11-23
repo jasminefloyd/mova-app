@@ -17,6 +17,7 @@ export default [
   route('plan', '../src/app/PublicShell.tsx', { id: 'plan-shortcut-shell' }, [index('../src/app/routes/PlanAlias.tsx')]),
   route('auth', '../src/features/auth/AuthRedirect.tsx'),
   route('login', '../src/app/StylistAuthShell.tsx', { id: 'stylist-signin-shell' }, [index('../src/features/auth/StylistSignInPage.tsx')]),
+  route('account-closure', '../src/app/StylistAuthShell.tsx', { id: 'account-closure-shell' }, [index('../src/features/settings/AccountClosurePage.tsx')]),
   route('auth/confirm', '../src/app/StylistAuthShell.tsx', { id: 'stylist-auth-confirm-shell' }, [index('../src/features/auth/AuthConfirmPage.tsx')]),
   // Passwords are retired (passwordless email links); old reset links fall back to sign-in.
   route('reset-password', '../src/features/auth/AuthRedirect.tsx', { id: 'stylist-password-reset-redirect' }),

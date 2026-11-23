@@ -1,3 +1,4 @@
+import { accountAvailable } from '../_shared/account-closure.ts';
 import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { corsHeaders, respond, serviceClient, tokenHash } from '../_shared/booking.ts';
 
@@ -14,6 +15,7 @@ Deno.serve(withSystemRequestLogging('booking-status', async(request)=>{
   if(typeof token!=='string'||token.length<30)return respond({code:'BOOKING_NOT_FOUND'},404);
   const db=serviceClient();const {data:booking,error}=await db.from('mova_appointments').select('id,artist_business_id,client_name,status,starts_at,ends_at,service_id,service_name_snapshot,service_price_minor,deposit_due_minor,balance_due_minor,client_locale,request_expires_at,cancelled_at,location_id,reschedule_requested_starts_at,reschedule_requested_ends_at,artist_suggested_starts_at,artist_suggested_ends_at').eq('manage_token_hash',await tokenHash(token)).maybeSingle();
   if(error||!booking)return respond({code:'BOOKING_NOT_FOUND'},404);
+  if(!await accountAvailable(db,booking.artist_business_id))return respond({code:'BOOKING_NOT_FOUND'},404);
   const [{data:location},{data:artist},{data:services}]=await Promise.all([
     db.from('mova_locations').select('name,time_zone,booking_mode,calendar_ownership').eq('id',booking.location_id).maybeSingle(),
     db.from('mova_artist_profiles').select('display_name,handle').eq('artist_business_id',booking.artist_business_id).maybeSingle(),

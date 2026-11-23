@@ -1,3 +1,4 @@
+import { accountCanChangeBilling } from '../_shared/account-closure.ts';
 import { withSystemRequestLogging, loggedProviderFetch } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { planPriceId, StripeBillingError, verifiedSubscription, type PlanKey } from '../_shared/providers/stripe/billing.ts';
@@ -20,6 +21,7 @@ Deno.serve(withSystemRequestLogging('plan-management', async (request) => {
   const billingDb = db as unknown as BillingDb;
   const stripe = () => billingClientFromEnv(env, loggedProviderFetch(request, 'stripe'));
   const businessId = actor.businessId;
+  if (['after_trial','unlock','confirm'].includes(body.action) && !await accountCanChangeBilling(db, businessId)) return respond({ code: 'ACCOUNT_CLOSURE_SCHEDULED' }, 409);
 
   const owner = async () => {
     const { data } = await db.from('mova_artist_memberships').select('role').eq('artist_business_id', businessId)

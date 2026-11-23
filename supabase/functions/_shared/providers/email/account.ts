@@ -8,6 +8,7 @@ import type { EmailLocale } from './types.ts';
 export type AccountEmailVars = {
   subject: string; preview: string; headline: string; lead: string;
   rows: Array<[string, string]>; action: string; url: string; after: string;
+  secondary?: { label: string; url: string };
   firstName: string; tone?: 'forest' | 'alert'; postalAddress?: string | null;
 };
 
@@ -23,6 +24,7 @@ export function renderAccountEmail(locale: EmailLocale, vars: AccountEmailVars) 
   const lang = locale === 'es-US' ? 'es-US' : 'en-US';
   const c = COPY[lang];
   const url = /^https:\/\//i.test(vars.url) ? vars.url : 'https://mova-beauty.co/login';
+  const secondary = vars.secondary && /^https:\/\//i.test(vars.secondary.url) ? vars.secondary : null;
   const address = vars.postalAddress ? esc(vars.postalAddress).replace(/\n/g, '<br>') : '[MAILING ADDRESS]';
   const alert = vars.tone === 'alert';
   const heroStyle = alert ? 'background:#F6E3DF;border:1px solid #E8C4BC' : 'background:#18392F';
@@ -42,8 +44,9 @@ export function renderAccountEmail(locale: EmailLocale, vars: AccountEmailVars) 
     + `<tr><td style="padding:20px 32px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border:1px solid #DCE1D9;border-radius:20px;border-collapse:separate"><tr><td style="padding:6px 20px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table></td></tr></table></td></tr>`
     + `<tr><td style="padding:20px 32px 0"><a href="${esc(url)}" style="display:block;height:54px;line-height:54px;border-radius:27px;background:#18392F;color:#F7F5EF;text-align:center;text-decoration:none;font-family:${UI};font-size:16px;font-weight:700">${esc(vars.action)}</a></td></tr>`
     + `<tr><td style="padding:16px 32px 0;font-family:${UI};font-size:14px;line-height:1.55;color:#3F4D46">${esc(vars.after)}</td></tr>`
+    + (secondary ? `<tr><td style="padding:14px 32px 0;font-family:${UI};font-size:14px"><a style="color:#18392F" href="${esc(secondary.url)}">${esc(secondary.label)}</a></td></tr>` : '')
     + `<tr><td style="padding-top:24px"><div style="border-top:1px solid #DCE1D9;padding:20px 32px 26px;font-family:${UI};font-size:12px;line-height:1.55;color:#4F5F57">${esc(c.why)}<br><br><b style="font-family:${DISPLAY};font-size:14px;font-weight:800;color:#18392F">mova</b> · ${esc(c.tagline)} · mova-beauty.co<br>${address}</div></td></tr>`
     + `</table></td></tr></table></body></html>`;
-  const text = [c.for(vars.firstName), '', vars.headline, vars.lead, '', ...vars.rows.map(([title, body]) => `${title}: ${body}`), '', `${vars.action}: ${url}`, '', vars.after, '', c.why].join('\n');
+  const text = [c.for(vars.firstName), '', vars.headline, vars.lead, '', ...vars.rows.map(([title, body]) => `${title}: ${body}`), '', `${vars.action}: ${url}`, '', vars.after, ...(secondary ? [`${secondary.label}: ${secondary.url}`] : []), '', c.why].join('\n');
   return { subject: vars.subject, preview: vars.preview, text, html };
 }

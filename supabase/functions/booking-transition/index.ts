@@ -1,3 +1,4 @@
+import { accountAvailable } from '../_shared/account-closure.ts';
 import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient, tokenHash } from '../_shared/booking.ts';
 
@@ -13,6 +14,7 @@ Deno.serve(withSystemRequestLogging('booking-transition', async(request)=>{
   const idempotencyKey=request.headers.get('Idempotency-Key')??`${actorType}:${body.token??body.appointment_id}:${body.to_status??body.reschedule_action??body.suggestion_action??body.suggested_starts_at??body.artist_reschedule_starts_at}`;
   const {data:booking,error:lookupError}=await bookingQuery.maybeSingle();
   if(lookupError||!booking)return respond({code:'BOOKING_NOT_FOUND'},404);
+  if(!await accountAvailable(db,booking.artist_business_id))return respond({code:'BOOKING_NOT_FOUND'},404);
   if(actorType==='artist')hash=booking.manage_token_hash;
   if(typeof body.artist_reschedule_starts_at==='string'){if(actorType!=='artist'||!actor)return respond({code:'ARTIST_MEMBERSHIP_REQUIRED'},403);if(Number.isNaN(Date.parse(body.artist_reschedule_starts_at)))return respond({code:'INVALID_REQUEST'},422);const {data,error}=await db.rpc('mova_booking_reschedule_artist',{p_appointment_id:booking.id,p_artist_business_id:actor.businessId,p_new_starts_at:body.artist_reschedule_starts_at,p_idempotency_key:idempotencyKey,p_actor_id:actor.user.id});if(error)return respond({code:error.message||'ARTIST_RESCHEDULE_FAILED'},error.message==='SLOT_TAKEN'?409:422);return respond(data);}
   if(body.suggested_starts_at){if(actorType!=='artist'||!actor)return respond({code:'ARTIST_MEMBERSHIP_REQUIRED'},403);if(Number.isNaN(Date.parse(body.suggested_starts_at)))return respond({code:'INVALID_REQUEST'},422);const {data,error}=await db.rpc('mova_booking_suggest_time',{p_appointment_id:booking.id,p_artist_business_id:actor.businessId,p_suggested_starts_at:body.suggested_starts_at,p_idempotency_key:idempotencyKey,p_actor_id:actor.user.id});if(error)return respond({code:error.message||'TIME_SUGGESTION_FAILED'},error.message==='SLOT_TAKEN'?409:422);return respond(data);}

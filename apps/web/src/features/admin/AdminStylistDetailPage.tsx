@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminErrorText, adminRpc, isAdminError, type AuditPage, type StylistDetail, type StylistFeatureControls, type StylistRuntimeSwitches } from './admin-api';
 import { formatCount, formatDate, formatDateTime, formatFeeBps, formatMoneyMinor, formatPercent, initials } from './admin-format';
 import { Card, ConfirmDialog, ErrorNote, Kpi, Loading, Pill } from './AdminPrimitives';
+import { AdminAccountClosure } from './AdminAccountClosure';
 import { AdminTrialCard } from './AdminTrialCard';
 
 const featureLabels: Record<string, { name: string; note: string }> = {
@@ -256,11 +257,12 @@ export default function AdminStylistDetailPage() {
             <Link className="btn sm wide" to={`/admin/fees?stylist=${businessId}`}>Change fee for {firstName}</Link>
           </Card>
           <AdminTrialCard businessId={businessId} />
+          <AdminAccountClosure businessId={businessId} displayName={displayName} />
           <Card title="Account actions">
             <p className="small muted">Each action asks for a reason and is logged.</p>
             <div className="action-grid">
               <button type="button" className="btn sm danger" onClick={() => setUnpublishOpen(true)} disabled={!d.profile?.is_published}>Unpublish page</button>
-              <button type="button" className="btn sm danger" onClick={() => setSuspensionOpen(true)}>{d.business.status === 'suspended' ? 'Restore account' : 'Suspend account'}</button>
+              <button type="button" className="btn sm danger" onClick={() => setSuspensionOpen(true)}>{d.business.status === 'suspended' ? 'Lift suspension' : 'Suspend access'}</button>
             </div>
           </Card>
         </div>

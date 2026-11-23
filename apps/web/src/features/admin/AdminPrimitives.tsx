@@ -80,8 +80,8 @@ export function Segmented<T extends string>({ label, value, options, onChange, v
 }
 
 /** Confirmation dialog. When `reasonRequired` is set the action sends the reason the staff member wrote. */
-export function ConfirmDialog({ open, title, body, confirmLabel, danger, reasonRequired, busy, error, onCancel, onConfirm }: {
-  open: boolean; title: string; body: ReactNode; confirmLabel: string; danger?: boolean; reasonRequired?: boolean;
+export function ConfirmDialog({ open, title, body, confirmLabel, cancelLabel = 'Cancel', danger, reasonRequired, busy, error, onCancel, onConfirm }: {
+  open: boolean; title: string; body: ReactNode; confirmLabel: string; cancelLabel?: string; danger?: boolean; reasonRequired?: boolean;
   busy?: boolean; error?: string | null; onCancel: () => void; onConfirm: (reason: string) => void;
 }) {
   if (!open) return null;
@@ -108,7 +108,7 @@ export function ConfirmDialog({ open, title, body, confirmLabel, danger, reasonR
         ) : null}
         <ErrorNote message={error} />
         <div className="row" style={{ justifyContent: 'flex-end' }}>
-          <button type="button" className="btn ghost" onClick={onCancel} disabled={busy}>Cancel</button>
+          <button type="button" className="btn ghost" onClick={onCancel} disabled={busy}>{cancelLabel}</button>
           <button type="submit" className={`btn ${danger ? 'danger' : 'pri'}`} disabled={busy}>{busy ? 'Working…' : confirmLabel}</button>
         </div>
       </form>

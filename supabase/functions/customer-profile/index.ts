@@ -1,3 +1,4 @@
+import { accountAvailable } from '../_shared/account-closure.ts';
 import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 import { corsHeaders, respond, serviceClient, tokenHash } from '../_shared/booking.ts';
@@ -65,7 +66,9 @@ Deno.serve(withSystemRequestLogging('customer-profile', async(request)=>{
       if(phoneValues.length)queries.push(db.from('mova_appointments').select('id,artist_business_id,client_id,customer_account_id,service_name_snapshot,starts_at,status,location_id').in('client_phone_normalized',phoneValues).lt('starts_at',new Date().toISOString()).order('starts_at',{ascending:false}).limit(100));
       const results=await Promise.all(queries);if(results.some((result)=>result.error))return respond({code:'CLAIM_LOOKUP_FAILED'},500);
       const candidates=new Map<string,Record<string,unknown>>();for(const result of results)for(const appointment of result.data??[])candidates.set(appointment.id,appointment as unknown as Record<string,unknown>);
-      const rows=[...candidates.values()];const businessIds=[...new Set(rows.map((row)=>row.artist_business_id as string))];const locationIds=[...new Set(rows.map((row)=>row.location_id as string))];
+      const candidatesByBusiness=[...new Set([...candidates.values()].map(row=>row.artist_business_id as string))];
+      const available=new Set((await Promise.all(candidatesByBusiness.map(async id=>await accountAvailable(db,id)?id:null))).filter(Boolean));
+      const rows=[...candidates.values()].filter(row=>available.has(row.artist_business_id as string));const businessIds=[...new Set(rows.map((row)=>row.artist_business_id as string))];const locationIds=[...new Set(rows.map((row)=>row.location_id as string))];
       const appointmentIds=rows.map((row)=>row.id as string);
       const [profilesResult,locationsResult,linksResult]=await Promise.all([
         businessIds.length?db.from('mova_artist_profiles').select('artist_business_id,display_name,handle').in('artist_business_id',businessIds):Promise.resolve({data:[],error:null}),
@@ -110,6 +113,7 @@ Deno.serve(withSystemRequestLogging('customer-profile', async(request)=>{
       const stylists:Array<{business_id:string;name:string;handle:string;photo_path:string|null;consents:{appointment_updates:boolean;reminders:boolean;offers:boolean;email_reminders:boolean;email_offers:boolean;push_reminders:boolean;push_offers:boolean}}>=[];
       const upcoming:Array<{id:string;service:string;starts_at:string;status:string;artist:string;handle:string;location:string}>=[];
       for(const link of links??[]){
+        if(!await accountAvailable(db,link.artist_business_id))continue;
         const profile=profiles.get(link.artist_business_id);
         const businessName=profile?.display_name??businessNames.get(link.artist_business_id)??'';
         const {data:consents}=await db.from('mova_client_consents').select('purpose,channel,granted,changed_at').eq('artist_business_id',link.artist_business_id).eq('client_id',link.client_id).order('changed_at',{ascending:false});
@@ -132,6 +136,7 @@ Deno.serve(withSystemRequestLogging('customer-profile', async(request)=>{
       if(contactError||linkError)return respond({code:'CLIENT_EXPORT_FAILED'},500);
       const appointments:Record<string,unknown>[]=[];const consents:Record<string,unknown>[]=[];const reviews:Record<string,unknown>[]=[];
       for(const link of links??[]){
+        if(!await accountAvailable(db,link.artist_business_id))continue;
         const [appointmentRows,consentRows]=await Promise.all([
           allExportPages((from,to)=>db.from('mova_appointments').select('id,appointment_number,starts_at,ends_at,status,service_name_snapshot,service_price_minor,currency,location_id,artist_business_id,client_id').eq('artist_business_id',link.artist_business_id).eq('client_id',link.client_id).order('starts_at',{ascending:false}).range(from,to)),
           allExportPages((from,to)=>db.from('mova_client_consents').select('purpose,channel,granted,locale,changed_at').eq('artist_business_id',link.artist_business_id).eq('client_id',link.client_id).order('changed_at',{ascending:false}).range(from,to)),
@@ -159,6 +164,7 @@ Deno.serve(withSystemRequestLogging('customer-profile', async(request)=>{
         businessId=artist.artist_business_id;purpose='rebooking_reminders';
       }
       if(typeof businessId!=='string'||!['appointment_updates','rebooking_reminders','offers'].includes(purpose)||!['sms','email','push'].includes(channel)||typeof granted!=='boolean')return respond({code:'INVALID_CONSENT'},422);
+      if(!await accountAvailable(db,businessId))return respond({code:'ARTIST_NOT_AVAILABLE'},404);
       const {data:link}=await db.from('mova_client_customer_links').select('client_id').eq('customer_account_id',account.id).eq('artist_business_id',businessId).is('unlinked_at',null).maybeSingle();if(!link)return respond({code:'CLIENT_LINK_NOT_FOUND'},404);
       const purposes=body.action==='consent-by-handle'?['rebooking_reminders','offers']:[purpose];const rows=purposes.map((consentPurpose:string)=>({artist_business_id:businessId,client_id:link.client_id,purpose:consentPurpose,channel,granted,locale:account.preferred_locale,changed_by:user.id,evidence:{source:'client_profile',verified_contact:true}}));
       const {error}=await db.from('mova_client_consents').insert(rows);

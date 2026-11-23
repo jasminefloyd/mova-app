@@ -1,3 +1,4 @@
+import { accountAvailable } from '../_shared/account-closure.ts';
 import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { serviceClient, respond, corsHeaders } from '../_shared/booking.ts';
 import { sha256Hex } from '../_shared/provider-crypto.ts';
@@ -13,6 +14,7 @@ Deno.serve(withSystemRequestLogging('client-card-landing', async (request) => {
   const { data: card } = await db.from('mova_client_card_tokens').select('artist_business_id,client_id,customer_account_id')
     .eq('token_hash', await sha256Hex(body.token)).is('revoked_at', null).maybeSingle();
   if (!card) return respond({ code: 'CARD_NOT_AVAILABLE' }, 404);
+  if (!await accountAvailable(db, card.artist_business_id)) return respond({ code: 'CARD_NOT_AVAILABLE' }, 404);
   const { data: link } = await db.from('mova_client_customer_links').select('id')
     .eq('artist_business_id', card.artist_business_id).eq('client_id', card.client_id)
     .eq('customer_account_id', card.customer_account_id).is('unlinked_at', null).maybeSingle();

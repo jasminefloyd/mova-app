@@ -1,3 +1,4 @@
+import { accountCanChangeBilling } from '../_shared/account-closure.ts';
 import { withSystemRequestLogging, loggedProviderFetch } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
 import { planPriceId } from '../_shared/providers/stripe/billing.ts';
@@ -12,6 +13,7 @@ Deno.serve(withSystemRequestLogging('trial-start', async (request) => {
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
   const actor = await artistClient(request);
   if (!actor) return respond({ code: 'UNAUTHENTICATED' }, 401);
+  if (!await accountCanChangeBilling(serviceClient(), actor.businessId)) return respond({ code: 'ACCOUNT_CLOSURE_SCHEDULED' }, 409);
   const env = (name: string) => Deno.env.get(name);
   const db = serviceClient();
   const body = await request.json().catch(() => ({}));

@@ -18,7 +18,7 @@ export class StripeBillingClient {
     if (!inferredMode || (mode && mode !== inferredMode)) throw new Error('STRIPE_BILLING_KEY_MODE_INVALID');
     this.mode = mode ?? inferredMode;
   }
-  private async call(method: 'GET' | 'POST', path: string, form?: URLSearchParams) {
+  private async call(method: 'GET' | 'POST' | 'DELETE', path: string, form?: URLSearchParams) {
     const response = await this.fetcher(`https://api.stripe.com/v1${path}`, {
       method, headers: { Authorization: `Bearer ${this.secretKey}`, ...(form ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}) }, ...(form ? { body: form.toString() } : {}),
     });
@@ -54,6 +54,11 @@ export class StripeBillingClient {
   updateSubscription(subscriptionId: string, form: URLSearchParams) {
     if (!/^sub_[A-Za-z0-9]+$/.test(subscriptionId)) throw new Error('STRIPE_SUBSCRIPTION_ID_INVALID');
     return this.call('POST', `/subscriptions/${encodeURIComponent(subscriptionId)}`, form);
+  }
+  cancelSubscription(subscriptionId: string) {
+    if (!/^sub_[A-Za-z0-9]+$/.test(subscriptionId)) throw new Error('STRIPE_SUBSCRIPTION_ID_INVALID');
+    // Stripe defaults invoice_now and prorate to false for this endpoint.
+    return this.call('DELETE', `/subscriptions/${encodeURIComponent(subscriptionId)}`);
   }
   /** Charges the card on file right away; throws StripeBillingError with Stripe's decline code when it can't. */
   async createSubscription(form: URLSearchParams) {

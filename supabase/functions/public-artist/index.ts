@@ -42,6 +42,9 @@ Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
   const { data: business, error: businessError } = await supabase.from('mova_artist_businesses').select('status').eq('id', profile.artist_business_id).maybeSingle();
   if (businessError) return respond({ code: 'PUBLIC_ARTIST_UNAVAILABLE' }, 503);
   if (business?.status !== 'active') return respond({ code: 'NOT_FOUND' }, 404);
+  const { data: available, error: accessError } = await supabase.rpc('mova_account_available', { p_business: profile.artist_business_id });
+  if (accessError) return respond({ code: 'PUBLIC_ARTIST_UNAVAILABLE' }, 503);
+  if (!available) return respond({ code: 'NOT_FOUND' }, 404);
 
   // Only expose reviews the stylist has approved for public display. Never infer
   // a rating from private, pending, or rejected review rows.

@@ -38,6 +38,7 @@ export async function fulfillJson(route: Route, value: unknown, status = 200) {
 
 /** Stubs for the functions the shell calls on every admin page. Screens override these by name. */
 export const shellStubs: Record<string, (body: Record<string, unknown>) => unknown> = {
+  mova_admin_account_closures: () => [],
   mova_admin_support_list: () => ({ messages: [], counts: { all: 0, new: 0, in_progress: 0, waiting_on_stylist: 0, resolved: 0 } }),
   mova_admin_health: () => ({
     checked_at: new Date().toISOString(),
@@ -68,6 +69,7 @@ export async function mockAdminApi(page: Page, options: {
     const path = new URL(route.request().url()).pathname;
     if (path.endsWith('/user')) return fulfillJson(route, adminUser);
     if (path.endsWith('/token')) return fulfillJson(route, session('aal1'));
+    if (path === '/auth/v1/verify') return fulfillJson(route, session('aal1'));
     if (path.endsWith('/verify')) return fulfillJson(route, session('aal2'));
     if (path.endsWith('/challenge')) return fulfillJson(route, { id: 'challenge-1', expires_at: Math.floor(Date.now() / 1000) + 300 });
     return fulfillJson(route, {});

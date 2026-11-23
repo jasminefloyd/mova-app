@@ -5,6 +5,7 @@ import { sendNextWave } from '../_shared/seat-filler.ts';
 import { growthTextsEnabled, runAutopilot } from '../_shared/autopilot.ts';
 import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 import { planFeatureEnabled } from '../_shared/plan-feature.ts';
+import { processAccountClosures } from '../_shared/account-closure-mail.ts';
 import { sendSystemLogAlert } from '../_shared/system-log-alert.ts';
 
 const equal = (left: string, right: string) => {
@@ -26,6 +27,11 @@ Deno.serve(withSystemRequestLogging('job-dispatch', async (request) => {
 
   try {
     const db = serviceClient();
+    // The same minute-by-minute schedule enforces access endings and delivers the account emails.
+    // An email outage must not stop existing appointment jobs.
+    await processAccountClosures(db, name => Deno.env.get(name)).catch(error => {
+      console.error('Account closure dispatch failed', error instanceof Error ? error.message : 'UNKNOWN');
+    });
     await db.rpc('mova_system_logs_cleanup');
     const { data: expiredMarketLocations, error: marketLocationCleanupError } = await db.rpc('mova_price_pilot_expire_market_locations');
     if (marketLocationCleanupError) return respond({ code: 'JOB_DISPATCH_FAILED' }, 503);

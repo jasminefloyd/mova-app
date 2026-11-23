@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { AdminAccountRequests } from './AdminAccountClosure';
 import { AdminNav } from './AdminNav';
 import { currentAdminSession, IDLE_LIMIT_MS, signOutAdmin } from './admin-session';
 import { Loading } from './AdminPrimitives';
@@ -48,6 +49,7 @@ export default function AdminLayout() {
       <div className="shell">
         <AdminNav name={session.data.displayName} />
         <main className="main">
+          <AdminAccountRequests />
           <Outlet />
         </main>
       </div>

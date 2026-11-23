@@ -18,6 +18,6 @@ export async function sendStylistEmailCode(supabase: Supabase, options: {
   });
   if (!error) return { ok: true };
   // Sign-in for an email with no account: answer the same way as success so the page never reveals who has an account.
-  if (!options.create && /signups? not allowed|user not found/i.test(error.message)) return { ok: true, unknownAccount: true };
+  if (!options.create && (error.code === 'user_banned' || /signups? not allowed|user not found|user is banned/i.test(error.message))) return { ok: true, unknownAccount: true };
   return { ok: false };
 }

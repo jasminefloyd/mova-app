@@ -1,3 +1,4 @@
+import { accountAvailable } from '../_shared/account-closure.ts';
 import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.0';
 import { searchAvailability } from '../../../packages/domain/src/availability.ts';
@@ -18,6 +19,7 @@ Deno.serve(withSystemRequestLogging('availability-search', async(request)=>{
   const {data:services,error:serviceError}=await db.from('mova_services').select('id,artist_business_id,duration_minutes,buffer_minutes,status,deposit_type,deposit_value,location_assignment_mode').in('id',serviceIds).eq('status','active');
   if(serviceError||!services||services.length!==serviceIds.length||new Set(services.map((service)=>service.artist_business_id)).size!==1)return respond({code:'SERVICE_NOT_BOOKABLE'},404);
   const artistBusinessId=services[0]!.artist_business_id;
+  if(!await accountAvailable(db,artistBusinessId))return respond({code:'SERVICE_NOT_BOOKABLE'},404);
   const {data:business,error:businessError}=await db.from('mova_artist_businesses').select('status').eq('id',artistBusinessId).maybeSingle();
   if(businessError)return respond({code:'AVAILABILITY_UNAVAILABLE'},503);
   if(business?.status!=='active')return respond({code:'SERVICE_NOT_BOOKABLE'},404);

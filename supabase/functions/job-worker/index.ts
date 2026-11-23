@@ -26,6 +26,11 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
   if (error || !event) throw new Error('OUTBOX_EVENT_READ_FAILED');
   const outboxEvent = event as OutboxEvent;
   // Task 5.1: a cancelled or no-show slot becomes a seat-filler campaign (sending stays behind its flag).
+  if (outboxEvent.artist_business_id) {
+    const { data: available, error } = await db.rpc('mova_account_available', { p_business: outboxEvent.artist_business_id });
+    if (error) throw new Error('ACCOUNT_ACCESS_CHECK_FAILED');
+    if (!available) return;
+  }
   if (outboxEvent.event_type === 'slot.opened') {
     const env = (name: string) => Deno.env.get(name);
     await consumeSlotOpened(db, smsProviderFromEnv(env), outboxEvent.id, env);
@@ -237,19 +242,27 @@ Deno.serve(withSystemRequestLogging('job-worker', async (request) => {
         if (feeError) throw new Error('STRIPE_FEE_SAVE_FAILED');
       } else if (job.job_type === 'account_sms' && typeof job.payload?.user_id === 'string' && typeof job.payload?.body === 'string') {
         // A trial or billing text held for quiet hours (9:00–20:00 business time).
-        const env = (name: string) => Deno.env.get(name);
-        const { data: consent } = await db.from('mova_account_sms_consents').select('phone_e164').eq('user_id', job.payload.user_id).is('revoked_at', null).maybeSingle();
-        const outcome = await sendAccountSms(db as never, smsProviderFromEnv(env), env, {
-          userId: job.payload.user_id, artistBusinessId: job.payload.artist_business_id, phone: consent?.phone_e164 ?? null,
-          eventType: String(job.payload.event_type), body: job.payload.body, idempotencyKey: String(job.payload.idempotency_key),
-          timeZone: String(job.payload.time_zone || 'America/New_York'), trialStartedAt: job.payload.trial_started_at ?? null,
-        });
-        if (outcome.status === 'failed') throw new Error('ACCOUNT_SMS_FAILED');
+        const { data: canSend, error: accessError } = await db.rpc('mova_account_available', { p_business: job.payload.artist_business_id });
+        if (accessError) throw new Error('ACCOUNT_ACCESS_CHECK_FAILED');
+        if (canSend) {
+          const env = (name: string) => Deno.env.get(name);
+          const { data: consent } = await db.from('mova_account_sms_consents').select('phone_e164').eq('user_id', job.payload.user_id).is('revoked_at', null).maybeSingle();
+          const outcome = await sendAccountSms(db as never, smsProviderFromEnv(env), env, {
+            userId: job.payload.user_id, artistBusinessId: job.payload.artist_business_id, phone: consent?.phone_e164 ?? null,
+            eventType: String(job.payload.event_type), body: job.payload.body, idempotencyKey: String(job.payload.idempotency_key),
+            timeZone: String(job.payload.time_zone || 'America/New_York'), trialStartedAt: job.payload.trial_started_at ?? null,
+          });
+          if (outcome.status === 'failed') throw new Error('ACCOUNT_SMS_FAILED');
+        }
       } else if (job.job_type === 'appointment_reminder' && typeof job.payload?.appointment_id === 'string') {
-        const emailProvider = emailProviderFromEnv((name) => Deno.env.get(name));
-        if (!emailProvider) throw new Error('EMAIL_PROVIDER_NOT_CONFIGURED');
-        const outcome = await sendAppointmentEmail(db as unknown as EmailDb, emailProvider, job.payload.appointment_id, 'appointment.reminder', `email:${job.idempotency_key ?? job.id}`);
-        if (outcome?.status === 'failed') throw new Error('APPOINTMENT_EMAIL_FAILED');
+        const { data: canSend, error: accessError } = await db.rpc('mova_account_available', { p_business: job.artist_business_id });
+        if (accessError) throw new Error('ACCOUNT_ACCESS_CHECK_FAILED');
+        if (canSend) {
+          const emailProvider = emailProviderFromEnv((name) => Deno.env.get(name));
+          if (!emailProvider) throw new Error('EMAIL_PROVIDER_NOT_CONFIGURED');
+          const outcome = await sendAppointmentEmail(db as unknown as EmailDb, emailProvider, job.payload.appointment_id, 'appointment.reminder', `email:${job.idempotency_key ?? job.id}`);
+          if (outcome?.status === 'failed') throw new Error('APPOINTMENT_EMAIL_FAILED');
+        }
       } else {
         throw new Error('JOB_TYPE_UNSUPPORTED');
       }

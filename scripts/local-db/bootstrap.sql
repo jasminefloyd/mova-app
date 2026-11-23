@@ -29,12 +29,17 @@ create table if not exists auth.users (
   email_confirmed_at timestamptz,
   phone_confirmed_at timestamptz,
   last_sign_in_at timestamptz,
+  banned_until timestamptz,
   raw_user_meta_data jsonb default '{}'::jsonb,
   raw_app_meta_data jsonb default '{}'::jsonb,
   is_anonymous boolean default false,
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
   deleted_at timestamptz
+);
+create table if not exists auth.sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade
 );
 create table if not exists auth.audit_log_entries (
   id uuid primary key default gen_random_uuid(),
