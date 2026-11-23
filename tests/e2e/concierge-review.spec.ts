@@ -17,6 +17,7 @@ test('the Revenue Center exposes read-only Concierge only to the review workspac
         aiEnabled: false,
       } } });
     });
+    await expect(link).toContainText('Read-only review · Replies paused');
     await expect(link).toHaveAttribute('href', '/BID-1/growth/concierge');
     await link.click();
     await expect(page.getByRole('heading', { name: 'AI Concierge', exact: true })).toBeVisible();
