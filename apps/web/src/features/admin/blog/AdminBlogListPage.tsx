@@ -58,13 +58,14 @@ export default function AdminBlogListPage() {
       {d ? (
         <div className="kpi-grid">
           <Kpi label="Published" value={formatCount(d.counts.published)} />
-          <Kpi label="Scheduled" value={formatCount(d.counts.scheduled)} note={next ? `Next: ${next.title}, ${formatDateTime(next.published_at)}` : 'Nothing scheduled'} />
+          <Kpi label="Scheduled" value={formatCount(d.counts.scheduled)} note={next && typeof next === 'object' && next.title && next.published_at ? `Next: ${next.title}, ${formatDateTime(next.published_at)}` : 'Nothing scheduled'} />
           <Kpi label="Drafts" value={formatCount(d.counts.drafts)} />
           <Kpi label="Missing a meta description" value={formatCount(d.summary.missing_meta_description)} note={d.summary.missing_meta_description > 0 ? 'Fix before publishing' : 'All set'} />
         </div>
       ) : null}
       <div className="toolbar">
         <Segmented
+          variant="chips"
           label="Guide status"
           value={status}
           onChange={setStatus}
@@ -75,7 +76,7 @@ export default function AdminBlogListPage() {
             { value: 'drafts', label: 'Drafts', count: d?.counts.drafts },
           ]}
         />
-        <form className="row" onSubmit={(event) => { event.preventDefault(); setSubmitted(search.trim()); }}>
+        <form className="row toolbar-form" onSubmit={(event) => { event.preventDefault(); setSubmitted(search.trim()); }}>
           <input className="input" type="search" aria-label="Search guides" placeholder="Search titles or tags" value={search} onChange={(e) => setSearch(e.target.value)} />
           <select className="select" aria-label="Category" value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="">All categories</option>
@@ -88,7 +89,7 @@ export default function AdminBlogListPage() {
       {list.isPending ? <Loading /> : null}
       {d && d.posts.length === 0 ? <Empty>No guides match this view. <Link to="/admin/blog/new">Start a guide</Link>.</Empty> : null}
       {d && d.posts.length > 0 ? (
-        <table className="tbl">
+        <div className="tbl-wrap"><table className="tbl">
           <thead><tr className="th"><th>Guide</th><th>Status</th><th>Category</th><th>Date</th><th /></tr></thead>
           <tbody>
             {d.posts.map((post) => (
@@ -101,11 +102,11 @@ export default function AdminBlogListPage() {
                 <td><Pill tone={stateTone[post.live_state]}>{stateLabel[post.live_state]}</Pill></td>
                 <td>{post.category ?? <span className="muted">None</span>}</td>
                 <td className="small">{post.live_state === 'draft' ? `Edited ${formatDateTime(post.updated_at)}` : formatDateTime(post.published_at)}</td>
-                <td>{post.live_state === 'draft' ? <button type="button" className="btn sm ghost" onClick={() => { setError(null); setDeleting(post); }}>Delete draft</button> : null}</td>
+                <td>{post.live_state === 'draft' ? <button type="button" className="btn sm danger" onClick={() => { setError(null); setDeleting(post); }}>Delete draft</button> : null}</td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       ) : null}
       {d ? <Card className="small muted">{formatCount(d.filtered_total)} guide{d.filtered_total === 1 ? '' : 's'} in this view. Published guides cannot be deleted; unpublish them from the editor.</Card> : null}
       <ConfirmDialog

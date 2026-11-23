@@ -7,6 +7,13 @@ export function formatMoneyMinor(amountMinor: number | null | undefined): string
   return money.format((amountMinor ?? 0) / 100);
 }
 
+const wholeMoney = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+/** Whole dollars for headline figures (A2: '$214,380', not '$214,380.00'); cents stay when the amount has them under $1,000. */
+export function formatMoneyWhole(amountMinor: number | null | undefined): string {
+  const value = (amountMinor ?? 0) / 100;
+  return Math.abs(value) >= 1000 || Number.isInteger(value) ? wholeMoney.format(value) : money.format(value);
+}
+
 export function formatCount(value: number | null | undefined): string {
   return integer.format(value ?? 0);
 }
@@ -74,6 +81,8 @@ function startOfDay(date: Date): Date {
 
 /** ISO week number for a YYYY-MM-DD day, shown as "W45". */
 export function isoWeekLabel(day: string): string {
+  const iso = /^\d{4}-W(\d{1,2})$/.exec(day);
+  if (iso) return `W${Number(iso[1])}`;
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(day);
   if (!match) return '—';
   const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));

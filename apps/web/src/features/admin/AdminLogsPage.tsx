@@ -5,7 +5,7 @@ import { useSearchParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { adminErrorText, adminRpc, type SystemLogPage, type SystemLogRow } from './admin-api';
 import { formatDateTime } from './admin-format';
-import { Empty, ErrorNote, Loading, PageHead, Pill } from './AdminPrimitives';
+import { Empty, ErrorNote, Loading, PageHead, Pill, Segmented } from './AdminPrimitives';
 
 const sources = ['web', 'function', 'database', 'auth', 'webhook', 'job', 'provider'] as const;
 const cleanCell = (v: unknown) => String(v ?? '').replace(/[\r\n\t]+/g, ' ').trim();
@@ -77,8 +77,8 @@ export default function AdminLogsPage() {
 
   return <>
     <PageHead title="System logs" sub="Operational events from the app and platform. Sensitive payloads are excluded; full detail is available by request ID." actions={<><button className="btn sm ghost" type="button" onClick={() => void copyResults()} disabled={rows.length === 0 || rows.length > 200}>Copy results (up to 200)</button><button className="btn sm ghost" type="button" onClick={() => void exportCsv()}>Export CSV (up to 1,000)</button></>} />
-    <form className="toolbar logs-filters" onSubmit={applyFilters}>
-      <label><span className="lbl">Time range</span><select className="input" value={range} onChange={(e) => setRange(e.target.value)}><option value="24h">24 hours</option><option value="7d">7 days</option><option value="30d">30 days</option></select></label>
+    <form className="card logs-filters" onSubmit={applyFilters}>
+      <div className="logs-range"><span className="lbl">Time range</span><Segmented label="Time range" value={range as '24h' | '7d' | '30d'} onChange={setRange} options={[{ value: '24h', label: '24h' }, { value: '7d', label: '7d' }, { value: '30d', label: '30d' }]} /></div>
       <label><span className="lbl">Level</span><select className="input" value={level} onChange={(e) => setLevel(e.target.value)}><option value="">All levels</option><option>info</option><option>warning</option><option>error</option></select></label>
       <label><span className="lbl">Source</span><select className="input" value={source} onChange={(e) => setSource(e.target.value)}><option value="">All sources</option>{sources.map((s) => <option key={s}>{s}</option>)}</select></label>
       <label><span className="lbl">Stylist or BID</span><input className="input" value={stylist} onChange={(e) => setStylist(e.target.value)} /></label>
@@ -90,7 +90,7 @@ export default function AdminLogsPage() {
     <ErrorNote message={page.isError ? adminErrorText(page.error) : null} />
     {page.isPending ? <Loading /> : null}
     {page.data && rows.length === 0 ? <Empty>No logs match these filters.</Empty> : null}
-    {rows.length ? <div className="logs-table-wrap"><table className="tbl logs-table"><thead><tr className="th"><th>Time</th><th>Level</th><th>Source · event</th><th>Stylist</th><th>Status</th><th>Message</th><th>Actions</th></tr></thead><tbody>
+    {rows.length ? <div className="logs-table-wrap admin-record-list"><table className="tbl logs-table"><thead><tr className="th"><th>Time</th><th>Level</th><th>Source · event</th><th>Stylist</th><th>Status</th><th>Message</th><th>Actions</th></tr></thead><tbody>
       {rows.map((row) => <Fragment key={row.id}>
         <tr key={row.id} className="tr">
           <td className="small">{formatDateTime(row.occurred_at)}</td><td><Pill tone={row.level === 'error' ? 'bad' : row.level === 'warning' ? 'warn' : 'ok'}>{row.level}</Pill></td>
@@ -102,6 +102,14 @@ export default function AdminLogsPage() {
         </tr>
         {selected === row.id ? <tr key={`${row.id}-detail`} className="tr"><td colSpan={7}><div className="logs-detail"><strong>Request:</strong> {row.request_id ?? '—'} · <strong>User:</strong> {row.user_id ?? '—'} · <strong>Client:</strong> {row.client_id ?? '—'}<br /><strong>Error:</strong> {row.error_code ?? '—'}<br /><strong>Context:</strong> <code>{JSON.stringify(row.context)}</code></div></td></tr> : null}
       </Fragment>)}</tbody></table></div> : null}
+    {/* A14: on a phone each log is a card with its level, event, stylist and message; Details opens inline. */}
+    {rows.length ? <div className="admin-mobile-list">{rows.map((row) => <article className="admin-record" key={`m-${row.id}`}>
+      <span><strong>{row.event_name}</strong><small>{formatDateTime(row.occurred_at)} · {row.source}{row.business_name ? ` · ${row.business_name}` : ''}</small></span>
+      <span className="admin-record__aside"><Pill tone={row.level === 'error' ? 'bad' : row.level === 'warning' ? 'warn' : 'ok'}>{row.level}</Pill></span>
+      <small>{row.message || row.error_code || '—'}</small>
+      <span className="row"><button className="btn sm" type="button" onClick={() => setSelected(selected === row.id ? null : row.id)}>{selected === row.id ? 'Hide' : 'Details'}</button><button className="btn sm" type="button" onClick={() => void copyOne(row)}>Copy</button></span>
+      {selected === row.id ? <div className="logs-detail"><strong>Request:</strong> {row.request_id ?? '—'}<br /><strong>Error:</strong> {row.error_code ?? '—'}<br /><strong>Context:</strong> <code>{JSON.stringify(row.context)}</code></div> : null}
+    </article>)}</div> : null}
     <p className="small muted">Info logs are retained for 30 days. Warnings and errors are retained for 90 days. Search returns at most 200 rows; CSV pulls up to 1,000.</p>
   </>;
 }

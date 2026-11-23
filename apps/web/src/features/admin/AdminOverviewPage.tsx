@@ -2,26 +2,26 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { adminErrorText, adminRpc, type Overview, type OverviewWindow } from './admin-api';
-import { downloadText, formatChange, formatCount, formatMoneyMinor, formatPercent, isoWeekLabel, toCsv } from './admin-format';
+import { downloadText, formatChange, formatCount, formatMoneyWhole, formatPercent, isoWeekLabel, toCsv } from './admin-format';
 import { Card, ErrorNote, Kpi, Loading, PageHead, Segmented } from './AdminPrimitives';
 
 type WindowKey = '7' | '30' | '90';
 
 const kpis: { key: keyof OverviewWindow; label: string; money?: boolean; percentage?: boolean; note?: string }[] = [
   { key: 'active_stylists', label: 'Active stylists' },
-  { key: 'new_signups', label: 'New sign-ups' },
+  { key: 'new_signups', label: 'New signups' },
   { key: 'bookings_made', label: 'Bookings made' },
   { key: 'no_shows', label: 'No-show rate', percentage: true },
   { key: 'processed_minor', label: 'Processed by Mova', money: true },
   { key: 'fees_minor', label: 'Mova fees earned', money: true },
-  { key: 'recorded_minor', label: 'Recorded by stylists', money: true, note: 'Cash and other · no fee' },
+  { key: 'recorded_minor', label: 'Recorded by stylists', money: true, note: 'Cash, Zelle, other · no fee' },
   { key: 'salon_minor', label: 'Collected by salons', money: true, note: 'No fee' },
 ];
 
 const nudgeReason: Record<Overview['needs_nudge']['items'][number]['reason'], string> = {
-  quiet: 'No bookings in two weeks',
-  stripe_restricted: 'Payouts restricted',
-  published_no_bookings: 'Published page, no bookings yet',
+  quiet: 'No bookings in 14+ days',
+  stripe_restricted: 'Stripe restricted · payouts paused',
+  published_no_bookings: 'Published, no bookings yet',
 };
 
 export default function AdminOverviewPage() {
@@ -38,100 +38,96 @@ export default function AdminOverviewPage() {
     downloadText(`mova-overview-${days}d.csv`, toCsv(['Metric', `Last ${days} days`, 'Prior period'], rows));
   }
 
+  const periodWord = days === '7' ? 'week' : days === '30' ? 'month' : 'quarter';
   return (
     <>
       <PageHead
         title="Overview"
-        sub="How Mova is doing across every stylist."
-        actions={<><Segmented label="Period" value={days} onChange={setDays} options={[{ value: '7', label: '7 days' }, { value: '30', label: '30 days' }, { value: '90', label: '90 days' }]} /><button type="button" className="btn sm ghost" onClick={exportCsv} disabled={!overview.data}>Export CSV</button></>}
+        sub={`How Mova is doing across every stylist. Last ${days} days, compared with the ${days} days before.`}
+        actions={<><Segmented label="Period" value={days} onChange={setDays} options={[{ value: '7', label: '7 days' }, { value: '30', label: '30 days' }, { value: '90', label: '90 days' }]} /><button type="button" className="btn sm" onClick={exportCsv} disabled={!overview.data}>Export</button></>}
       />
       <ErrorNote message={overview.isError ? adminErrorText(overview.error) : null} />
       {overview.isPending ? <Loading /> : null}
-      {overview.data ? (
-        <>
+      {overview.data ? (() => {
+        const o = overview.data;
+        const perStylist = (w: OverviewWindow) => w.completed / Math.max(w.active_stylists, 1);
+        const star = formatChange(perStylist(o.current), perStylist(o.prior));
+        const weeks = o.weekly_active;
+        const maxWeek = Math.max(1, ...weeks.map((entry) => entry.stylists));
+        const funnel = [
+          ['Waitlist', o.funnel.waitlist], ['Invited', o.funnel.invited], ['Signed up', o.funnel.signed_up],
+          ['Published page', o.funnel.published_page], ['Stripe connected', o.funnel.stripe_connected], ['First booking', o.funnel.first_booking],
+        ] as const;
+        const funnelMax = Math.max(1, ...funnel.map(([, count]) => count));
+        const languageTotal = Math.max(1, o.language.en_us + o.language.es_us);
+        // North-star trend: weekly active stylists as a filled line (A2).
+        const points = weeks.map((row, index) => [weeks.length > 1 ? index / (weeks.length - 1) * 400 : 200, 56 - row.stylists / maxWeek * 48] as const);
+        const line = points.map(([x, y], index) => `${index ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+        return <>
           <section className="northstar" aria-label="North star metric">
-            <div><div className="eyebrow">North star</div><div>Completed appointments per active stylist</div>
-              <div className="value">{formatCount(Math.round(overview.data.current.completed / Math.max(overview.data.current.active_stylists, 1) * 10) / 10)}<small> / period</small></div>
-              <div className="small">{formatCount(overview.data.current.completed)} completed · {formatCount(overview.data.current.active_stylists)} active</div>
+            <div><div className="eyebrow">North star</div><div className="northstar__label">Completed appointments per active stylist</div>
+              <div className="value">{formatCount(Math.round(perStylist(o.current) * 10) / 10)}<small> / {periodWord}</small></div>
+              <div className="small"><span className={star.direction === 'down' ? 'down' : 'up'}>{star.text}</span> vs prior {days} days · {formatCount(o.current.completed)} completed · {formatCount(o.current.active_stylists)} active</div>
             </div>
-            <div className="trend" aria-label="Weekly active stylist trend">{overview.data.weekly_active.map((row) => {
-              const max = Math.max(1, ...overview.data!.weekly_active.map((entry) => entry.stylists));
-              return <i key={row.week} title={`${isoWeekLabel(row.week)}: ${formatCount(row.stylists)}`} style={{ height: `${Math.max(8, row.stylists / max * 100)}%` }} />;
-            })}</div>
+            {points.length > 1 ? <svg className="northstar__trend" viewBox="0 0 400 60" preserveAspectRatio="none" role="img" aria-label="Weekly active stylists trend"><path d={`${line} L400 60 L0 60 Z`} className="area" /><path d={line} className="stroke" /></svg> : <span />}
           </section>
-          <div className="kpi-grid">
+          <div className="k4">
             {kpis.map((kpi) => {
-              const current = overview.data.current[kpi.key];
-              const change = formatChange(current, overview.data.prior[kpi.key]);
-              const value = kpi.money ? formatMoneyMinor(current) : kpi.percentage ? formatPercent(current, overview.data.current.bookings_made) : formatCount(current);
+              const current = o.current[kpi.key];
+              const change = formatChange(current, o.prior[kpi.key]);
+              const value = kpi.money ? formatMoneyWhole(current) : kpi.percentage ? formatPercent(current, o.current.bookings_made) : formatCount(current);
               return <Kpi key={kpi.key} label={kpi.label} value={value} note={kpi.note ?? <span className={`${change.direction === 'up' ? 'up' : change.direction === 'down' ? 'down' : ''}`}>{change.text}</span>} />;
             })}
           </div>
+          <div className="cols2">
+            <Card title="Growth funnel" aside={<span className="small muted">All time</span>}>
+              <ul className="funnel">{funnel.map(([label, count]) => (
+                <li key={label}><span>{label}</span><span className="bar" aria-hidden="true"><i style={{ width: `${Math.max(2, count / funnelMax * 100)}%` }} /></span><b className="num">{formatCount(count)}</b></li>
+              ))}</ul>
+              <p className="small muted">{formatPercent(o.funnel.signed_up, o.funnel.invited)} of invites become signups · {formatPercent(o.funnel.first_booking, o.funnel.signed_up)} of signups take a first booking.</p>
+            </Card>
+            <Card title="Active stylists by week" aside={<span className="small muted">Signed in and had a booking</span>}>
+              {weeks.length === 0 ? <p className="muted">No activity in this period.</p> : <div className="weekly-bars">{weeks.map((row, index) => (
+                <div key={row.week} title={`${isoWeekLabel(row.week)} · ${formatCount(row.stylists)}`} className={index === weeks.length - 1 ? 'is-current' : ''}><b>{formatCount(row.stylists)}</b><i style={{ height: `${Math.max(8, row.stylists / maxWeek * 100)}%` }} /><small>{isoWeekLabel(row.week)}</small></div>
+              ))}</div>}
+            </Card>
+          </div>
           <div className="k3">
-            <Kpi label="Seat filler" value={formatCount(overview.data.current.seat_filler_filled)} note={`${formatPercent(overview.data.current.seat_filler_filled, overview.data.current.seat_filler_offered)} of offers filled`} />
-            <Kpi label="Rebooking autopilot" value={formatPercent(overview.data.current.autopilot_rebooked, overview.data.current.autopilot_sent)} note={`${formatCount(overview.data.current.autopilot_rebooked)} rebooked from ${formatCount(overview.data.current.autopilot_sent)} reminders`} />
-            <Kpi label="AI Concierge" value={formatPercent(overview.data.current.concierge_handed, overview.data.current.concierge_conversations)} note={`${formatCount(overview.data.current.concierge_handed)} of ${formatCount(overview.data.current.concierge_conversations)} conversations handed to stylist`} />
+            <Kpi label="Seat filler" value={formatCount(o.current.seat_filler_filled)} note={`open slots refilled · ${formatPercent(o.current.seat_filler_filled, o.current.seat_filler_offered)} of slots offered`} />
+            <Kpi label="Rebooking autopilot" value={formatPercent(o.current.autopilot_rebooked, o.current.autopilot_sent)} note={`rebooked from ${formatCount(o.current.autopilot_sent)} reminder texts`} />
+            <Kpi label="AI Concierge" value={formatPercent(o.current.concierge_conversations - o.current.concierge_handed, o.current.concierge_conversations)} note={`handled · ${formatPercent(o.current.concierge_handed, o.current.concierge_conversations)} handed to the stylist`} />
           </div>
-          <div className="cols2">
-            <Card title="Funnel">
-              <ul className="list">
-                {([
-                  ['Waitlist', overview.data.funnel.waitlist],
-                  ['Invited', overview.data.funnel.invited],
-                  ['Signed up', overview.data.funnel.signed_up],
-                  ['Published a page', overview.data.funnel.published_page],
-                  ['Payouts connected', overview.data.funnel.stripe_connected],
-                  ['First booking', overview.data.funnel.first_booking],
-                ] as const).map(([label, count]) => (
-                  <li key={label} className="row" style={{ justifyContent: 'space-between' }}>
-                    <span>{label}</span><span className="mono">{formatCount(count)} <span className="muted small">{formatPercent(count, overview.data.funnel.waitlist)}</span></span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </div>
-          <div className="cols2">
-            <Card title="Weekly active stylists">
-              {overview.data.weekly_active.length === 0 ? <p className="muted">No activity in this period.</p> : <div className="weekly-bars">{overview.data.weekly_active.map((row) => {
-                const max = Math.max(1, ...overview.data!.weekly_active.map((entry) => entry.stylists));
-                return <div key={row.week} title={`${isoWeekLabel(row.week)} · ${formatCount(row.stylists)}`}><b>{formatCount(row.stylists)}</b><i style={{ height: `${Math.max(8, row.stylists / max * 100)}%` }} /><small>{isoWeekLabel(row.week)}</small></div>;
-              })}</div>}
-            </Card>
-            <Card title="Top stylists">
-              {overview.data.top_stylists.length === 0 ? <p className="muted">No completed appointments yet.</p> : (
-                <table className="tbl"><thead><tr className="th"><th>Stylist</th><th>Completed</th><th>Processed</th></tr></thead><tbody>
-                  {overview.data.top_stylists.map((row) => (
+          <div className="detail-grid">
+            <Card title="Top stylists by completed visits" aside={<Link className="link-sm" to="/admin/stylists">All stylists</Link>} className="pad0">
+              {o.top_stylists.length === 0 ? <p className="muted" style={{ padding: 16 }}>No completed appointments yet.</p> : (
+                <table className="tbl"><thead><tr className="th"><th>Stylist</th><th className="num">Completed</th><th className="num">Processed</th></tr></thead><tbody>
+                  {o.top_stylists.map((row) => (
                     <tr key={row.business_id} className="tr">
-                      <td><Link to={`/admin/stylists/${row.business_id}`}>{row.name}</Link> <span className="muted small">B{row.bid}</span></td>
-                      <td className="mono">{formatCount(row.completed)}</td><td className="mono">{formatMoneyMinor(row.processed_minor)}</td>
+                      <td><Link to={`/admin/stylists/${row.business_id}`}><strong>{row.business_name}</strong></Link><br /><span className="muted small">{row.name} · BID-{row.bid}</span></td>
+                      <td className="num"><strong>{formatCount(row.completed)}</strong></td><td className="num">{formatMoneyWhole(row.processed_minor)}</td>
                     </tr>
                   ))}
                 </tbody></table>
               )}
             </Card>
+            <div className="stack">
+              <Card title="Need a nudge" aside={<span className="pill p-warn">{formatCount(o.needs_nudge.quiet)} quiet</span>}>
+                {o.needs_nudge.items.length === 0 ? <p className="muted">Nobody needs a nudge right now.</p> : (
+                  <ul className="activity-list">
+                    {o.needs_nudge.items.map((item) => (
+                      <li key={`${item.business_id}-${item.reason}`}><span><Link to={`/admin/stylists/${item.business_id}`}><strong>{item.name}</strong></Link><br /><span className="small muted">{item.business_name} · BID-{item.bid}</span></span><span className="small nudge-reason">{nudgeReason[item.reason]}</span></li>
+                    ))}
+                  </ul>
+                )}
+              </Card>
+              <Card title="Language">
+                <span className="lang-bar" aria-hidden="true"><i style={{ width: `${o.language.en_us / languageTotal * 100}%` }} /></span>
+                <p className="lang-legend small"><span><i className="dot en" />English {formatPercent(o.language.en_us, languageTotal)}</span><span><i className="dot es" />Spanish {formatPercent(o.language.es_us, languageTotal)}</span></p>
+              </Card>
+            </div>
           </div>
-          <div className="cols2">
-            <Card title={`Needs a nudge (${formatCount(overview.data.needs_nudge.quiet)} quiet)`}>
-              {overview.data.needs_nudge.items.length === 0 ? <p className="muted">Nobody needs a nudge right now.</p> : (
-                <ul className="list">
-                  {overview.data.needs_nudge.items.map((item) => (
-                    <li key={`${item.business_id}-${item.reason}`} className="row" style={{ justifyContent: 'space-between' }}>
-                      <Link to={`/admin/stylists/${item.business_id}`}>{item.name}</Link><span className="small muted">{nudgeReason[item.reason]}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Card>
-            <Card title="Language">
-              <dl className="kv">
-                <dt>English (US)</dt><dd>{formatCount(overview.data.language.en_us)}</dd>
-                <dt>Spanish (US)</dt><dd>{formatCount(overview.data.language.es_us)}</dd>
-              </dl>
-              <p className="small muted">Admin screens are English only.</p>
-            </Card>
-          </div>
-        </>
-      ) : null}
+        </>;
+      })() : null}
     </>
   );
 }

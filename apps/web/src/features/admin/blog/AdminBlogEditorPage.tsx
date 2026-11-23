@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminErrorText, adminRpc } from '../admin-api';
 import { dayInZone, formatDateTime } from '../admin-format';
@@ -152,6 +152,7 @@ function BlogEditor({ initial, categories }: { initial: BlogDraft; categories: s
 
   return (
     <>
+      <nav className="crumbs" aria-label="Breadcrumb"><Link to="/admin/blog">Guides & blog</Link><span aria-hidden="true">›</span><span aria-current="page">{isSaved ? 'Edit guide' : 'New guide'}</span></nav>
       <PageHead
         title={draft.title.trim() || 'New guide'}
         sub={<>
@@ -190,6 +191,8 @@ function BlogEditor({ initial, categories }: { initial: BlogDraft; categories: s
             </Card>
 
             <Card title="Cover image">
+              {/* A13: preview of the cover as it will appear at the top of the guide. */}
+              <div className="cover-preview" aria-hidden="true">{/^https:\/\//i.test(draft.coverUrl) ? <img src={draft.coverUrl} alt="" /> : <span>Cover image preview</span>}</div>
               {field('Image link (https://)', 'coverUrl', <input className="input" value={draft.coverUrl} onChange={(e) => set('coverUrl', e.target.value)} />)}
               {field('Alt text', 'coverAlt', <input className="input" value={draft.coverAlt} maxLength={240} onChange={(e) => set('coverAlt', e.target.value)} />)}
               {field('Credit (optional)', 'coverAlt', <input className="input" value={draft.coverCredit} maxLength={200} onChange={(e) => set('coverCredit', e.target.value)} />)}
@@ -202,7 +205,7 @@ function BlogEditor({ initial, categories }: { initial: BlogDraft; categories: s
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <BlockField block={block} index={index} problem={problems.get(index)} onChange={(next) => setBlock(index, next)} />
                   </div>
-                  <div className="stack">
+                  <div className="blk-tools">
                     <button type="button" className="btn sm ghost" aria-label="Move block up" disabled={index === 0} onClick={() => set('body', moveBlock(draft.body, index, -1))}>Up</button>
                     <button type="button" className="btn sm ghost" aria-label="Move block down" disabled={index === draft.body.length - 1} onClick={() => set('body', moveBlock(draft.body, index, 1))}>Down</button>
                     <button type="button" className="btn sm ghost" aria-label="Remove block" onClick={() => set('body', removeBlock(draft.body, index))}>Remove</button>

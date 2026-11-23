@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { adminErrorText, adminRpc, isAdminError, type StylistDetail, type StylistFeatureControls, type StylistRuntimeSwitches } from './admin-api';
-import { formatCount, formatDate, formatDateTime, formatFeeBps, formatMoneyMinor, formatPercent } from './admin-format';
-import { Card, ConfirmDialog, ErrorNote, Kpi, Loading, PageHead, Pill } from './AdminPrimitives';
+import { adminErrorText, adminRpc, isAdminError, type AuditPage, type StylistDetail, type StylistFeatureControls, type StylistRuntimeSwitches } from './admin-api';
+import { formatCount, formatDate, formatDateTime, formatFeeBps, formatMoneyMinor, formatPercent, initials } from './admin-format';
+import { Card, ConfirmDialog, ErrorNote, Kpi, Loading, Pill } from './AdminPrimitives';
 import { AdminTrialCard } from './AdminTrialCard';
 
 const featureLabels: Record<string, { name: string; note: string }> = {
@@ -73,6 +73,11 @@ export default function AdminStylistDetailPage() {
   const featureControls = useQuery({
     queryKey: ['admin', 'stylist-features', businessId],
     queryFn: () => adminRpc<StylistFeatureControls>('mova_admin_stylist_feature_controls', { p_artist_business_id: businessId }),
+    enabled: businessId.length > 0,
+  });
+  const recent = useQuery({
+    queryKey: ['admin', 'stylist-recent', businessId],
+    queryFn: () => adminRpc<AuditPage>('mova_admin_audit_events', { p_business_id: businessId, p_from: null, p_to: null, p_category: null, p_search: null, p_limit: 5, p_before: null }),
     enabled: businessId.length > 0,
   });
   const runtimeSwitches = useQuery({
@@ -178,20 +183,25 @@ export default function AdminStylistDetailPage() {
   if (detail.isError || !detail.data) return <ErrorNote message={adminErrorText(detail.error)} />;
   const d = detail.data;
 
+  const displayName = d.profile?.display_name ?? d.business.name;
+  const firstName = displayName.split(/\s+/)[0] ?? displayName;
   return (
     <>
-      <PageHead
-        title={d.profile?.display_name ?? d.business.name}
-        sub={<><Pill tone={d.business.status === 'active' ? 'ok' : 'bad'}>{d.business.status}</Pill> {d.business.name} · BID-{d.business.bid} · {d.owner_email ?? 'No owner email on file'}{d.business.created_at ? ` · joined ${formatDate(d.business.created_at)}` : ''}</>}
-        actions={<>
-          {d.profile?.handle ? <a className="btn sm ghost" href={`https://mova-beauty.co/a/${encodeURIComponent(d.profile.handle)}`} target="_blank" rel="noreferrer">View public page ↗</a> : null}
-          <Link className="btn sm ghost" to={`/admin/stylists/${businessId}/audit`}>Audit log</Link>
+      <nav className="crumbs" aria-label="Breadcrumb"><Link to="/admin/stylists">Stylists</Link><span aria-hidden="true">›</span><span aria-current="page">BID-{d.business.bid}</span></nav>
+      <header className="head stylist-head">
+        <div className="stylist-head__id">
+          <span className="stylist-avatar" aria-hidden="true">{initials(displayName)}</span>
+          <div>
+            <h1 className="h1">{displayName} <Pill tone={d.business.status === 'active' ? 'ok' : 'bad'}>{d.business.status}</Pill></h1>
+            <p className="sub">{d.business.name} · BID-{d.business.bid} · {d.owner_email ?? 'No owner email on file'}{d.business.created_at ? ` · joined ${formatDate(d.business.created_at)}` : ''}</p>
+          </div>
+        </div>
+        <div className="row">
+          {d.profile?.handle ? <a className="btn sm" href={`https://mova-beauty.co/a/${encodeURIComponent(d.profile.handle)}`} target="_blank" rel="noreferrer">View public page ↗</a> : null}
+          <Link className="btn sm" to={`/admin/stylists/${businessId}/audit`}>Audit log</Link>
           <Link className="btn sm ghost" to={`/admin/logs?stylist=${businessId}`}>System logs</Link>
-          <Link className="btn sm ghost" to="/admin/fees">Fees</Link>
-          <button type="button" className="btn sm danger" onClick={() => setSuspensionOpen(true)}>{d.business.status === 'suspended' ? 'Restore stylist' : 'Suspend stylist'}</button>
-          <button type="button" className="btn sm danger" onClick={() => setUnpublishOpen(true)} disabled={!d.profile?.is_published}>Unpublish page</button>
-        </>}
-      />
+        </div>
+      </header>
       <ErrorNote message={actionError} />
       {notice ? <p className="notice" role="status">{notice}</p> : null}
       <div className="k4">
@@ -200,38 +210,60 @@ export default function AdminStylistDetailPage() {
         <Kpi label="Mova fees" value={formatMoneyMinor(d.metrics.fees_30d_minor)} />
         <Kpi label="Repeat clients (90d)" value={formatPercent(d.metrics.repeat_clients_90d, d.metrics.clients_90d)} />
       </div>
-      <div className="cols2">
-        <Card title="Account">
-          <dl className="kv">
-            <dt>Status</dt><dd><Pill tone={d.business.status === 'active' ? 'ok' : 'bad'}>{d.business.status}</Pill></dd>
-            <dt>Plan</dt><dd>{d.plan.name}</dd>
-            <dt>Fee</dt><dd>{formatFeeBps(d.fee.fee_bps)} <span className="small muted">({d.fee.source === 'override' ? 'custom rate' : d.fee.source === 'plan' ? 'plan rate' : 'platform default'})</span></dd>
-            <dt>Joined</dt><dd>{formatDate(d.business.created_at)}</dd>
-            <dt>Public page</dt><dd>{d.profile ? (d.profile.is_published ? <Pill tone="ok">Published</Pill> : <Pill tone="off">Not published</Pill>) : 'No page yet'}</dd>
-            <dt>Language</dt><dd>{d.profile?.preferred_locale === 'es-US' ? 'Spanish (US)' : 'English (US)'}</dd>
-          </dl>
-        </Card>
-        <Card title="Payouts">
-          {d.stripe ? (
+      <div className="detail-grid">
+        <div className="stack">
+          <Card title="Recent activity" aside={<Link className="link-sm" to={`/admin/stylists/${businessId}/audit`}>Open full audit log</Link>}>
+            {recent.isPending ? <p className="muted">Loading…</p> : !recent.data || recent.data.events.length === 0 ? <p className="muted">No activity yet.</p> : (
+              <ul className="activity-list">{recent.data.events.slice(0, 5).map((event) => (
+                <li key={`${event.occurred_at}-${event.reference}-${event.event}`}><span className="small muted">{formatDateTime(event.occurred_at)}</span><span>{event.summary}{event.reference ? ` · ${event.reference}` : ''}</span><Pill tone="off">{event.actor}</Pill></li>
+              ))}</ul>
+            )}
+          </Card>
+          <Card title={`Feedback from ${firstName}`} aside={<Link className="link-sm" to="/admin/inbox">Support inbox</Link>}>
+            {d.feedback.length === 0 ? <p className="muted">No messages from this stylist.</p> : (
+              <ul className="activity-list">{d.feedback.map((f) => (
+                <li key={f.id}><span><Link to={`/admin/inbox?message=${f.id}`}><strong>{f.type.charAt(0).toUpperCase() + f.type.slice(1)} · {f.preview}</strong></Link><br /><span className="small muted">{formatDateTime(f.created_at)}</span></span><Pill tone={f.status === 'new' ? 'new' : 'off'}>{f.status.replace(/_/g, ' ')}</Pill></li>
+              ))}</ul>
+            )}
+          </Card>
+          <Card title="Last 30 days">
             <dl className="kv">
-              <dt>Status</dt><dd>{d.stripe.status}</dd>
-              <dt>Charges</dt><dd>{d.stripe.charges_enabled ? 'Enabled' : 'Off'}</dd>
-              <dt>Payouts</dt><dd>{d.stripe.payouts_enabled ? 'Enabled' : 'Off'}</dd>
+              <dt>Completed</dt><dd>{formatCount(d.metrics.completed_30d)}</dd>
+              <dt>Processed</dt><dd>{formatMoneyMinor(d.metrics.processed_30d_minor)}</dd>
+              <dt>Mova fees</dt><dd>{formatMoneyMinor(d.metrics.fees_30d_minor)}</dd>
+              <dt>Repeat clients (90 days)</dt><dd>{formatPercent(d.metrics.repeat_clients_90d, d.metrics.clients_90d)} of {formatCount(d.metrics.clients_90d)}</dd>
             </dl>
-          ) : <p className="muted">Payouts are not connected.</p>}
-        </Card>
-      </div>
-      <div className="cols2">
-        <Card title="Last 30 days">
-          <dl className="kv">
-            <dt>Completed</dt><dd>{formatCount(d.metrics.completed_30d)}</dd>
-            <dt>Processed</dt><dd>{formatMoneyMinor(d.metrics.processed_30d_minor)}</dd>
-            <dt>Mova fees</dt><dd>{formatMoneyMinor(d.metrics.fees_30d_minor)}</dd>
-            <dt>Repeat clients (90 days)</dt><dd>{formatPercent(d.metrics.repeat_clients_90d, d.metrics.clients_90d)} of {formatCount(d.metrics.clients_90d)}</dd>
-            <dt>Locations · services · clients</dt><dd>{formatCount(d.metrics.locations)} · {formatCount(d.metrics.services)} · {formatCount(d.metrics.clients)}</dd>
-          </dl>
-        </Card>
-        <AdminTrialCard businessId={businessId} />
+          </Card>
+        </div>
+        <div className="stack">
+          <Card title="Account">
+            <dl className="kv">
+              <dt>Plan</dt><dd>{d.plan.name}</dd>
+              <dt>Language</dt><dd>{d.profile?.preferred_locale === 'es-US' ? 'Spanish' : 'English'}</dd>
+              <dt>Locations</dt><dd>{formatCount(d.metrics.locations)}</dd>
+              <dt>Services</dt><dd>{formatCount(d.metrics.services)}</dd>
+              <dt>Clients</dt><dd>{formatCount(d.metrics.clients)}</dd>
+              <dt>Page</dt><dd>{d.profile ? <>{d.profile.handle ? `mova-beauty.co/a/${d.profile.handle}` : '—'} {d.profile.is_published ? <Pill tone="ok">Published</Pill> : <Pill tone="off">Not published</Pill>}</> : 'No page yet'}</dd>
+            </dl>
+          </Card>
+          <Card title="Payments">
+            <dl className="kv">
+              <dt>Stripe</dt><dd>{d.stripe ? <Pill tone={d.stripe.status === 'active' ? 'ok' : 'warn'}>{d.stripe.status}</Pill> : 'Not connected'}</dd>
+              {d.stripe ? <><dt>Charges</dt><dd>{d.stripe.charges_enabled ? 'On' : 'Off'}</dd><dt>Payouts</dt><dd>{d.stripe.payouts_enabled ? 'On' : 'Off'}</dd></> : null}
+              <dt>Mova fee</dt><dd>{formatFeeBps(d.fee.fee_bps)} · {d.fee.source === 'override' ? 'custom rate' : d.fee.source === 'plan' ? 'plan rate' : 'platform default'}</dd>
+              {d.overrides.map((o) => <Fragment key={o.starts_at}><dt>Custom rate</dt><dd>{formatFeeBps(o.fee_bps)} from {formatDate(o.starts_at)}{o.ends_at ? ` to ${formatDate(o.ends_at)}` : ''}</dd></Fragment>)}
+            </dl>
+            <Link className="btn sm wide" to={`/admin/fees?stylist=${businessId}`}>Change fee for {firstName}</Link>
+          </Card>
+          <AdminTrialCard businessId={businessId} />
+          <Card title="Account actions">
+            <p className="small muted">Each action asks for a reason and is logged.</p>
+            <div className="action-grid">
+              <button type="button" className="btn sm danger" onClick={() => setUnpublishOpen(true)} disabled={!d.profile?.is_published}>Unpublish page</button>
+              <button type="button" className="btn sm danger" onClick={() => setSuspensionOpen(true)}>{d.business.status === 'suspended' ? 'Restore account' : 'Suspend account'}</button>
+            </div>
+          </Card>
+        </div>
       </div>
       <section className="stack">
         <div><h2 className="group-heading">Feature access</h2><p className="sub">Plan access follows the assigned tier automatically. You can override any individual feature for this stylist, including a temporary grant outside their tier. A plan change clears overrides and returns features to the new tier’s defaults. Stylist opt-in, provider readiness, consent and global emergency switches still apply.</p></div>
@@ -257,22 +289,6 @@ export default function AdminStylistDetailPage() {
           </Card>
         </>}
       </section>
-      <div className="cols2">
-        <Card title="Custom rates">
-          {d.overrides.length === 0 ? <p className="muted">No custom rate. This stylist pays the plan rate.</p> : (
-            <ul className="list">{d.overrides.map((o) => (
-              <li key={o.starts_at}>{formatFeeBps(o.fee_bps)} from {formatDate(o.starts_at)}{o.ends_at ? ` to ${formatDate(o.ends_at)}` : ''} <span className="small muted">{o.reason}</span></li>
-            ))}</ul>
-          )}
-        </Card>
-        <Card title="Recent support">
-          {d.feedback.length === 0 ? <p className="muted">No messages from this stylist.</p> : (
-            <ul className="list">{d.feedback.map((f) => (
-              <li key={f.id}><Link to={`/admin/inbox?message=${f.id}`}>{f.preview}</Link> <span className="small muted">{f.type} · {formatDateTime(f.created_at)} · {f.status}</span></li>
-            ))}</ul>
-          )}
-        </Card>
-      </div>
       <ConfirmDialog
         open={suspensionOpen}
         title={d.business.status === 'suspended' ? 'Restore this stylist?' : 'Suspend this stylist?'}

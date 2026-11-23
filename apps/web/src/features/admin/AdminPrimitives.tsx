@@ -26,7 +26,7 @@ export function Card({ title, aside, children, className }: { title?: ReactNode;
   );
 }
 
-export function Kpi({ label, value, note }: { label: string; value: string; note?: ReactNode }) {
+export function Kpi({ label, value, note }: { label: ReactNode; value: string; note?: ReactNode }) {
   return (
     <div className="kpi">
       <span className="lbl">{label}</span>
@@ -54,9 +54,20 @@ export function Empty({ children }: { children: ReactNode }) {
   return <p className="muted pad0">{children}</p>;
 }
 
-export function Segmented<T extends string>({ label, value, options, onChange }: {
+export function Segmented<T extends string>({ label, value, options, onChange, variant = 'segmented' }: {
   label: string; value: T; options: { value: T; label: string; count?: number | undefined }[]; onChange: (value: T) => void;
+  /** 'chips': the boards' filter chips ("Active · 142"); 'segmented': the period switch. */
+  variant?: 'segmented' | 'chips';
 }) {
+  if (variant === 'chips') return (
+    <div className="chips" role="group" aria-label={label}>
+      {options.map((option) => (
+        <button key={option.value} type="button" className="chip" aria-pressed={option.value === value} onClick={() => onChange(option.value)}>
+          {option.label}{option.count !== undefined ? ` · ${option.count.toLocaleString('en-US')}` : ''}
+        </button>
+      ))}
+    </div>
+  );
   return (
     <div className="seg" role="group" aria-label={label}>
       {options.map((option) => (
