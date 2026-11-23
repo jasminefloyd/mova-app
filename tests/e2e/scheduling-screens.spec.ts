@@ -280,13 +280,37 @@ for (const width of [320, 430]) {
   });
 }
 
-test('TC-SCR-37-01 Reports opens Money from the revenue card and links the marketing rows', async ({ page }) => {
-  await openOperatorPage(page, '/reports');
+test('TC-SCR-37-01 Reports exposes Money and keeps its compact design and marketing links', async ({ page }) => {
+  await openOperatorPage(page, '/');
+  await functionMock(page, 'reports-summary', () => ({
+    current: { service_value_minor: 65000, completed_count: 8, rebooking_count: 1, rebooking_reminders_sent: 0 },
+    previous: {}, series: [],
+  }), []);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/BID-1/reports');
   await expect(page.getByRole('heading', { level: 1, name: 'Reports' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Open Money' })).toHaveAttribute('href', '/BID-1/money');
+  const moneyLink = page.getByRole('link', { name: 'Money', exact: true });
+  await expect(moneyLink).toHaveAttribute('href', '/BID-1/money');
+  await expect(moneyLink).toHaveCSS('text-decoration-line', 'none');
+  const periods = page.getByRole('group', { name: 'Reporting period' });
+  await expect(periods.getByRole('button', { name: '30 days' })).toHaveAttribute('aria-pressed', 'true');
+  const revenue = page.locator('.mova-report-card--revenue');
+  await expect(revenue.getByText('$650', { exact: true })).toHaveCSS('font-size', '28px');
+  expect((await periods.boundingBox())!.width).toBeCloseTo((await revenue.boundingBox())!.width, 0);
   await expect(page.getByRole('link', { name: /Reputation/ })).toHaveAttribute('href', '/BID-1/reports/reputation');
-  await expect(page.getByRole('link', { name: /Seat filler/ })).toHaveAttribute('href', '/BID-1/growth/slots');
-  await expect(page.getByRole('link', { name: /Rebooking reminders/ })).toHaveAttribute('href', '/BID-1/growth/pipeline');
+  const seatFiller = page.getByRole('link', { name: /Seat filler/ });
+  if (process.env.VITE_SEAT_FILLER_ENABLED === 'true') {
+    await expect(seatFiller).toHaveAttribute('href', '/BID-1/growth/slots');
+  } else {
+    await expect(seatFiller).toHaveCount(0);
+  }
+  const rebooking = page.getByRole('link', { name: /Rebooking reminders/ });
+  await expect(rebooking).toHaveAttribute('href', '/BID-1/growth/pipeline');
+  await expect(rebooking).toHaveCSS('text-decoration-line', 'none');
+  await expect(rebooking).toContainText('1 booked · 0 sent');
+  await rebooking.focus();
+  await expect(rebooking).toBeFocused();
+  await expect(rebooking).toHaveCSS('outline-style', 'solid');
 });
 
 test('TC-SCR-43-01 Teach your concierge saves a permission from its toggle', async ({ page }) => {

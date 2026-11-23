@@ -185,7 +185,6 @@
   },
   "screens": {
     "reports": {
-      "openMoney": "Abrir Dinero",
       "serviceValueChange": "Valor de servicios · {{value}} frente a los {{days}} días anteriores",
       "rebookedLine": "{{rate}} reservaron de nuevo",
       "averageTicketLine": "{{value}} ticket promedio",
@@ -194,7 +193,8 @@
       "topSources": "Principales fuentes: {{sources}}",
       "noSources": "Aún no hay tráfico en tu perfil.",
       "seatFillerRow": "Llenado de espacios · {{count}} espacios llenos",
-      "rebookingRow": "Recordatorios para reservar · {{booked}} de {{sent}} reservaron"
+      "rebookingRow": "Recordatorios para reservar · {{booked}} de {{sent}} reservaron",
+      "rebookingCounts": "Recordatorios para reservar · {{booked}} reservas · {{sent}} enviados"
     },
     "concierge": {
       "backToRevenue": "Centro de ingresos IA",
@@ -1264,9 +1264,9 @@
     "awaitingReplyCount": "{{count}} esperan respuesta",
     "manageReviews": "Administrar reseñas",
     "profileTraffic": "Visitas al perfil",
-    "views": "Vistas del perfil",
+    "views": "Vistas de la página",
     "qrScans": "Escaneos del código QR",
-    "viewToBook": "De vista a reserva",
+    "viewToBook": "Vistas → reservas",
     "sources": "Origen de las visitas",
     "sourcesMap": {
       "instagram": "Instagram",
@@ -1275,10 +1275,10 @@
       "direct": "Directo",
       "other": "Otro"
     },
-    "marketing": "Resultados de marketing",
+    "marketing": "Marketing",
     "seatFiller": "Citas de espacios disponibles",
     "rebookingReminder": "Nuevas citas · recordatorios enviados",
-    "socialShares": "Compartidos en redes sociales",
+    "socialShares": "Publicaciones compartidas",
     "money": "Abrir Dinero",
     "signInRequired": "Inicia sesión en tu cuenta de estilista para ver los informes.",
     "loading": "Cargando tus informes…",

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Card, ErrorState, Segmented } from '../../components';
+import { Card, ErrorState, Icon, Segmented } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { seatFillerEnabled } from '../../lib/env';
 import { operatorUrl } from '../../app/operator-url';
@@ -10,8 +10,7 @@ import './reports-board.css';
 
 type Summary = { start: string; end: string; current: Record<string, number>; previous: Record<string, number>; series: Array<{ date: string; service_value_minor: number; completed_count: number; page_views: number; qr_scans: number }> };
 
-// Board 37 (Reports). Numbers come from reports-summary. Rebook rate and the "new reviews" count are
-// not in that summary yet, so they show a dash rather than a guess.
+// Board 37 (Reports). Numbers come from reports-summary.
 export function ReportsPage() {
   const { t, i18n } = useTranslation();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
@@ -62,16 +61,23 @@ export function ReportsPage() {
   const maxRevenueBucket = Math.max(1, ...revenueBuckets);
   const periodOptions = [{ key: '7', label: t('reports.days7') }, { key: '30', label: t('reports.days30') }, { key: '90', label: t('reports.days90') }];
   const periodLabel = periodOptions.find((item) => item.key === period)?.label ?? periodOptions[1]!.label;
+  const rebookings = c.rebooking_count ?? 0;
+  const remindersSent = c.rebooking_reminders_sent ?? 0;
 
   return <main className="mova-page mova-reports-page">
     <div className="mova-report-heading">
-      <h1>{t('reports.title')}</h1>
+      <div className="mova-report-heading__title">
+        <h1>{t('reports.title')}</h1>
+        {businessId && <Link className="mova-report-heading__money" to={operatorUrl(businessId, 'money')}>
+          {t('money.title')} <Icon name="chevron" size={14} />
+        </Link>}
+      </div>
       <Segmented label={t('reports.period')} options={periodOptions.map((item) => item.label)} value={periodLabel} onChange={(value) => setPeriod(periodOptions.find((item) => item.label === value)?.key ?? '30')} />
     </div>
     {identityLoading || loading ? <p role="status" aria-busy="true">{t('reports.loading')}</p>
       : error ? <ErrorState title={t('reports.error')} retryLabel={t('reports.retry')} onRetry={() => void load()} />
       : <div className="mova-reports-board">
-        <Link className="mova-report-card mova-report-card--revenue" to={operatorUrl(businessId, 'money')} aria-label={t('screens.reports.openMoney')}>
+        <Card className="mova-report-card mova-report-card--revenue">
           <span className="mova-report-card__label">{t('reports.revenue')}</span>
           <strong className="mova-report-card__metric">{money(c.service_value_minor ?? 0)}</strong>
           <span className="mova-report-card__detail">
@@ -80,7 +86,7 @@ export function ReportsPage() {
           <span className="mova-report-chart" aria-hidden="true">
             {revenueBuckets.map((value, index) => <span key={index} data-current={index === revenueBuckets.length - 1 || undefined} style={{ height: `${Math.max(14, Math.round(value / maxRevenueBucket * 100))}%` }} />)}
           </span>
-        </Link>
+        </Card>
 
         <div className="mova-reports-board__pair">
           <Card className="mova-report-card mova-report-card--bookings">
@@ -124,7 +130,7 @@ export function ReportsPage() {
             <span>{t('screens.reports.seatFillerRow', { count: c.slot_fills ?? 0 })}</span><strong>{money(c.slot_recovered_minor ?? 0)}</strong>
           </Link>}
           <Link className="mova-report-row" to={operatorUrl(businessId, 'growth/pipeline')}>
-            <span>{t('screens.reports.rebookingRow', { booked: c.rebooking_count ?? 0, sent: c.rebooking_reminders_sent ?? 0 })}</span><strong>{money(c.rebooking_value_minor ?? 0)}</strong>
+            <span>{t(rebookings > remindersSent ? 'screens.reports.rebookingCounts' : 'screens.reports.rebookingRow', { booked: fmt(rebookings), sent: fmt(remindersSent) })}</span><strong>{money(c.rebooking_value_minor ?? 0)}</strong>
           </Link>
           <div className="mova-report-row">
             <span>{t('reports.socialShares')}</span><strong>{fmt(c.social_shares ?? 0)}</strong>

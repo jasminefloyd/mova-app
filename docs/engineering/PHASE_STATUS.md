@@ -513,3 +513,7 @@ The owner approved the production Supabase release. Migration 0110 was applied a
 The owner approved a limited production review of the inbox and setup with automated replies paused. The operator UI and the Concierge artist function use a single configured business UUID each to allow the same workspace. Server authorization still checks the signed-in membership and the plan entitlement. The review path permits status, conversation and quote reads only. The public promotion flag and platform Concierge switch stay off. To close the review, unset `MOVA_CONCIERGE_REVIEW_BUSINESS_ID` from the Edge Function environment and `VITE_CONCIERGE_REVIEW_BUSINESS_ID` from Vercel, then redeploy the web build.
 
 Local browser tests verified access and read-only controls for the review workspace and denial for another workspace. The full build, type checks, 22 Deno tests and 1,276 pgTAP assertions passed.
+
+## 2026-11-23 Reports and Money navigation
+
+Reports now exposes Money as a visible link in the heading, and Money has a back link to Reports. Removed the older Reports styles that overrode the Board 37 layout and underlined marketing links. Reports uses a full-width period control and compact metric cards. When the period has more rebookings than reminders sent, the marketing row shows separate counts. The local build, type checks and both focused Playwright scenarios passed. Compared Reports at 390 px with the design reference and checked that keyboard focus remains visible. The owner approved the Vercel production release from GitHub main.

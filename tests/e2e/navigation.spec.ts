@@ -59,15 +59,20 @@ test('language selection lives in Settings and Settings matches its menu structu
 });
 
 test('payment settings is reachable from Settings and Money is reachable from Reports', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await openOperatorPage(page, '/settings');
   await page.getByRole('link', { name: 'Payments & payouts' }).click();
   await expect(page).toHaveURL(/\/BID-1\/settings\/payments$/);
   await expect(page.getByRole('heading', { level: 1, name: 'How you get paid' })).toBeVisible();
 
   await openOperatorPage(page, '/reports');
-  await page.getByRole('link', { name: 'Open Money' }).click();
+  await page.getByRole('link', { name: 'Money', exact: true }).click();
   await expect(page).toHaveURL(/\/BID-1\/money$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Money' })).toBeVisible();
+  await expect(page.getByText('Service value', { exact: true })).toBeVisible();
+  await expect(page.getByText('Recent activity', { exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Reports', exact: true }).click();
+  await expect(page).toHaveURL(/\/BID-1\/reports$/);
 });
 
 test('Settings uses the saved profile photo and current plan in the banner', async ({ page }) => {

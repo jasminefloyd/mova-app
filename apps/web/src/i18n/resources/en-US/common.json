@@ -185,7 +185,6 @@
   },
   "screens": {
     "reports": {
-      "openMoney": "Open Money",
       "serviceValueChange": "Service value · {{value}} vs previous {{days}} days",
       "rebookedLine": "{{rate}} rebooked",
       "averageTicketLine": "{{value}} avg. ticket",
@@ -194,7 +193,8 @@
       "topSources": "Top sources: {{sources}}",
       "noSources": "No profile traffic yet.",
       "seatFillerRow": "Seat filler · {{count}} slots filled",
-      "rebookingRow": "Rebooking reminders · {{booked}} of {{sent}} booked"
+      "rebookingRow": "Rebooking reminders · {{booked}} of {{sent}} booked",
+      "rebookingCounts": "Rebooking reminders · {{booked}} booked · {{sent}} sent"
     },
     "concierge": {
       "backToRevenue": "AI Revenue Center",
@@ -1264,9 +1264,9 @@
     "awaitingReplyCount": "{{count}} waiting for a reply",
     "manageReviews": "Manage reviews",
     "profileTraffic": "Profile traffic",
-    "views": "Profile views",
+    "views": "Page views",
     "qrScans": "QR scans",
-    "viewToBook": "View to booking",
+    "viewToBook": "Views → booked",
     "sources": "Traffic sources",
     "sourcesMap": {
       "instagram": "Instagram",
@@ -1275,10 +1275,10 @@
       "direct": "Direct",
       "other": "Other"
     },
-    "marketing": "Marketing results",
+    "marketing": "Marketing",
     "seatFiller": "Open-slot bookings",
     "rebookingReminder": "Rebookings · reminders sent",
-    "socialShares": "Social shares",
+    "socialShares": "Social posts shared",
     "money": "Open Money",
     "signInRequired": "Sign in to your stylist account to view reports.",
     "loading": "Loading your reports…",

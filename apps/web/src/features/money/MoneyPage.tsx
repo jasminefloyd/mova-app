@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Card, EmptyState, ErrorState } from '../../components';
+import { Card, EmptyState, ErrorState, Icon } from '../../components';
+import { operatorUrl } from '../../app/operator-url';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 
 type Totals = { service_value_minor:number; mova_processed_minor:number; recorded_by_artist_minor:number; collected_by_salon_minor:number; mova_platform_fee_minor:number; processor_fee_minor:number; refunds_minor:number; estimated_to_artist_minor:number };
@@ -19,7 +21,12 @@ export function MoneyPage(){
   const rows=[['processed',data.totals.mova_processed_minor],['recorded',data.totals.recorded_by_artist_minor],['salon',data.totals.collected_by_salon_minor]] as const;
   const monthLabel=new Intl.DateTimeFormat(i18n.resolvedLanguage,{month:'long',year:'numeric'}).format(new Date(`${month}-01T12:00:00`));
   return <main className="mova-page mova-money-page">
-    <div className="mova-money-page__period"><label className="mova-visually-hidden" htmlFor="mova-money-month">{t('money.period')}</label><input id="mova-money-month" type="month" value={month} onChange={event=>setMonth(event.currentTarget.value)} aria-label={t('money.selectMonth')}/><span className="mova-visually-hidden" aria-live="polite">{monthLabel}</span></div>
+    <div className="mova-money-page__period">
+      {businessId && <Link className="mova-money-page__back mova-icon-button" to={operatorUrl(businessId, 'reports')} aria-label={t('reports.title')}><Icon name="back" /></Link>}
+      <label className="mova-visually-hidden" htmlFor="mova-money-month">{t('money.period')}</label>
+      <input id="mova-money-month" type="month" value={month} onChange={event=>setMonth(event.currentTarget.value)} aria-label={t('money.selectMonth')}/>
+      <span className="mova-visually-hidden" aria-live="polite">{monthLabel}</span>
+    </div>
     <h1>{t('money.title')}</h1>
     {identityLoading||loading?<p role="status" aria-busy="true">{t('money.loading')}</p>:error?<ErrorState title={t('money.error')} retryLabel={t('money.retry')} onRetry={()=>void load()}/>:<>
       <Card className="mova-money-breakdown"><div className="mova-money-breakdown__total"><h2>{t('money.serviceValue')}</h2><strong>{currency(data.totals.service_value_minor)}</strong></div>
