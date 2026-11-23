@@ -214,8 +214,7 @@ export function HomeAppointments({ onOpenSettings }: { onOpenSettings: () => voi
       <div className="mova-home__greeting"><p>{dateLabel}</p><h1 title={t(greetingKey(currentDate.getHours()), { name })}>{t(greetingKey(currentDate.getHours()), { name })}</h1></div>
       <div className="mova-home__header-actions">
         <Link className="mova-home__growth" to={operatorUrl(businessId, 'growth')} aria-label={t('navigation.growthTitle')}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17.5 9 12l3.5 3.5L20 7.5M14.5 7.5H20v5.5" /></svg>
-          <span />
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.2 6.3 6.3 2.2-6.3 2.2L12 20.5l-2.2-6.3L3.5 12l6.3-2.2z" /></svg>
         </Link>
         <button type="button" className="mova-home__settings" onClick={onOpenSettings} aria-label={t('navigation.openSettings')}>
           <Avatar label={t('navigation.openSettings')} size={44} placeholder />

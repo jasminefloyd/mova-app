@@ -202,9 +202,8 @@ body {
 .mova-home__greeting h1 { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .mova-home__header p { margin: 0; color: var(--ink-muted); font-size: var(--fs-caption); font-weight: 600; }
 .mova-home__header-actions { display: flex; flex: none; flex-direction: row; align-items: center; gap: 12px; }
-.mova-home__growth { position: relative; display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--line-control); border-radius: 50%; background: var(--surface); color: var(--forest); }
-.mova-home__growth svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
-.mova-home__growth span { position: absolute; top: 5px; right: 4px; width: 9px; height: 9px; border-radius: 50%; background: var(--peach); }
+.mova-home__growth { position: relative; display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--forest); border-radius: 50%; background: var(--forest); color: var(--peach); }
+.mova-home__growth svg { width: 28px; height: 28px; fill: currentColor; }
 .mova-services-page__header p, .mova-location-settings__header p { margin: 0; color: var(--ink-secondary); font-size: var(--fs-body-s); }
 .mova-home__header h1, .mova-calendar__month-header h1, .mova-clients__header h1, .mova-services-page__header h1, .mova-location-settings__header h1 { margin: 0; font-size: var(--fs-display-xl); line-height: 1.1; }
 .mova-home__settings { display: inline-flex; min-width: var(--tap-min); min-height: var(--tap-min); align-items: center; justify-content: center; border: 0; border-radius: 50%; padding: 0; background: transparent; }
