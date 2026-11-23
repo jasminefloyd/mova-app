@@ -5,6 +5,7 @@ import { Button, Card, ErrorState, ScreenHeader, StatusChip, TextField } from '.
 import { operatorUrl } from '../../app/operator-url';
 import { displayId } from '../../lib/display-ids';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
+import { isConciergeReviewBusiness } from '../../lib/env';
 import './concierge-board.css';
 
 type Quote = {
@@ -47,6 +48,7 @@ export default function ConciergeQuotePage() {
   const { quoteId = '' } = useParams();
   const navigate = useNavigate();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
+  const reviewOnly = isConciergeReviewBusiness(businessId);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(true);
@@ -77,6 +79,7 @@ export default function ConciergeQuotePage() {
 
   const saveEstimate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (reviewOnly) return;
     const minor = Math.round(Number(amount) * 100);
     if (!Number.isSafeInteger(minor) || minor <= 0) {
       setValidationError(true);
@@ -150,7 +153,7 @@ export default function ConciergeQuotePage() {
 
         {quote.risk_flags.length > 0 && <Card tone="warm" className="mova-concierge-quote__risk"><p>{t('concierge.quoteRiskNeedsReview')}</p></Card>}
 
-        <form className="mova-concierge-form" onSubmit={event => void saveEstimate(event)}>
+        {reviewOnly ? <p>{t('concierge.reviewOnly')}</p> : <form className="mova-concierge-form" onSubmit={event => void saveEstimate(event)}>
           {suggestions.length > 0 && <fieldset className="mova-concierge-quote__prices"><legend>{t('concierge.quoteYourPrice')}</legend>
             {suggestions.map(value => <button key={value} type="button" className={`mova-chip${Number(amount) === value ? ' is-selected' : ''}`} aria-pressed={Number(amount) === value} onClick={() => { setAmount(value.toFixed(2)); setSaved(false); }}>{money(value * 100)}</button>)}
             <button type="button" className={`mova-chip${amount && !suggestions.includes(Number(amount)) ? ' is-selected' : ''}`} onClick={() => document.getElementById('quote-amount')?.focus()}>{t('concierge.quoteOther')}</button>
@@ -173,7 +176,7 @@ export default function ConciergeQuotePage() {
             <Button type="submit" variant="secondary" loading={saving} disabled={quote.status !== 'open'}>{t('concierge.quoteSaveEstimate')}</Button>
           </div>
           {saved && <p role="status">{t('concierge.quoteEstimateSaved')}</p>}
-        </form>
+        </form>}
       </>}
   </main>;
 }

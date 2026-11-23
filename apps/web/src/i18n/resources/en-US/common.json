@@ -480,6 +480,7 @@
     }
   },
   "concierge": {
+    "reviewOnly": "Read-only review. Automated replies are paused.",
     "title": "AI Concierge",
     "subtitle": "Ari’s assistant · AI",
     "teach": "Teach it",

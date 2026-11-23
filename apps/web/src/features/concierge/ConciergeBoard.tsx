@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, ErrorState, Icon, ScreenHeader, TextArea, TextField, Toggle } from '../../components';
 import { operatorUrl } from '../../app/operator-url';
+import { isConciergeReviewBusiness } from '../../lib/env';
 import { invoke, useConcierge } from './ConciergePages';
 import './concierge-board.css';
 
@@ -31,7 +32,8 @@ export function ConciergeInboxPage() {
   const channelName = (value: string) => t(`concierge.channelLabels.${({ web_chat: 'webChat', webchat: 'webChat', 'web-chat': 'webChat', page_chat: 'webChat', website_chat: 'webChat', sms: 'sms', missed_call: 'missedCall', instagram: 'instagram' } as Record<string, string>)[value.trim().toLowerCase()] ?? 'unknown'}`);
   const conversationStatus = (value: string) => t(`concierge.conversationStatus.${({ handled: 'handled', needs_you: 'needsYou', open: 'open', closed: 'closed' } as Record<string, string>)[value.trim().toLowerCase()] ?? 'unknown'}`);
   const handoffType = (value: string) => t(`concierge.handoffTypes.${({ quote: 'quote', exception: 'exception', complaint: 'complaint' } as Record<string, string>)[value] ?? 'other'}`);
-  const on = Boolean(data?.settings.enabled && !data.settings.globally_paused);
+  const reviewOnly = isConciergeReviewBusiness(businessId);
+  const on = !reviewOnly && Boolean(data?.settings.enabled && !data.settings.globally_paused);
   const metrics = data?.metrics;
   const handoffs = data?.handoffs ?? [];
   const handled = (data?.conversations ?? []).filter((row) => row.status !== 'needs_you').slice(0, 10);
@@ -59,6 +61,7 @@ export function ConciergeInboxPage() {
         {on ? t('screens.concierge.statusOn', { name: artistName ?? t('screens.concierge.yourAssistant') }) : t('screens.concierge.statusPaused')}
       </button>}
     </div>
+    {reviewOnly && <p>{t('concierge.reviewOnly')}</p>}
     {pauseError && <p role="status">{t('concierge.error')}</p>}
     {loading ? <p role="status" aria-busy="true">{t('concierge.loading')}</p>
       : error ? <ErrorState title={t('concierge.error')} retryLabel={t('concierge.retry')} onRetry={() => void load()} />
@@ -110,6 +113,7 @@ export function ConciergeSetupPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { client, businessId, data, loading, error, load } = useConcierge();
+  const reviewOnly = isConciergeReviewBusiness(businessId);
   const [knowledge, setKnowledge] = useState<Knowledge[]>([]);
   const [form, setForm] = useState({ id: '', kind: 'faq', question: '', answer_en: '', answer_es: '' });
   const [notice, setNotice] = useState('');
@@ -135,7 +139,7 @@ export function ConciergeSetupPage() {
   const tone = data?.settings.tone === 'warm' ? t('screens.conciergeSetup.toneWarm') : data?.settings.tone ?? t('screens.conciergeSetup.toneWarm');
 
   const saveSettings = async (patch: { channels?: Record<string, boolean>; permissions?: Record<string, boolean>; paused?: boolean }) => {
-    if (!client || !businessId || !data) return;
+    if (!client || !businessId || !data || reviewOnly) return;
     setBusy(true); setNotice('');
     try {
       await invoke(client, businessId, { action: 'save-settings', channels: patch.channels ?? data.settings.channels, permissions: patch.permissions ?? data.settings.permissions, languages: data.settings.languages ?? ['en-US', 'es-US'] });
@@ -149,7 +153,7 @@ export function ConciergeSetupPage() {
 
   const save = async (event: FormEvent) => {
     event.preventDefault();
-    if (!client || !businessId) return;
+    if (!client || !businessId || reviewOnly) return;
     setBusy(true); setNotice('');
     try {
       const result = await invoke(client, businessId, { action: 'save-knowledge', ...form });
@@ -168,6 +172,7 @@ export function ConciergeSetupPage() {
     <div className="mova-concierge-board__head">
       <h1>{t('screens.conciergeSetup.title')}</h1>
       <p>{t('screens.conciergeSetup.intro')}</p>
+      {reviewOnly && <p>{t('concierge.reviewOnly')}</p>}
     </div>
     {loading ? <p role="status" aria-busy="true">{t('concierge.loading')}</p>
       : error ? <ErrorState title={t('concierge.error')} retryLabel={t('concierge.retry')} onRetry={() => void load()} />
@@ -179,7 +184,7 @@ export function ConciergeSetupPage() {
               const enabled = data?.settings.channels[channel] ?? false;
               const label = t(`screens.conciergeSetup.channel.${({ instagram: 'instagram', sms: 'sms', missed_call: 'missedCall', web_chat: 'webChat' } as Record<string, string>)[channel]}`);
               const value = channel === 'sms' ? data?.sms_number ?? t('screens.conciergeSetup.notAssigned') : channel === 'instagram' && enabled ? t('screens.conciergeSetup.connected') : enabled ? t('screens.conciergeSetup.on') : t('screens.conciergeSetup.off');
-              return <button key={channel} type="button" className="mova-concierge-board__fixed mova-concierge-board__channel" aria-pressed={enabled} disabled={busy} onClick={() => void saveSettings({ channels: { ...data?.settings.channels, [channel]: !enabled } })}>
+              return <button key={channel} type="button" className="mova-concierge-board__fixed mova-concierge-board__channel" aria-pressed={enabled} disabled={busy || reviewOnly} onClick={() => void saveSettings({ channels: { ...data?.settings.channels, [channel]: !enabled } })}>
                 <span>{label}</span><span>{value}</span>
               </button>;
             })}
@@ -189,7 +194,7 @@ export function ConciergeSetupPage() {
         <section className="mova-concierge-board__section" aria-labelledby="setup-alone">
           <h2 id="setup-alone" className="mova-overline">{t('screens.conciergeSetup.aloneTitle')}</h2>
           <Card className="mova-concierge-board__rows">
-            {PERMISSIONS.map((permission) => <Toggle key={permission} label={permissionLabel(permission)} checked={data?.settings.permissions[permission] ?? false} disabled={busy} onChange={(value) => void saveSettings({ permissions: { ...data?.settings.permissions, [permission]: value } })} />)}
+            {PERMISSIONS.map((permission) => <Toggle key={permission} label={permissionLabel(permission)} checked={data?.settings.permissions[permission] ?? false} disabled={busy || reviewOnly} onChange={(value) => void saveSettings({ permissions: { ...data?.settings.permissions, [permission]: value } })} />)}
             <div className="mova-concierge-board__fixed mova-concierge-board__fixed--locked"><span>{t('screens.conciergeSetup.alwaysYou')}</span><span><Icon name="lock" size={14} />{t('screens.conciergeSetup.alwaysYouValue')}</span></div>
           </Card>
         </section>
@@ -206,7 +211,7 @@ export function ConciergeSetupPage() {
         {knowledgeOpen && <section className="mova-concierge-board__section" aria-labelledby="setup-edit">
           <h2 id="setup-edit" className="mova-overline">{t('screens.conciergeSetup.editTitle')}</h2>
           <Card className="mova-concierge-board__rows mova-concierge-board__knowledge-editor">
-            <form className="mova-concierge-form" onSubmit={(event) => void save(event)}>
+            {!reviewOnly && <form className="mova-concierge-form" onSubmit={(event) => void save(event)}>
               <label className="mova-field"><span className="mova-field__label">{t('concierge.kind')}</span>
               <select className="mova-input" value={form.kind} onChange={(event) => { const kind = event.currentTarget.value; setForm((value) => ({ ...value, kind })); }}>
                   <option value="faq">{t('concierge.faq')}</option><option value="prep">{t('concierge.prep')}</option><option value="policy">{t('concierge.policy')}</option><option value="location_detail">{t('concierge.location')}</option>
@@ -215,9 +220,16 @@ export function ConciergeSetupPage() {
               <TextArea label={t('concierge.answerEn')} required maxLength={3000} value={form.answer_en} onChange={(event) => { const answer_en = event.currentTarget.value; setForm((value) => ({ ...value, answer_en })); }} />
               <TextArea label={t('concierge.answerEs')} maxLength={3000} value={form.answer_es} onChange={(event) => { const answer_es = event.currentTarget.value; setForm((value) => ({ ...value, answer_es })); }} />
               <Button type="submit" disabled={busy}>{t('concierge.saveKnowledge')}</Button>
-            </form>
+            </form>}
             {knowledge.length
-              ? <ul className="mova-revenue-list">{knowledge.map((item) => <li key={item.id} className="mova-revenue-list__item"><span><strong>{item.question}</strong><small>{knowledgeKind(item.kind)} · {knowledgeStatus(item.status)}</small></span><Button variant="ghost" onClick={() => setForm({ id: item.id, kind: item.kind, question: item.question, answer_en: item.answer_en, answer_es: item.answer_es ?? '' })}>{t('settings.edit')}</Button></li>)}</ul>
+              ? <ul className="mova-revenue-list">{knowledge.map((item) => <li key={item.id} className="mova-revenue-list__item">
+                <span>
+                  <strong>{item.question}</strong>
+                  <small>{knowledgeKind(item.kind)} · {knowledgeStatus(item.status)}</small>
+                  {reviewOnly && <><p lang="en-US">{item.answer_en}</p>{item.answer_es && <p lang="es-US">{item.answer_es}</p>}</>}
+                </span>
+                {!reviewOnly && <Button variant="ghost" onClick={() => setForm({ id: item.id, kind: item.kind, question: item.question, answer_en: item.answer_en, answer_es: item.answer_es ?? '' })}>{t('settings.edit')}</Button>}
+              </li>)}</ul>
               : <EmptyState title={t('concierge.knowledgeEmpty')} />}
           </Card>
         </section>}

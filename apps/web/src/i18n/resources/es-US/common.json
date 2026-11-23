@@ -480,6 +480,7 @@
     }
   },
   "concierge": {
+    "reviewOnly": "Vista de solo lectura. Las respuestas automáticas están en pausa.",
     "title": "Conserjería con IA",
     "subtitle": "Asistente de Ari · IA",
     "teach": "Enséñale",

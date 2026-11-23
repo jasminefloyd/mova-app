@@ -507,3 +507,9 @@ New appointment now uses inset-chevron dropdowns. Stylists can add or remove up 
 Verified locally with 7 Playwright cases, the scheduling unit tests, all 1,276 pgTAP assertions and 21 Deno tests. A local Edge and PostgREST smoke test confirmed that two concurrent requests booked the same slot only once, the idempotent retry returned the booking, and both services persisted. No production changes were made for this feature.
 
 The owner approved the production Supabase release. Migration 0110 was applied and recorded as `20261123180000`. Verified the authenticated RPC grant and that anonymous callers have no execute grant. `artist-appointment-create` v14 is active, matches the release source, and retains gateway JWT verification. These checks used the production catalog and deployed bundle. The booking smoke test ran locally.
+
+## 2026-11-23 Rooted Beauty Concierge review
+
+The owner approved a limited production review of the inbox and setup with automated replies paused. The operator UI and the Concierge artist function use a single configured business UUID each to allow the same workspace. Server authorization still checks the signed-in membership and the plan entitlement. The review path permits status, conversation and quote reads only. The public promotion flag and platform Concierge switch stay off. To close the review, unset `MOVA_CONCIERGE_REVIEW_BUSINESS_ID` from the Edge Function environment and `VITE_CONCIERGE_REVIEW_BUSINESS_ID` from Vercel, then redeploy the web build.
+
+Local browser tests verified access and read-only controls for the review workspace and denial for another workspace. The full build, type checks, 22 Deno tests and 1,276 pgTAP assertions passed.

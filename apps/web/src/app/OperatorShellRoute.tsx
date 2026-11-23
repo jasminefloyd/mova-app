@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { LoaderFunctionArgs } from 'react-router';
 import { ErrorState } from '../components';
 import { createMovaSupabaseClient } from '../lib/supabase';
-import { conciergeEnabled, rebookingAutopilotEnabled, seatFillerEnabled } from '../lib/env';
+import { conciergeEnabled, conciergeReviewConfigured, isConciergeReviewBusiness, rebookingAutopilotEnabled, seatFillerEnabled } from '../lib/env';
 import { operatorUrl } from './operator-url';
 import { ArtistShell } from './ArtistShell';
 import { displayId, parseDisplayId } from '../lib/display-ids';
@@ -15,7 +15,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   if (host !== 'ops.mova-beauty.co' && host !== 'mova-beauty.co' && host !== 'localhost' && host !== '127.0.0.1' && !host.endsWith('.vercel.app')) throw new Response('Not found', { status: 404 });
   const [, , section, feature] = url.pathname.split('/');
   if (section === 'growth' && (
-    (feature === 'concierge' && !conciergeEnabled) ||
+    (feature === 'concierge' && !conciergeEnabled && !conciergeReviewConfigured) ||
     (feature === 'slots' && !seatFillerEnabled) ||
     (feature === 'autopilot' && !rebookingAutopilotEnabled)
   )) return redirect(operatorUrl(params.businessId, 'growth'));
@@ -51,6 +51,11 @@ export default function OperatorShellRoute() {
       const { data } = await supabase.from('mova_artist_memberships').select('artist_business_id').eq('artist_business_id', business.id).eq('user_id', session.user.id).eq('status','active').maybeSingle();
       if (!active) return;
       if (!data) { setState('denied'); return; }
+      const [, , section, feature] = location.pathname.split('/');
+      if (section === 'growth' && feature === 'concierge' && !conciergeEnabled && !isConciergeReviewBusiness(business.id)) {
+        navigate(operatorUrl(routeId, 'growth'), { replace: true });
+        return;
+      }
       sessionStorage.setItem('mova_active_artist_business_id', business.id);
       sessionStorage.setItem('mova_active_artist_business_display_id', routeId);
       if (isLegacyUuid) {

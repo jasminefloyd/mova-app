@@ -32,6 +32,11 @@ export const stripeTestModeEnabled = publicEnv.VITE_STRIPE_TEST_MODE === 'true';
 export const trialMarketingEnabled = publicEnv.VITE_TRIAL_ENABLED === 'true';
 export const webChatEnabled = publicEnv.VITE_CONCIERGE_WEB_CHAT_ENABLED === 'true';
 export const conciergeEnabled = import.meta.env.VITE_AI_CONCIERGE_ENABLED === 'true';
+const conciergeReviewBusinessId = import.meta.env.VITE_CONCIERGE_REVIEW_BUSINESS_ID?.trim().toLowerCase();
+export const conciergeReviewConfigured = Boolean(conciergeReviewBusinessId);
+export function isConciergeReviewBusiness(businessId: string | null) {
+  return Boolean(businessId && businessId.toLowerCase() === conciergeReviewBusinessId);
+}
 export const seatFillerEnabled = import.meta.env.VITE_SEAT_FILLER_ENABLED === 'true';
 export const rebookingAutopilotEnabled = import.meta.env.VITE_REBOOKING_AUTOPILOT_ENABLED === 'true';
 export const textsEnabled = import.meta.env.VITE_SMS_ENABLED === 'true';

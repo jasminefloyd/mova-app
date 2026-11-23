@@ -9,7 +9,7 @@ import {Link,useNavigate} from 'react-router';
 import {useTranslation} from 'react-i18next';
 import {Button,Card,EmptyState,ErrorState,ScreenHeader,TextField,Toggle} from '../../components';
 import {operatorUrl} from '../../app/operator-url';
-import { conciergeEnabled, rebookingAutopilotEnabled, seatFillerEnabled } from '../../lib/env';
+import { conciergeEnabled, isConciergeReviewBusiness, rebookingAutopilotEnabled, seatFillerEnabled } from '../../lib/env';
 import {useArtistBusiness} from '../settings/useArtistBusiness';
 
 type RevenueData={pipeline:Array<{id:string;client_id:string;service_id:string;last_visit_at:string;next_due_at:string;window_end_at:string;confidence:string;status:string;client:{display_name:string;preferred_locale:string;visit_count:number;marketing_opted_out:boolean}|null}>;winback:Array<{id:string;status?:string;client:{display_name:string;preferred_locale:string}|null;last_visit_at:string}>;decisions:Array<{id:string;action:string;reason_code:string;created_at:string;value_minor:number|null}>;settings:{enabled:boolean;slot_texts_autopilot:boolean;rules:Record<string,number|string>};counts:{due:number;contacted:number;rebooked:number;winback:number};outboundEnabled:boolean};
@@ -24,7 +24,7 @@ export function RevenueHomePage(){const{t,i18n}=useTranslation();const navigate=
  const due=data?.counts.due??0,contacted=data?.counts.contacted??0,rebooked=data?.counts.rebooked??0,winback=data?.counts.winback??0;
  const rows:Array<{key:string;path:string;title:string;detail:string;count?:string|number;badge?:boolean;icon?:boolean}>=[
   ...(rebookingAutopilotEnabled?[{key:'autopilot',path:'growth/autopilot',title:t('revenue.hub.autopilotTitle',{state:data?.settings?.enabled?t('revenue.hub.on'):t('revenue.hub.offShort')}),detail:t('revenue.hub.autopilotDetail',{sent:contacted,rebooked}),icon:true}]:[]),
-  ...(conciergeEnabled?[{key:'concierge',path:'growth/concierge',title:t('revenue.concierge'),detail:t('revenue.hub.conciergeDetail')}]:[]),
+  ...(conciergeEnabled || isConciergeReviewBusiness(businessId)?[{key:'concierge',path:'growth/concierge',title:t('revenue.concierge'),detail:t('revenue.hub.conciergeDetail')}]:[]),
   ...(seatFillerEnabled?[{key:'slots',path:'growth/slots',title:t('revenue.slots'),detail:t('revenue.hub.slotsDetail')}]:[]),
   {key:'pipeline',path:'growth/pipeline',title:t('revenue.pipeline'),detail:t('revenue.hub.pipelineDetail',{due,contacted,rebooked}),count:data?.pipeline.length??0},
   {key:'winback',path:'growth/winback',title:t('revenue.winback'),detail:t('revenue.hub.winbackDetail',{count:winback}),count:winback},

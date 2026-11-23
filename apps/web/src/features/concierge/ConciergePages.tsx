@@ -3,6 +3,7 @@ import {Link,useNavigate,useParams} from 'react-router';
 import {useTranslation} from 'react-i18next';
 import {Button,Card,ErrorState,IconButton,StatusChip,Toggle} from '../../components';
 import {operatorUrl} from '../../app/operator-url';
+import {isConciergeReviewBusiness} from '../../lib/env';
 import {displayIdOrNull} from '../../lib/display-ids';
 import {useArtistBusiness} from '../settings/useArtistBusiness';
 import './concierge-board.css';
@@ -23,23 +24,24 @@ export function ConciergeThreadPage(){const{t,i18n}=useTranslation();const{conve
  // and the per-chat concierge switch with a reply bar at the bottom.
  const name=conversation?.mova_clients?.display_name??t('concierge.clientLabel');const channelKey=({sms:'sms',instagram:'instagram',missed_call:'missedCall',web_chat:'webChat'} as Record<string,string>)[conversation?.channel??'']??'unknown';
  const openHandoffs=handoffs.filter(item=>item.status==='open');const aiOn=Boolean(conversation?.ai_enabled)&&Boolean(data?.aiEnabled);
+ const reviewOnly=isConciergeReviewBusiness(businessId);
  const time=(iso:string)=>new Intl.DateTimeFormat(i18n.resolvedLanguage,{hour:'numeric',minute:'2-digit'}).format(new Date(iso));
  return <main lang={conversation?.locale??i18n.resolvedLanguage} className="mova-page mova-concierge-page mova-concierge-thread">
   <header className="mova-concierge-thread__head"><IconButton label={t('messaging.back')} icon="back" onClick={()=>navigate(operatorUrl(businessId,'growth/concierge'))}/>
    <div><h1>{name}</h1><p>{t(`concierge.channelLabels.${channelKey}`)} · {t(conversation?.locale==='es-US'?'onboarding.spanish':'onboarding.english')}</p></div>
    <StatusChip status={openHandoffs.length?'needs-approval':'confirmed'}>{openHandoffs.length?t('concierge.handoff'):t('concierge.handled')}</StatusChip></header>
   {loading?<p role="status" aria-busy="true">{t('concierge.loading')}</p>:error?<ErrorState title={t('concierge.error')} retryLabel={t('concierge.retry')} onRetry={()=>void load()}/>:<>
-  {openHandoffs.map(item=><Card key={item.id} tone="warm" className="mova-concierge-thread__handoff"><strong>{handoffType(item.type)}</strong><p>{item.summary}</p><Button variant="secondary" onClick={()=>void resolve(item.id)}>{t('concierge.resolve')}</Button></Card>)}
+  {openHandoffs.map(item=><Card key={item.id} tone="warm" className="mova-concierge-thread__handoff"><strong>{handoffType(item.type)}</strong><p>{item.summary}</p>{!reviewOnly&&<Button variant="secondary" onClick={()=>void resolve(item.id)}>{t('concierge.resolve')}</Button>}</Card>)}
   <section className="mova-concierge-messages" aria-label={t('concierge.thread')}>{messages.map((message,index)=>{const kind=message.direction==='inbound'?'client':message.origin==='concierge'||message.origin==='ai'?'ai':message.origin==='artist'?'artist':'system';const label=kind==='ai'?t('concierge.aiLabel'):kind==='artist'?t('concierge.youLabel'):null;const first=index===0;return <Fragment key={message.id}>
    {first&&<p className="mova-concierge-thread__time">{new Intl.DateTimeFormat(i18n.resolvedLanguage,{weekday:'short',hour:'numeric',minute:'2-digit'}).format(new Date(message.created_at))}</p>}
    {label&&<small className="mova-concierge-thread__label">✦ {label}</small>}
    <article className={`mova-concierge-bubble mova-concierge-bubble--${kind}`} aria-label={`${kind==='client'?name:label??''} · ${time(message.created_at)} · ${messageStatus(message.status)}`}><p>{message.body}</p></article>
   </Fragment>;})}</section>
   {quotes.map(quote=><div key={quote.id} className="mova-concierge-thread__chip"><StatusChip status="needs-approval">{t('concierge.quote')} · {quote.service_category} · {quoteStatus(quote.status)}</StatusChip><Link to={operatorUrl(businessId,`growth/concierge/quotes/${quote.id}`)}>{t('concierge.reviewQuote')}</Link>{displayIdOrNull('AID',quote.appointment_number)&&<Link to={operatorUrl(businessId,`appointments/${displayIdOrNull('AID',quote.appointment_number)}`)}>{t('concierge.linkedAppointment')}</Link>}</div>)}
-  <div className="mova-concierge-thread__bar">
+  {reviewOnly ? <p>{t('concierge.reviewOnly')}</p> : <div className="mova-concierge-thread__bar">
    <Toggle label={t('concierge.repliesInChat')} checked={aiOn} disabled={!aiOn} onChange={(value)=>{if(!value)void takeover();}}/>
    <form className="mova-concierge-thread__reply" onSubmit={send}><label className="mova-visually-hidden" htmlFor="thread-reply">{t('concierge.reply')}</label><input id="thread-reply" className="mova-input" value={reply} onChange={event=>setReply(event.currentTarget.value)} placeholder={t('concierge.replyAsYourself')} maxLength={4000}/><button type="submit" className="mova-concierge-thread__send" aria-label={t('concierge.queueReply')} disabled={!reply.trim()}><span aria-hidden="true">➤</span></button></form>
    <p role="status" className="mova-concierge-thread__note">{notice||t('concierge.disclosure')}</p>
-  </div>
+  </div>}
  </>}</main>;}
 
