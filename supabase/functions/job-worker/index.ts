@@ -110,14 +110,18 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
     if (outboxEvent.event_type === 'appointment.pending_artist' && proposedEnabled) {
       const { data: context, error } = await db.rpc('mova_appointment_stylist_email_context', { p_appointment_id: aggregate.aggregate_id });
       if (error) throw new Error('STYLIST_EMAIL_CONTEXT_FAILED');
-      const value = context as { recipients?: Array<{ email: string; name: string }>; vars?: AppointmentEmailVars; artist_business_id?: string; locale?: string } | null;
+      const value = context as { recipients?: Array<{ email: string; name: string }>; vars?: AppointmentEmailVars; artist_business_id?: string; locale?: string; business_number?: number | null; appointment_number?: number | null } | null;
+      // EM12 links straight to the request in the operator app, and the footer to notification settings.
+      const publicBase = (Deno.env.get('MOVA_EMAIL_PUBLIC_BASE_URL') ?? 'https://mova-beauty.co').replace(/\/$/, '');
+      const operatorBase = value?.business_number ? `${publicBase}/BID-${value.business_number}` : null;
+      const requestUrl = operatorBase ? (value?.appointment_number ? `${operatorBase}/appointments/AID-${value.appointment_number}` : `${operatorBase}/calendar`) : `${publicBase}/login`;
       for (const recipient of value?.recipients ?? []) {
         const { data: recipientUser } = await db.rpc('mova_member_preferences_by_email', { p_artist_business_id: value?.artist_business_id ?? outboxEvent.artist_business_id, p_email: recipient.email });
         if (recipientUser && !wantsEmail((recipientUser as { preferences?: unknown }).preferences, 'booking_request')) continue;
         const sent = await sendEmail(db as unknown as EmailDb, emailProvider, {
           artistBusinessId: value?.artist_business_id ?? outboxEvent.artist_business_id!, clientId: null,
           to: recipient.email, templateId: 'stylist_new_request', locale: value?.locale === 'es-US' ? 'es-US' : 'en-US',
-          vars: { ...(value?.vars as AppointmentEmailVars), stylistName: recipient.name, stylistUrl: `${Deno.env.get('MOVA_EMAIL_PUBLIC_BASE_URL') ?? 'https://mova-beauty.co'}/calendar`, postalAddress: Deno.env.get('MOVA_EMAIL_POSTAL_ADDRESS') },
+          vars: { ...(value?.vars as AppointmentEmailVars), stylistName: recipient.name, stylistUrl: requestUrl, settingsUrl: operatorBase ? `${operatorBase}/settings/notifications` : null, postalAddress: Deno.env.get('MOVA_EMAIL_POSTAL_ADDRESS') },
           idempotencyKey: `email:${outboxEvent.id}:stylist:${recipient.email.toLowerCase()}`,
         });
         if (sent.status === 'failed') throw new Error('APPOINTMENT_EMAIL_FAILED');

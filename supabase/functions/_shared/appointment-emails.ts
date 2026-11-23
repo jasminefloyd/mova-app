@@ -3,6 +3,7 @@ import { sendEmail, type EmailDb, type EmailProvider, type EmailTemplateId, type
 type Context = {
   template_id: EmailTemplateId | null; artist_business_id: string; client_id: string | null; to: string | null; locale: string;
   client_name: string; business_name: string; service_name: string; starts_at: string; time_zone: string; location_name: string;
+  location_address?: string | null; deposit_minor?: number | null; balance_minor?: number | null; payment_collector?: string | null;
 };
 
 /**
@@ -17,6 +18,7 @@ export async function sendAppointmentEmail(db: EmailDb, provider: EmailProvider,
   return sendEmail(db, provider, {
     artistBusinessId: context.artist_business_id, clientId: context.client_id, to: context.to, templateId: context.template_id,
     locale: context.locale === 'es-US' ? 'es-US' : 'en-US', idempotencyKey: key, now,
-    vars: { clientName: context.client_name, businessName: context.business_name, serviceName: context.service_name, startsAt: typeof payload.starts_at === 'string' ? payload.starts_at : context.starts_at, previousStartsAt: typeof payload.previous_starts_at === 'string' ? payload.previous_starts_at : null, manageUrl: typeof payload.review_url === 'string' ? payload.review_url : null, timeZone: context.time_zone, locationName: context.location_name, postalAddress },
+    vars: { clientName: context.client_name, businessName: context.business_name, serviceName: context.service_name, startsAt: typeof payload.starts_at === 'string' ? payload.starts_at : context.starts_at, previousStartsAt: typeof payload.previous_starts_at === 'string' ? payload.previous_starts_at : null, manageUrl: typeof payload.review_url === 'string' ? payload.review_url : null, timeZone: context.time_zone, locationName: context.location_name, postalAddress,
+      locationAddress: context.location_address ?? null, depositMinor: context.deposit_minor ?? null, balanceMinor: context.balance_minor ?? null, paymentCollector: context.payment_collector ?? null },
   });
 }
