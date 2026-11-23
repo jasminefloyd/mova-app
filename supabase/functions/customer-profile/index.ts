@@ -41,7 +41,7 @@ async function allExportPages<T=Record<string,unknown>>(load:(from:number,to:num
 }
 Deno.serve(withSystemRequestLogging('customer-profile', async(request)=>{
   if(request.method==='OPTIONS')return new Response('ok',{headers:corsHeaders});if(request.method!=='POST')return respond({code:'METHOD_NOT_ALLOWED'},405);
-  if(Deno.env.get('MOVA_CLIENT_PROFILES_ENABLED')!=='true')return respond({code:'CLIENT_PROFILES_DISABLED'},403);
+  if(Deno.env.get('MOVA_CLIENT_PROFILES_ENABLED')==='false')return respond({code:'CLIENT_PROFILES_DISABLED'},403);
   const user=await getUser(request);if(!user)return respond({code:'UNAUTHENTICATED'},401);const body=await request.json().catch(()=>({}));const db=serviceClient();
   try{
     if(body.action==='bootstrap'){

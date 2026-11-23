@@ -36,7 +36,7 @@ test('quote request opens its scoped detail and saves an internal estimate witho
   await openOperatorPage(page, '/growth/concierge/e2500000-0000-4000-8000-000000000031');
   await page.getByRole('link', { name: 'Review quote' }).click();
   await expect(page).toHaveURL(/\/BID-1\/growth\/concierge\/quotes\/e2500000-0000-4000-8000-000000000030$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'Quote request · Alex Rivera · Protective style' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Alex Rivera · Protective style' })).toBeVisible();
   await expect(page.getByText('Low-tension protective style', { exact: true })).toBeVisible();
   await expect(page.getByText('No photos were attached to this request.')).toBeVisible();
   await page.getByRole('spinbutton', { name: 'Estimate amount (USD)' }).fill('175');

@@ -1221,14 +1221,21 @@ select,
 .mova-slots__timeline small { color: var(--ink-muted); font-size: var(--fs-caption); overflow-wrap: anywhere; }
 .mova-claim { display: grid; gap: var(--space-4); padding-bottom: var(--space-8); }
 .mova-claim h1 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-l); }
-.mova-claim__head { display: grid; gap: var(--space-2); }
+.mova-claim__head { display: grid; gap: var(--space-2); justify-items: center; text-align: center; }
+.mova-claim__avatar { width: 92px; height: 92px; border-radius: 46px; border: 4px solid var(--surface); box-shadow: 0 6px 16px color-mix(in srgb, var(--forest) 18%, transparent); background: var(--accent-warm); color: var(--forest); display: inline-flex; align-items: center; justify-content: center; font: 800 30px var(--font-display); }
+.mova-claim__eyebrow { color: var(--forest); font-size: var(--fs-caption); font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+.mova-claim__details dl > div { grid-template-columns: auto minmax(0, 1fr); align-items: baseline; padding: var(--space-3) 0; border-top: 1px solid var(--line-subtle); }
+.mova-claim__details dl > div:first-child { border-top: 0; }
+.mova-claim__details dd { text-align: right; }
+.mova-claim__bar { position: sticky; bottom: 0; display: grid; gap: var(--space-2); justify-items: center; margin: 0 calc(-1 * var(--space-4)); padding: var(--space-3) var(--space-4) var(--space-4); border-top: 1px solid var(--line-subtle); background: var(--surface-alt, var(--surface)); }
+.mova-claim__bar .mova-button { width: 100%; }
 .mova-claim__badge { width: fit-content; border-radius: var(--radius-pill); padding: 4px var(--space-3); background: var(--status-confirmed-bg); color: var(--forest); font-size: var(--fs-caption); font-weight: 700; }
 .mova-claim__badge.is-taken { background: var(--accent-warm); }
-.mova-claim__details dl { display: grid; gap: var(--space-3); margin: 0; }
+.mova-claim__details dl { display: grid; gap: 0; margin: 0; }
 .mova-claim__details dl > div { display: grid; gap: 2px; }
 .mova-claim__details dt { color: var(--ink-muted); font-size: var(--fs-caption); }
 .mova-claim__details dd { margin: 0; font-weight: 600; }
-.mova-claim__one { margin: var(--space-3) 0 0; color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-claim__one { margin: 0; color: var(--ink-muted); font-size: var(--fs-caption); text-align: center; }
 .mova-claim .mova-button { width: 100%; }
 .mova-claim__other { justify-self: center; color: var(--forest); font-weight: 600; }
 .mova-claim__taken, .mova-claim__done { display: grid; gap: var(--space-3); }
@@ -1441,3 +1448,26 @@ html[data-mova-offline-bar] .mova-offline-notice { display: none; }
 .mova-client-emails__edit input[aria-invalid="true"] { border-color: var(--danger); }
 .mova-client-emails__edit .mova-push-device__action { height: 44px; border-radius: 22px; padding: 0 18px; }
 .mova-client-emails__edit .mova-push-device__action:disabled { opacity: .45; }
+/* PP8: PricePilot off state, to the board. */
+.mova-price-pilot__subtitle { margin: var(--space-1) 0 0; color: var(--ink-secondary); }
+.mova-price-pilot__hero--off { display: grid; gap: var(--space-3); padding: var(--space-5); }
+.mova-price-pilot__hero--off h2 { margin: 0; color: var(--ink-inverse); font: 800 26px/1.15 var(--font-display); }
+.mova-price-pilot__hero--off p { margin: 0; color: var(--ink-inverse); }
+.mova-price-pilot__soon { justify-self: center; }
+.mova-price-pilot__preview { display: grid; gap: var(--space-2); padding: var(--space-4); }
+.mova-price-pilot__sample { display: grid; gap: var(--space-2); padding: var(--space-3); border: 1px solid var(--line); border-radius: 16px; }
+.mova-price-pilot__sample-top, .mova-price-pilot__sample-prices { display: flex; justify-content: space-between; align-items: flex-start; }
+.mova-price-pilot__sample-top span, .mova-price-pilot__sample-prices span { display: grid; gap: 2px; }
+.mova-price-pilot__sample-prices span:last-child { text-align: right; }
+.mova-price-pilot__sample small { color: var(--ink-secondary); font-size: var(--fs-caption); }
+.mova-price-pilot__sample b { font: 800 22px/1.1 var(--font-display); }
+.mova-price-pilot__raise { padding: 3px 10px; border-radius: 12px; background: var(--mint); color: var(--forest); font-size: var(--fs-caption); font-weight: 700; }
+.mova-price-pilot__sample-bar { position: relative; display: block; height: 8px; border-radius: 4px; background: var(--line-subtle); }
+.mova-price-pilot__sample-bar .range { position: absolute; left: 52%; width: 22%; top: 0; bottom: 0; border-radius: 4px; background: var(--mint); }
+.mova-price-pilot__sample-bar .dot { position: absolute; left: 30%; top: 50%; width: 12px; height: 12px; margin: -6px; border-radius: 6px; background: var(--forest); }
+.mova-price-pilot__sample-bar .mark { position: absolute; left: 62%; top: 50%; width: 14px; height: 14px; margin: -7px; transform: rotate(45deg); border: 2px solid var(--forest); background: var(--surface); }
+.mova-price-pilot__how { padding: var(--space-4); }
+.mova-price-pilot__how h2 { margin: 0 0 var(--space-2); font: 700 var(--fs-display-s)/1.25 var(--font-display); }
+.mova-price-pilot__how ol { margin: 0; padding-left: 1.4em; display: grid; gap: var(--space-2); list-style: decimal; }
+.mova-price-pilot__how li::marker { font-weight: 700; color: var(--forest); }
+.mova-appointment-detail__google { display: flex; align-items: center; gap: 6px; margin: var(--space-2) 0 0; color: var(--ink-muted); font-size: var(--fs-caption); }

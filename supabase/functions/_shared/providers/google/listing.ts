@@ -7,7 +7,15 @@ export type ServiceRow = { id: string; name: string; status: string; base_price_
 export type HoursRow = { weekday: number; opens_at: string; closes_at: string };
 export type ProfileRow = { display_name: string; bio: string; handle: string };
 export type Snapshot = { item_key: string; payload: Record<string, unknown> };
-export type PendingChange = { key: string; kind: 'profile' | 'hours' | 'service' | 'service_new' | 'booking_link' | 'service_removed'; label: string };
+export type PendingChange = { key: string; kind: 'profile' | 'hours' | 'service' | 'service_new' | 'booking_link' | 'service_removed'; label: string; previous_price_minor?: number };
+
+/** Minor units from a Google Money object (the snapshot of what Google shows now). */
+function moneyMinor(value: unknown): number | null {
+  const money = value as { units?: string | number; nanos?: number } | null;
+  if (!money || money.units === undefined) return null;
+  const minor = Number(money.units) * 100 + Math.round((money.nanos ?? 0) / 10_000_000);
+  return Number.isFinite(minor) ? minor : null;
+}
 
 const DAYS = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'] as const;
 
@@ -50,7 +58,14 @@ export function pendingListing(desired: GoogleListingItem[], snapshots: Snapshot
   for (const item of desired) {
     if (canonicalJson(sent.get(item.key) ?? null) === canonicalJson(item.payload)) continue;
     const kind = item.key.startsWith('service:') ? (sent.has(item.key) ? 'service' : 'service_new') : item.kind;
-    changes.push({ key: item.key, kind: kind as PendingChange['kind'], label: names.get(item.key) ?? item.key });
+    const change: PendingChange = { key: item.key, kind: kind as PendingChange['kind'], label: names.get(item.key) ?? item.key };
+    // Audit 38d: a price change shows Google's current price struck through.
+    if (kind === 'service') {
+      const before = moneyMinor((sent.get(item.key) as { price?: unknown } | undefined)?.price);
+      const after = moneyMinor((item.payload as { price?: unknown }).price);
+      if (before !== null && after !== null && before !== after) change.previous_price_minor = before;
+    }
+    changes.push(change);
   }
   const desiredKeys = new Set(desired.map((item) => item.key));
   for (const row of snapshots) {

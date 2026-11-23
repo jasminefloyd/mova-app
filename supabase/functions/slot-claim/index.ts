@@ -9,6 +9,14 @@ import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 // only credential; the database stores its hash and mova_slot_claim (0056) decides who wins.
 const TOKEN = /^[0-9a-f]{48}$/;
 
+type ServiceDeposit = { base_price_minor?: number | null; deposit_type?: string | null; deposit_value?: number | null } | null;
+function depositMinor(collector: string | null | undefined, service: ServiceDeposit): number | null {
+  if (collector !== 'artist' || !service) return null;
+  if (service.deposit_type === 'fixed' && (service.deposit_value ?? 0) > 0) return service.deposit_value ?? null;
+  if (service.deposit_type === 'percent' && service.base_price_minor && service.deposit_value) return Math.round(service.base_price_minor * service.deposit_value / 10_000);
+  return null;
+}
+
 Deno.serve(withSystemRequestLogging('slot-claim', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
@@ -24,13 +32,15 @@ Deno.serve(withSystemRequestLogging('slot-claim', async (request) => {
   if (!await planFeatureEnabled(slot.artist_business_id, 'seat_filler')) return respond({ status: 'unavailable' });
   const [{ data: profile }, { data: location }, { data: service }] = await Promise.all([
     db.from('mova_artist_profiles').select('display_name,handle').eq('artist_business_id', slot.artist_business_id).maybeSingle(),
-    db.from('mova_locations').select('name,time_zone,booking_mode').eq('id', slot.location_id).maybeSingle(),
-    slot.service_id ? db.from('mova_services').select('name,base_price_minor').eq('id', slot.service_id).maybeSingle() : Promise.resolve({ data: null }),
+    db.from('mova_locations').select('name,time_zone,booking_mode,payment_collector').eq('id', slot.location_id).maybeSingle(),
+    slot.service_id ? db.from('mova_services').select('name,base_price_minor,deposit_type,deposit_value').eq('id', slot.service_id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   const view = {
     stylist: profile?.display_name ?? '', handle: profile?.handle ?? '', starts_at: slot.starts_at, ends_at: slot.ends_at,
     time_zone: location?.time_zone ?? 'America/New_York', location: location?.name ?? '', booking_mode: location?.booking_mode ?? 'instant',
     service: service?.name ?? null, price_minor: service?.base_price_minor ?? null,
+    // Board 31d: the deposit, only where the stylist collects payment (D-18).
+    deposit_minor: depositMinor(location?.payment_collector, service),
   };
   const current = slot.status === 'filled' ? (candidate.status === 'claimed' ? 'claimed' : 'taken')
     : slot.status === 'live' && Date.parse(slot.expires_at) > Date.now() && candidate.status === 'messaged' ? 'open' : 'expired';

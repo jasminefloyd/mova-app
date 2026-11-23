@@ -118,7 +118,7 @@ Deno.serve(withSystemRequestLogging('google-business-sync', async (request) => {
     return respond({
       connected: connection?.status === 'active', business_profile_ready: ready, provider_configured: provider !== null,
       auto_send: settings?.auto_send ?? true, last_synced_at: settings?.last_synced_at ?? null, last_sync_status: settings?.last_sync_status ?? 'never',
-      sections: summarize(pending), changes: pending.map((change) => ({ key: change.key, kind: change.kind, label: change.label })),
+      sections: summarize(pending), changes: pending.map((change) => ({ key: change.key, kind: change.kind, label: change.label, ...(change.previous_price_minor !== undefined ? { previous_price_minor: change.previous_price_minor } : {}) })),
     });
   }
 

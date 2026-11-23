@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, EmptyState, StatusChip } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
+import './revenue-board.css';
 
 type Candidate = { id: string; status: string; wave: number; rank: number; reasons: string[]; mova_clients: { display_name: string } | null };
 type Campaign = {
@@ -45,22 +46,25 @@ export function SlotCampaigns() {
   return <div className="mova-slots">
     {!outbound && <p className="mova-slots__note">{t('revenue.seat.outboundOff')}</p>}
     {error && <p role="alert">{t('revenue.seat.error')}</p>}
-    {campaigns.length > 0 && <div className="mova-revenue-kpis">
-      <Card className="is-highlight"><strong>{money(recovered)}</strong><span>{t('revenue.seat.recovered')}</span></Card>
-      {counts.map(([key, value]) => <Card key={key}><strong>{value}</strong><span>{status(key)}</span></Card>)}
+    {/* Board 31: three stats in a row — recovered, slots filled, waiting for you. */}
+    {campaigns.length > 0 && <div className="mova-revenue-stats">
+      <div className="is-accent"><strong>{money(recovered) ?? '$0'}</strong><span>{t('revenue.seat.recovered')}</span></div>
+      <div><strong>{t('revenue.seat.filledOf', { filled: counts[2]?.[1] ?? 0, total: campaigns.filter((item) => item.status !== 'cancelled').length })}</strong><span>{t('revenue.seat.slotsFilled')}</span></div>
+      <div><strong>{counts[0]?.[1] ?? 0}</strong><span>{status('needs_approval')}</span></div>
     </div>}
     {campaigns.length === 0 ? <EmptyState title={t('revenue.campaignEmpty')} detail={t('revenue.campaignEmptyDetail')} /> : <ul className="mova-slots__list">{campaigns.map((campaign) => {
       const copy = Array.isArray(campaign.mova_slot_campaign_copy) ? campaign.mova_slot_campaign_copy[0] : campaign.mova_slot_campaign_copy;
       const candidates = [...(campaign.mova_slot_candidates ?? [])].sort((a, b) => a.rank - b.rank);
       const waves = [1, 2, 3].map((wave) => candidates.filter((item) => item.wave === wave)).filter((list) => list.length);
       const claimed = candidates.find((item) => item.status === 'claimed');
-      const expanded = open === campaign.id || campaign.status === 'needs_approval';
+      const expanded = open === campaign.id;
       const service = campaign.mova_services?.name;
       return <li key={campaign.id}><Card className={`mova-slots__card is-${campaign.status}`}>
         <div className="mova-slots__head">
           <span><strong>{when(campaign.starts_at)}</strong><small>{[campaign.mova_locations?.name, service, money(campaign.mova_services?.base_price_minor ?? campaign.value_minor)].filter(Boolean).join(' · ')}</small></span>
           <StatusChip status={campaign.status === 'live' ? 'live' : campaign.status === 'filled' ? 'confirmed' : campaign.status === 'needs_approval' ? 'needs-approval' : 'pending'}>{campaign.status === 'live' ? t('revenue.seat.liveWave', { wave: campaign.current_wave, waves: waves.length }) : status(campaign.status)}</StatusChip>
         </div>
+        {campaign.status === 'needs_approval' && !expanded && <p className="mova-slots__ready">{t('revenue.seat.ready')} <strong>{t('revenue.seat.matched', { count: candidates.length })}</strong></p>}
         {claimed && <p className="mova-slots__filled">{t('revenue.seat.bookedBy', { name: claimed.mova_clients?.display_name ?? '' })}{campaign.filled_at ? ` · ${time(campaign.filled_at)}` : ''}</p>}
         {expanded && <>
           {campaign.status === 'needs_approval' && <>
@@ -80,12 +84,13 @@ export function SlotCampaigns() {
           </ol>
         </>}
         <div className="mova-revenue-actions">
-          {campaign.status === 'needs_approval' && <Button disabled={!outbound || busy !== null} loading={busy === `approve:${campaign.id}`} onClick={() => void act('approve', campaign.id)}>{t('revenue.seat.approve')}</Button>}
+          {campaign.status === 'needs_approval' && !expanded && <Button variant="secondary" onClick={() => setOpen(campaign.id)}>{t('revenue.seat.review')}</Button>}
+          {campaign.status === 'needs_approval' && expanded && <Button disabled={!outbound || busy !== null} loading={busy === `approve:${campaign.id}`} onClick={() => void act('approve', campaign.id)}>{t('revenue.seat.approve')}</Button>}
           {campaign.status === 'live' && campaign.current_wave < waves.length && <Button variant="secondary" disabled={!outbound || busy !== null} loading={busy === `send-next-wave:${campaign.id}`} onClick={() => void act('send-next-wave', campaign.id)}>{t('revenue.seat.sendNext', { wave: campaign.current_wave + 1 })}</Button>}
           {['needs_approval', 'live', 'gap_found', 'drafting'].includes(campaign.status) && <Button variant="ghost" disabled={busy !== null} onClick={() => void act('cancel', campaign.id)}>{t('revenue.seat.stop')}</Button>}
           {campaign.status !== 'needs_approval' && <Button variant="ghost" onClick={() => setOpen(open === campaign.id ? null : campaign.id)}>{open === campaign.id ? t('revenue.seat.hide') : t('revenue.seat.details')}</Button>}
         </div>
-        {campaign.status === 'needs_approval' && <small className="mova-slots__ends">{t('revenue.seat.ends')}</small>}
+        {campaign.status === 'needs_approval' && expanded && <small className="mova-slots__ends">{t('revenue.seat.ends')}</small>}
       </Card></li>;
     })}</ul>}
   </div>;

@@ -19,6 +19,13 @@ export function ReputationPage() {
   const location = useLocation();
   const isSettings = location.pathname.endsWith('/settings/reviews');
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
+  useEffect(() => {
+    if (!client || !businessId) return;
+    let active = true;
+    void client.from('mova_artist_profiles').select('display_name').eq('artist_business_id', businessId).maybeSingle()
+      .then(({ data }) => { if (active && data?.display_name) setListingName(String(data.display_name)); });
+    return () => { active = false; };
+  }, [businessId, client]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [googleReviews, setGoogleReviews] = useState<GoogleReview[]>([]);
   const [summary, setSummary] = useState<RatingSummary | null>(null);
@@ -37,6 +44,8 @@ export function ReputationPage() {
   const [googleReplyText, setGoogleReplyText] = useState('');
   const [googleBusy, setGoogleBusy] = useState(false);
   const [googleNotice, setGoogleNotice] = useState('');
+  // 38e: Google shows replies under the business, so the note names the business, not the Google account.
+  const [listingName, setListingName] = useState<string | null>(null);
 
   const call = useCallback(async (payload: Record<string, unknown>): Promise<ReviewResponse> => {
     if (!client || !businessId) throw new Error('IDENTITY_REQUIRED');
@@ -229,7 +238,7 @@ export function ReputationPage() {
               <blockquote className="mova-google-reply-quote"><div><strong>{googleReplyFor.display_name || t('reviews.googleReviewer')}</strong><span aria-label={t('reviews.stars', { count: googleReplyFor.rating })}>{'★'.repeat(googleReplyFor.rating)}{'☆'.repeat(5 - googleReplyFor.rating)}</span></div>{googleReplyFor.body && <p>{googleReplyFor.body}</p>}</blockquote>
               <TextArea label={t('google.reply.label')} value={googleReplyText} maxLength={4096} onChange={(event) => setGoogleReplyText(event.currentTarget.value)} />
               <small>{googleReplyText.length}/4096</small>
-              <p className="mova-google-reply-note">{t('google.reply.posts', { name: googleConnection?.google_account_email ?? '' })}</p>
+              <p className="mova-google-reply-note">{t('google.reply.posts', { name: listingName ?? googleConnection?.google_account_email ?? '' })}</p>
               <Button loading={googleBusy} disabled={googleBusy || !googleReplyText.trim()} onClick={() => void postGoogleReply()}>{t('google.reply.post')}</Button>
             </div>}
           </Sheet>

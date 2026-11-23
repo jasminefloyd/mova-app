@@ -29,7 +29,7 @@ describe('Google listing rules (P6)', () => {
     const snapshots = before.map((item) => ({ item_key: item.key, payload: item.payload }));
     expect(pendingListing(before, snapshots, new Map())).toEqual([]);
     const changed = desiredListing({ profile, hours, services: [{ ...services[0]!, base_price_minor: 15500 }, services[1]!], publicBaseUrl: 'https://mova-beauty.co' });
-    expect(pendingListing(changed, snapshots, new Map([['service:s1', 'Silk press']]))).toEqual([{ key: 'service:s1', kind: 'service', label: 'Silk press' }]);
+    expect(pendingListing(changed, snapshots, new Map([['service:s1', 'Silk press']]))).toEqual([{ key: 'service:s1', kind: 'service', label: 'Silk press', previous_price_minor: services[0]!.base_price_minor }]);
   });
   it('a new service is waiting, and a service removed from the menu is waiting as removed', () => {
     const snapshots = [{ item_key: 'service:s1', payload: desiredListing({ profile, hours, services: [services[0]!], publicBaseUrl: 'x' })[3]!.payload }, { item_key: 'service:gone', payload: { displayName: 'Gone' } }];

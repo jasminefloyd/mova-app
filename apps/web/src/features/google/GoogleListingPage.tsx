@@ -90,6 +90,7 @@ export function GoogleListingPage() {
   const waiting = listing?.changes ?? [];
   const sectionState = (value: 'waiting' | 'up_to_date' | undefined) => value === 'waiting' ? t('google.listing.waitingItem') : t('google.listing.upToDate');
   const newKeys = new Set(waiting.filter((change) => change.kind === 'service_new').map((change) => change.key));
+  const previousPrice = new Map(waiting.filter((change) => change.previous_price_minor !== undefined).map((change) => [change.key, change.previous_price_minor as number]));
   const waitingKeys = new Set(waiting.filter((change) => change.kind === 'service' || change.kind === 'service_new').map((change) => change.key));
 
   return <main className="mova-page mova-google-page mova-google-listing">
@@ -123,7 +124,7 @@ export function GoogleListingPage() {
               ? <p>{t('google.listing.noServices')}</p>
               : <ul className="mova-google-menu">{services.map((service) => <li key={service.id}>
                 <span>{service.name}{newKeys.has(`service:${service.id}`) && <span className="mova-google-badge">{t('google.listing.newBadge')}</span>}{!newKeys.has(`service:${service.id}`) && waitingKeys.has(`service:${service.id}`) && <span className="mova-google-badge is-soft">{t('google.listing.waitingItem')}</span>}</span>
-                <strong>{money(service.base_price_minor, i18n.resolvedLanguage)}</strong>
+                <span className="mova-google-menu__price">{previousPrice.has(`service:${service.id}`) && <del aria-label={t('google.listing.wasPrice', { price: money(previousPrice.get(`service:${service.id}`)!, i18n.resolvedLanguage) })}>{money(previousPrice.get(`service:${service.id}`)!, i18n.resolvedLanguage)}</del>}<strong>{money(service.base_price_minor, i18n.resolvedLanguage)}</strong></span>
               </li>)}</ul>}
             <Checkbox label={t('google.listing.autoSend')} checked={Boolean(listing?.auto_send)} disabled={busy || !ready} onChange={(event) => void setAutoSend(event.currentTarget.checked)} />
           </section>

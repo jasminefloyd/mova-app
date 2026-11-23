@@ -29,6 +29,7 @@
   min-height: 36px;
   padding-inline: var(--space-2);
   font-size: var(--fs-caption);
+  white-space: nowrap; /* audit 37: "30 days" stays on one line */
 }
 
 .mova-reports-page .mova-report-heading .mova-segmented { margin-top: 0; }

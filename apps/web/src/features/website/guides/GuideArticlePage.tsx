@@ -85,7 +85,7 @@ export default function GuideArticlePage() {
 
         <aside className="mova-site__side" aria-label={t('website.guide.more')}>
           <div className="mova-site__side-card mova-site__side-card--cta">
-            <p style={{ fontWeight: 700, color: 'var(--site-ink)', fontSize: 18 }}>{t('website.guide.moreCtaTitle')}</p>
+            <p className="mova-site__side-card-title">{t('website.guide.moreCtaTitle')}</p>
             <p>{t('website.guide.moreCtaBody')}</p>
             <ButtonLink to="/signup">{t('website.guide.startFree')}</ButtonLink>
           </div>

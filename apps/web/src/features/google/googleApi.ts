@@ -27,7 +27,7 @@ export type CalendarStatus = {
   providerConfigured: boolean;
 };
 
-export type ListingChange = { key: string; kind: 'profile' | 'hours' | 'booking_link' | 'service' | 'service_new' | 'service_removed'; label: string };
+export type ListingChange = { key: string; kind: 'profile' | 'hours' | 'booking_link' | 'service' | 'service_new' | 'service_removed'; label: string; previous_price_minor?: number };
 export type ListingStatus = {
   connected: boolean;
   business_profile_ready: boolean;

@@ -27,6 +27,9 @@ test('TC-SLOT-31-01 review, approve, send the next wave and see who booked', asy
   const actions: string[] = [];
   await mockCampaigns(page, actions);
   await page.goto('/BID-1/growth/slots');
+  // Board 31: a campaign waiting for approval shows a summary; Review opens it (31b).
+  await expect(page.getByText('3 clients matched.')).toBeVisible();
+  await page.getByRole('button', { name: 'Review' }).click();
   await expect(page.getByText('3 clients fit this slot')).toBeVisible();
   await expect(page.getByText('Reply STOP to opt out', { exact: false })).toBeVisible();
   await expect(page.getByText('Live · wave 1 of 2')).toBeVisible();

@@ -7,7 +7,7 @@ import { planFeatureEnabled } from '../_shared/plan-feature.ts';
 Deno.serve(withSystemRequestLogging('client-card-token', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
-  if (Deno.env.get('MOVA_CLIENT_PROFILES_ENABLED') !== 'true') return respond({ code: 'CLIENT_PROFILES_DISABLED' }, 403);
+  if (Deno.env.get('MOVA_CLIENT_PROFILES_ENABLED') === 'false') return respond({ code: 'CLIENT_PROFILES_DISABLED' }, 403);
   const url = Deno.env.get('SUPABASE_URL');
   const key = Deno.env.get('SUPABASE_ANON_KEY');
   const authorization = request.headers.get('Authorization');

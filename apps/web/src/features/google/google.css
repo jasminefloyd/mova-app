@@ -78,3 +78,4 @@
 .mova-google-connect__privacy, .mova-google-reply-quote { padding: var(--space-3) var(--space-4); border-radius: var(--radius-xl); }
 .mova-google-reputation-link > span:first-child { gap: var(--space-2); }
 @media (max-width: 340px) { .mova-google-tiles { grid-template-columns: minmax(0, 1fr); } }
+.mova-google-menu__price { display: inline-flex; gap: 8px; align-items: baseline; } .mova-google-menu__price del { color: var(--ink-muted); font-size: var(--fs-caption); }

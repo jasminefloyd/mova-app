@@ -5,6 +5,7 @@ import { Button, Card, ErrorState, ScreenHeader, StatusChip, TextField } from '.
 import { operatorUrl } from '../../app/operator-url';
 import { displayId } from '../../lib/display-ids';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
+import './concierge-board.css';
 
 type Quote = {
   id: string;
@@ -105,6 +106,11 @@ export default function ConciergeQuotePage() {
       : quote?.status === 'consult_offered' ? t('concierge.quoteStatuses.consultOffered')
         : quote?.status === 'booked' ? t('concierge.quoteStatuses.booked')
           : quote?.status === 'closed' ? t('concierge.quoteStatuses.closed') : t('concierge.quoteStatuses.unknown');
+  const money = (minor: number) => new Intl.NumberFormat(i18n.resolvedLanguage, { style: 'currency', currency: 'USD', minimumFractionDigits: minor % 100 === 0 ? 0 : 2 }).format(minor / 100);
+  // Price chips around the client's budget (or the saved estimate): about 12% under, at, and 16% over, rounded to $10.
+  const budgetMatch = /\$?\s?(\d{2,5})/.exec(String(quote?.details.budget ?? ''));
+  const anchor = quote?.quoted_minor ? quote.quoted_minor / 100 : budgetMatch ? Number(budgetMatch[1]) : null;
+  const suggestions = anchor ? [...new Set([Math.round(anchor * 0.88 / 10) * 10, Math.round(anchor / 10) * 10, Math.round(anchor * 1.16 / 10) * 10])].filter(value => value > 0) : [];
   const details = [
     { label: t('concierge.hair_now'), value: quote?.details.hair_now },
     { label: t('concierge.goal'), value: quote?.details.goal },
@@ -123,15 +129,19 @@ export default function ConciergeQuotePage() {
       ? <ErrorState title={t('concierge.quoteLoadError')} retryLabel={t('concierge.retry')} onRetry={() => void load()} />
       : <>
         <div className="mova-concierge-quote__heading">
-          <StatusChip status={quote.status === 'open' ? 'needs-approval' : 'info'}>{quoteStatusLabel}</StatusChip>
-          <h1>{t('concierge.quote')} · {quote.client_name ?? t('concierge.quoteClientUnknown')} · {quote.service_category}</h1>
+          <StatusChip status={quote.status === 'open' ? 'needs-approval' : 'info'}>{t('concierge.quote')} · {quoteStatusLabel}</StatusChip>
+          <h1>{quote.client_name ?? t('concierge.quoteClientUnknown')} · {quote.service_category}</h1>
           <p>{channelLabel} · {t(quote.locale === 'es-US' ? 'onboarding.spanish' : 'onboarding.english')}</p>
         </div>
 
         {quote.appointment_number !== null && <Card><Link to={operatorUrl(businessId, `appointments/${displayId('AID', quote.appointment_number)}`)}>{t('concierge.linkedAppointment')}</Link></Card>}
 
+        {/* Board 42: a photo strip. The photos themselves can't be shown here yet, so each is a labelled placeholder. */}
         {quote.media_count > 0
-          ? <Card className="mova-concierge-quote__media"><p>{t('concierge.quotePhotosUnavailable')}</p></Card>
+          ? <div className="mova-concierge-quote__strip">
+            <ul aria-label={t('concierge.quotePhotos', { count: quote.media_count })}>{Array.from({ length: Math.min(quote.media_count, 6) }, (_, index) => <li key={index}><span>{t('concierge.quotePhotoN', { number: index + 1 })}</span></li>)}</ul>
+            <p>{t('concierge.quotePhotosUnavailable')}</p>
+          </div>
           : <Card className="mova-concierge-quote__media"><p>{t('concierge.quoteNoPhotos')}</p></Card>}
 
         <Card className="mova-concierge-quote__details">
@@ -141,7 +151,12 @@ export default function ConciergeQuotePage() {
         {quote.risk_flags.length > 0 && <Card tone="warm" className="mova-concierge-quote__risk"><p>{t('concierge.quoteRiskNeedsReview')}</p></Card>}
 
         <form className="mova-concierge-form" onSubmit={event => void saveEstimate(event)}>
+          {suggestions.length > 0 && <fieldset className="mova-concierge-quote__prices"><legend>{t('concierge.quoteYourPrice')}</legend>
+            {suggestions.map(value => <button key={value} type="button" className={`mova-chip${Number(amount) === value ? ' is-selected' : ''}`} aria-pressed={Number(amount) === value} onClick={() => { setAmount(value.toFixed(2)); setSaved(false); }}>{money(value * 100)}</button>)}
+            <button type="button" className={`mova-chip${amount && !suggestions.includes(Number(amount)) ? ' is-selected' : ''}`} onClick={() => document.getElementById('quote-amount')?.focus()}>{t('concierge.quoteOther')}</button>
+          </fieldset>}
           <TextField
+            id="quote-amount"
             label={t('concierge.quoteEstimateLabel')}
             type="number"
             min="0.01"
@@ -152,8 +167,11 @@ export default function ConciergeQuotePage() {
             {...(validationError ? { error: t('concierge.quoteEstimateInvalid') } : {})}
             required
           />
-          <p>{t('concierge.quoteNotSent')}</p>
-          <Button type="submit" loading={saving} disabled={quote.status !== 'open'}>{t('concierge.quoteSaveEstimate')}</Button>
+          <div className="mova-concierge-quote__send">
+            <Button type="button" disabled title={t('concierge.quoteSendUnavailable')}>{Number(amount) > 0 ? t('concierge.quoteSend', { price: money(Math.round(Number(amount) * 100)) }) : t('concierge.quoteSendNoPrice')}</Button>
+            <p>{t('concierge.quoteSendUnavailable')} {t('concierge.quoteNotSent')}</p>
+            <Button type="submit" variant="secondary" loading={saving} disabled={quote.status !== 'open'}>{t('concierge.quoteSaveEstimate')}</Button>
+          </div>
           {saved && <p role="status">{t('concierge.quoteEstimateSaved')}</p>}
         </form>
       </>}

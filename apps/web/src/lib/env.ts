@@ -24,7 +24,8 @@ const rawEnv = {
 };
 
 export const publicEnv = publicEnvSchema.parse(rawEnv);
-export const clientProfilesEnabled = publicEnv.VITE_CLIENT_PROFILES_ENABLED === 'true';
+/** Client profiles are on unless the deployment sets VITE_CLIENT_PROFILES_ENABLED=false (owner, Nov 22). */
+export const clientProfilesEnabled = publicEnv.VITE_CLIENT_PROFILES_ENABLED !== 'false';
 export const walletClientCardEnabled = publicEnv.VITE_WALLET_CLIENT_CARD_ENABLED === 'true';
 export const stripeTestModeEnabled = publicEnv.VITE_STRIPE_TEST_MODE === 'true';
 /** WP7: public pages talk about the 30-day trial. Turn on together with the trial_enabled platform switch. */

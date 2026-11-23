@@ -306,6 +306,29 @@ export function PricePilotPage() {
   if (identityLoading || loading) return <main className="mova-page mova-price-pilot" aria-busy="true"><p role="status">{t('revenue.pricePilot.loading')}</p></main>;
   if (!client || !businessId) return <main className="mova-page mova-price-pilot"><EmptyState title={t('revenue.pricePilot.signIn')} /></main>;
 
+  const whole = new Intl.NumberFormat(i18n.resolvedLanguage, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  // PP8: while PricePilot is off, the screen is the board's preview — what it does, a labelled sample, how it works.
+  if (!featureEnabled && !error) return <main className="mova-page mova-revenue-page mova-price-pilot mova-price-pilot--off">
+    <ScreenHeader onBack={() => navigate(operatorUrl(businessId, 'growth'))} backLabel={t('revenue.backToCenter')} />
+    <div><h1>{t('revenue.pricePilot.title')}</h1><p className="mova-price-pilot__subtitle">{t('revenue.pricePilot.off.subtitle')}</p></div>
+    <Card tone="inverse" className="mova-price-pilot__hero mova-price-pilot__hero--off">
+      <h2>{t('revenue.pricePilot.off.title')}</h2><p>{t('revenue.pricePilot.off.body')}</p>
+      <Button variant="on-dark" disabled title={t('revenue.pricePilot.comingSoon')}>{t('revenue.pricePilot.off.turnOn')}</Button>
+      <p className="mova-price-pilot__soon"><StatusChip status="info">{t('revenue.pricePilot.comingSoon')}</StatusChip></p>
+    </Card>
+    <Card className="mova-price-pilot__preview" aria-label={t('revenue.pricePilot.off.preview')}>
+      <p className="mova-overline">{t('revenue.pricePilot.off.preview')}</p>
+      <div className="mova-price-pilot__sample">
+        <div className="mova-price-pilot__sample-top"><span><strong>{t('revenue.pricePilot.off.sampleService')}</strong><small>{t('revenue.pricePilot.off.sampleDuration')}</small></span><span className="mova-price-pilot__raise">{t('revenue.pricePilot.off.raise')}</span></div>
+        <div className="mova-price-pilot__sample-prices"><span><small>{t('revenue.pricePilot.off.youCharge')}</small><b>{whole.format(95)}</b></span><span><small>{t('revenue.pricePilot.off.suggested')}</small><b>{whole.format(110)}</b></span></div>
+        <span className="mova-price-pilot__sample-bar" aria-hidden="true"><i className="dot" /><i className="range" /><i className="mark" /></span>
+        <small className="mova-price-pilot__sample-note">{t('revenue.pricePilot.off.sampleData')}</small>
+      </div>
+    </Card>
+    <Card className="mova-price-pilot__how"><h2>{t('revenue.pricePilot.off.howTitle')}</h2><ol><li>{t('revenue.pricePilot.off.step1')}</li><li>{t('revenue.pricePilot.off.step2')}</li><li>{t('revenue.pricePilot.off.step3')}</li></ol></Card>
+    <p className="mova-price-pilot__subtitle">{t('revenue.pricePilot.off.never')}</p>
+  </main>;
+
   return <main className="mova-page mova-revenue-page mova-price-pilot">
     <ScreenHeader onBack={() => navigate(operatorUrl(businessId, 'growth'))} backLabel={t('revenue.backToCenter')} />
     <h1>{t('revenue.pricePilot.title')}</h1>

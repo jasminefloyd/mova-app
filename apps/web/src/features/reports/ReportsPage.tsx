@@ -87,7 +87,7 @@ export function ReportsPage() {
             <span className="mova-report-card__label">{t('reports.bookings')}</span>
             <strong className="mova-report-card__metric">{fmt(c.completed_count ?? 0)}</strong>
             <ul className="mova-report-lines">
-              <li>{t('screens.reports.rebookedLine', { rate: '—' })}</li>
+              <li>{t('screens.reports.rebookedLine', { rate: typeof c.rebooked_rate === 'number' ? `${Math.round(c.rebooked_rate * 100)}%` : '—' })}</li>
               <li>{t('screens.reports.averageTicketLine', { value: c.completed_count ? money(Math.round((c.service_value_minor ?? 0) / c.completed_count)) : '—' })}</li>
               <li>{t('screens.reports.noShowsLine', { count: c.no_show_count ?? 0 })}</li>
             </ul>

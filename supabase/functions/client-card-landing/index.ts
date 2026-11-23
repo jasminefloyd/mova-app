@@ -5,7 +5,7 @@ import { sha256Hex } from '../_shared/provider-crypto.ts';
 Deno.serve(withSystemRequestLogging('client-card-landing', async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return respond({ code: 'METHOD_NOT_ALLOWED' }, 405);
-  if (Deno.env.get('MOVA_CLIENT_PROFILES_ENABLED') !== 'true') return respond({ code: 'CLIENT_PROFILES_DISABLED' }, 404);
+  if (Deno.env.get('MOVA_CLIENT_PROFILES_ENABLED') === 'false') return respond({ code: 'CLIENT_PROFILES_DISABLED' }, 404);
   const body = await request.json().catch(() => ({}));
   if (typeof body.token !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(body.token)) return respond({ code: 'CARD_NOT_AVAILABLE' }, 404);
 

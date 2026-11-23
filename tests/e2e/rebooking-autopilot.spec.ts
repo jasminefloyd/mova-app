@@ -44,10 +44,13 @@ test('TC-D4-WINBACK-01 win-back sends only when the stylist taps, and only when 
   await openOperatorPage(page, '/');
   await mock(page, false);
   await page.goto('/BID-1/growth/winback');
+  // Board 33: Review opens the client's message card; Send stays off until texting is live.
+  await page.getByRole('button', { name: 'Review' }).first().click();
   await expect(page.getByRole('button', { name: 'Send message' })).toBeDisabled();
   await page.unroute('**/functions/v1/revenue-center');
   const actions = await mock(page, true);
   await page.reload();
+  await page.getByRole('button', { name: 'Review' }).first().click();
   await page.getByRole('button', { name: 'Send message' }).click();
   await expect.poll(() => actions).toContainEqual({ action: 'send-winback', opportunity_id: 'opp-1' });
   await expect(page.getByText('Win-back messages always require your tap.')).toBeVisible();

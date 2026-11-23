@@ -273,3 +273,36 @@
   .mova-concierge-handoff { grid-template-columns: 32px minmax(0, 1fr) auto; gap: var(--space-2); padding-inline: 10px; }
   .mova-concierge-handoff__icon { width: 32px; height: 32px; }
 }
+/* Visual audit 42: photo strip, price chips and the send bar. */
+.mova-concierge-quote__strip ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+.mova-concierge-quote__strip li { aspect-ratio: 1 / 0.95; border-radius: 16px; background: var(--line-subtle); display: flex; align-items: flex-end; padding: var(--space-2); }
+.mova-concierge-quote__strip li:last-child:not(:first-child) { background: var(--surface-warm, #f4e3d4); }
+.mova-concierge-quote__strip li span { font-size: var(--fs-caption); font-weight: 700; color: var(--ink-secondary); }
+.mova-concierge-quote__strip p { margin: var(--space-2) 0 0; font-size: var(--fs-caption); color: var(--ink-muted); }
+.mova-concierge-quote__prices { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); border: 0; margin: 0; padding: 0; }
+.mova-concierge-quote__prices legend { margin-bottom: var(--space-2); font-weight: 700; }
+.mova-concierge-quote__prices .mova-chip.is-selected { background: var(--mint); border: 2px solid var(--forest); color: var(--forest); }
+.mova-concierge-quote__send { display: grid; gap: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--line-subtle); }
+.mova-concierge-quote__send p { margin: 0; font-size: var(--fs-caption); color: var(--ink-muted); }
+/* Visual audit 41: chat thread. */
+.mova-concierge-thread { padding-bottom: 0; }
+.mova-concierge-thread__head { display: flex; align-items: center; gap: var(--space-2); padding-bottom: var(--space-3); border-bottom: 1px solid var(--line-subtle); }
+.mova-concierge-thread__head > div { flex: 1; min-width: 0; }
+.mova-concierge-thread__head h1 { margin: 0; font: 700 var(--fs-display-s, 20px)/1.2 var(--font-display); }
+.mova-concierge-thread__head p { margin: 0; color: var(--ink-secondary); font-size: var(--fs-caption); }
+.mova-concierge-thread .mova-concierge-messages { display: grid; gap: var(--space-2); }
+.mova-concierge-thread__time { justify-self: center; margin: 0; color: var(--ink-muted); font-size: var(--fs-caption); }
+.mova-concierge-thread__label { justify-self: end; color: var(--forest); font-size: var(--fs-caption); font-weight: 700; }
+.mova-concierge-thread .mova-concierge-bubble p { margin: 0; line-height: 1.45; }
+.mova-concierge-thread .mova-concierge-bubble--client { justify-self: start; border-radius: 18px 18px 18px 6px; }
+.mova-concierge-thread .mova-concierge-bubble--ai, .mova-concierge-thread .mova-concierge-bubble--artist { border-radius: 18px 18px 6px 18px; }
+.mova-concierge-thread__chip { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2); font-size: var(--fs-caption); }
+.mova-concierge-thread__chip a { font-weight: 700; color: var(--forest); }
+.mova-concierge-thread__handoff { display: grid; gap: var(--space-2); }
+.mova-concierge-thread__handoff p { margin: 0; }
+.mova-concierge-thread__bar { position: sticky; bottom: 0; display: grid; gap: var(--space-2); margin: 0 calc(-1 * var(--space-4)); padding: var(--space-3) var(--space-4) var(--space-4); border-top: 1px solid var(--line-subtle); background: var(--surface-alt, var(--surface)); }
+.mova-concierge-thread__reply { display: flex; gap: var(--space-2); }
+.mova-concierge-thread__reply .mova-input { flex: 1; min-height: 48px; border-radius: 24px; }
+.mova-concierge-thread__send { flex: none; width: 48px; height: 48px; border: 0; border-radius: 24px; background: var(--forest); color: var(--ivory); font-size: 18px; cursor: pointer; }
+.mova-concierge-thread__send:disabled { opacity: .45; cursor: not-allowed; }
+.mova-concierge-thread__note { margin: 0; color: var(--ink-muted); font-size: var(--fs-caption); }

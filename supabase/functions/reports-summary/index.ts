@@ -33,5 +33,9 @@ Deno.serve(withSystemRequestLogging('reports-summary', async (request) => {
     data.previous.google_rating_sum = 0;
     data.previous.google_rating_count = 0;
   }
+  // Audit 37: rebook rate for the Bookings card (null when no client finished a visit in the range).
+  const { data: rebook } = await serviceClient().rpc('mova_reports_rebook_rate', { p_artist_business_id: actor.businessId, p_start: startDate.toISOString().slice(0, 10), p_end: endDay, p_time_zone: timeZone });
+  const rebookCounts = rebook as { clients?: number; rebooked?: number } | null;
+  if (data?.current) data.current.rebooked_rate = rebookCounts?.clients ? (rebookCounts.rebooked ?? 0) / rebookCounts.clients : null;
   return respond({ ...data, period: days, range: weekToDate ? 'week_to_date' : 'rolling', time_zone: timeZone });
 }));
