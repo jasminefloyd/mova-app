@@ -940,11 +940,11 @@
       "autopilotDetail": "{{sent}} reminders this week · {{rebooked}} rebooked",
       "conciergeDetail": "Replies for you, hands off what needs you",
       "slotsDetail": "Offer cancelled times to clients who want them",
-      "pipelineDetail": "{{due}} due · {{contacted}} contacted · {{rebooked}} booked",
-      "winbackDetail_one": "{{count}} client past their usual return",
-      "winbackDetail_other": "{{count}} clients past their usual return",
-      "templatesDetail": "The messages Mova may send for you",
-      "activityDetail": "Every message sent or skipped, and why",
+      "pipelineDue_one": "{{count}} due",
+      "pipelineDue_other": "{{count}} due",
+      "winbackDetail_one": "{{count}} client overdue",
+      "winbackDetail_other": "{{count}} clients overdue",
+      "activityDetail": "Message history",
       "reviewOnce": "No messages are sent automatically. Sending stays off until approvals and a provider are set up."
     },
     "board": {

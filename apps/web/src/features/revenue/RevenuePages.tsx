@@ -7,7 +7,7 @@ import './revenue-board.css';
 import {useCallback,useEffect,useState,type FormEvent} from 'react';
 import {Link,useNavigate} from 'react-router';
 import {useTranslation} from 'react-i18next';
-import {Button,Card,EmptyState,ErrorState,Icon,ScreenHeader,TextField,Toggle} from '../../components';
+import {Button,Card,EmptyState,ErrorState,Icon,ScreenHeader,TextField,Toggle,type IconName} from '../../components';
 import {operatorUrl} from '../../app/operator-url';
 import { conciergeEnabled, isConciergeReviewBusiness, rebookingAutopilotEnabled, seatFillerEnabled } from '../../lib/env';
 import {useArtistBusiness} from '../settings/useArtistBusiness';
@@ -15,6 +15,14 @@ import {useArtistBusiness} from '../settings/useArtistBusiness';
 type RevenueData={pipeline:Array<{id:string;client_id:string;service_id:string;last_visit_at:string;next_due_at:string;window_end_at:string;confidence:string;status:string;client:{display_name:string;preferred_locale:string;visit_count:number;marketing_opted_out:boolean}|null}>;winback:Array<{id:string;status?:string;client:{display_name:string;preferred_locale:string}|null;last_visit_at:string}>;decisions:Array<{id:string;action:string;reason_code:string;created_at:string;value_minor:number|null}>;settings:{enabled:boolean;slot_texts_autopilot:boolean;rules:Record<string,number|string>};counts:{due:number;contacted:number;rebooked:number;winback:number};outboundEnabled:boolean};
 async function invoke<T>(client:ReturnType<typeof useArtistBusiness>['client'],businessId:string|null,name:string,payload:Record<string,unknown>):Promise<T>{if(!client||!businessId)throw new Error('IDENTITY_MISSING');const{data,error}=await client.functions.invoke<{data?:T}>(name,{body:payload,headers:{'x-mova-artist-business-id':businessId}});if(error)throw error;return (data?.data??data) as T;}
 function useRevenueData(){const{client,businessId,loading:identityLoading}=useArtistBusiness();const[data,setData]=useState<RevenueData|null>(null);const[forecast,setForecast]=useState<Record<string,unknown>|null>(null);const[loading,setLoading]=useState(true);const[error,setError]=useState(false);const load=useCallback(async()=>{if(!client||!businessId)return;setLoading(true);setError(false);try{const[r,f]=await Promise.all([invoke<RevenueData>(client,businessId,'revenue-center',{action:'status'}),invoke<{forecast?:Record<string,unknown>|null}>(client,businessId,'forecast-summary',{})]);setData(r);setForecast(f.forecast??null);}catch{setError(true);}finally{setLoading(false);}},[client,businessId]);useEffect(()=>{void load();},[load]);return{client,businessId,data,forecast,loading:loading||identityLoading,error,load};}
+type RevenueTile = {
+  path: string;
+  icon: IconName;
+  title: string;
+  detail?: string;
+  variant?: 'wide' | 'muted';
+};
+
 /** Board 14: month-end forecast and the stylist's growth tools. */
 export function RevenueHomePage() {
   const { t, i18n } = useTranslation();
@@ -32,34 +40,37 @@ export function RevenueHomePage() {
   const { due = 0, contacted = 0, rebooked = 0, winback = 0 } = data?.counts ?? {};
   const reviewOnly = isConciergeReviewBusiness(businessId);
 
-  const groups = [
+  const groups: { id: string; title: string; tiles: RevenueTile[] }[] = [
     {
       id: 'client-follow-up',
       title: t('revenue.hub.clientFollowUp'),
-      rows: [
+      tiles: [
         ...(conciergeEnabled || reviewOnly ? [{
           path: 'growth/concierge',
+          icon: 'message' as const,
+          variant: 'wide' as const,
           title: t('revenue.concierge'),
           detail: reviewOnly ? t('revenue.hub.conciergeReview') : t('revenue.hub.conciergeDetail'),
         }] : []),
-        { path: 'growth/pipeline', title: t('revenue.pipeline'), detail: t('revenue.hub.pipelineDetail', { due, contacted, rebooked }) },
-        { path: 'growth/winback', title: t('revenue.winback'), detail: t('revenue.hub.winbackDetail', { count: winback }) },
+        { path: 'growth/pipeline', icon: 'calendar', title: t('revenue.pipeline'), detail: t('revenue.hub.pipelineDue', { count: due }) },
+        { path: 'growth/winback', icon: 'clients', title: t('revenue.winback'), detail: t('revenue.hub.winbackDetail', { count: winback }) },
         ...(rebookingAutopilotEnabled ? [{
           path: 'growth/autopilot',
+          icon: 'refresh' as const,
           title: t('revenue.hub.autopilotTitle', { state: data?.settings?.enabled ? t('revenue.hub.on') : t('revenue.hub.offShort') }),
           detail: t('revenue.hub.autopilotDetail', { sent: contacted, rebooked }),
         }] : []),
-        ...(seatFillerEnabled ? [{ path: 'growth/slots', title: t('revenue.slots'), detail: t('revenue.hub.slotsDetail') }] : []),
+        ...(seatFillerEnabled ? [{ path: 'growth/slots', icon: 'plus' as const, title: t('revenue.slots'), detail: t('revenue.hub.slotsDetail') }] : []),
       ],
     },
     {
       id: 'tools-and-activity',
       title: t('revenue.hub.toolsAndActivity'),
-      rows: [
-        { path: 'growth/marketing', title: t('marketing.title'), detail: t('marketing.draftsOnly') },
-        { path: 'growth/templates', title: t('revenue.templates'), detail: t('revenue.hub.templatesDetail') },
-        { path: 'growth/activity', title: t('revenue.activity'), detail: t('revenue.hub.activityDetail') },
-        { path: 'growth/price-pilot', title: t('revenue.pricePilot.title'), detail: t('revenue.pricePilot.shortStatus') },
+      tiles: [
+        { path: 'growth/marketing', icon: 'send', title: t('marketing.title'), detail: t('marketing.draftsOnly') },
+        { path: 'growth/templates', icon: 'check', title: t('revenue.templates') },
+        { path: 'growth/activity', icon: 'clock', title: t('revenue.activity'), detail: t('revenue.hub.activityDetail') },
+        { path: 'growth/price-pilot', icon: 'reports', variant: 'muted', title: t('revenue.pricePilot.title'), detail: t('revenue.pricePilot.shortStatus') },
       ],
     },
   ];
@@ -95,16 +106,17 @@ export function RevenueHomePage() {
         </Card>
         {groups.map(group => <section className="mova-revenue-group" key={group.id} aria-labelledby={group.id}>
           <h2 className="mova-overline" id={group.id}>{group.title}</h2>
-          <Card className="mova-revenue-hub__tools">
-            <ul role="list">
-              {group.rows.map(row => <li key={row.path}>
-                <Link className="mova-list-row" to={operatorUrl(businessId, row.path)}>
-                  <span className="mova-list-row__copy"><strong>{row.title}</strong><small>{row.detail}</small></span>
-                  <span className="mova-list-row__trailing"><Icon name="chevron" size={16} /></span>
-                </Link>
-              </li>)}
-            </ul>
-          </Card>
+          <ul className="mova-revenue-hub__tiles" role="list">
+            {group.tiles.map(tile => <li key={tile.path} className={tile.variant === 'wide' ? 'mova-revenue-hub__tile-wide' : undefined}>
+              <Link className={`mova-revenue-tile${tile.variant ? ` mova-revenue-tile--${tile.variant}` : ''}`} to={operatorUrl(businessId, tile.path)}>
+                <Icon name={tile.icon} size={18} />
+                <span className="mova-revenue-tile__copy">
+                  <strong>{tile.title}</strong>
+                  {tile.detail && <small>{tile.detail}</small>}
+                </span>
+              </Link>
+            </li>)}
+          </ul>
         </section>)}
         <p className="mova-revenue-footnote">{t('revenue.hub.reviewOnce')}</p>
       </RevenueGate>}

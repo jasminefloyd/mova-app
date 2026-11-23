@@ -940,11 +940,11 @@
       "autopilotDetail": "{{sent}} recordatorios esta semana · {{rebooked}} reservaron",
       "conciergeDetail": "Responde por ti y te pasa lo que necesita de ti",
       "slotsDetail": "Ofrece horarios cancelados a clientes que los quieren",
-      "pipelineDetail": "{{due}} pendientes · {{contacted}} contactados · {{rebooked}} reservaron",
-      "winbackDetail_one": "{{count}} cliente pasó su regreso habitual",
-      "winbackDetail_other": "{{count}} clientes pasaron su regreso habitual",
-      "templatesDetail": "Los mensajes que Mova puede enviar por ti",
-      "activityDetail": "Cada mensaje enviado u omitido, y por qué",
+      "pipelineDue_one": "{{count}} pendiente",
+      "pipelineDue_other": "{{count}} pendientes",
+      "winbackDetail_one": "{{count}} cliente atrasado",
+      "winbackDetail_other": "{{count}} clientes atrasados",
+      "activityDetail": "Historial de mensajes",
       "reviewOnce": "No se envían mensajes automáticamente. El envío sigue apagado hasta configurar aprobaciones y un proveedor."
     },
     "board": {
