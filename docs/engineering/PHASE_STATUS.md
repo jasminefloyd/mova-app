@@ -439,3 +439,31 @@ Executed browser and local-service checks against the November 22 key flows work
 Local fixes cover persona sign-in navigation, guest continuation, calendar positioning, booking availability buffers, preserving pending booking requests on Home, review reply editing, and the Auth log SQL projection. Onboarding step order, the missing upcoming guest booking after OTP, and claimed history and same-service rebooking remain open. Cash, Other and salon-collected payments persisted locally with zero platform fees. Stripe subscription and appointment card paths remain blocked on sandbox access. See the [QA report](../../qa-artifacts/qa-report.md) and [individual outcomes](../../qa-artifacts/test-results.md). No production action was taken during this QA run.
 
 The product owner explicitly authorized committing the working tree, pushing to GitHub and deploying the web application to Vercel production. The local QA results above remain the record of test coverage and open defects. This authorization covers the Vercel web deployment.
+
+Production Vercel deployment `dpl_2q4hKGAtjkNUavLdHPdNFwBM5VRX` is Ready at GitHub revision `e1dc832`. Homepage, pricing, sign-in, and the ops and admin aliases responded to public HTTPS requests.
+
+The owner subsequently authorized the production Supabase release. Verified that migrations 0098–0104 and the 0098 permission revoke were already present. Applied and recorded migration 0105 as `20261122235900` in one transaction and verified the deployed function definition and its restricted grants. Redeployed `availability-search` v18, `guides-public` v14, `marketing-campaign` v14, and `job-dispatch` v16. All four are active and their runtime source and gateway settings match the repository. The other checklist bundles were already current, including `push-subscription` v2. This release was applied to the existing production Supabase project. Verification used the catalog and deployed bundles.
+
+## 2026-11-23 production database migrations 0106–0108
+
+Applied 0106 (plan trials), 0107 (appointment email details), and 0108 (report rebooking rate) individually in that order on production Supabase. Verified all three history records, the trial and billing objects, both updated email contexts, and the rebooking RPC's service-role-only access among app roles. The required read-back returned one row with `trial_enabled = false`. All 69 local pgTAP files passed, with 1,260 of 1,260 assertions. This release covered the database migrations.
+
+## 2026-11-23 production Edge and Stripe billing webhook rollout
+
+Deployed and verified all 25 requested Supabase Edge Functions from `ffbf45e` after migrations 0106–0108. The new `admin-billing`, `billing-webhook`, and `trial-start` are active at v2 with gateway JWT verification disabled. Existing gateway settings were preserved, including JWT verification enabled for `google-business-sync`. After setting the signing secret, redeployed `client-card-landing` again and verified the final runtime bundles for all 25 functions.
+
+Created live Stripe subscription billing endpoint `we_1Uf01pGwglVFMNN127pV57Sw` for the ten documented events and verified that the production Supabase signing secret matched. Existing live Stripe API configuration and plan prices were verified. The production `trial_enabled` switch remains false and `VITE_TRIAL_ENABLED` is unset. The Vercel and Supabase client-profile overrides are unset. The trial uses the 30-day default, and optional account SMS settings are unset. Local checks passed for all 76 Edge entry points, 21 Deno tests, and 35 focused billing and messaging tests. Production verification covered configuration and deployed code. No payment or subscription was created for testing.
+
+## 2026-11-23 trial launch checkpoint
+
+Verified that Vercel production is already serving GitHub `main` at `ffbf45e` from Ready deployment `dpl_CYnV2GVwJhoBvyMvLDnEAa1zyy2X`. The Vercel Production trial and client-profile overrides are unset. Public Pricing and sign-up return HTTP 200 and omit trial copy. The client sign-in route returns HTTP 200 and displays its email or mobile-number field.
+
+The Stripe test-clock run is blocked on sandbox access. The available billing credentials are live and were excluded from QA. The isolated retest needs a sandbox secret key, sandbox recurring prices, and a signed test webhook delivery path to the local QA instance. The five local trial Playwright tests passed with mocked Stripe routes. The prior local SQL suite verified reminder timing, the Free downgrade and past-due state against synthetic fixtures. The complete Stripe lifecycle and actual reminder delivery remain unverified. The production database switch remains false. No QA trial or charge was created.
+
+## 2026-11-23 Stripe sandbox trial QA
+
+Completed hosted Stripe Checkout on three disposable test clocks using the sandbox credentials supplied in the ignored local environment file. Verified T3, T4 at days 23 and 29, one queued and rendered reminder at each interval with duplicate suppression, T7 and Calendar Sync lock after cancellation to Free, active AI + Growth after a paid test invoice, and T11 after the 0341 test card failed. Verified signed Stripe webhook delivery and application persistence for checkout, cancellation, paid invoice and failed invoice. The reminder scheduler used Stripe's frozen time and the Home countdown used a temporary local date projection. Reminder delivery used the fake local email transport. All test records and payments were confined to the sandbox and local QA stack. Production trial flags remained off. See the [trial QA report](../../qa-artifacts/trial-sandbox-report.md).
+
+## 2026-11-23 trial launch release
+
+The owner authorized the production release after the Stripe sandbox pass. Migration 0109 adds the Free trial key to the existing audited Admin Features setter so operators can enable and pause trials from the portal. The production Vercel build flag was configured as `VITE_TRIAL_ENABLED=true`. Local verification passed the Admin enable and pause regressions, all 69 pgTAP files with 1,263 assertions, 76 Edge Function type checks and 21 Deno tests.

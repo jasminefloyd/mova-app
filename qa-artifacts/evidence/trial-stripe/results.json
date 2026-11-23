@@ -1,0 +1,48 @@
+[
+  {
+    "name": "4242 Checkout on Stripe test clock",
+    "status": "PASS",
+    "evidence": {
+      "clock": "clock_1Uf0XLGwglVFMNN1gfxbxOde",
+      "subscription": "sub_1Uf0XWGwglVFMNN13ASfcZsC",
+      "card": "4242",
+      "stripeStatus": "trialing",
+      "app": "T3 visible",
+      "webhooks": [
+        "evt_1Uf0XXGwglVFMNN15ItCgnxF"
+      ]
+    }
+  },
+  {
+    "name": "Day 23 reminder and T4",
+    "status": "PASS",
+    "evidence": {
+      "clock": "clock_1Uf0XLGwglVFMNN1gfxbxOde",
+      "daysAdvanced": 23,
+      "queued": "trial.reminder_7d",
+      "count": 1,
+      "app": "T4 verified with local clock projection"
+    }
+  },
+  {
+    "name": "Day 29 reminder and T4",
+    "status": "PASS",
+    "evidence": {
+      "clock": "clock_1Uf0XLGwglVFMNN1gfxbxOde",
+      "daysAdvanced": 29,
+      "queued": "trial.reminder_1d",
+      "count": 1,
+      "app": "T4 verified with local clock projection"
+    }
+  },
+  {
+    "name": "T7 free and lock",
+    "status": "PASS",
+    "evidence": {
+      "webhooks": [
+        "evt_1Uf0XmGwglVFMNN19usKlXrq"
+      ],
+      "app": "Free and Calendar Sync lock visible"
+    }
+  }
+]

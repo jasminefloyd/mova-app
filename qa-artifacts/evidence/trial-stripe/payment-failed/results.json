@@ -1,0 +1,16 @@
+[
+  {
+    "name": "payment-failed",
+    "status": "PASS",
+    "evidence": {
+      "clock": "clock_1Uf0Y8GwglVFMNN1w78VilRM",
+      "subscription": "sub_1Uf0YKGwglVFMNN1CWFxG2AR",
+      "card": "0341",
+      "stripeStatus": "past_due",
+      "app": "T11 and Update card visible",
+      "webhooks": [
+        "evt_1Uf0YhGwglVFMNN1obXSDxGk"
+      ]
+    }
+  }
+]

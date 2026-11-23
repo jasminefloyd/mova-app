@@ -1,0 +1,171 @@
+{
+  "structure": [
+    {
+      "hostname": "checkout.stripe.com",
+      "fields": [],
+      "buttons": [],
+      "copy": "Back\nJasmine Floyd\nSandbox\nTry Mova disposable QA AI_GROWTH\n30 days free\nThen $39.00 per month starting December 23, 2026\nPowered by \nTerms\nPrivacy"
+    },
+    {
+      "hostname": "js.stripe.com",
+      "fields": [],
+      "buttons": [],
+      "copy": ""
+    },
+    {
+      "hostname": "js.stripe.com",
+      "fields": [],
+      "buttons": [],
+      "copy": ""
+    },
+    {
+      "hostname": "js.stripe.com",
+      "fields": [
+        {
+          "id": "linkAuthentication-emailInput",
+          "name": "email",
+          "type": "text",
+          "autocomplete": "email"
+        },
+        {
+          "id": "payment-numberInput",
+          "name": "number",
+          "type": "text",
+          "autocomplete": "cc-number"
+        },
+        {
+          "id": "payment-expiryInput",
+          "name": "expiry",
+          "type": "text",
+          "autocomplete": "cc-exp"
+        },
+        {
+          "id": "payment-cvcInput",
+          "name": "cvc",
+          "type": "text",
+          "autocomplete": "cc-csc"
+        },
+        {
+          "id": "payment-nameInput",
+          "name": "name",
+          "type": "text",
+          "autocomplete": "cc-name"
+        },
+        {
+          "id": "payment-postalCodeInput",
+          "name": "postalCode",
+          "type": "text",
+          "autocomplete": "billing postal-code"
+        },
+        {
+          "id": "payment-linkOptInInput",
+          "name": "linkOptIn",
+          "type": "checkbox",
+          "autocomplete": ""
+        },
+        {
+          "id": "payment-linkMobilePhoneInput",
+          "name": "linkMobilePhone",
+          "type": "text",
+          "autocomplete": "billing tel"
+        },
+        {
+          "id": "",
+          "name": "",
+          "type": "text",
+          "autocomplete": ""
+        },
+        {
+          "id": "",
+          "name": "",
+          "type": "text",
+          "autocomplete": ""
+        },
+        {
+          "id": "",
+          "name": "",
+          "type": "text",
+          "autocomplete": ""
+        },
+        {
+          "id": "",
+          "name": "",
+          "type": "text",
+          "autocomplete": ""
+        },
+        {
+          "id": "",
+          "name": "",
+          "type": "text",
+          "autocomplete": ""
+        },
+        {
+          "id": "",
+          "name": "",
+          "type": "text",
+          "autocomplete": ""
+        },
+        {
+          "id": "",
+          "name": "",
+          "type": "text",
+          "autocomplete": ""
+        }
+      ],
+      "buttons": [
+        "Pay securely with Pay with 000000000000",
+        "Card",
+        "",
+        "",
+        "Cash App Pay",
+        "Amazon Pay",
+        "Klarna",
+        "Bank",
+        "Start trial"
+      ],
+      "copy": "Pay securely with\nPay with\n0000\nOR\n\nContact information\n\nEmail\n​\n\nPayment method\n\nCard\n\nCard information\n\nCard number\nVisa\nMastercard\nAmerican Express\nDiscover\n\nSupported cards include Visa, Mastercard, American Express, and Discover.\n\nCurrent card brand is Visa.\n​\nExpiration (MM/YY)\n​\nSecurity code\n3-digit code on back of card\n​\nName on card\n​\n\nBilling information\n\nCountry\nCountry\nAfghanistan\nÅland Islands\nAlbania\nAlgeria\nAndorra\nAngola\nAnguilla\nAntarctica\nAntigua & Barbuda\nArgentina\nArmenia\nAruba\nAscension Island\nAustralia\nAustria\nAzerbaijan\nBahamas\nBahrain\nBangladesh\nBarbados\nBelarus\nBelgium\nBelize\nBenin\nBermuda\nBhutan\nBolivia\nBosnia & Herzegovina\nBotswana\nBouvet Island\nBrazil\nBritish Indian Ocean Territory\nBritish Virgin Islands\nBrunei\nBulgaria\nBurkina Faso\nBurundi\nCambodia\nCameroon\nCanada\nCape Verde\nCaribbean Netherlands\nCayman Islands\nCentral African Republic\nChad\nChile\nChina\nColombia\nComoros\nCongo - Brazzaville\nCongo - Kinshasa\nCook Islands\nCosta Rica\nCôte d’Ivoire\nCroatia\nCuraçao\nCyprus\nCzechia\nDenmark\nDjibouti\nDominica\nDominican Republic\nEcuador\nEgypt\nEl Salvador\nEquatorial Guinea\nEritrea\nEstonia\nEswatini\nEthiopia\nFalkland Islands\nFaroe Islands\nFiji\nFinland\nFrance\nFrench Guiana\nFrench Polynesia\nFrench Southern Territories\nGabon\nGambia\nGeorgia\nGermany\nGhana\nGibraltar\nGreece\nGreenland\nGrenada\nGuadeloupe\nGuam\nGuatemala\nGuernsey\nGuinea\nGuinea-Bissau\nGuyana\nHaiti\nHonduras\nHong Kong SAR China\nHungary\nIceland\nIndia\nIndonesia\nIraq\nIreland\nIsle of Man\nIsrael\nItaly\nJamaica\nJapan\nJersey\nJordan\nKazakhstan\nKenya\nKiribati\nKosovo\nKuwait\nKyrgyzstan\nLaos\nLatvia\nLebanon\nLesotho\nLiberia\nLibya\nLiechtenstein\nLithuania\nLuxembourg\nMacao SAR China\nMadagascar\nMalawi\nMalaysia\nMaldives\nMali\nMalta\nMartinique\nMauritania\nMauritius\nMayotte\nMexico\nMoldova\nMonaco\nMongolia\nMontenegro\nMontserrat\nMorocco\nMozambique\nMyanmar (Burma)\nNamibia\nNauru\nNepal\nNetherlands\nNew Caledonia\nNew Zealand\nNicaragua\nNiger\nNigeria\nNiue\nNorth Macedonia\nNorway\nOman\nPakistan\nPalestinian Territories\nPanama\nPapua New Guinea\nParaguay\nPeru\nPhilippines\nPitcairn Islands\nPoland\nPortugal\nPuerto Rico\nQatar\nRéunion\nRomania\nRussia\nRwanda\nSamoa\nSan Marino\nSão Tomé & Príncipe\nSaudi Arabia\nSenegal\nSerbia\nSeychelles\nSierra Leone\nSingapore\nSint Maarten\nSlovakia\nSlovenia\nSolomon Islands\nSomalia\nSouth Africa\nSouth Georgia & South Sandwich Islands\nSouth Korea\nSouth Sudan\nSpain\nSri Lanka\nSt. Barthélemy\nSt. Helena\nSt. Kitts & Nevis\nSt. Lucia\nSt. Martin\nSt. Pierre & Miquelon\nSt. Vincent & Grenadines\nSudan\nSuriname\nSvalbard & J"
+    },
+    {
+      "hostname": "js.stripe.com",
+      "fields": [],
+      "buttons": [],
+      "copy": ""
+    },
+    {
+      "hostname": "js.stripe.com",
+      "fields": [],
+      "buttons": [],
+      "copy": ""
+    },
+    {
+      "hostname": "js.stripe.com",
+      "fields": [],
+      "buttons": [],
+      "copy": ""
+    },
+    {
+      "hostname": "js.stripe.com",
+      "fields": [],
+      "buttons": [],
+      "copy": ""
+    },
+    {
+      "hostname": "b.stripecdn.com",
+      "fields": [],
+      "buttons": [],
+      "copy": ""
+    },
+    {
+      "hostname": "js.stripe.com",
+      "fields": [],
+      "buttons": [],
+      "copy": ""
+    },
+    {
+      "hostname": "m.stripe.network",
+      "fields": [],
+      "buttons": [],
+      "copy": ""
+    }
+  ]
+}

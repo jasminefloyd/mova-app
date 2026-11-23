@@ -1,0 +1,32 @@
+[
+  {
+    "id": "T3",
+    "result": "PASS (local simulation)",
+    "note": "The real Home showed the 30-day trial strip after the local billing RPC wrote trialing."
+  },
+  {
+    "id": "T4, day 23",
+    "result": "PASS (local simulation)",
+    "note": "The simulated scheduler queued exactly one 7-day reminder. The real Home showed the final-week banner."
+  },
+  {
+    "id": "T4, day 29",
+    "result": "NOT VERIFIED",
+    "note": "The input did not match the regular expression /1\\s*day/. Input:"
+  },
+  {
+    "id": "T7, end on Free",
+    "result": "PASS (local simulation)",
+    "note": "The real plan record became Free. Home offered Unlock and Calendar Sync displayed its lock."
+  },
+  {
+    "id": "Paid conversion",
+    "result": "PASS (local simulation)",
+    "note": "The real billing RPC persisted active AI + Growth and the owner’s Plan screen displayed AI + Growth."
+  },
+  {
+    "id": "T11",
+    "result": "PASS (local simulation)",
+    "note": "The local past-due state produced the real payment-failed Home banner and Update card action."
+  }
+]

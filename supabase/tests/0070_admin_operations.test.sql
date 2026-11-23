@@ -1,5 +1,5 @@
 begin;
-select plan(30);
+select plan(33);
 
 insert into auth.users (id, email) values
   ('ad700000-0000-4000-8000-000000000001', 'ops-admin@mova.invalid'),
@@ -49,6 +49,9 @@ select throws_ok($$select public.mova_admin_set_platform_switch('tap_to_pay', tr
 select throws_ok($$select public.mova_admin_set_platform_switch('autopilot', false, 'no')$$, '22023', 'REASON_REQUIRED', 'a switch change needs a reason');
 select throws_ok($$select public.mova_admin_set_platform_switch('everything', false, 'Turn it all off please')$$, '22023', 'SWITCH_INVALID', 'unknown switches are refused');
 select is((select (public.mova_admin_switches() -> 0 ->> 'key')), 'autopilot', 'switches are listed by key');
+select lives_ok($$select public.mova_admin_set_platform_switch('trial_enabled', true, 'Launch trial after sandbox QA')$$, 'an admin can launch trials through the switch');
+select lives_ok($$select public.mova_admin_set_platform_switch('trial_enabled', false, 'Pause trial from Admin')$$, 'an admin can pause trials through the switch');
+select is((select (s->>'enabled')::boolean from jsonb_array_elements(public.mova_admin_switches()) s where s->>'key'='trial_enabled'), false, 'the admin switch listing reflects the pause');
 
 -- Stylist page.
 select lives_ok($$select public.mova_admin_unpublish_page('ad700000-0000-4000-8000-000000000101', 'Page shows a disputed claim')$$, 'an admin can unpublish a page with a reason');

@@ -1,0 +1,79 @@
+[
+  {
+    "name": "4242 trial start from Stripe API",
+    "status": "PASS",
+    "evidence": {
+      "start": "Stripe Subscriptions API",
+      "clock": "clock_1Uf0UAGwglVFMNN1uK3OmZtQ",
+      "subscription": "sub_1Uf0UBGwglVFMNN1H2z6iAAT",
+      "card": "4242",
+      "stripeStatus": "trialing",
+      "app": "T3 visible",
+      "webhooks": [
+        "evt_1Uf0UDGwglVFMNN1aWnrU46h"
+      ]
+    }
+  },
+  {
+    "name": "Day 23 reminder and T4",
+    "status": "PASS",
+    "evidence": {
+      "clock": "clock_1Uf0UAGwglVFMNN1uK3OmZtQ",
+      "daysAdvanced": 23,
+      "queued": "trial.reminder_7d",
+      "count": 1,
+      "app": "T4 verified with local clock projection"
+    }
+  },
+  {
+    "name": "Day 29 reminder and T4",
+    "status": "PASS",
+    "evidence": {
+      "clock": "clock_1Uf0UAGwglVFMNN1uK3OmZtQ",
+      "daysAdvanced": 29,
+      "queued": "trial.reminder_1d",
+      "count": 1,
+      "app": "T4 verified with local clock projection"
+    }
+  },
+  {
+    "name": "T7 free and lock",
+    "status": "PASS",
+    "evidence": {
+      "webhooks": [
+        "evt_1Uf0USGwglVFMNN1s1eUjh82"
+      ],
+      "app": "Free and Calendar Sync lock visible"
+    }
+  },
+  {
+    "name": "paid-conversion",
+    "status": "PASS",
+    "evidence": {
+      "start": "Stripe Subscriptions API",
+      "clock": "clock_1Uf0UUGwglVFMNN119Qy1Oxx",
+      "subscription": "sub_1Uf0UVGwglVFMNN1JHHliCYU",
+      "card": "4242",
+      "stripeStatus": "active",
+      "app": "AI + Growth visible",
+      "webhooks": [
+        "evt_1Uf0UkGwglVFMNN1ragZ1cbD"
+      ]
+    }
+  },
+  {
+    "name": "payment-failed",
+    "status": "PASS",
+    "evidence": {
+      "start": "Stripe Subscriptions API",
+      "clock": "clock_1Uf0UmGwglVFMNN14AcDuucT",
+      "subscription": "sub_1Uf0UoGwglVFMNN1xz8EqgA2",
+      "card": "0341",
+      "stripeStatus": "past_due",
+      "app": "T11 and Update card visible",
+      "webhooks": [
+        "evt_1Uf0VBGwglVFMNN1DGti8DAY"
+      ]
+    }
+  }
+]

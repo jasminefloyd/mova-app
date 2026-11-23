@@ -1,0 +1,20 @@
+[
+  {
+    "event": "trial.reminder_7d",
+    "transport": "local fake",
+    "subject": "Your free trial ends Dec 23",
+    "template": "stylist_trial_ending",
+    "duplicateSuppressed": true,
+    "sms": "skipped",
+    "push": 0
+  },
+  {
+    "event": "trial.reminder_1d",
+    "transport": "local fake",
+    "subject": "Your free trial ends tomorrow",
+    "template": "stylist_trial_ending",
+    "duplicateSuppressed": true,
+    "sms": "skipped",
+    "push": 0
+  }
+]

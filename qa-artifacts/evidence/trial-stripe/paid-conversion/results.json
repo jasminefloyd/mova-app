@@ -1,0 +1,16 @@
+[
+  {
+    "name": "paid-conversion",
+    "status": "PASS",
+    "evidence": {
+      "clock": "clock_1Uf0Y8GwglVFMNN178b3W7Rs",
+      "subscription": "sub_1Uf0YJGwglVFMNN1K7JSzU6w",
+      "card": "4242",
+      "stripeStatus": "active",
+      "app": "AI + Growth visible",
+      "webhooks": [
+        "evt_1Uf0YeGwglVFMNN1jShLI0gM"
+      ]
+    }
+  }
+]
