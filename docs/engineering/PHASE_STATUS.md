@@ -499,3 +499,9 @@ The Settings banner loads the active business's profile photo from private Stora
 ## 2026-11-23 private profile preview
 
 Removed the full-page wrapper around the preview's back button. Its 70dvh minimum height was pushing the private-preview notice and profile far below the header. The preview also reads the saved Unsplash cover and attribution. Type checks, the local web build and 13 Playwright cases passed. The preview regression opened from Edit your profile and checked the notice and cover at 320 and 430 px. This change is local.
+
+## 2026-11-23 stylist multi-service appointments
+
+New appointment now uses inset-chevron dropdowns. Stylists can add or remove up to eight distinct services. The location dropdown preserves the selection and disables locations that cannot offer the whole appointment. Migration 0110 adds an authenticated RPC for availability checks and booking. It sums location-specific service durations and service buffers, checks location hours and buffered conflicts, and checks again under a location lock before saving the appointment and its ordered service snapshots. The existing single-service RPC delegates to the same booking path. The web release requires migration 0110 and the updated `artist-appointment-create` Edge Function.
+
+Verified locally with 7 Playwright cases, the scheduling unit tests, all 1,276 pgTAP assertions and 21 Deno tests. A local Edge and PostgREST smoke test confirmed that two concurrent requests booked the same slot only once, the idempotent retry returned the booking, and both services persisted. No production changes were made for this feature.

@@ -27,9 +27,13 @@ function rows(page: Page, table: string, data: unknown) {
     : route.fulfill({ status: 200, contentType: 'application/json', headers: { ...cors, 'Content-Range': '0-0/1' }, body: JSON.stringify(data) }));
 }
 
-const services = [{ id: serviceId, name: 'Silk press', duration_minutes: 90, base_price_minor: 15000 }];
+const services = [{ id: serviceId, name: 'Silk press', duration_minutes: 90, buffer_minutes: 0, base_price_minor: 15000, location_assignment_mode: 'all' }];
 const serviceLinks = [{ service_id: serviceId, location_id: locationId, price_minor_override: null, duration_minutes_override: null }];
 const clientsList = [{ id: clientId, client_number: 7, display_name: 'Simone A.', email: null, phone: null }];
+
+function slotResult(body: Record<string, unknown>, minutes: number, available = true) {
+  return { available, ends_at: new Date(Date.parse(String(body.starts_at)) + minutes * 60_000).toISOString() };
+}
 
 test('TC-SCR-08B-01 the Calendar + opens the add choice sheet with three choices and Cancel', async ({ page }) => {
   await openOperatorPage(page, '/calendar');
@@ -93,7 +97,9 @@ test('TC-SCR-08C-01 New appointment books a known client into a free time', asyn
     return route.fallback();
   });
   await functionMock(page, 'client-crud', () => clientsList, sent);
-  await functionMock(page, 'artist-appointment-create', () => ({ appointment_id: 'e2500000-0000-4000-8000-000000000777' }), sent);
+  await functionMock(page, 'artist-appointment-create', (body) => body.action === 'check'
+    ? slotResult(body, 90)
+    : { appointment_id: 'e2500000-0000-4000-8000-000000000777' }, sent);
   await page.goto(`/BID-1/calendar/new-appointment?client=${clientId}`);
 
   await expect(page.getByRole('heading', { level: 1, name: 'New appointment' })).toBeVisible();
@@ -103,8 +109,8 @@ test('TC-SCR-08C-01 New appointment books a known client into a free time', asyn
   await page.getByRole('button', { name: 'Book appointment' }).click();
 
   await expect(page).toHaveURL(/\/BID-1\/appointments\/AID-21$/);
-  const booking = sent.find((item) => item.url.endsWith('/artist-appointment-create'));
-  expect(booking?.body).toMatchObject({ artist_business_id: businessId, client_id: clientId, location_id: locationId, service_id: serviceId });
+  const booking = sent.find((item) => item.headers['idempotency-key']);
+  expect(booking?.body).toMatchObject({ artist_business_id: businessId, client_id: clientId, location_id: locationId, service_ids: [serviceId] });
   expect(String((booking?.body as { starts_at?: string }).starts_at)).toMatch(/T\d{2}:\d{2}:00\.000Z$/);
   expect(booking?.headers['idempotency-key']).toMatch(/^[0-9a-f-]{36}$/);
 });
@@ -112,19 +118,74 @@ test('TC-SCR-08C-01 New appointment books a known client into a free time', asyn
 test('TC-SCR-08C-02 New appointment says when the time is taken and does not book it', async ({ page }) => {
   await openOperatorPage(page, '/');
   const sent: Recorded[] = [];
-  // A booking across the days around now, so the default date and time (10:00 in the location zone) collide.
-  const day = 86_400_000;
   await rows(page, 'mova_services', services);
   await rows(page, 'mova_service_locations', serviceLinks);
-  await rows(page, 'mova_appointments', [{ location_id: locationId, starts_at: new Date(Date.now() - 2 * day).toISOString(), ends_at: new Date(Date.now() + 2 * day).toISOString() }]);
   await functionMock(page, 'client-crud', () => clientsList, sent);
-  await functionMock(page, 'artist-appointment-create', () => ({ appointment_id: 'x' }), sent);
+  await functionMock(page, 'artist-appointment-create', (body) => slotResult(body, 90, false), sent);
   await page.goto(`/BID-1/calendar/new-appointment?client=${clientId}`);
 
   await page.getByLabel('Service').selectOption({ label: 'Silk press · 90 min · $150' });
   await expect(page.getByRole('status').filter({ hasText: 'overlaps another booking or block' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Book appointment' })).toBeDisabled();
-  expect(sent.filter((item) => item.url.endsWith('/artist-appointment-create'))).toEqual([]);
+  expect(sent.filter((item) => item.headers['idempotency-key'])).toEqual([]);
+});
+
+test('New appointment allows adding and removing services and checks the full slot at a compatible location', async ({ page }) => {
+  const salonId = 'e2500000-0000-4000-8000-000000000051';
+  const studioId = 'e2500000-0000-4000-8000-000000000052';
+  const trimId = 'e2500000-0000-4000-8000-000000000302';
+  await page.setViewportSize({ width: 320, height: 740 });
+  await openOperatorPage(page, '/');
+  await rows(page, 'mova_locations', [
+    { id: locationId, name: 'Luxe Salon', time_zone: 'America/New_York' },
+    { id: salonId, name: 'Salon Two', time_zone: 'America/New_York' },
+    { id: studioId, name: 'Studio Two', time_zone: 'America/New_York' },
+  ]);
+  await rows(page, 'mova_services', [...services, {
+    id: trimId, name: 'Trim', duration_minutes: 30, buffer_minutes: 10, base_price_minor: 4000, location_assignment_mode: 'selected',
+  }]);
+  await rows(page, 'mova_service_locations', [...serviceLinks,
+    { service_id: trimId, location_id: locationId, price_minor_override: null, duration_minutes_override: 40 },
+    { service_id: trimId, location_id: studioId, price_minor_override: null, duration_minutes_override: 25 },
+  ]);
+  const sent: Recorded[] = [];
+  await functionMock(page, 'client-crud', () => clientsList, sent);
+  await functionMock(page, 'artist-appointment-create', (body) => {
+    if (body.action !== 'check') return { appointment_id: 'e2500000-0000-4000-8000-000000000777' };
+    const multi = (body.service_ids as string[]).length > 1;
+    const blocked = multi && body.location_id === locationId;
+    return slotResult(body, multi ? (blocked ? 140 : 125) : 90, !blocked);
+  }, sent);
+  await page.goto(`/BID-1/calendar/new-appointment?client=${clientId}&day=2030-03-05`);
+
+  const location = page.getByRole('combobox', { name: 'Location', exact: true });
+  const addService = page.getByRole('combobox', { name: 'Add a service' });
+  await expect(location).toHaveValue(locationId);
+  await addService.selectOption(serviceId);
+  await addService.selectOption(trimId);
+  await expect(page.getByRole('list', { name: 'Selected services' }).getByRole('listitem')).toHaveCount(2);
+  await expect(page.getByText('+ 10 min buffer')).toBeVisible();
+  const salonOption = location.locator(`option[value="${salonId}"]`);
+  await expect(salonOption).toHaveJSProperty('disabled', true);
+  await expect(page.getByRole('status').filter({ hasText: 'overlaps another booking or block' })).toContainText('12:20');
+  await expect(page.getByRole('button', { name: 'Book appointment' })).toBeDisabled();
+
+  await page.getByRole('button', { name: 'Remove Trim' }).click();
+  await expect(salonOption).toHaveJSProperty('disabled', false);
+  await expect(page.getByRole('status').filter({ hasText: 'is free' })).toContainText('11:30');
+  await addService.selectOption(trimId);
+  await location.selectOption(studioId);
+  await expect(page.getByRole('list', { name: 'Selected services' }).getByRole('listitem')).toHaveCount(2);
+  await expect(page.getByRole('listitem').filter({ hasText: 'Trim' })).toContainText('25 min');
+  await expect(page.getByRole('status').filter({ hasText: 'is free' })).toContainText('12:05');
+  const locationArrow = location.locator('..').locator('.mova-icon');
+  const bounds = await location.boundingBox();
+  const arrow = await locationArrow.boundingBox();
+  expect(bounds!.x + bounds!.width - (arrow!.x + arrow!.width)).toBeGreaterThanOrEqual(12);
+
+  await page.getByRole('button', { name: 'Book appointment' }).click();
+  await expect(page).toHaveURL(/\/BID-1\/calendar$/);
+  expect(sent.find((item) => item.headers['idempotency-key'])?.body).toMatchObject({ location_id: studioId, service_ids: [serviceId, trimId] });
 });
 
 test('TC-SCR-08E-01 Block time validates the hours, then saves one block per location', async ({ page }) => {

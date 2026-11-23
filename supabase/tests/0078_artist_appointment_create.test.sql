@@ -1,5 +1,5 @@
 begin;
-select plan(15);
+select plan(28);
 
 insert into auth.users(id,aud,role,email,email_confirmed_at) values
   ('e7800000-0000-4000-8000-000000000001','authenticated','authenticated','p6-stylist@example.invalid',now()),
@@ -65,6 +65,59 @@ select throws_ok($$select public.mova_artist_appointment_create('e7800000-0000-4
 reset role;
 select is((select status||'/'||source||'/'||deposit_due_minor::text from public.mova_appointments where id=(select id from p6_first_booking)), 'confirmed/artist/0', 'TC-SCR-08C-07 the booking is confirmed, from the stylist, with no deposit');
 select is((select count(*)::int from public.mova_appointment_services where appointment_id=(select id from p6_first_booking)), 1, 'TC-SCR-08C-07 the service snapshot is written');
+
+update public.mova_location_policies set buffer_before_minutes = 5, buffer_after_minutes = 15
+where location_id = 'e7800000-0000-4000-8000-000000000201';
+insert into public.mova_services(id,artist_business_id,name,category,duration_minutes,buffer_minutes,base_price_minor,status,location_assignment_mode)
+values
+  ('e7800000-0000-4000-8000-000000000303','e7800000-0000-4000-8000-000000000101','Trim','Styling',45,10,5000,'active','selected'),
+  ('e7800000-0000-4000-8000-000000000304','e7800000-0000-4000-8000-000000000101','Twists','Styling',60,0,7500,'active','selected');
+insert into public.mova_service_locations(artist_business_id,service_id,location_id,duration_minutes_override,price_minor_override)
+values('e7800000-0000-4000-8000-000000000101','e7800000-0000-4000-8000-000000000303','e7800000-0000-4000-8000-000000000201',30,4000);
+insert into public.mova_availability_blocks(artist_business_id,location_id,starts_at,ends_at,reason,label)
+values('e7800000-0000-4000-8000-000000000101','e7800000-0000-4000-8000-000000000201','2030-03-07 12:20+00','2030-03-07 12:21+00','personal_break','');
+
+create function pg_temp.manual_multi(
+  starts_at timestamptz, check_only boolean, key text default 'p6-multi-booking',
+  services uuid[] default array['e7800000-0000-4000-8000-000000000303'::uuid,'e7800000-0000-4000-8000-000000000301'::uuid]
+) returns jsonb language sql as $$
+  select public.mova_artist_appointment_create_multi(
+    'e7800000-0000-4000-8000-000000000101','e7800000-0000-4000-8000-000000000401',
+    'e7800000-0000-4000-8000-000000000201',services,starts_at,key,check_only
+  )
+$$;
+
+select ok(not has_function_privilege('anon','public.mova_artist_appointment_create_multi(uuid,uuid,uuid,uuid[],timestamptz,text,boolean)','EXECUTE'),
+  'Anonymous callers cannot run the manual booking check or create RPC');
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"e7800000-0000-4000-8000-000000000002","role":"authenticated"}',true);
+select throws_ok($$select pg_temp.manual_multi('2030-03-06 10:00+00',true)$$,
+  '42501','ARTIST_MEMBERSHIP_REQUIRED','Another tenant cannot check the slot');
+select set_config('request.jwt.claims','{"sub":"e7800000-0000-4000-8000-000000000001","role":"authenticated"}',true);
+
+select is((pg_temp.manual_multi('2030-03-06 10:00+00',true)->>'ends_at')::timestamptz,'2030-03-06 12:10+00'::timestamptz,
+  'Preview end uses the ordered services, including the duration override and service buffer');
+select ok(not exists(select 1 from public.mova_appointments where idempotency_key='p6-multi-booking'), 'Preview does not book the slot');
+select is(pg_temp.manual_multi('2030-03-07 10:00+00',true)->>'available','false','A block inside the after buffer makes the full slot unavailable');
+select throws_ok($$select pg_temp.manual_multi('2030-03-07 10:00+00',false,'p6-multi-block')$$,
+  '23505','SLOT_TAKEN','Booking independently refuses the same buffered conflict');
+select throws_ok($$select pg_temp.manual_multi('2030-03-06 15:00+00',true)$$,
+  '22023','SLOT_OUTSIDE_LOCATION_HOURS','The combined duration must fit within location hours');
+select throws_ok($$select pg_temp.manual_multi('2030-03-06 10:00+00',true,services => array['e7800000-0000-4000-8000-000000000301'::uuid,'e7800000-0000-4000-8000-000000000304'::uuid])$$,
+  '22023','SERVICE_NOT_OFFERED_AT_LOCATION','Every selected service must be offered at the location');
+select throws_ok($$select pg_temp.manual_multi('2030-03-06 10:00+00',true,services => array['e7800000-0000-4000-8000-000000000301'::uuid,'e7800000-0000-4000-8000-000000000301'::uuid])$$,
+  '22023','SERVICES_INVALID','The same service cannot be selected twice');
+
+create temporary table p6_multi_booking as
+select (pg_temp.manual_multi('2030-03-06 10:00+00',false)->>'appointment_id')::uuid as id;
+select is((select string_agg(service_name_snapshot||':'||duration_minutes_snapshot||':'||price_minor_snapshot,',' order by position)
+  from public.mova_appointment_services where appointment_id=(select id from p6_multi_booking)),
+  'Trim:40:4000,Silk press:90:15000','One booking stores both services in order with their own duration and price');
+select is((select ends_at||'/'||buffer_before_minutes||'/'||buffer_after_minutes||'/'||service_price_minor||'/'||deposit_due_minor
+  from public.mova_appointments where id=(select id from p6_multi_booking)),
+  '2030-03-06 12:10:00+00/5/15/19000/0','The confirmed appointment stores the full span, location buffers and combined price');
+select is(pg_temp.manual_multi('2030-03-06 12:29+00',true)->>'available','false','A following booking cannot overlap the existing after-buffer');
+select is(pg_temp.manual_multi('2030-03-06 12:30+00',true)->>'available','true','Touching buffered windows are allowed');
 
 select * from finish();
 rollback;

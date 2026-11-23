@@ -227,13 +227,14 @@ export function overlaps(a: { startsAt: string; endsAt: string }, b: { startsAt:
 
 // ---- New appointment (08c) -----------------------------------------------------------------
 
-export type AppointmentDraft = { clientId: string; serviceId: string; locationId: string; date: string; start: string };
+export const MAX_APPOINTMENT_SERVICES = 8;
+export type AppointmentDraft = { clientId: string; serviceIds: string[]; locationId: string; date: string; start: string };
 export type AppointmentField = 'client' | 'service' | 'location' | 'date' | 'start';
 
 export function validateNewAppointment(draft: AppointmentDraft): FieldErrors<AppointmentField> {
   const errors: FieldErrors<AppointmentField> = {};
   if (!draft.clientId) errors.client = true;
-  if (!draft.serviceId) errors.service = true;
+  if (draft.serviceIds.length < 1 || draft.serviceIds.length > MAX_APPOINTMENT_SERVICES || new Set(draft.serviceIds).size !== draft.serviceIds.length) errors.service = true;
   if (!draft.locationId) errors.location = true;
   if (!DATE.test(draft.date)) errors.date = true;
   if (!TIME.test(draft.start)) errors.start = true;

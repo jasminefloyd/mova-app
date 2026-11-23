@@ -124,10 +124,11 @@ describe('Block time (board 08e)', () => {
 
 describe('New appointment validation (board 08c)', () => {
   it('TC-SCR-08C-08 needs a client, service, location, date and start time', () => {
-    const ok = { clientId: 'c', serviceId: 's', locationId: 'l', date: '2030-03-05', start: '10:15' };
+    const ok = { clientId: 'c', serviceIds: ['s'], locationId: 'l', date: '2030-03-05', start: '10:15' };
     expect(validateNewAppointment(ok)).toEqual({});
     expect(validateNewAppointment({ ...ok, clientId: '' })).toEqual({ client: true });
-    expect(validateNewAppointment({ ...ok, serviceId: '' })).toEqual({ service: true });
+    expect(validateNewAppointment({ ...ok, serviceIds: [] })).toEqual({ service: true });
+    expect(validateNewAppointment({ ...ok, serviceIds: ['s', 's'] })).toEqual({ service: true });
     expect(validateNewAppointment({ ...ok, start: '' })).toEqual({ start: true });
   });
 });

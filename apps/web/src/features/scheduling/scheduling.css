@@ -200,6 +200,15 @@
 
 /* New appointment */
 .mova-scheduling__form--appointment { display: grid; gap: var(--space-4); }
+.mova-scheduling__select { position: relative; display: block; min-width: 0; }
+.mova-scheduling--appointment .mova-scheduling__select .mova-input { appearance: none; padding-inline-end: calc(var(--space-4) + 24px); }
+.mova-scheduling__select > .mova-icon { position: absolute; inset-inline-end: var(--space-4); top: 50%; transform: translateY(-50%) rotate(90deg); pointer-events: none; }
+.mova-scheduling__services, .mova-scheduling__service-list { display: grid; gap: var(--space-2); }
+.mova-scheduling__service-list { margin: 0; padding: 0; list-style: none; }
+.mova-scheduling__service-list li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-l); background: var(--surface); }
+.mova-scheduling__service-list li > span { min-width: 0; overflow-wrap: anywhere; }
+.mova-scheduling__service-list small { display: block; color: var(--ink-muted); }
+.mova-scheduling__service-list .mova-button { flex: none; }
 .mova-scheduling__selected-client { display: flex; min-height: 88px; align-items: center; gap: var(--space-3); border: 2px solid var(--forest); border-radius: var(--radius-2xl); padding: var(--space-3); background: var(--surface); }
 .mova-scheduling__client-avatar { display: grid; width: 56px; height: 56px; flex: none; place-items: center; border-radius: 50%; background: var(--mint); color: var(--forest); font-weight: 700; }
 .mova-scheduling__selected-client-copy { display: grid; min-width: 0; flex: 1; }

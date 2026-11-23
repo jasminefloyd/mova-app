@@ -13,20 +13,25 @@ Deno.serve(withSystemRequestLogging('artist-appointment-create', async (request)
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
   if (!body) return respond({ code: 'INVALID_JSON' }, 400);
   if (body.artist_business_id !== actor.businessId) return respond({ code: 'ARTIST_BUSINESS_SCOPE_MISMATCH' }, 403);
-  const ids = [body.client_id, body.location_id, body.service_id];
-  if (!ids.every((value) => typeof value === 'string' && UUID.test(value))) return respond({ code: 'APPOINTMENT_INPUT_INVALID' }, 422);
+  if (body.action !== undefined && body.action !== 'check' && body.action !== 'create') return respond({ code: 'APPOINTMENT_INPUT_INVALID' }, 422);
+  if (![body.client_id, body.location_id].every((value) => typeof value === 'string' && UUID.test(value))) return respond({ code: 'APPOINTMENT_INPUT_INVALID' }, 422);
+  const serviceIds = body.service_ids === undefined ? [body.service_id] : body.service_ids;
+  if (!Array.isArray(serviceIds) || serviceIds.length < 1 || serviceIds.length > 8 ||
+      !serviceIds.every((id) => typeof id === 'string' && UUID.test(id))) return respond({ code: 'SERVICES_INVALID' }, 422);
   const startsAt = typeof body.starts_at === 'string' ? new Date(body.starts_at) : null;
   if (!startsAt || Number.isNaN(startsAt.getTime())) return respond({ code: 'APPOINTMENT_TIME_INVALID' }, 422);
   const key = String(request.headers.get('Idempotency-Key') ?? body.idempotency_key ?? '').trim();
-  if (key.length < 8) return respond({ code: 'IDEMPOTENCY_KEY_REQUIRED' }, 422);
-  const { data, error } = await actor.client.rpc('mova_artist_appointment_create', {
+  const checkOnly = body.action === 'check';
+  if (!checkOnly && key.length < 8) return respond({ code: 'IDEMPOTENCY_KEY_REQUIRED' }, 422);
+  const { data, error } = await actor.client.rpc('mova_artist_appointment_create_multi', {
     p_artist_business_id: actor.businessId,
     p_client_id: body.client_id,
     p_location_id: body.location_id,
-    p_service_id: body.service_id,
+    p_service_ids: serviceIds,
     p_starts_at: startsAt.toISOString(),
     p_idempotency_key: key,
+    p_check_only: checkOnly,
   });
   if (error) return respond({ code: error.message || 'APPOINTMENT_CREATE_FAILED' }, 422);
-  return respond({ appointment_id: data }, 201);
+  return respond(data, checkOnly ? 200 : 201);
 }));

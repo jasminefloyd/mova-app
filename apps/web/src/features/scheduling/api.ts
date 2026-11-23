@@ -22,7 +22,7 @@ export function errorCode(error: unknown): string {
 }
 
 export type LocationRow = { id: string; name: string; time_zone: string; display_color_index: number; location_type: string; booking_mode: string };
-export type ServiceRow = { id: string; name: string; duration_minutes: number; base_price_minor: number };
+export type ServiceRow = { id: string; name: string; duration_minutes: number; buffer_minutes: number; base_price_minor: number; location_assignment_mode: 'all' | 'selected' };
 export type ServiceLocationRow = { service_id: string; location_id: string; price_minor_override: number | null; duration_minutes_override: number | null };
 export type ClientRow = { id: string; client_number: number; display_name: string; email: string | null; phone: string | null };
 export type BusyRow = { location_id: string; starts_at: string; ends_at: string };
@@ -31,7 +31,7 @@ export type BusyRow = { location_id: string; starts_at: string; ends_at: string 
 export async function loadBookingOptions(client: MovaClient, businessId: string) {
   const [locations, services, links] = await Promise.all([
     client.from('mova_locations').select('id,name,time_zone,display_color_index,location_type,booking_mode').eq('artist_business_id', businessId).eq('is_active', true).order('display_color_index').order('name'),
-    client.from('mova_services').select('id,name,duration_minutes,base_price_minor').eq('artist_business_id', businessId).eq('status', 'active').order('name'),
+    client.from('mova_services').select('id,name,duration_minutes,buffer_minutes,base_price_minor,location_assignment_mode').eq('artist_business_id', businessId).eq('status', 'active').order('name'),
     client.from('mova_service_locations').select('service_id,location_id,price_minor_override,duration_minutes_override').eq('artist_business_id', businessId),
   ]);
   if (locations.error || services.error || links.error) throw new Error('OPTIONS_LOAD_FAILED');
