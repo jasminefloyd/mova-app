@@ -149,22 +149,30 @@ test('TC-SCR-08E-01 Block time validates the hours, then saves one block per loc
   expect(inserted).toEqual([expect.arrayContaining([expect.objectContaining({ artist_business_id: businessId, location_id: locationId, reason: 'holiday', label: 'Lunch' })])]);
 });
 
-test('TC-SCR-19A-01 New location needs a type of place, then saves with the board defaults', async ({ page }) => {
+test('TC-SCR-19A-01 New location requires a type of place and working hours', async ({ page }) => {
   await openOperatorPage(page, '/');
   const sent: Recorded[] = [];
   await functionMock(page, 'location-save', () => ({ id: locationId }), sent);
   await page.goto('/BID-1/settings/locations/new');
   await expect(page.getByRole('heading', { level: 1, name: 'Where else do you work?' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Tuesday' })).toHaveAttribute('aria-pressed', 'true');
+  const placeType = page.getByRole('combobox', { name: 'Type of place' });
+  await expect(placeType).toHaveValue('');
+  await expect(placeType.locator('option')).toHaveText(['Choose a type of place', 'Suite rental', 'Booth rental', 'Salon', 'Home studio', 'I travel to clients']);
+  await expect(page.getByRole('button', { name: 'Tuesday' })).toHaveAttribute('aria-pressed', 'false');
   await expect(page.getByRole('button', { name: 'Monday' })).toHaveAttribute('aria-pressed', 'false');
 
   await page.getByLabel('Location name').fill('Studio 9 Suites');
   await page.getByLabel('Address').fill('210 Main St, Suite 4');
   await page.getByRole('button', { name: 'Save location' }).click();
-  await expect(page.getByText('Choose a type of place.')).toBeVisible();
+  await expect(page.getByText('Choose a type of place.', { exact: true })).toBeVisible();
   expect(sent).toEqual([]);
 
-  await page.getByRole('radio', { name: 'Suite rental' }).check();
+  await placeType.selectOption({ label: 'Suite rental' });
+  await page.getByRole('button', { name: 'Tuesday' }).click();
+  await page.getByRole('button', { name: 'Thursday' }).click();
+  await page.getByRole('button', { name: 'Friday' }).click();
+  await page.getByLabel('Opens').fill('09:00');
+  await page.getByLabel('Closes').fill('17:00');
   await page.getByRole('button', { name: 'Save location' }).click();
   await expect(page).toHaveURL(/\/BID-1\/settings\/locations$/);
   const body = sent[0]?.body as Record<string, unknown> | undefined;
@@ -172,6 +180,44 @@ test('TC-SCR-19A-01 New location needs a type of place, then saves with the boar
   expect((body?.hours as Array<{ weekday: number }>).map((row) => row.weekday)).toEqual([2, 4, 5]);
   expect(body?.policies).toMatchObject({ lead_time_minutes: 720, booking_horizon_days: 56, buffer_after_minutes: 15 });
 });
+
+for (const width of [320, 430]) {
+  test(`Edit location saves below the form at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 640 });
+    await openOperatorPage(page, '/');
+    await rows(page, 'mova_locations', [{
+      id: locationId, name: 'Studio 9 Suites', location_type: 'suite', booking_mode: 'instant',
+      calendar_ownership: 'mova', payment_collector: 'artist', time_zone: 'America/New_York',
+      address: { street: '210 Main St, Suite 4' }, display_color_index: 2,
+    }]);
+    await rows(page, 'mova_location_hours', [{ weekday: 2, opens_at: '09:00:00', closes_at: '17:00:00' }]);
+    await rows(page, 'mova_location_policies', [{ lead_time_minutes: 60, booking_horizon_days: 28, buffer_after_minutes: 10 }]);
+    await rows(page, 'mova_location_exceptions', []);
+    const sent: Recorded[] = [];
+    await functionMock(page, 'location-save', () => ({ id: locationId }), sent);
+    await page.goto(`/BID-1/settings/locations/new?location_id=${locationId}`);
+
+    const kind = page.getByRole('combobox', { name: 'Type of place' });
+    const save = page.getByRole('button', { name: 'Save changes' });
+    await expect(kind).toHaveValue('suite');
+    await expect(save).not.toBeInViewport();
+    await kind.selectOption({ label: 'Home studio' });
+
+    const bookAhead = page.getByRole('combobox', { name: 'Book ahead' });
+    await bookAhead.scrollIntoViewIfNeeded();
+    await expect(bookAhead).toBeInViewport();
+    const rulesBounds = await page.getByRole('region', { name: 'Booking rules' }).boundingBox();
+    const saveBounds = await save.boundingBox();
+    expect(saveBounds!.y).toBeGreaterThan(rulesBounds!.y + rulesBounds!.height);
+    await save.click();
+    await expect(page).toHaveURL(/\/BID-1\/settings\/locations$/);
+    expect(sent[0]?.body).toMatchObject({
+      location_id: locationId, location_type: 'home_studio',
+      hours: [{ weekday: 2, opens_at: '09:00', closes_at: '17:00' }],
+      policies: { lead_time_minutes: 60, booking_horizon_days: 28, buffer_after_minutes: 10 },
+    });
+  });
+}
 
 test('TC-SCR-37-01 Reports opens Money from the revenue card and links the marketing rows', async ({ page }) => {
   await openOperatorPage(page, '/reports');

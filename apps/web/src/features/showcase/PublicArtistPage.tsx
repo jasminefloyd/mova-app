@@ -7,6 +7,7 @@ import { ErrorFallback } from '../../app/ErrorFallback';
 import { PublicLocaleToggle } from '../../app/PublicLocaleToggle';
 import { WebChat } from '../concierge/WebChat';
 import { trackProfileEvent } from '../reports/track';
+import { CoverPhotoCredit } from './CoverPhotoCredit';
 
 type Service = { id: string; name: string; category: string; description?: string; duration_minutes: number; buffer_minutes?: number; base_price_minor: number; deposit_type: 'none' | 'fixed' | 'percent'; deposit_value: number; location_deposits: Array<{ location_id: string; price_minor: number; duration_minutes: number; deposit_amount_minor: number }> };
 type Look = { id: string; image_url: string; alt_text: string; service_ids: string[] };
@@ -102,8 +103,10 @@ export function PublicArtistPage({ initialArtist = null, preview = false, handle
       <h1>{artist.profile.display_name}</h1>
       <p className="mova-public-artist__specialties">{artist.profile.specialties.join(' · ')}{artist.profile.specialties.length > 0 && reputation && ' · '}{reputation}</p>
       {locationsLabel && <p className="mova-public-artist__location"><Icon name="location" size={24}/><span>{locationsLabel}</span></p>}
-      {artist.profile.cover_source === 'unsplash' && artist.profile.cover_credit_name && artist.profile.cover_credit_url && artist.profile.cover_unsplash_url && <p className="mova-public-artist__cover-credit">{t('coverPicker.photoCredit')} <a href={artist.profile.cover_credit_url} target="_blank" rel="noopener noreferrer">{artist.profile.cover_credit_name}</a> / <a href={artist.profile.cover_unsplash_url} target="_blank" rel="noopener noreferrer">{t('coverPicker.unsplash')}</a></p>}
       {artist.profile.bio && <p className="mova-public-artist__bio">{artist.profile.bio}</p>}
+      {coverUrl && artist.profile.cover_source === 'unsplash' && artist.profile.cover_credit_name && artist.profile.cover_credit_url && artist.profile.cover_unsplash_url && (
+        <CoverPhotoCredit name={artist.profile.cover_credit_name} url={artist.profile.cover_credit_url} unsplashUrl={artist.profile.cover_unsplash_url} locale={locale} />
+      )}
       <span role="status" className="sr-only">{shareCopied ? t('identity.linkCopied') : ''}</span>
     </section>
     {!preview && !artist.bookable && <Card tone="warm" className="mova-public-artist__booking-unavailable"><p>{t('showcase.bookingUnavailable')}</p></Card>}

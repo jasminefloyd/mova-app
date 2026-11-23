@@ -7,7 +7,7 @@ import type { PublicArtist } from './PublicArtistPage';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { operatorUrl } from '../../app/operator-url';
 
-type ProfileRow = { display_name: string; handle: string; specialties: string[]; bio: string; preferred_locale: string; search_index_enabled: boolean; photo_variants: Record<string, Record<string, string>> | null };
+type ProfileRow = Omit<PublicArtist['profile'], 'photo_urls'> & { photo_variants: PublicArtist['profile']['photo_urls'] | null };
 type ServiceRow = { id: string; name: string; category: string; description: string; duration_minutes: number; buffer_minutes: number; base_price_minor: number; deposit_type: 'none' | 'fixed' | 'percent'; deposit_value: number; location_assignment_mode: 'all' | 'selected' };
 type LocationRow = { id: string; name: string; booking_mode: 'instant' | 'request'; time_zone: string; payment_collector: string };
 type ServiceLocationRow = { service_id: string; location_id: string; price_minor_override: number | null; duration_minutes_override: number | null };
@@ -26,13 +26,13 @@ export function ArtistProfilePreviewPage() {
     setLoading(true); setError(false);
     try {
       const [profileResult, serviceResult, locationResult] = await Promise.all([
-        client.from('mova_artist_profiles').select('display_name,handle,specialties,bio,preferred_locale,search_index_enabled,photo_variants').eq('artist_business_id', businessId).maybeSingle(),
+        client.from('mova_artist_profiles').select('display_name,handle,specialties,bio,preferred_locale,search_index_enabled,photo_variants,cover_source,cover_image_url,cover_credit_name,cover_credit_url,cover_unsplash_url').eq('artist_business_id', businessId).maybeSingle(),
         client.from('mova_services').select('id,name,category,description,duration_minutes,buffer_minutes,base_price_minor,deposit_type,deposit_value,location_assignment_mode').eq('artist_business_id', businessId).eq('status', 'active').order('name'),
         client.from('mova_locations').select('id,name,booking_mode,time_zone,payment_collector').eq('artist_business_id', businessId).eq('is_active', true).order('name'),
       ]);
       if (profileResult.error || serviceResult.error || locationResult.error || !profileResult.data) throw new Error('PROFILE_PREVIEW_LOAD_FAILED');
 
-      const profile = profileResult.data as ProfileRow;
+      const { photo_variants: photoVariants, ...profile } = profileResult.data as ProfileRow;
       const services = (serviceResult.data ?? []) as ServiceRow[];
       const locations = (locationResult.data ?? []) as LocationRow[];
       const serviceIds = services.map((service) => service.id);
@@ -50,8 +50,7 @@ export function ArtistProfilePreviewPage() {
 
       const serviceLocations = (serviceLocationResult.data ?? []) as ServiceLocationRow[];
       const locationsWithHours = new Set((hourResult.data ?? []).map((row) => row.location_id));
-      const photoVariants = profile.photo_variants ?? {};
-      const photos = await Promise.all(Object.entries(photoVariants).map(async ([kind, sizes]) => {
+      const photos = await Promise.all(Object.entries(photoVariants ?? {}).map(async ([kind, sizes]) => {
         const signedSizes = await Promise.all(Object.entries(sizes).map(async ([size, path]) => {
           const { data, error: signedError } = await client.storage.from('mova_profile_photos').createSignedUrl(path, 300);
           if (signedError || !data?.signedUrl) return null;
@@ -69,7 +68,7 @@ export function ArtistProfilePreviewPage() {
       }));
 
       setArtist({
-        profile: { display_name: profile.display_name, handle: profile.handle, specialties: profile.specialties ?? [], bio: profile.bio ?? '', preferred_locale: profile.preferred_locale ?? 'en-US', search_index_enabled: profile.search_index_enabled, photo_urls: Object.fromEntries(photos) },
+        profile: { ...profile, specialties: profile.specialties ?? [], bio: profile.bio ?? '', preferred_locale: profile.preferred_locale ?? 'en-US', photo_urls: Object.fromEntries(photos) },
         services: services.map((service) => ({
           id: service.id, name: service.name, category: service.category, description: service.description, duration_minutes: service.duration_minutes, base_price_minor: service.base_price_minor,
           deposit_type: service.deposit_type, deposit_value: service.deposit_value,
@@ -96,7 +95,7 @@ export function ArtistProfilePreviewPage() {
   if (identityLoading || loading) return <main className="mova-page" aria-busy="true"><p role="status">{t('showcase.loading')}</p></main>;
   if (!artist || error) return <main className="mova-page"><ErrorState title={t('showcase.loadError')} retryLabel={t('showcase.retry')} onRetry={() => void load()} /></main>;
   return <div className="mova-profile-preview">
-    <div className="mova-page"><ScreenHeader onBack={() => navigate(operatorUrl(businessId, 'settings'))} backLabel={t('settings.close')} /></div>
+    <ScreenHeader onBack={() => navigate(operatorUrl(businessId, 'settings'))} backLabel={t('settings.close')} />
     <HonestyBanner tone="warm">{t('showcase.previewOnly')}</HonestyBanner>
     <PublicArtistPage initialArtist={artist} preview handleOverride={artist.profile.handle} initialLocale={i18n.resolvedLanguage === 'es-US' ? 'es-US' : 'en-US'} />
   </div>;

@@ -40,6 +40,7 @@ async function mockProfile(page: Page) {
 }
 
 test('TC-COVER-16F-01 searches free photos, shows six with credit, and uses the chosen cover', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
   await openOperatorPage(page, '/');
   const calls = await mockCover(page);
   await mockProfile(page);
@@ -58,8 +59,14 @@ test('TC-COVER-16F-01 searches free photos, shows six with credit, and uses the 
   await page.getByRole('button', { name: 'Use this cover' }).click();
   await expect(page).toHaveURL(/\/BID-1\/settings\/profile$/);
   expect(calls.filter((call) => call.action === 'use')).toEqual([{ action: 'use', photo_id: 'mova-sample-botanical-2' }]);
-  await expect(page.getByText('Photo:').first()).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Sample photographer 2 (sample)' })).toHaveAttribute('target', '_blank');
+  const caption = page.getByText('Photo by Sample photographer 2 (sample) on Unsplash');
+  await expect(caption).toBeInViewport();
+  await expect(caption.getByRole('link', { name: 'Sample photographer 2 (sample)' })).toHaveAttribute('href', UNSPLASH_HOME);
+  await expect(caption.getByRole('link', { name: 'Unsplash' })).toHaveAttribute('href', UNSPLASH_HOME);
+  const avatarRow = await page.locator('.mova-profile-edit__avatar-row').boundingBox();
+  const captionBounds = await caption.boundingBox();
+  expect(captionBounds!.y).toBeGreaterThan(avatarRow!.y + avatarRow!.height);
+  expect(captionBounds!.x + captionBounds!.width).toBeLessThanOrEqual(320);
 });
 
 test('TC-COVER-16F-02 idea chips search again, and the page does not scroll sideways at 320 px', async ({ page }) => {
@@ -81,4 +88,34 @@ test('TC-COVER-16F-03 says so when free photos are not set up, and when a search
   await page.goto('/BID-1/settings/profile/cover');
   await expect(page.getByText("Free photos aren't set up yet. You can still upload your own cover.")).toBeVisible();
   await expect(page.getByRole('radio')).toHaveCount(0);
+});
+
+test('the public profile shows linked photo credit in the requested language', async ({ page }) => {
+  await page.setViewportSize({ width: 430, height: 850 });
+  await page.route('https://images.unsplash.com/**', (route) => route.abort());
+  await page.goto('/a/nia-flores?locale=es-US');
+  const caption = page.getByText('Foto de Sample Photographer en Unsplash');
+  await expect(caption).toBeInViewport();
+  await expect(caption.getByRole('link', { name: 'Sample Photographer' })).toHaveAttribute('href', 'https://unsplash.com/@sample?utm_source=mova&utm_medium=referral');
+  await expect(caption.getByRole('link', { name: 'Unsplash' })).toHaveAttribute('href', 'https://unsplash.com/photos/sample?utm_source=mova&utm_medium=referral');
+});
+
+test('the private profile preview starts below its header and shows the saved cover', async ({ page }) => {
+  await page.route('https://images.unsplash.com/**', (route) => route.abort());
+  await openOperatorPage(page, '/');
+  await mockProfile(page);
+  await page.goto('/BID-1/settings/profile');
+  await page.getByRole('link', { name: 'Preview' }).click();
+  await expect(page).toHaveURL(/\/settings\/profile\/preview$/);
+
+  const previewNotice = page.getByText('Private preview. Only you can see this page.');
+  const cover = page.locator('.mova-public-artist__hero');
+  for (const width of [320, 430]) {
+    await page.setViewportSize({ width, height: 740 });
+    await expect(previewNotice).toBeInViewport();
+    await expect(cover).toBeInViewport({ ratio: 1 });
+    expect((await cover.boundingBox())!.y).toBeLessThan(150);
+  }
+  await expect(cover).toHaveCSS('background-image', `url("${savedProfile.cover_image_url}")`);
+  await expect(page.getByText('Photo by Sample photographer 2 (sample) on Unsplash')).toBeVisible();
 });

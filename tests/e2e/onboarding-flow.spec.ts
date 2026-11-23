@@ -120,7 +120,7 @@ test('new stylist completes onboarding: profile, photo, where you work, what you
   // Step 4 · Where you work: the full Settings location editor, inside onboarding.
   await expect(page).toHaveURL(/\/onboarding\/location$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Where you work' })).toBeVisible();
-  await page.getByRole('radio', { name: 'Suite rental' }).check();
+  await page.getByRole('combobox', { name: 'Type of place' }).selectOption({ label: 'Suite rental' });
   await page.getByLabel('Location name').fill('Studio 9 Suites');
   await page.getByLabel('Address').fill('210 Main St, Suite 4');
   await page.getByRole('button', { name: 'Tuesday' }).click();
@@ -133,13 +133,12 @@ test('new stylist completes onboarding: profile, photo, where you work, what you
 
   // Step 5 · What you offer: the full Add a service editor with the new location already ticked.
   await expect(page).toHaveURL(/\/onboarding\/services$/);
-  await expect(page.getByRole('heading', { level: 1, name: 'What you offer' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'What you offer' }).getByRole('heading', { level: 1, name: 'Add service' })).toBeVisible();
   await expect(page.getByRole('checkbox', { name: /Studio 9 Suites/ })).toBeChecked();
   await page.getByLabel('Service name').fill('Silk press');
-  await page.getByLabel('Category').fill('Silk press');
-  await page.getByLabel('Duration (minutes)').fill('90');
-  await page.getByLabel('Buffer (minutes)').fill('15');
-  await page.getByLabel('Price (USD)').fill('150');
+  await page.getByLabel('Duration', { exact: true }).fill('90');
+  await page.getByLabel('Buffer', { exact: true }).fill('15');
+  await page.getByLabel('Price', { exact: true }).fill('150');
   await page.getByRole('button', { name: 'Save service' }).click();
   await expect(page.getByRole('button', { name: 'Add another service' })).toBeVisible();
   await page.getByRole('button', { name: 'Continue' }).click();

@@ -467,3 +467,35 @@ Completed hosted Stripe Checkout on three disposable test clocks using the sandb
 ## 2026-11-23 trial launch release
 
 The owner authorized the production release after the Stripe sandbox pass. Migration 0109 adds the Free trial key to the existing audited Admin Features setter so operators can enable and pause trials from the portal. The production Vercel build flag was configured as `VITE_TRIAL_ENABLED=true`. Local verification passed the Admin enable and pause regressions, all 69 pgTAP files with 1,263 assertions, 76 Edge Function type checks and 21 Deno tests.
+
+## 2026-11-23 production Rooted Beauty demo reset
+
+The owner authorized the full reset and a permanent full license for Rooted Beauty. Rehearsed the reset locally, including a revoked fixture login with a different active owner, and verified an encrypted pre-reset snapshot. The production reset replaced the working data in one tenant-scoped transaction. Verified 12 synthetic clients, 41 appointments, 17 upcoming times at verification, six pending requests, 13 recorded-only payments, five private reviews, two campaign drafts and four preserved portfolio items. No pending outbound events or Stripe payments were created. The existing owner and public handle remained in place.
+
+Rooted Beauty now has an admin-assigned AI + Growth plan. Production returned trial state `admin` with eligibility and the offer both false and no subscription row. Other tenants' trial switch remained on. SQL for the reset is in `scripts/demo/`.
+
+## 2026-11-23 cover photo processing
+
+Traced the production cover picker request to an unconfigured Unsplash provider. The separate upload request reached `photo-process` and failed during processing. Reproduced the processing failure with the pinned ImageMagick WASM and confirmed that the JPEG writer released its output buffer when the callback returned. Copying both the master and thumbnail bytes in the callback restored all photo variants. Verified four fixture JPEGs and all four upload handler paths with a local HTTP and Storage stub, plus 21 Deno tests and 1,263 pgTAP assertions. The owner approved deploying only `photo-process`. Production v17 is active and its source matches the verified fix. Unsplash still requires a provider key and live configuration. A production account photo upload has yet to be verified.
+
+The owner approved enabling Unsplash cover search in production for limited testing at the application's 50-request hourly demo quota. Verified the updated local settings, tested the Access Key and the live Mova adapter, and installed and verified the three corresponding production Edge secrets. The adapter returned displayable covers with attribution, and `profile-cover` v13 remained active with gateway JWT verification enabled. No cover was changed.
+
+## 2026-11-23 location editor layout
+
+Replaced the Type of place radio cards with a native dropdown in the shared location form. The Settings editor now shows its save button below Booking rules in the scrollable form. Playwright verified location creation, editing at 320 and 430 px, and completion of onboarding using local mocks. The edit checks confirmed the existing type loaded and the save request preserved hours and booking policies. The build, type checks and 21 scheduling and onboarding unit tests passed. This change is local.
+
+## 2026-11-23 Rooted Beauty portfolio image access
+
+Read-only checks found four existing portfolio JPEGs under the `rooted-beauty/` prefix. The public gallery returned all four images through server-signed links. Reproduced the signed-in Storage policy error locally using the legacy paths. Rehearsed updating the four references to UUID-prefixed copies in a rolled-back transaction. The demo owner could read all four corrected paths, and an unrelated account was denied. The production Storage copies and reference updates await approval.
+
+## 2026-11-23 profile cover attribution
+
+The profile editor now puts the Unsplash credit below the avatar and photo controls. The public profile puts the same caption below the bio. The caption keeps separate links to the photographer and Unsplash. The local web build, locale validation, type checks and 12 Playwright cases passed. The browser tests checked the editor at 320 px and the Spanish public caption at 430 px. Updated the profile settings test fixture to include the contact fields required to save. The styling change is local.
+
+## 2026-11-23 Settings profile banner
+
+The Settings banner loads the active business's profile photo from private Storage and uses initials when a photo is absent or fails to load. Replaced the hardcoded plan placeholder with the confirmed plan name alongside the publication status. While the plan is unavailable, the banner shows the publication status and the Plan row explains the error. The local web build, type checks, profile and billing unit tests, and nine Playwright cases passed. The banner regression verified image rendering after returning from the editor with a saved photo path, fallback initials, and accurate plan labels. This change is local.
+
+## 2026-11-23 private profile preview
+
+Removed the full-page wrapper around the preview's back button. Its 70dvh minimum height was pushing the private-preview notice and profile far below the header. The preview also reads the saved Unsplash cover and attribution. Type checks, the local web build and 13 Playwright cases passed. The preview regression opened from Edit your profile and checked the notice and cover at 320 and 430 px. This change is local.

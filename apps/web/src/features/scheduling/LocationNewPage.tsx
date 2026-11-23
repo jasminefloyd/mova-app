@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, ErrorState, Icon, RadioCard, ScreenHeader, TextField } from '../../components';
@@ -29,6 +29,8 @@ export function LocationNewPage({ embedded }: { embedded?: LocationEditorEmbed }
   const [searchParams] = useSearchParams();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
   const locationId = embedded ? null : searchParams.get('location_id');
+  const kindId = useId();
+  const kindErrorId = `${kindId}-error`;
   const [zoneOpen, setZoneOpen] = useState(false);
   const [draft, setDraft] = useState<NewLocationDraft>(() => newLocationDefaults(Intl.DateTimeFormat().resolvedOptions().timeZone));
   const [differentHours, setDifferentHours] = useState(false);
@@ -200,13 +202,14 @@ export function LocationNewPage({ embedded }: { embedded?: LocationEditorEmbed }
     {!embedded && <h1 className="mova-location-new__title">{t('scheduling.locationNew.heading')}</h1>}
     {loadError && <ErrorState title={t('scheduling.locationNew.loadError')} retryLabel={t('scheduling.retry')} onRetry={() => window.location.reload()} />}
     <form className="mova-scheduling__form" onSubmit={(event) => void submit(event)} noValidate>
-      <fieldset className="mova-choice-fieldset">
-        <legend>{t('scheduling.locationNew.kindLegend')}</legend>
-        <div className="mova-scheduling__pair mova-location-new__kind-grid">
-          {LOCATION_KINDS.map((kind) => <RadioCard key={kind} name="kind" value={kind} label={t(`scheduling.locationNew.kind.${kind}`)} checked={draft.kind === kind} onChange={(value) => update('kind', value as LocationKind)} />)}
-        </div>
-        {errors.kind && <p className="mova-field__error" role="alert">{fieldError('kind')}</p>}
-      </fieldset>
+      <div className="mova-field">
+        <label className="mova-field__label" htmlFor={kindId}>{t('scheduling.locationNew.kindLegend')}</label>
+        <select id={kindId} className="mova-input" name="kind" value={draft.kind} required aria-invalid={Boolean(errors.kind)} aria-describedby={errors.kind ? kindErrorId : undefined} onChange={(event) => update('kind', event.target.value as LocationKind)}>
+          <option value="" disabled>{t('scheduling.locationNew.kindPlaceholder')}</option>
+          {LOCATION_KINDS.map((kind) => <option key={kind} value={kind}>{t(`scheduling.locationNew.kind.${kind}`)}</option>)}
+        </select>
+        {errors.kind && <span id={kindErrorId} className="mova-field__error" role="alert">{fieldError('kind')}</span>}
+      </div>
 
       <TextField label={t('scheduling.locationNew.name')} placeholder={t('scheduling.locationNew.namePlaceholder')} maxLength={120} value={draft.name} error={fieldError('name')} onChange={(event) => update('name', event.target.value)} />
       <div className="mova-location-new__address"><Icon name="location" size={20} /><TextField label={t('scheduling.locationNew.address')} placeholder={t('scheduling.locationNew.addressPlaceholder')} hint={t('scheduling.locationNew.addressHint')} autoComplete="street-address" maxLength={300} value={draft.address} error={fieldError('address')} onChange={(event) => searchAddresses(event.target.value)} />
@@ -271,9 +274,9 @@ export function LocationNewPage({ embedded }: { embedded?: LocationEditorEmbed }
       </section>
 
       {saveError && <p className="mova-field__error" role="alert">{t('scheduling.locationNew.saveError')}</p>}
-      <div className="mova-actions mova-scheduling__footer-actions">
-      {embedded?.onCancel && <Button type="button" variant="secondary" onClick={embedded.onCancel}>{t('settings.cancel')}</Button>}
-      <Button type="submit" disabled={Boolean(locationId && loadError)} loading={busy}>{embedded?.saveLabel ?? t(locationId ? 'scheduling.locationNew.saveEdit' : 'scheduling.locationNew.save')}</Button>
+      <div className="mova-actions mova-location-new__actions">
+        {embedded?.onCancel && <Button type="button" variant="secondary" onClick={embedded.onCancel}>{t('settings.cancel')}</Button>}
+        <Button type="submit" disabled={Boolean(locationId && loadError)} loading={busy}>{embedded?.saveLabel ?? t(locationId ? 'scheduling.locationNew.saveEdit' : 'scheduling.locationNew.save')}</Button>
       </div>
     </form>
   </Root>;

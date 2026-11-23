@@ -350,7 +350,9 @@ body {
 .mova-settings-language > label > span { color: var(--ink-secondary); }
 .mova-settings-language select { min-height: var(--tap-min); max-width: 55%; border: 1px solid var(--line-control); border-radius: var(--radius-m); padding-inline: var(--space-3); background: var(--surface); color: var(--ink-primary); }
 .mova-profile-preview { padding-bottom: var(--space-8); }
-.mova-profile-preview .mova-honesty { width: min(100% - 2 * var(--gutter), 680px); margin: 0 auto var(--space-2); }
+.mova-profile-preview > .mova-screen-header,
+.mova-profile-preview > .mova-honesty { width: min(100% - 2 * var(--gutter), 680px); margin: 0 auto var(--space-2); }
+.mova-profile-preview > .mova-screen-header { padding-top: var(--space-3); }
 .mova-profile-preview .mova-public-artist__hero { height: 168px; }
 .mova-settings-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 .mova-settings-actions .mova-button { min-height: var(--tap-min); padding-inline: var(--space-2); }
@@ -544,7 +546,6 @@ body {
 .mova-location-new .mova-choice-fieldset legend { color: var(--forest); font-size: var(--fs-body-s); }
 .mova-location-new .mova-field__label { color: var(--forest); font-size: var(--fs-body-s); font-weight: 600; }
 .mova-location-new .mova-input { min-height: var(--input-h); border-radius: var(--radius-l); background: var(--surface); font-size: var(--fs-body-l); }
-.mova-location-new__kind-grid { grid-template-columns: 1fr !important; gap: var(--space-2); }
 .mova-location-new .mova-radio-card { min-height: var(--option-h); border-radius: var(--radius-l); font-size: var(--fs-body-s); }
 .mova-location-new .mova-radio-card strong { font-size: var(--fs-body-s); }
 .mova-location-new .mova-radio-card__dot { display: none; }
@@ -580,7 +581,7 @@ body {
 .mova-location-new__rules-card .mova-field__label { color: var(--ink-secondary); font-size: var(--fs-caption); }
 .mova-location-new .mova-location-new__rules-card .mova-input { min-height: var(--tap-min); border-radius: var(--radius-m); padding: 0 var(--space-2); font-size: var(--fs-body-l); }
 .mova-location-new .mova-location-new__rules-card .mova-field__label { color: var(--ink-muted); font-size: var(--fs-micro); font-weight: 400; }
-.mova-location-new .mova-scheduling__footer-actions .mova-button { width: 100%; }
+.mova-location-new__actions .mova-button { width: 100%; }
 @media(max-width: 359px) {
   .mova-location-new__rules-card .mova-form-grid { grid-template-columns: 1fr; }
   .mova-location-card__rules { grid-template-columns: 1fr; }
@@ -884,8 +885,8 @@ select,
 .mova-public-artist__location { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-3) 0 0; color: var(--ink-secondary); font-size: var(--fs-body); line-height: 1.4; }
 .mova-public-artist__location .mova-icon { flex: none; }
 .mova-public-artist__bio { margin: var(--space-3) 0 0; color: var(--ink-primary); font-size: var(--fs-body-l); line-height: 1.5; white-space: pre-wrap; }
-.mova-public-artist__cover-credit { margin: var(--space-2) 0 0; color: var(--ink-secondary); font-size: var(--fs-caption); }
-.mova-public-artist__cover-credit a { color: inherit; }
+.mova-cover-photo-credit { margin: var(--space-2) 0 0; color: var(--ink-muted); font-size: var(--fs-micro); line-height: 1.5; overflow-wrap: anywhere; }
+.mova-cover-photo-credit a { color: inherit; text-decoration: underline; text-underline-offset: .16em; }
 .mova-public-artist > .mova-public-tabs { display: flex; gap: var(--space-1); margin: var(--space-5) var(--gutter) var(--space-3); border: 0; border-radius: var(--radius-pill); padding: var(--space-1); background: var(--surface-alt); }
 .mova-public-artist .mova-public-tabs button { min-width: 0; min-height: 44px; flex: 1; border: 0; border-radius: var(--radius-pill); padding: 0 var(--space-3); color: var(--forest); font-size: var(--fs-body-l); font-weight: 700; }
 .mova-public-artist .mova-public-tabs button[aria-selected=true] { background: var(--forest); color: var(--ink-inverse); }
@@ -911,7 +912,6 @@ select,
 .mova-public-artist .mova-public-services__info .mova-button { flex: none; min-height: var(--tap-min); border: 0; border-radius: var(--radius-pill); padding-inline: var(--space-4); font-size: var(--fs-body-s); }
 .mova-public-artist__book { position: fixed; z-index: 5; right: max(0px, calc((100vw - 780px) / 2)); bottom: 0; left: max(0px, calc((100vw - 780px) / 2)); margin: 0; border-top: 1px solid var(--line-bar); padding: var(--space-3) var(--gutter) calc(var(--space-3) + env(safe-area-inset-bottom)); background: var(--surface-page); }
 .mova-public-artist__book .mova-button { width: 100%; min-height: var(--btn-primary-h); border-radius: var(--radius-pill); font-size: var(--fs-body-l); }
-.mova-public-artist__cover-credit { padding-bottom: var(--space-1); }
 
 .mova-page.mova-booking { width: min(100%, 780px); min-height: 100dvh; margin: 0 auto; padding: var(--space-4) var(--gutter) calc(96px + env(safe-area-inset-bottom)); background: var(--surface-page); }
 .mova-booking__screen-header { display: grid; grid-template-columns: var(--tap-min) minmax(0, 1fr) auto; align-items: center; gap: var(--space-2); margin-bottom: var(--space-5); }
@@ -1026,6 +1026,7 @@ select,
 .mova-profile-edit .mova-form-stack { display: grid; gap: 14px; }
 .mova-profile-edit__preview { display: inline-flex; min-height: var(--tap-min); align-items: center; border: 1px solid var(--line-control); border-radius: var(--radius-pill); padding: 0 14px; background: var(--surface); color: var(--forest); font-size: var(--fs-body-s); font-weight: 600; text-decoration: none; }
 .mova-profile-edit__photos { position: relative; }
+.mova-profile-edit__photos .mova-cover-photo-credit { text-align: end; }
 .mova-profile-edit__cover { position: relative; height: 124px; border-radius: var(--radius-2xl); background: linear-gradient(135deg, var(--botanical) 0%, var(--forest) 55%, var(--accent-warm-strong) 140%) center / cover; }
 .mova-profile-edit__cover-button { position: absolute; top: 10px; right: 10px; display: inline-flex; min-height: var(--tap-min); align-items: center; border-radius: var(--radius-pill); padding: 0 12px; background: rgba(247, 245, 239, .92); color: var(--forest); font-size: var(--fs-caption); font-weight: 600; cursor: pointer; }
 .mova-profile-edit__cover-button:focus-within, .mova-profile-edit__photo-button:focus-within { outline: 2px solid var(--forest); outline-offset: 2px; }

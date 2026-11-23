@@ -586,7 +586,7 @@ await check('ONB-13',async page=>{
 });
 async function createLocationViaUi(page,path,locName) {
   await open(page,path);
-  await page.getByRole('radio',{name:/Suite rental/i}).check();
+  await page.getByRole('combobox',{name:'Type of place'}).selectOption({label:'Suite rental'});
   await page.getByLabel('Location name').fill(locName);
   await page.getByLabel('Address').first().fill('210 Main St, QA Suite 4');
   await button(page,/^Tuesday$/i).click();

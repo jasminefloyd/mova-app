@@ -102,7 +102,8 @@ Deno.serve(withSystemRequestLogging('photo-process', async (request) => {
       image.format = MagickFormat.Jpeg;
       image.quality = 84;
       image.resize(512, 512);
-      const master = image.write(MagickFormat.Jpeg, (data) => data);
+      // ImageMagick releases the WASM buffer when the write callback returns.
+      const master = image.write(MagickFormat.Jpeg, (data) => data.slice());
       if (kind === 'portfolio' || kind === 'visit') return { '512': master };
       const result: Record<string, Uint8Array> = { '512': master };
       for (const size of [96, 256]) {
@@ -110,7 +111,7 @@ Deno.serve(withSystemRequestLogging('photo-process', async (request) => {
           variant.resize(size, size);
           variant.format = MagickFormat.Jpeg;
           variant.quality = 84;
-          return variant.write(MagickFormat.Jpeg, (data) => data);
+          return variant.write(MagickFormat.Jpeg, (data) => data.slice());
         });
       }
       return result;

@@ -1,6 +1,6 @@
 {
   "nia-flores": {
-    "profile": { "display_name": "Nia Flores", "handle": "nia-flores", "specialties": ["Color"], "bio": "Color specialist", "preferred_locale": "en-US", "search_index_enabled": true, "photo_urls": {} },
+    "profile": { "display_name": "Nia Flores", "handle": "nia-flores", "specialties": ["Color"], "bio": "Color specialist", "preferred_locale": "en-US", "search_index_enabled": true, "photo_urls": {}, "cover_source": "unsplash", "cover_image_url": "https://images.unsplash.com/photo-mova-sample-botanical-2?w=1200&q=80", "cover_credit_name": "Sample Photographer", "cover_credit_url": "https://unsplash.com/@sample?utm_source=mova&utm_medium=referral", "cover_unsplash_url": "https://unsplash.com/photos/sample?utm_source=mova&utm_medium=referral" },
     "services": [{ "id": "service-color", "name": "Color refresh", "category": "Color", "duration_minutes": 60, "base_price_minor": 9000, "deposit_type": "none", "deposit_value": 0, "location_deposits": [] }],
     "looks": [],
     "locations": [{ "id": "location-studio", "name": "Rooted Beauty", "booking_mode": "request", "time_zone": "America/New_York" }],

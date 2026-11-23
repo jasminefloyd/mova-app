@@ -3,13 +3,14 @@ import { openOperatorPage } from './operator-session';
 
 // Task 3.3: Edit your profile (board 16c) with mocked tables and RPC.
 const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, accept-profile, content-profile, prefer', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Content-Range': '0-0/1' };
-const profile = { display_name: 'Rooted Beauty', bio: 'Healthy-hair specialist.', specialties: ['Silk press', 'Braids'], handle: 'rooted-beauty', preferred_locale: 'en-US', profile_photo_path: null, cover_photo_path: null };
+const profile = { display_name: 'Rooted Beauty', bio: 'Healthy-hair specialist.', specialties: ['Silk press', 'Braids'], handle: 'rooted-beauty', preferred_locale: 'en-US', profile_photo_path: null, cover_photo_path: null, contact_phone: '2125550100', contact_email: 'studio@example.invalid' };
 
 async function mock(page: Page, rpcError: string | null = null) {
   const calls: Record<string, unknown>[] = [];
   await page.route('**/rest/v1/mova_artist_profiles?*', (route) => route.fulfill({ status: 200, contentType: 'application/json', headers, body: JSON.stringify(profile) }));
   await page.route('**/rest/v1/mova_portfolio_items?*', (route) => route.fulfill({ status: 200, contentType: 'application/json', headers, body: JSON.stringify([{ media_path: 'x/1.jpg', is_published: true, sort_order: 0 }, { media_path: 'x/2.jpg', is_published: false, sort_order: 1 }]) }));
   await page.route('**/storage/v1/object/sign/**', (route) => route.fulfill({ status: 200, contentType: 'application/json', headers, body: JSON.stringify({ signedURL: '/object/sign/fixture.jpg?token=x' }) }));
+  await page.route('**/rest/v1/rpc/mova_update_artist_contact', (route) => route.fulfill({ status: 200, contentType: 'application/json', headers, body: 'null' }));
   await page.route('**/rest/v1/rpc/mova_update_artist_profile', async (route) => {
     if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
     calls.push(route.request().postDataJSON());

@@ -103,8 +103,13 @@ export function DefinitionList({ rows }: { rows: Array<{ label: string; value: R
   return <dl className="mova-definition-list">{rows.map((row) => <div key={row.label}><dt>{row.label}</dt><dd>{row.value}</dd></div>)}</dl>;
 }
 
-export function Avatar({ label, initials, size = 40, placeholder = false }: { label: string; initials?: string; size?: number; placeholder?: boolean }) {
-  return <span className={`mova-avatar mova-avatar--${size}${placeholder ? ' mova-avatar--placeholder' : ''}`} role="img" aria-label={label}>{initials ?? (placeholder ? <span className="mova-avatar__silhouette" aria-hidden="true" /> : <Icon name="user" size={Math.round(size * 0.5)} />)}</span>;
+export function Avatar({ label, initials, src, size = 40, placeholder = false }: { label: string; initials?: string; src?: string | null; size?: number; placeholder?: boolean }) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  return <span className={`mova-avatar mova-avatar--${size}${placeholder ? ' mova-avatar--placeholder' : ''}`} role="img" aria-label={label}>
+    {src && src !== failedSrc
+      ? <img className="mova-avatar__image" src={src} alt="" onError={() => setFailedSrc(src)} />
+      : initials ?? (placeholder ? <span className="mova-avatar__silhouette" aria-hidden="true" /> : <Icon name="user" size={Math.round(size * 0.5)} />)}
+  </span>;
 }
 
 export function SectionOverline({ children }: PropsWithChildren) { return <h2 className="mova-overline">{children}</h2>; }

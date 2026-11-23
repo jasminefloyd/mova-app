@@ -70,6 +70,62 @@ test('payment settings is reachable from Settings and Money is reachable from Re
   await expect(page.getByRole('heading', { level: 1, name: 'Money' })).toBeVisible();
 });
 
+test('Settings uses the saved profile photo and current plan in the banner', async ({ page }) => {
+  await openOperatorPage(page, '/');
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, x-mova-artist-business-id',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  };
+  let photoPath: string | null = null;
+  let planAvailable = true;
+  let imageAvailable = true;
+  await page.route('**/rest/v1/mova_artist_profiles?*', (route) => route.fulfill({
+    headers,
+    json: { display_name: 'Rooted Beauty', handle: 'rooted-beauty', is_published: true, profile_photo_path: photoPath },
+  }));
+  await page.route('**/functions/v1/plan-management', (route) => {
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
+    return route.fulfill(planAvailable
+      ? { headers, json: { data: { current_plan: { plan_key: 'ai_growth' }, plans: [] }, error: null } }
+      : { status: 503, headers, json: { data: null, error: { code: 'TEMPORARILY_UNAVAILABLE' } } });
+  });
+  const signedPath = '/object/sign/mova_profile_photos/demo-avatar.png?token=test';
+  await page.route('**/storage/v1/object/sign/mova_profile_photos/**', (route) => {
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
+    if (route.request().method() === 'POST') return route.fulfill({ headers, json: { signedURL: signedPath } });
+    return imageAvailable
+      ? route.fulfill({ contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aMHsAAAAASUVORK5CYII=', 'base64') })
+      : route.fulfill({ status: 404 });
+  });
+
+  await page.goto('/BID-1/settings');
+  const banner = page.locator('.mova-settings-profile');
+  const avatar = banner.getByRole('img', { name: 'Rooted Beauty' });
+  await expect(banner).toContainText('AI + Growth · Published');
+  await expect(avatar).toHaveText('RB');
+  await expect(avatar.locator('img')).toHaveCount(0);
+
+  await page.getByRole('link', { name: 'Profile, photo & looks' }).click();
+  await expect(page).toHaveURL(/\/settings\/profile$/);
+  // The profile photo processor writes this path when a replacement photo is saved.
+  photoPath = 'e2500000-0000-4000-8000-000000000001/variants/demo-avatar.png';
+  await page.goBack();
+  const image = avatar.locator('img');
+  await expect(image).toHaveAttribute('src', new RegExp('demo-avatar\\.png'));
+  await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0);
+
+  imageAvailable = false;
+  planAvailable = false;
+  await page.evaluate(() => sessionStorage.removeItem('mova_plan_summary_e2500000-0000-4000-8000-000000000001'));
+  await page.reload();
+  await expect(page.getByRole('link', { name: /Plan details could not be loaded/ })).toBeVisible();
+  await expect(banner).toContainText('Published');
+  await expect(banner).not.toContainText('Not configured');
+  await expect(avatar).toHaveText('RB');
+  await expect(avatar.locator('img')).toHaveCount(0);
+});
+
 test('running-late sheet identifies the same-day appointment receiving the queued update', async ({ page }) => {
   await openOperatorPage(page, '/appointments/AID-1', 'BID-1', new Date('2026-11-10T14:00:00.000Z'));
   await page.getByRole('button', { name: 'More options' }).click();

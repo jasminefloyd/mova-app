@@ -7,6 +7,7 @@ import { operatorUrl } from '../../app/operator-url';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { usePlan } from '../billing/PlanProvider';
 import { isLocked } from '../billing/plan-api';
+import { CoverPhotoCredit } from './CoverPhotoCredit';
 
 type Profile = { display_name: string; bio: string; specialties: string[]; handle: string; preferred_locale: 'en-US' | 'es-US'; profile_photo_path: string | null; cover_photo_path: string | null; cover_source?: 'upload' | 'unsplash'; cover_image_url?: string | null; cover_credit_name?: string | null; cover_credit_url?: string | null; cover_unsplash_url?: string | null; contact_phone?: string | null; contact_email?: string | null; website_url?: string | null; social_links?: Partial<Record<SocialKey, string>> | null };
 type CoverCredit = { name: string; url: string; unsplashUrl: string };
@@ -219,11 +220,11 @@ export function ProfileSettingsPage() {
         <div className="mova-profile-edit__cover" role="img" aria-label={t('settings.coverPhoto')} style={coverImage ? { backgroundImage: `url("${coverImage}")` } : undefined}>
           <Link className="mova-profile-edit__cover-button" to={operatorUrl(businessId, 'settings/profile/cover')}>{coverLocked && <Icon name="lock" size={14} />}{t('settings.changeCover')}</Link>
         </div>
-        {credit && !coverPreview && <p className="mova-profile-edit__credit">{t('coverPicker.photoCredit')} <a href={credit.url} target="_blank" rel="noopener noreferrer">{credit.name}</a> / <a href={credit.unsplashUrl} target="_blank" rel="noopener noreferrer">{t('coverPicker.unsplash')}</a></p>}
         <div className="mova-profile-edit__avatar-row">
           <span className="mova-profile-edit__avatar">{avatar && <img src={avatar} alt={t('settings.profilePhotoAlt', { name: draft.displayName || profile.display_name })} />}</span>
           <label className="mova-button mova-button--secondary mova-profile-edit__photo-button">{t('settings.changeProfilePhoto')}<input type="file" accept={accept} onChange={pick('profile')} /></label>
         </div>
+        {credit && !coverPreview && <CoverPhotoCredit {...credit} />}
       </section>
 
       <TextField label={t('settings.nameClientsSee')} required maxLength={80} value={draft.displayName} onChange={(event) => edit({ displayName: event.currentTarget.value })} />
