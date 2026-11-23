@@ -12,7 +12,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
   // Public pages take their language from ?locale=, so the document language matches the content that was rendered.
   const location = useLocation();
   const lang = new URLSearchParams(location.search).get('locale') === 'es-US' ? 'es-US' : 'en-US';
-  useEffect(() => { document.title = `Mova Beauty ${pageName(location.pathname)}`; }, [location.pathname]);
+  useEffect(() => {
+    // The calculator and guide articles supply localized titles through route metadata.
+    if (/^\/(calculator\/?|guides\/[^/]+\/?)$/.test(location.pathname)) return;
+    document.title = `Mova Beauty ${pageName(location.pathname)}`;
+  }, [location.pathname]);
   return <html lang={lang}>
     <head><meta charSet="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       <meta name="theme-color" content="#18392F" /><link rel="manifest" href="/manifest.webmanifest" />

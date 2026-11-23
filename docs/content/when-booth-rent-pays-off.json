@@ -1,0 +1,33 @@
+{
+  "slug": "when-booth-rent-pays-off",
+  "title": "When does booth rent pay off for hairstylists?",
+  "summary": "Use a weekly break-even calculation to find out when booth rent leaves you more than salon commission. Then test the numbers against a slow week.",
+  "category": "Going independent",
+  "tags": ["booth rent", "commission", "take home pay"],
+  "author_name": "Mova team",
+  "cover_url": null,
+  "cover_alt": "",
+  "cover_credit": null,
+  "meta_title": "When Does Booth Rent Pay Off for Hairstylists?",
+  "meta_description": "Find your booth rent break-even point, compare it with salon commission, and check whether the numbers still work during a slow week.",
+  "canonical_url": null,
+  "og_title": "",
+  "og_description": "",
+  "og_image_url": null,
+  "noindex": false,
+  "body": [
+    {"type":"paragraph","content":[{"text":"Booth rent starts to pay off when the commission you would give up is greater than the rent and any extra expenses you would take on. Start with a typical week, then run the same comparison for a slow week."}]},
+    {"type":"heading","level":2,"text":"Find your weekly break-even point"},
+    {"type":"paragraph","content":[{"text":"If your other expenses are the same in both setups, divide your weekly booth rent by the share of service revenue the salon keeps. For $300 in weekly rent and a salon cut of 40%, divide $300 by 0.40. Your break-even point is $750 in weekly service revenue."}]},
+    {"type":"paragraph","content":[{"text":"On a 60/40 split, check which side gets 60%. In this example, you keep 60% and the salon keeps 40%. Below $750, commission leaves you more. Above $750, booth rent leaves you more, assuming equal expenses."}]},
+    {"type":"heading","level":2,"text":"Compare a typical week and a slow week"},
+    {"type":"list","ordered":false,"items":[
+      [{"text":"At $1,500 in weekly service revenue, with $150 in other expenses under either setup, you keep an estimated $750 on commission or $1,050 on booth rent."}],
+      [{"text":"At $600 in weekly service revenue, with the same $150 in other expenses, you keep an estimated $210 on commission or $150 on booth rent."}]
+    ]},
+    {"type":"heading","level":2,"text":"Account for expenses that change when you rent"},
+    {"type":"paragraph","content":[{"text":"Ask what each setup includes. Compare what you personally pay for supplies, payment processing, booking software and any other recurring costs. If booth rental would cost you an extra $100 per week beyond the rent, divide $400 by 0.40 instead. Your weekly break-even moves to $1,000."}]},
+    {"type":"paragraph","content":[{"text":"Use weekly numbers throughout. If you have monthly rent, multiply it by 12 and divide by 52 for a weekly estimate. Estimate one-time setup costs separately, and check what you would owe during weeks you take off."}]},
+    {"type":"callout","tone":"tip","content":[{"text":"Try the "},{"text":"free booth rent vs. commission calculator","href":"/calculator"},{"text":" with a typical week and a slower week. The calculator uses the same other expenses for both options, so use the adjusted break-even formula above when your costs differ."}]}
+  ]
+}

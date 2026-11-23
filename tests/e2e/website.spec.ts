@@ -43,17 +43,29 @@ test.describe('public website', () => {
   });
 
   test('calculator computes the weekly comparison and explains bad input', async ({ page }) => {
+    const events: Array<string | null> = [];
+    await page.route('**/api/calculator-event', (route) => {
+      events.push(route.request().postData());
+      return route.fulfill({ status: 204 });
+    });
     await page.goto('/calculator');
-    await expect(page.getByRole('heading', { level: 1, name: /Booth rent or commission/ })).toBeVisible();
+    await expect(page).toHaveTitle('Booth Rent vs. Commission Calculator for Hairstylists | Mova');
+    await expect(page.getByRole('heading', { level: 1, name: 'Booth Rent vs. Commission Calculator for Hairstylists' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Example: a 60/40 salon commission split' })).toBeVisible();
+    await expect(page.getByText(/^At \$750 in weekly service revenue/)).toBeVisible();
     await expect(page.getByText('Booth rental: $300 more per week')).toBeVisible();
     await expect(page.getByText('About $15,600 a year, if every week looked like this one.')).toBeVisible();
     await page.getByLabel('Service revenue per week ($)').fill('1000');
     await page.getByLabel('Booth or suite rent per week ($)').fill('600');
     await expect(page.getByText('Commission: $200 more per week')).toBeVisible();
+    await expect(page.getByText(/^At \$1,500 in weekly service revenue/)).toBeVisible();
     await page.getByLabel('Salon\'s commission cut (%)').fill('150');
     await expect(page.getByRole('alert')).toHaveText('Commission cut must be between 0 and 100%.');
     await page.getByLabel('Your own expenses per week ($)').fill('');
     await expect(page.getByRole('alert')).toHaveText('Fill in every number to see your results.');
+    await page.locator('a[href="/signup?from=calculator"]').click();
+    await expect(page).toHaveURL(/\/signup\?from=calculator$/);
+    await expect.poll(() => events).toEqual(['calculator_used', 'start_free_clicked']);
   });
 
   test('Spanish pricing copy renders from the es-US catalog', async ({ page }) => {

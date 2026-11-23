@@ -517,3 +517,19 @@ Local browser tests verified access and read-only controls for the review worksp
 ## 2026-11-23 Reports and Money navigation
 
 Reports now exposes Money as a visible link in the heading, and Money has a back link to Reports. Removed the older Reports styles that overrode the Board 37 layout and underlined marketing links. Reports uses a full-width period control and compact metric cards. When the period has more rebookings than reminders sent, the marketing row shows separate counts. The local build, type checks and both focused Playwright scenarios passed. Compared Reports at 390 px with the design reference and checked that keyboard focus remains visible. The owner approved the Vercel production release from GitHub main.
+
+## 2026-11-23 calculator search and signup funnel
+
+The supplied Search Console charts for November 11–21 show 21 impressions, zero clicks and average position 65.3. Visible calculator queries include “booth renter take home calculator” (9), “booth rent vs commission calculator” (6) and “salon commission split calculator” (4). The screenshot omits the page filter and query-level position values. For follow-up, export Web search with an exact page filter of `https://mova-beauty.co/calculator`. Compare the first complete 28 days following release with the preceding 28 days, using the Queries and Pages tabs and keeping the same property, search type and filters.
+
+The calculator keeps its URL and now includes a dynamic break-even point and a worked 60/40 example. The [guide payload](../content/when-booth-rent-pays-off.json) links to the calculator and is prepared for the MFA-protected admin publisher. Migration 0111 stores aggregate UTC counts for calculator use, Start free clicks and newly verified email accounts originating from the calculator. The browser deduplicates each event within a tab session and forwards only the event name. “Used” means editing a value while the form has a valid result. “Completed” means successful email verification for an account created during that signup attempt. Use the following service-role report with the same full dates when comparing counts.
+
+```sql
+select event, sum(total) as events
+from public.mova_calculator_funnel_daily
+where day >= :start_date and day < :end_date
+group by event
+order by event;
+```
+
+The local build, type checks, 12 unit tests, five browser cases, 22 Deno tests, and 1,285 pgTAP assertions passed. A rolled-back rehearsal passed the real guide publisher's validation and exposed the guide to the anonymous live-posts view. The owner approved the production rollout. Migration 0111 was applied and recorded as `20261123210000`. Verified the exact migration text, RLS, and service-role-only access for the calculator counters. The calculator collector runs as a Vercel server route. The guide slug is available in production and publication requires an authenticated admin session with MFA.

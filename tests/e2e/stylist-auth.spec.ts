@@ -67,6 +67,29 @@ async function landFromEmailLink(page: Page, query = '') {
 }
 
 test.describe('stylist sign-up (/signup)', () => {
+  for (const newAccount of [true, false]) {
+    test(`calculator attribution counts ${newAccount ? 'a newly verified account' : 'no conversion for an existing account'}`, async ({ page }) => {
+      await mockAuth(page);
+      const events: Array<string | null> = [];
+      await page.route('**/api/calculator-event', (route) => {
+        events.push(route.request().postData());
+        return route.fulfill({ status: 204 });
+      });
+      await page.route('**/auth/v1/verify', (route) => json(route, 200, {
+        ...session(), user: { ...user, created_at: newAccount ? new Date().toISOString() : user.created_at },
+      }));
+      await page.goto('/calculator');
+      await page.locator('a[href="/signup?from=calculator"]').click();
+      await page.getByLabel('First name').fill('Ari');
+      await page.getByLabel('Last name').fill('Monroe');
+      await page.getByLabel('Email', { exact: true }).fill('new-stylist@mova.invalid');
+      await page.getByRole('button', { name: 'Create account' }).click();
+      await page.locator('input[autocomplete="one-time-code"]').fill('123456');
+      await expect(page).toHaveURL(/\/onboarding\/profile$/);
+      await expect.poll(() => events).toEqual(newAccount ? ['start_free_clicked', 'signup_completed'] : ['start_free_clicked']);
+    });
+  }
+
   test('anyone can create an account: no invite or waitlist gate', async ({ page }) => {
     await page.goto('/signup');
     await expect(page.getByRole('heading', { level: 1, name: 'Create your account' })).toBeVisible();

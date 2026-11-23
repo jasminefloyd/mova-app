@@ -10,6 +10,7 @@ export type CalculatorResult =
     booth: number;
     /** booth minus commission. Positive means booth rental keeps more. */
     difference: number;
+      breakEven: { kind: 'revenue'; amount: number } | { kind: 'always' | 'never' };
     /** Share of the larger amount, used for the bar widths (0 to 100). */
     commissionBar: number;
     boothBar: number;
@@ -22,7 +23,7 @@ function parse(value: string): number {
 
 export function calculate(input: CalculatorInput): CalculatorResult {
   const values = [parse(input.revenue), parse(input.commissionCut), parse(input.rent), parse(input.expenses)];
-  if (values.some((value) => Number.isNaN(value))) return { status: 'incomplete' };
+  if (values.some((value) => !Number.isFinite(value))) return { status: 'incomplete' };
   if (values.some((value) => value < 0)) return { status: 'negative' };
   const [revenue, cut, rent, expenses] = values as [number, number, number, number];
   if (cut > 100) return { status: 'commission-range' };
@@ -36,6 +37,7 @@ export function calculate(input: CalculatorInput): CalculatorResult {
     commission,
     booth,
     difference: booth - commission,
+    breakEven: cut > 0 ? { kind: 'revenue', amount: rent / (cut / 100) } : { kind: rent === 0 ? 'always' : 'never' },
     commissionBar: bar(commission),
     boothBar: bar(booth),
   };

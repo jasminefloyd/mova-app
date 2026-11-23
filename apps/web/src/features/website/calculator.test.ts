@@ -13,6 +13,13 @@ describe('booth rent vs commission calculator', () => {
     expect(result.difference).toBeCloseTo(1050 - 750);
     expect(result.commissionBar).toBeCloseTo((750 / 1050) * 100);
     expect(result.boothBar).toBe(100);
+    expect(result.breakEven).toEqual({ kind: 'revenue', amount: 750 });
+  });
+
+  it('explains zero commission with and without booth rent', () => {
+    expect(calculate({ ...base, commissionCut: '0' })).toMatchObject({ breakEven: { kind: 'never' } });
+    expect(calculate({ ...base, commissionCut: '0', rent: '0' })).toMatchObject({ breakEven: { kind: 'always' } });
+    expect(calculate({ ...base, rent: '0' })).toMatchObject({ breakEven: { kind: 'revenue', amount: 0 } });
   });
 
   it('reports incomplete input when any field is blank or not a number', () => {

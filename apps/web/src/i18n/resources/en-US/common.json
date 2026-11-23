@@ -2700,9 +2700,8 @@
     },
     "calculator": {
       "eyebrow": "Free calculator · no signup",
-      "headlineA": "Booth rent or commission?",
-      "headlineB": "Run your numbers.",
-      "intro": "Enter a typical week. Your numbers stay in your browser and are never sent to us.",
+      "headline": "Booth Rent vs. Commission Calculator for Hairstylists",
+      "intro": "See what you’d keep each week after salon commission, booth rent, and expenses. No signup needed. Your dollar amounts stay in your browser.",
       "formTitle": "Your week",
       "revenue": "Service revenue per week ($)",
       "commission": "Salon's commission cut (%)",
@@ -2720,6 +2719,15 @@
       "verdictBooth": "Booth rental: {{amount}} more per week",
       "verdictCommission": "Commission: {{amount}} more per week",
       "yearly": "About {{amount}} a year, if every week looked like this one.",
+      "breakEvenTitle": "Break-even point",
+      "breakEvenRevenue": "At {{amount}} in weekly service revenue, both options pay the same when your other expenses are equal.",
+      "breakEvenAlways": "Both options pay the same at every revenue level when rent and commission are both zero.",
+      "breakEvenNever": "With no salon commission and a positive booth rent, booth rental won’t break even when other expenses are equal.",
+      "exampleTitle": "Example: a 60/40 salon commission split",
+      "exampleIntro": "Say you bring in $1,500 a week and the salon keeps 40%. Booth rent is $300 a week, and you spend $150 on other expenses in either setup.",
+      "exampleCommission": "Commission: you keep 60% of $1,500 ($900), then subtract $150 in expenses. Take-home estimate: $750.",
+      "exampleRent": "Booth rental: subtract $300 rent and $150 in expenses from $1,500. Take-home estimate: $1,050.",
+      "exampleBreakEven": "Break-even is $750 in weekly service revenue because 40% of $750 is $300, the same as the rent. Above that point, booth rental leaves you more under these assumptions.",
       "disclaimer": "An estimate, not tax or legal advice. Booth renters usually pay their own self-employment taxes, insurance and supplies; add those to your expenses for a fair comparison.",
       "nextTitle": "Going independent? Take your clients with you.",
       "nextBody": "Mova gives you a booking page, QR code and client notes that move with you.",
@@ -2785,8 +2793,8 @@
         "description": "Start free. Pro is $19 a month and AI + Growth is $39 a month. Mova never charges a fee on cash or on payments the salon collects."
       },
       "calculator": {
-        "title": "Booth rent vs. commission calculator | Mova",
-        "name": "Booth rent vs. commission calculator",
+        "title": "Booth Rent vs. Commission Calculator for Hairstylists | Mova",
+        "name": "Booth Rent vs. Commission Calculator for Hairstylists",
         "description": "Free calculator for hairstylists: compare your weekly take-home pay on booth rent and on commission. No signup, and your numbers stay in your browser."
       },
       "guides": {

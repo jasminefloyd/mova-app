@@ -36,9 +36,9 @@ export function PhoneFrame({ variant = 'home' }: { variant?: 'home' | 'booking' 
   </div>;
 }
 
-export function ButtonLink({ to, variant, children }: { to: string; variant?: 'secondary' | 'peach' | 'plan' | 'plan-featured' | 'small'; children: ReactNode }) {
+export function ButtonLink({ to, variant, children, onClick }: { to: string; variant?: 'secondary' | 'peach' | 'plan' | 'plan-featured' | 'small'; children: ReactNode; onClick?: () => void }) {
   const modifier = variant ? ` mova-site__button--${variant}` : '';
-  return <Link className={`mova-site__button${modifier}`} to={to}>{children}</Link>;
+  return <Link className={`mova-site__button${modifier}`} to={to} onClick={onClick}>{children}</Link>;
 }
 
 /** Structured data (schema.org JSON-LD) for search engines and AI assistants. */

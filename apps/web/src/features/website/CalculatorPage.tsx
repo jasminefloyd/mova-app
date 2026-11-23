@@ -4,6 +4,7 @@ import type { MetaFunction } from 'react-router';
 import { ButtonLink, Eyebrow, JsonLd, useSiteShell } from './parts';
 import { breadcrumbLd, calculatorLd, pageMeta, shellFromMatches } from './seo';
 import { calculate, formatDollars, type CalculatorInput } from './calculator';
+import { startCalculatorSignup, trackCalculatorUse } from './calculator-analytics';
 
 // W4 Calculator. Free, no signup. Numbers are computed in the browser and never sent anywhere.
 const defaults: CalculatorInput = { revenue: '1500', commissionCut: '40', rent: '300', expenses: '150' };
@@ -18,6 +19,8 @@ export default function CalculatorPage() {
   const locale = i18n.language === 'es-US' ? 'es-US' : 'en-US';
   const set = (key: keyof CalculatorInput) => (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.currentTarget.value;
+    if (value === input[key]) return;
+    if (calculate({ ...input, [key]: value }).status === 'ok') trackCalculatorUse();
     setInput((current) => ({ ...current, [key]: value }));
   };
 
@@ -29,13 +32,18 @@ export default function CalculatorPage() {
     : ok.difference === 0 ? t('website.calculator.verdictEven')
       : t(ok.difference > 0 ? 'website.calculator.verdictBooth' : 'website.calculator.verdictCommission', { amount: formatDollars(Math.abs(ok.difference), locale) });
   const yearly = ok ? t('website.calculator.yearly', { amount: formatDollars(Math.abs(ok.difference) * 52, locale) }) : '';
+  const threshold = ok?.breakEven;
+  const breakEven = threshold?.kind === 'revenue'
+    ? t('website.calculator.breakEvenRevenue', { amount: new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(threshold.amount) })
+    : threshold?.kind === 'always' ? t('website.calculator.breakEvenAlways')
+    : threshold?.kind === 'never' ? t('website.calculator.breakEvenNever') : '';
 
   return <div>
     <JsonLd data={calculatorLd(shell)} />
     <JsonLd data={breadcrumbLd(shell, [[t('website.nav.calculator'), '/calculator']])} />
     <section className="mova-site__container" aria-labelledby="calc-h" style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBlock: 'clamp(40px, 6vw, 80px) 24px' }}>
       <Eyebrow>{t('website.calculator.eyebrow')}</Eyebrow>
-      <h1 id="calc-h" className="mova-site__h1" style={{ maxWidth: 820, fontSize: 'clamp(36px, 4.6vw, 58px)' }}>{t('website.calculator.headlineA')} <span className="mova-site__accent">{t('website.calculator.headlineB')}</span></h1>
+      <h1 id="calc-h" className="mova-site__h1" style={{ maxWidth: 820, fontSize: 'clamp(36px, 4.6vw, 58px)' }}>{t('website.calculator.headline')}</h1>
       <p className="mova-site__lead" style={{ maxWidth: 640, fontSize: 'clamp(17px, 1.6vw, 19px)' }}>{t('website.calculator.intro')}</p>
     </section>
 
@@ -78,8 +86,21 @@ export default function CalculatorPage() {
             <strong>{verdict}</strong>
             <span>{yearly}</span>
           </div>
+          {breakEven && <p><strong>{t('website.calculator.breakEvenTitle')}</strong><br /><span>{breakEven}</span></p>}
           <p className="mova-site__disclaimer">{t('website.calculator.disclaimer')}</p>
         </div>
+      </div>
+    </section>
+
+    <section className="mova-site__container" aria-labelledby="calc-example-h" style={{ paddingBottom: 'clamp(48px, 6vw, 80px)' }}>
+      <div className="mova-site__prose">
+        <h2 id="calc-example-h">{t('website.calculator.exampleTitle')}</h2>
+        <p>{t('website.calculator.exampleIntro')}</p>
+        <ul>
+          <li>{t('website.calculator.exampleCommission')}</li>
+          <li>{t('website.calculator.exampleRent')}</li>
+        </ul>
+        <p>{t('website.calculator.exampleBreakEven')}</p>
       </div>
     </section>
 
@@ -89,7 +110,7 @@ export default function CalculatorPage() {
           <h2 id="calc-next-h">{t('website.calculator.nextTitle')}</h2>
           <p>{t('website.calculator.nextBody')}</p>
         </div>
-        <ButtonLink to="/signup">{t('website.calculator.startFree')}</ButtonLink>
+        <ButtonLink to="/signup?from=calculator" onClick={startCalculatorSignup}>{t('website.calculator.startFree')}</ButtonLink>
       </div>
     </section>
   </div>;

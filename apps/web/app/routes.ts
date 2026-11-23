@@ -107,6 +107,7 @@ export default [
   route('api/job-dispatch', '../src/routes/job-dispatch.ts'),
   route('api/calendar-sync', '../src/routes/calendar-sync.ts'),
   route('api/reports-refresh', '../src/routes/reports-refresh.ts'),
+  route('api/calculator-event', '../src/routes/calculator-event.ts'),
   route('feed/:token', '../src/routes/calendar-feed.ts'),
   route('pay/:code', '../src/routes/paylink-redirect.ts'),
 ] satisfies RouteConfig;
