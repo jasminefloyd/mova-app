@@ -452,7 +452,7 @@ body {
 .mova-money-activity li > span { display: grid; min-width: 0; gap: 2px; }
 .mova-money-activity li small { color: var(--ink-muted); }
 .mova-money-activity li b { flex: none; }
-.mova-page.mova-get-paid { position: relative; z-index: 1; width: min(100%, 390px); min-height: calc(100dvh - 96px); margin: 96px auto 0; padding: var(--space-6) var(--gutter) 132px; border-radius: var(--radius-3xl) var(--radius-3xl) 0 0; background: var(--surface-page); }
+.mova-page.mova-get-paid { position: relative; width: min(100%, 390px); min-height: calc(100dvh - 96px); margin: 96px auto 0; padding: var(--space-6) var(--gutter) 132px; border-radius: var(--radius-3xl) var(--radius-3xl) 0 0; background: var(--surface-page); }
 .mova-page.mova-get-paid::before { position: fixed; z-index: -1; inset: 0; background: color-mix(in srgb, var(--scrim) 88%, transparent); content: ''; }
 .mova-page.mova-get-paid::after { position: absolute; top: 10px; left: 50%; width: 40px; height: 5px; transform: translateX(-50%); border-radius: var(--radius-pill); background: var(--line-control); content: ''; }
 .mova-get-paid__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
