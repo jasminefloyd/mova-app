@@ -1,6 +1,7 @@
 import type { EmailLocale, EmailTemplateId } from './types.ts';
 import { renderWelcomeEmail, type WelcomeEmailVars } from './welcome.ts';
 import { renderStylistAlertEmail, type StylistAlertEmailVars } from './stylist-alert.ts';
+import { renderAccountEmail, type AccountEmailVars } from './account.ts';
 
 export const EMAIL_TEMPLATES: EmailTemplateId[] = ['booking_confirmation', 'request_received', 'request_accepted', 'request_declined', 'appointment_reminder'];
 export const PROPOSED_EMAIL_TEMPLATES: EmailTemplateId[] = ['appointment_moved', 'appointment_cancelled', 'review_request', 'stylist_welcome', 'stylist_new_request'];
@@ -14,6 +15,8 @@ export type AppointmentEmailVars = {
   welcome?: Omit<WelcomeEmailVars, 'firstName' | 'postalAddress'> & { firstName?: string | null };
   /** stylist_alert only. */
   alert?: Omit<StylistAlertEmailVars, 'postalAddress'>;
+  /** stylist_trial_ending, stylist_payment_failed, stylist_trial_ended (EM13–EM15). */
+  account?: Omit<AccountEmailVars, 'postalAddress'>;
 };
 
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
@@ -28,7 +31,7 @@ const dateParts = (startsAt: string, timeZone: string, locale: EmailLocale) => {
 export function formatWhen(startsAt: string, timeZone: string, locale: EmailLocale) { return dateParts(startsAt, timeZone, locale).full; }
 
 type Copy = { subject: string; preview: string; headline: string; lead: string; action: string; footer: string; state: 'forest' | 'request' | 'white' | 'review' };
-const COPY: Record<EmailLocale, Record<EmailTemplateId, (v: AppointmentEmailVars, date: ReturnType<typeof dateParts>) => Copy>> = {
+const COPY: Record<EmailLocale, Partial<Record<EmailTemplateId, (v: AppointmentEmailVars, date: ReturnType<typeof dateParts>) => Copy>>> = {
   'en-US': {
     booking_confirmation: (v,d) => ({ subject: `You're booked with ${v.businessName}`, preview: `${v.serviceName} on ${d.full}. Add it to your calendar.`, headline: `You're booked, ${firstName(v.clientName)}.`, lead: `Your ${v.serviceName} with ${v.businessName} is confirmed.`, action: 'View or change your appointment', footer: 'Running late or need to move it? Use the button above, any time up to 24 hours before.', state: 'forest' }),
     request_received: (v,d) => ({ subject: `Request sent to ${v.businessName}`, preview: `This is not confirmed yet. ${v.businessName} will reply within 24 hours.`, headline: `Your request is with ${v.businessName}.`, lead: `${v.businessName} will check the salon's book and reply within 24 hours. This is not confirmed yet, and no payment has been taken.`, action: 'View your request', footer: 'You will get another email when the stylist replies. Only then is the time yours.', state: 'request' }),
@@ -60,11 +63,17 @@ const COPY: Record<EmailLocale, Record<EmailTemplateId, (v: AppointmentEmailVars
 export function renderEmail(id: EmailTemplateId, locale: EmailLocale, vars: AppointmentEmailVars) {
   const lang = locale === 'es-US' ? 'es-US' : 'en-US';
   if (id === 'stylist_alert' && vars.alert) return renderStylistAlertEmail(lang, { ...vars.alert, postalAddress: vars.postalAddress ?? null });
+  if (id === 'stylist_trial_ending' || id === 'stylist_payment_failed' || id === 'stylist_trial_ended') {
+    if (!vars.account) throw new Error('ACCOUNT_EMAIL_VARS_MISSING');
+    return renderAccountEmail(lang, { ...vars.account, postalAddress: vars.postalAddress ?? null });
+  }
   if (id === 'stylist_welcome') {
     return renderWelcomeEmail(lang, { ...vars.welcome, firstName: vars.welcome?.firstName || vars.stylistName || vars.businessName, postalAddress: vars.postalAddress ?? null });
   }
   const d = dateParts(vars.startsAt, vars.timeZone || 'UTC', lang);
-  const copy = COPY[lang][id](vars, d);
+  const build = COPY[lang][id];
+  if (!build) throw new Error('EMAIL_TEMPLATE_UNKNOWN');
+  const copy = build(vars, d);
   const link = safeLink(id.startsWith('stylist_') ? vars.stylistUrl ?? vars.bookingUrl ?? vars.manageUrl : id === 'review_request' ? vars.manageUrl : vars.manageUrl ?? vars.bookingUrl);
   if (!link && ['booking_confirmation', 'request_accepted', 'appointment_reminder', 'appointment_moved'].includes(id)) {
     copy.footer = lang === 'es-US' ? `Para cambiarla, comunícate con ${vars.businessName}.` : `To change it, contact ${vars.businessName}.`;

@@ -56,9 +56,18 @@ Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
   const ratingCount = publicRatings?.length ?? 0;
   const ratingAverage = ratingCount ? Math.round(publicRatings!.reduce((sum, review) => sum + review.rating, 0) / ratingCount * 10) / 10 : null;
 
+  // Free trial WP3 (Q4): after a paid plan or trial ends, the page shows the default cover. The
+  // stylist's cover is kept and comes back when they unlock a plan. Stylists who never had a paid
+  // plan keep the cover they set before plans existed.
+  const [{ data: coverGate }, { data: billingRow }] = await Promise.all([
+    supabase.rpc('mova_feature_gate', { p_artist_business_id: profile.artist_business_id, p_feature_key: 'custom_cover', p_customer_account_id: null }),
+    supabase.from('mova_billing_subscriptions').select('status').eq('artist_business_id', profile.artist_business_id).maybeSingle(),
+  ]);
+  const customCover = coverGate?.enabled === true || !billingRow;
   const variantGroups = profile.photo_variants && typeof profile.photo_variants === 'object'
     ? Object.entries(profile.photo_variants as Record<string, unknown>)
       .filter((entry): entry is [string, Record<string, unknown>] => Boolean(entry[1]) && typeof entry[1] === 'object')
+      .filter(([kind]) => customCover || !kind.startsWith('cover'))
     : [];
   const photos = await Promise.all(variantGroups.map(async ([kind, sizes]) => {
     const signedSizes = await Promise.all(Object.entries(sizes).map(async ([size, path]) => {
@@ -125,11 +134,11 @@ Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
       rating_average: ratingAverage,
       rating_count: ratingCount,
       search_index_enabled: profile.search_index_enabled,
-      cover_source: profile.cover_source,
-      cover_image_url: profile.cover_image_url,
-      cover_credit_name: profile.cover_credit_name,
-      cover_credit_url: profile.cover_credit_url,
-      cover_unsplash_url: profile.cover_unsplash_url,
+      cover_source: customCover ? profile.cover_source : null,
+      cover_image_url: customCover ? profile.cover_image_url : null,
+      cover_credit_name: customCover ? profile.cover_credit_name : null,
+      cover_credit_url: customCover ? profile.cover_credit_url : null,
+      cover_unsplash_url: customCover ? profile.cover_unsplash_url : null,
       contact_phone: profile.contact_phone,
       contact_email: profile.contact_email,
       website_url: profile.website_url,

@@ -8,6 +8,7 @@ const publicEnvSchema = z.object({
   VITE_WALLET_CLIENT_CARD_ENABLED: z.enum(['true','false']).optional(),
   VITE_CONCIERGE_WEB_CHAT_ENABLED: z.enum(['true','false']).optional(),
   VITE_STRIPE_TEST_MODE: z.enum(['true','false']).optional(),
+  VITE_TRIAL_ENABLED: z.enum(['true','false']).optional(),
   VITE_HCAPTCHA_SITE_KEY: z.string().regex(/^[0-9a-f-]{20,64}$/i).optional(),
 });
 
@@ -18,6 +19,7 @@ const rawEnv = {
   VITE_WALLET_CLIENT_CARD_ENABLED: import.meta.env.VITE_WALLET_CLIENT_CARD_ENABLED || undefined,
   VITE_CONCIERGE_WEB_CHAT_ENABLED: import.meta.env.VITE_CONCIERGE_WEB_CHAT_ENABLED || undefined,
   VITE_STRIPE_TEST_MODE: import.meta.env.VITE_STRIPE_TEST_MODE || undefined,
+  VITE_TRIAL_ENABLED: import.meta.env.VITE_TRIAL_ENABLED || undefined,
   VITE_HCAPTCHA_SITE_KEY: import.meta.env.VITE_HCAPTCHA_SITE_KEY || undefined,
 };
 
@@ -25,6 +27,8 @@ export const publicEnv = publicEnvSchema.parse(rawEnv);
 export const clientProfilesEnabled = publicEnv.VITE_CLIENT_PROFILES_ENABLED === 'true';
 export const walletClientCardEnabled = publicEnv.VITE_WALLET_CLIENT_CARD_ENABLED === 'true';
 export const stripeTestModeEnabled = publicEnv.VITE_STRIPE_TEST_MODE === 'true';
+/** WP7: public pages talk about the 30-day trial. Turn on together with the trial_enabled platform switch. */
+export const trialMarketingEnabled = publicEnv.VITE_TRIAL_ENABLED === 'true';
 export const webChatEnabled = publicEnv.VITE_CONCIERGE_WEB_CHAT_ENABLED === 'true';
 export const conciergeEnabled = import.meta.env.VITE_AI_CONCIERGE_ENABLED === 'true';
 export const seatFillerEnabled = import.meta.env.VITE_SEAT_FILLER_ENABLED === 'true';

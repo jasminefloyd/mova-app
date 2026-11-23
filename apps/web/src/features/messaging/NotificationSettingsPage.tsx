@@ -104,6 +104,66 @@ function ClientEmailsSection({ client, businessId }: { client: ReturnType<typeof
   </section>;
 }
 
+const toE164 = (value: string) => {
+  const digits = value.replace(/\D/g, '');
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
+  return null;
+};
+const showPhone = (e164: string | null) => {
+  const digits = (e164 ?? '').replace(/^\+1/, '');
+  return digits.length === 10 ? `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}` : (e164 ?? '');
+};
+
+/** Trial and billing texts to the stylist (WP5). Off unless they said yes; up to five texts, STOP works too. */
+export function AccountSmsSection({ client }: { client: ReturnType<typeof useArtistBusiness>['client'] }) {
+  const { t } = useTranslation();
+  const [state, setState] = useState<{ enabled: boolean; phone: string | null } | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [status, setStatus] = useState<'idle' | 'invalid' | 'error'>('idle');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!client) return;
+    let active = true;
+    void client.rpc('mova_account_sms_status').then(({ data, error }) => {
+      if (active && !error && data && typeof data === 'object') setState(data as { enabled: boolean; phone: string | null });
+    });
+    return () => { active = false; };
+  }, [client]);
+  if (!client || !state) return null;
+  const save = async (consent: boolean) => {
+    const e164 = consent ? toE164(phone || state.phone || '') : null;
+    if (consent && !e164) { setStatus('invalid'); return; }
+    setBusy(true); setStatus('idle');
+    const { data, error } = await client.rpc('mova_set_account_sms_consent', { p_phone: e164, p_consent: consent, p_source: 'settings' });
+    setBusy(false);
+    if (error) { setStatus(error.message?.includes('PHONE_INVALID') ? 'invalid' : 'error'); return; }
+    const next = data && typeof data === 'object' && 'enabled' in data ? data as { enabled: boolean; phone: string | null } : { enabled: consent, phone: e164 ?? state.phone };
+    setState(next); setEditing(false); setPhone('');
+  };
+  return <section className="mova-notification-settings__section" aria-labelledby="mova-account-sms-heading">
+    <h2 id="mova-account-sms-heading" className="mova-overline">{t('accountSms.title')}</h2>
+    <div className="mova-client-emails">
+      <div className="mova-client-emails__row"><span>{state.enabled ? t('accountSms.on', { phone: showPhone(state.phone) }) : t('accountSms.off')}</span>
+        {state.enabled
+          ? <button type="button" className="mova-push-device__action" disabled={busy} onClick={() => void save(false)}>{t('accountSms.turnOff')}</button>
+          : !editing && <button type="button" className="mova-push-device__action" disabled={busy} onClick={() => { setEditing(true); setPhone(state.phone ? showPhone(state.phone) : ''); }}>{t('accountSms.turnOn')}</button>}
+      </div>
+      {editing && !state.enabled && <>
+        <label className="mova-client-emails__field" htmlFor="mova-account-sms-phone">{t('accountSms.phone')}</label>
+        <div className="mova-client-emails__edit">
+          <input id="mova-account-sms-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} aria-invalid={status === 'invalid'} onChange={(event) => { setPhone(event.currentTarget.value); setStatus('idle'); }} />
+          <button type="button" className="mova-push-device__action" disabled={busy || !phone.trim()} onClick={() => void save(true)}>{t('accountSms.save')}</button>
+        </div>
+      </>}
+      <p className="mova-notification-settings__note">{t('accountSms.consent')}</p>
+      {status === 'invalid' && <p role="alert">{t('accountSms.invalid')}</p>}
+      {status === 'error' && <p role="alert">{t('accountSms.error')}</p>}
+    </div>
+  </section>;
+}
+
 /** Settings › Language & notifications: app language plus Email/Push per event. Everything starts on. */
 export function NotificationSettingsPage() {
   const { t } = useTranslation();
@@ -178,5 +238,6 @@ export function NotificationSettingsPage() {
       {saveError && <p role="alert">{t('notificationSettings.saveError')}</p>}
     </section>
     <ClientEmailsSection client={client} businessId={businessId} />
+    <AccountSmsSection client={client} />
   </main>;
 }

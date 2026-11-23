@@ -2143,7 +2143,8 @@
       "firstName": "Nombre",
       "lastName": "Apellido",
       "namesPrivate": "Solo tú ves tu nombre. Tus clientes ven tu nombre público y tu enlace.",
-      "nameRequired": "Escribe tu nombre y apellido."
+      "nameRequired": "Escribe tu nombre y apellido.",
+      "freeTitleTrial": "30 días de AI + Growth, gratis"
     },
     "legal": {
       "terms": "Términos",
@@ -2213,7 +2214,8 @@
     "notice": {
       "confirmed": "Tu plan se actualizó.",
       "cancelled": "Se canceló el pago. Tu plan no cambió.",
-      "failed": "No pudimos cambiar tu plan. Inténtalo de nuevo."
+      "failed": "No pudimos cambiar tu plan. Inténtalo de nuevo.",
+      "saved": "Guardado. Te avisaremos antes de que termine tu prueba."
     }
   },
   "messaging": {
@@ -2555,7 +2557,12 @@
         "revenueCenter": "Pronósticos e información sobre espacios libres con el Centro de ingresos de IA",
         "missedCallTextback": "Mensaje de texto cuando pierdes una llamada",
         "aiPricePilot": "PricePilot"
-      }
+      },
+      "introTrial": "Prueba AI + Growth gratis por 30 días. Luego elige el plan que te quede.",
+      "startTrial": "Empieza tu prueba gratis",
+      "faq3ATrial": "Sí. Cada estilista nueva recibe 30 días de AI + Growth gratis. Antes de que termine, quédate con él, cambia a Pro o pasa a Gratis. Puedes cambiar de plan cuando quieras en Configuración.",
+      "faq5Q": "¿Necesito una tarjeta para la prueba?",
+      "faq5A": "Sí. Agregas una tarjeta cuando empieza la prueba. No se te cobra hasta que termine, y puedes cambiar a Gratis antes para no pagar nada."
     },
     "calculator": {
       "eyebrow": "Calculadora gratis · sin registro",
@@ -3030,5 +3037,188 @@
     "differentEmail": "Usar otro correo",
     "invalid": "Ese código no funcionó. Revisa el correo o envía un código nuevo.",
     "sent": "Enviamos un código nuevo."
+  },
+  "trial": {
+    "confirming": "Iniciando tu prueba gratis…",
+    "start": {
+      "overline": "Tus primeros {{days}} días",
+      "title": "Prueba todo AI + Growth, gratis.",
+      "lead": "Deja que Mova llene tu agenda y te promocione. Elige tu plan antes de que termine la prueba.",
+      "includes": "Qué incluye",
+      "features": {
+        "marketing": {
+          "title": "Marketing que llena espacios libres",
+          "body": "Mova lo redacta, tú lo apruebas."
+        },
+        "pricePilot": {
+          "title": "PricePilot",
+          "body": "Compara tus precios con los de tu zona."
+        },
+        "revenue": {
+          "title": "Centro de ingresos con IA",
+          "body": "El pronóstico del mes y dónde está el dinero."
+        },
+        "calendar": {
+          "title": "Sincronización de calendario y reportes avanzados",
+          "body": "Además, tus reseñas de Mova en tu página."
+        }
+      },
+      "timeline": "Cómo funciona la prueba",
+      "today": "Hoy · empieza la prueba gratis",
+      "todayBody": "Hoy no se cobra nada.",
+      "reminder": "{{date}} · recordatorio",
+      "reminderBody": "Te avisamos una semana antes de que termine.",
+      "ends": "{{date}} · empiezan {{price}} al mes",
+      "endsBody": "O cambia a Pro ({{pro}}) o Gratis antes.",
+      "sms": {
+        "title": "Envíame recordatorios de la prueba y la facturación por mensaje",
+        "body": "También los enviamos por correo y, si lo permites, por notificación.",
+        "mobile": "Celular",
+        "invalid": "Escribe un número celular de EE. UU. de 10 dígitos.",
+        "consent": "Hasta 5 mensajes sobre tu prueba y facturación. Pueden aplicar tarifas de mensajes y datos. Responde STOP para cancelar."
+      },
+      "cta": "Agregar tarjeta y empezar la prueba",
+      "note": "Los pagos con Mova usan la tarifa de Gratis (1.5%) durante tu prueba. Cancela cuando quieras en Configuración › Plan.",
+      "free": "Seguir en Gratis",
+      "notice": {
+        "cancelled": "No agregaste una tarjeta. Puedes empezar tu prueba cuando quieras en Configuración › Plan.",
+        "failed": "No pudimos abrir el pago. Inténtalo de nuevo.",
+        "used": "Esta cuenta ya tuvo una prueba gratis. Tus planes están en Configuración › Plan."
+      }
+    },
+    "plan": {
+      "title": "AI + Growth · prueba gratis",
+      "daysLeft_one": "Queda {{count}} día",
+      "daysLeft_other": "Quedan {{count}} días",
+      "ends": "La prueba termina",
+      "then": "Después",
+      "thenFree": "Gratis · sin cobro",
+      "perMonth": "{{price}} al mes",
+      "perMonthShort": "{{price}}/mes",
+      "feeUntil": "Tarifa de Mova hasta entonces",
+      "feeFree": "{{fee}} (tarifa de Gratis)",
+      "updateCard": "Actualizar tarjeta",
+      "afterTitle": "Después de tu prueba",
+      "after": {
+        "ai_growth": {
+          "title": "Quedarte en AI + Growth",
+          "body": "Conservas todo. + {{fee}} por pago con Mova."
+        },
+        "pro": {
+          "title": "Cambiar a Pro",
+          "body": "El Centro de ingresos con IA y el reagendado automático se bloquean. PricePilot baja a 25 consultas al mes. + {{fee}} por pago con Mova."
+        },
+        "free": {
+          "title": "Pasar a Gratis",
+          "body": "Las funciones de pago se bloquean y no se te cobra. No se borra nada. + {{fee}} por pago con Mova."
+        }
+      },
+      "reminders": "Puedes cambiar esto hasta el {{date}}. Te avisaremos 7 días y 1 día antes por correo, notificación y mensaje.",
+      "endedTitle": "Tu prueba de AI + Growth terminó el {{date}}",
+      "endedBody": "Marketing, PricePilot, el Centro de ingresos con IA y la sincronización de calendario están bloqueados. Tus campañas, precios y configuración están guardados y vuelven cuando desbloquees.",
+      "unlockCharges": "Desbloquear cobra {{card}} de inmediato.",
+      "unlock": "Desbloquear {{plan}}",
+      "offerTitle": "Prueba AI + Growth gratis por {{days}} días",
+      "offerBody": "Todo lo que hace Mova, con una tarjeta agregada ahora y sin cobro hasta que termine la prueba. Cambia a Pro o Gratis cuando quieras.",
+      "offerCta": "Empezar prueba gratis"
+    }
+  },
+  "billingBanner": {
+    "trialRegion": "Prueba gratis",
+    "lockedRegion": "Prueba terminada",
+    "stripTitle_one": "Prueba gratis de AI + Growth · queda {{count}} día",
+    "stripTitle_other": "Prueba gratis de AI + Growth · quedan {{count}} días",
+    "stripThen": "Después {{price}} al mes desde el {{date}}",
+    "stripFree": "Después Gratis desde el {{date}} · sin cobro",
+    "plan": "Plan",
+    "days_one": "día",
+    "days_other": "días",
+    "endsTitle": "La prueba termina el {{date}}",
+    "endsBody": "Después {{price}} al mes por {{plan}}. Cambia cuando quieras.",
+    "endsFree": "Después pasas a Gratis. No se te cobrará.",
+    "manage": "Gestionar",
+    "failedTitle": "Tu pago no se procesó",
+    "failedBody": "Actualiza tu tarjeta antes del {{date}} para mantener {{plan}}.",
+    "updateCard": "Actualizar tarjeta",
+    "lockedTitle": "Tu prueba terminó",
+    "lockedBody": "Marketing y PricePilot están en pausa. Tu configuración está guardada.",
+    "unlock": "Desbloquear",
+    "tryFree": "Probar gratis"
+  },
+  "planGate": {
+    "tagPro": "Pro y AI + Growth",
+    "tagGrowth": "AI + Growth",
+    "unlockPro": "Desbloquear con Pro · {{price}}/mes",
+    "unlockGrowth": "Desbloquear AI + Growth · {{price}}/mes",
+    "startTrial": "Empezar tu prueba gratis",
+    "compare": "Comparar planes",
+    "badgePro": "Pro",
+    "badgeGrowth": "AI + Growth",
+    "marketing": {
+      "title": "Marketing está bloqueado",
+      "body": "Tu campaña y tus borradores están guardados. Desbloquea para volver a enviar.",
+      "name": "Marketing"
+    },
+    "revenue": {
+      "title": "El Centro de ingresos con IA está bloqueado",
+      "bodyPro": "Estás en Pro. Los pronósticos, el análisis de espacios libres y el reagendado automático vienen con AI + Growth.",
+      "body": "Los pronósticos, el análisis de espacios libres y el reagendado automático vienen con AI + Growth.",
+      "name": "Centro de ingresos con IA"
+    },
+    "calendarSync": {
+      "title": "La sincronización de calendario está bloqueada",
+      "body": "Tu conexión está guardada. Desbloquea para mantener Google Calendar y Mova al día.",
+      "name": "Sincronización de calendario"
+    },
+    "reports": {
+      "title": "Los reportes avanzados están bloqueados",
+      "body": "Tu historial está guardado. Desbloquea para ver tendencias, fuentes y resultados de marketing.",
+      "name": "Reportes avanzados"
+    },
+    "reviews": {
+      "title": "Las reseñas públicas están bloqueadas",
+      "body": "Tus reseñas están guardadas. Desbloquea para mostrarlas en tu página.",
+      "name": "Reseñas públicas"
+    },
+    "cover": {
+      "title": "Las portadas personalizadas están bloqueadas",
+      "body": "Tu página muestra la portada predeterminada. Tu foto está guardada y vuelve cuando desbloquees.",
+      "name": "Portada personalizada"
+    },
+    "handle": "Cambiar el enlace de tu página requiere Pro. Tu enlace actual sigue funcionando."
+  },
+  "unlock": {
+    "title": "Desbloquear un plan",
+    "titleFeature": "Desbloquear {{feature}}",
+    "lead": "Elige un plan. Lo que guardaste vuelve de inmediato.",
+    "choose": "Elige un plan",
+    "perMonth": "{{price}}/mes",
+    "proAdds": "Marketing, relleno de espacios, sincronización de calendario, reseñas públicas, reportes avanzados.",
+    "growthAdds": "Todo lo de Pro, más PricePilot, el Centro de ingresos con IA y el reagendado automático.",
+    "payWith": "Pagar con",
+    "change": "Cambiar",
+    "pay": "Pagar {{price}} y desbloquear",
+    "note": "Se cobra cada mes. Cancela o cambia cuando quieras en Configuración › Plan.",
+    "close": "Cerrar",
+    "error": "No pudimos cobrar tu tarjeta. Inténtalo de nuevo o actualiza tu tarjeta.",
+    "done": "{{plan}} está activo. Tu {{feature}} guardado está de vuelta.",
+    "yourSetup": "configuración"
+  },
+  "accountSms": {
+    "title": "Mensajes de prueba y facturación",
+    "on": "Activado · {{phone}}",
+    "off": "Desactivado",
+    "turnOff": "Desactivar",
+    "turnOn": "Activar",
+    "phone": "Número celular",
+    "save": "Guardar",
+    "invalid": "Escribe un número celular de EE. UU. de 10 dígitos.",
+    "consent": "Hasta 5 mensajes sobre tu prueba y facturación. Pueden aplicar tarifas de mensajes y datos. Responde STOP para cancelar.",
+    "error": "No pudimos guardar esto. Inténtalo de nuevo."
+  },
+  "settingsPlan": {
+    "trialDays_one": "{{plan}} · prueba · queda {{count}} día",
+    "trialDays_other": "{{plan}} · prueba · quedan {{count}} días",
+    "trialEnded": "Gratis · prueba terminada"
   }
 }

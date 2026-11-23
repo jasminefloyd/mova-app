@@ -5,6 +5,7 @@ import { Card, ErrorState, Segmented } from '../../components';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { seatFillerEnabled } from '../../lib/env';
 import { operatorUrl } from '../../app/operator-url';
+import { PlanGate } from '../billing/PlanGate';
 import './reports-board.css';
 
 type Summary = { start: string; end: string; current: Record<string, number>; previous: Record<string, number>; series: Array<{ date: string; service_value_minor: number; completed_count: number; page_views: number; qr_scans: number }> };
@@ -103,6 +104,8 @@ export function ReportsPage() {
           </Link>
         </div>
 
+        {/* T12: traffic sources and marketing results are the advanced reports (Pro and up). */}
+        <PlanGate feature="reports_advanced" requiredPlan="pro" title={t('planGate.reports.title')} body={t('planGate.reports.body')} featureName={t('planGate.reports.name')}>
         <Card className="mova-report-card mova-report-card--traffic">
           <h2 className="mova-report-card__label">{t('reports.profileTraffic')}</h2>
           <div className="mova-report-trio">
@@ -127,6 +130,7 @@ export function ReportsPage() {
             <span>{t('reports.socialShares')}</span><strong>{fmt(c.social_shares ?? 0)}</strong>
           </div>
         </Card>
+        </PlanGate>
       </div>}
   </main>;
 }

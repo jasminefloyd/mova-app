@@ -7,6 +7,9 @@ import { useArtistBusiness } from '../features/settings/useArtistBusiness';
 import { clearOfflineData } from '../pwa/offline-data';
 import { operatorUrl } from './operator-url';
 import { ReportsPage } from '../features/reports/ReportsPage';
+import { usePlan } from '../features/billing/PlanProvider';
+import { isLocked } from '../features/billing/plan-api';
+import '../features/billing/billing.css';
 import { FeedbackSheet } from '../features/settings/FeedbackSheet';
 
 type Section = 'home' | 'calendar' | 'clients' | 'growth' | 'reports' | 'money';
@@ -38,6 +41,14 @@ export function SettingsPage() {
   const [signingOut, setSigningOut] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const { summary: planSummary } = usePlan();
+  const planName = (key: string) => t(`plan.names.${key}`, { defaultValue: key });
+  // T12: the Plan row says where the stylist stands; locked rows carry the plan that unlocks them.
+  const planTrailing = !planSummary ? t('settings.planNotConfigured')
+    : planSummary.trial?.state === 'trialing' ? t('settingsPlan.trialDays', { plan: planName('ai_growth'), count: planSummary.trial.days_left ?? 0 })
+    : planSummary.trial?.state === 'ended_free' && planSummary.current_plan.plan_key === 'free' ? t('settingsPlan.trialEnded')
+    : planName(planSummary.current_plan.plan_key);
+  const lockBadge = (feature: string) => isLocked(planSummary, feature) ? <span className="mova-lock-badge"><Icon name="lock" size={12} />{t('planGate.badgePro')}</span> : null;
   const [publishError, setPublishError] = useState(false);
   useEffect(() => {
     if (!client || !businessId) return;
@@ -109,10 +120,10 @@ export function SettingsPage() {
       <ListRow title={t('settings.servicesPricesDeposits')} trailing={serviceCount===null?'—':String(serviceCount)} href={operatorUrl(businessId,'settings/services')} />
       <ListRow title={t('settings.locationsHours')} trailing={locationCount===null?'—':String(locationCount)} href={operatorUrl(businessId,'settings/locations')} />
       <ListRow title={t('settings.paymentsPayouts')} trailing={paymentSummary} href={operatorUrl(businessId,'settings/payments')} />
-      <ListRow title={t('settings.calendarSync')} trailing={calendarSummary} href={operatorUrl(businessId,'settings/calendar-sync')} />
+      <ListRow title={t('settings.calendarSync')} trailing={lockBadge('google_calendar_sync') ?? calendarSummary} href={operatorUrl(businessId,'settings/calendar-sync')} />
       <ListRow title={t('settings.reviewsGoogle')} trailing={t('settings.notConnected')} href={operatorUrl(businessId,'settings/reviews')} />
       <ListRow title={t('google.account.settingsRow')} trailing={googleSummary} href={operatorUrl(businessId,'settings/google')} />
-      <ListRow title={t('settings.plan')} trailing={t('settings.planNotConfigured')} href={operatorUrl(businessId,'settings/plan')} />
+      <ListRow title={t('settings.plan')} trailing={planTrailing} href={operatorUrl(businessId,'settings/plan')} />
       <ListRow title={t('settings.languageNotifications')} trailing={localeName} href={operatorUrl(businessId,'settings/notifications')} />
       <ListRow title={t('settings.privacyData')} href={operatorUrl(businessId,'settings/privacy')} />
     </Card>

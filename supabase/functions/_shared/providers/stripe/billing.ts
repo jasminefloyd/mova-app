@@ -7,6 +7,10 @@ export function planPriceId(plan: PlanKey, env: (name: string) => string | undef
   return value && /^price_[A-Za-z0-9]+$/.test(value) ? value : null;
 }
 
+export class StripeBillingError extends Error {
+  constructor(readonly code: string) { super(code); }
+}
+
 export class StripeBillingClient {
   readonly mode: BillingMode;
   constructor(private readonly secretKey: string, private readonly fetcher: typeof fetch = fetch, mode?: BillingMode) {
@@ -23,15 +27,50 @@ export class StripeBillingClient {
     if (typeof json.livemode === 'boolean' && json.livemode !== (this.mode === 'live')) throw new Error('STRIPE_OBJECT_MODE_MISMATCH');
     return json;
   }
-  createSubscriptionCheckout(input: { priceId: string; businessId: string; plan: PlanKey; successUrl: string; cancelUrl: string; customerId?: string | null; email?: string | null }) {
+  createSubscriptionCheckout(input: { priceId: string; businessId: string; plan: PlanKey; successUrl: string; cancelUrl: string; customerId?: string | null; email?: string | null; trialDays?: number }) {
     const form = new URLSearchParams({
       mode: 'subscription', 'line_items[0][price]': input.priceId, 'line_items[0][quantity]': '1',
       success_url: input.successUrl, cancel_url: input.cancelUrl, client_reference_id: input.businessId,
       'metadata[artist_business_id]': input.businessId, 'metadata[plan_key]': input.plan,
       'subscription_data[metadata][artist_business_id]': input.businessId, 'subscription_data[metadata][plan_key]': input.plan,
     });
+    if (input.trialDays) {
+      // Free trial (D1/D2): card collected now, first charge when the trial ends.
+      if (!Number.isInteger(input.trialDays) || input.trialDays < 1 || input.trialDays > 60) throw new Error('TRIAL_DAYS_INVALID');
+      form.set('subscription_data[trial_period_days]', String(input.trialDays));
+      form.set('payment_method_collection', 'always');
+      form.set('subscription_data[trial_settings][end_behavior][missing_payment_method]', 'cancel');
+      form.set('subscription_data[metadata][trial]', 'true');
+      form.set('metadata[trial]', 'true');
+    }
     if (input.customerId) form.set('customer', input.customerId); else if (input.email) form.set('customer_email', input.email);
     return this.call('POST', '/checkout/sessions', form);
+  }
+  /** A subscription with its card, so the app can show "Visa •• 4242" without storing card data. */
+  retrieveSubscriptionWithCard(subscriptionId: string) {
+    if (!/^sub_[A-Za-z0-9]+$/.test(subscriptionId)) throw new Error('STRIPE_SUBSCRIPTION_ID_INVALID');
+    return this.call('GET', `/subscriptions/${encodeURIComponent(subscriptionId)}?expand[]=default_payment_method&expand[]=latest_invoice`);
+  }
+  updateSubscription(subscriptionId: string, form: URLSearchParams) {
+    if (!/^sub_[A-Za-z0-9]+$/.test(subscriptionId)) throw new Error('STRIPE_SUBSCRIPTION_ID_INVALID');
+    return this.call('POST', `/subscriptions/${encodeURIComponent(subscriptionId)}`, form);
+  }
+  /** Charges the card on file right away; throws StripeBillingError with Stripe's decline code when it can't. */
+  async createSubscription(form: URLSearchParams) {
+    const response = await this.fetcher('https://api.stripe.com/v1/subscriptions', {
+      method: 'POST', headers: { Authorization: `Bearer ${this.secretKey}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: form.toString(),
+    });
+    const json = await response.json().catch(() => null) as Record<string, unknown> | null;
+    if (!response.ok || !json) {
+      const error = (json?.error ?? {}) as Record<string, unknown>;
+      throw new StripeBillingError(String(error.decline_code ?? error.code ?? 'STRIPE_BILLING_REQUEST_FAILED'));
+    }
+    if (typeof json.livemode === 'boolean' && json.livemode !== (this.mode === 'live')) throw new Error('STRIPE_OBJECT_MODE_MISMATCH');
+    return json;
+  }
+  retrieveCustomer(customerId: string) {
+    if (!/^cus_[A-Za-z0-9]+$/.test(customerId)) throw new Error('STRIPE_CUSTOMER_ID_INVALID');
+    return this.call('GET', `/customers/${encodeURIComponent(customerId)}?expand[]=invoice_settings.default_payment_method`);
   }
   retrieveCheckout(sessionId: string) {
     const validPrefix = this.mode === 'live' ? /^cs_live_[A-Za-z0-9_]+$/ : /^cs_test_[A-Za-z0-9_]+$/;
@@ -59,5 +98,5 @@ export function verifiedSubscription(session: Record<string, unknown>, businessI
   const subscriptionId = typeof subscription.id === 'string' ? subscription.id : typeof session.subscription === 'string' ? session.subscription : null;
   const status = typeof subscription.status === 'string' ? subscription.status : 'incomplete';
   if (!subscriptionId || typeof session.customer !== 'string') return null;
-  return { plan: plan as PlanKey, customerId: session.customer, subscriptionId, status: ['active', 'trialing', 'past_due', 'canceled', 'incomplete'].includes(status) ? status : 'incomplete' };
+  return { plan: plan as PlanKey, customerId: session.customer, subscriptionId, status: ['active', 'trialing', 'past_due', 'canceled', 'incomplete', 'unpaid', 'incomplete_expired'].includes(status) ? status : 'incomplete', trial: metadata.trial === 'true' };
 }

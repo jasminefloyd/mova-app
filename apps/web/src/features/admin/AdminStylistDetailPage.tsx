@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminErrorText, adminRpc, isAdminError, type StylistDetail, type StylistFeatureControls, type StylistRuntimeSwitches } from './admin-api';
 import { formatCount, formatDate, formatDateTime, formatFeeBps, formatMoneyMinor, formatPercent } from './admin-format';
 import { Card, ConfirmDialog, ErrorNote, Kpi, Loading, PageHead, Pill } from './AdminPrimitives';
+import { AdminTrialCard } from './AdminTrialCard';
 
 const featureLabels: Record<string, { name: string; note: string }> = {
   booking_page: { name: 'Booking page', note: 'Public stylist page and booking entry point.' },
@@ -230,6 +231,7 @@ export default function AdminStylistDetailPage() {
             <dt>Locations · services · clients</dt><dd>{formatCount(d.metrics.locations)} · {formatCount(d.metrics.services)} · {formatCount(d.metrics.clients)}</dd>
           </dl>
         </Card>
+        <AdminTrialCard businessId={businessId} />
       </div>
       <section className="stack">
         <div><h2 className="group-heading">Feature access</h2><p className="sub">Plan access follows the assigned tier automatically. You can override any individual feature for this stylist, including a temporary grant outside their tier. A plan change clears overrides and returns features to the new tier’s defaults. Stylist opt-in, provider readiness, consent and global emergency switches still apply.</p></div>

@@ -42,9 +42,11 @@ test('MKT-01 Free plan channel states reflect entitlements', async ({ page }) =>
   await openOperatorPage(page, '/');
   await mockMarketing(page, { free: true });
   await page.goto('/BID-1/growth/marketing');
-  await expect(page.getByText('Available on Pro and AI + Growth.')).toBeVisible();
+  // T8: the screen stays visible but locked, with what unlocks it.
+  await expect(page.getByRole('heading', { name: 'Marketing is locked' })).toBeVisible();
   await expect(page.getByText('14', { exact: true })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'See plans' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Compare plans' })).toBeVisible();
+  await expect(page.locator('.mova-locked')).toHaveAttribute('aria-hidden', 'true');
 });
 
 test('MKT-02 distinct rebooking reminder selects its due-window audience', async ({ page }) => {

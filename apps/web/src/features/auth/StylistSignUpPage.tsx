@@ -5,6 +5,7 @@ import { createMovaSupabaseClient } from '../../lib/supabase';
 import type { ReactNode } from 'react';
 import { CheckEmailPanel } from './CheckEmailPanel';
 import { sendStylistEmailCode } from './email-code';
+import { trialMarketingEnabled } from '../../lib/env';
 import './stylist-auth.css';
 
 function FeatureIcon({ children }: { children: ReactNode }) {
@@ -84,7 +85,7 @@ export default function StylistSignUpPage() {
           <li><FeatureIcon><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" /><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" /></FeatureIcon><span><strong>{t('stylistAuth.signUp.featureChairTitle')}</strong><span>{t('stylistAuth.signUp.featureChairBody')}</span></span></li>
         </ul>
         <div className="stylist-auth__free">
-          <button type="button" className="stylist-auth__start" onClick={startFree}>{t('stylistAuth.signUp.freeTitle')}</button>
+          <button type="button" className="stylist-auth__start" onClick={startFree}>{t(trialMarketingEnabled ? 'stylistAuth.signUp.freeTitleTrial' : 'stylistAuth.signUp.freeTitle')}</button>
           <span>{t('stylistAuth.signUp.freeBody')} <Link className="stylist-auth__accent" to="/pricing">{t('stylistAuth.signUp.seePlans')}</Link></span>
         </div>
       </section>}

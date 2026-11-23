@@ -99,3 +99,23 @@ Phase C5 disposition is limited to these six folders. The remaining empty folder
 These aliases close folder duplication only. D7 scheduling and D11 end-to-end identity/tenant-security evidence remain open.
 
 Task 4.5 (Nov 8) removed 21 more empty folders and lists every remaining one with its owner in `docs/engineering/function-folders.md`.
+
+## Free trial screens (CR-018, 2026-11-22)
+
+Built from the T- and EM-boards on the design canvas. All sit behind the `trial_enabled` platform switch except the locks (T8/T10/T12), which follow the plan for every stylist.
+
+| # | Screen | Route / place | Implementation files | Status |
+|---|---|---|---|---|
+| T1 | Start free trial | `/:businessId/start-trial` (first app entry for an eligible owner) | `features/billing/StartTrialPage.tsx`, `features/billing/trial-offer.ts`, `app/ArtistShell.tsx` | Built |
+| T3 | Trial strip (days 1–23) | Home, under the greeting | `features/bookings/HomeBanner.tsx` | Built |
+| T4 | Trial ends soon (last 7 days) | Home banner | `features/bookings/HomeBanner.tsx` | Built |
+| T5 | Plan during the trial, after-trial choice | `/:businessId/settings/plan` | `features/reports/PlanPage.tsx` | Built |
+| T6 | Plan after the trial on Free | `/:businessId/settings/plan` | `features/reports/PlanPage.tsx` | Built |
+| T7 | Trial ended banner | Home banner | `features/bookings/HomeBanner.tsx` | Built |
+| T8 / T10 | Locked feature (lock card over the real screen, inert) | Marketing, AI Revenue Center, Google Calendar sync, advanced reports, cover picker | `features/billing/PlanGate.tsx` | Built |
+| T9 | Unlock on the card on file | Sheet from a lock card or Plan | `features/billing/UnlockSheet.tsx` | Built |
+| T11 | Payment didn't go through | Home banner (not dismissible) and Plan | `features/bookings/HomeBanner.tsx`, `features/reports/PlanPage.tsx` | Built |
+| T12 | Settings plan row and lock badges; handle lock note | Settings, Profile | `app/ArtistPages.tsx`, `features/showcase/ProfileSettingsPage.tsx` | Built |
+| — | Trial and billing texts opt-in | Settings › Language & notifications | `features/messaging/NotificationSettingsPage.tsx` | Built (no board; uses the client-emails section pattern) |
+| EM13–EM15 | Trial ending, payment failed, trial ended emails | Email | `supabase/functions/_shared/providers/email/account.ts` | Built |
+| — | Admin trial card and actions | Admin › Stylist | `features/admin/AdminTrialCard.tsx` | Built (no board; admin card pattern) |

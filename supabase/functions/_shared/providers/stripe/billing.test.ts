@@ -22,7 +22,7 @@ describe('Stripe Billing', () => {
   });
   it('only accepts a complete checkout for the same business', () => {
     const session = { mode: 'subscription', status: 'complete', client_reference_id: biz, customer: 'cus_1', metadata: { artist_business_id: biz, plan_key: 'ai_growth' }, subscription: { id: 'sub_1', status: 'active' } };
-    expect(verifiedSubscription(session, biz)).toEqual({ plan: 'ai_growth', customerId: 'cus_1', subscriptionId: 'sub_1', status: 'active' });
+    expect(verifiedSubscription(session, biz)).toEqual({ plan: 'ai_growth', customerId: 'cus_1', subscriptionId: 'sub_1', status: 'active', trial: false });
     expect(verifiedSubscription({ ...session, status: 'open' }, biz)).toBeNull();
     expect(verifiedSubscription(session, 'someone-else')).toBeNull();
     expect(verifiedSubscription({ ...session, metadata: { artist_business_id: biz, plan_key: 'free' } }, biz)).toBeNull();

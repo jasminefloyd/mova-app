@@ -5,7 +5,7 @@ import { Button, Card } from '../../components';
 import { operatorLocation } from '../operator-url';
 import { useArtistBusiness } from '../../features/settings/useArtistBusiness';
 
-export function OperatorAlias({ section, titleKey }: { section: 'growth' | 'money' | 'reports'; titleKey: string }) {
+export function OperatorAlias({ section, titleKey }: { section: 'growth' | 'money' | 'reports' | 'settings/plan'; titleKey: string }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { businessId, loading } = useArtistBusiness();
@@ -25,7 +25,7 @@ export function OperatorAlias({ section, titleKey }: { section: 'growth' | 'mone
     <Card>
       <h1>{t(titleKey)}</h1>
       <p>{t('reports.signInRequired')}</p>
-      <Button onClick={() => navigate('/login')}>{t('onboarding.signIn')}</Button>
+      <Button onClick={() => navigate(section === 'settings/plan' ? '/login?returnTo=%2Fplan' : '/login')}>{t('onboarding.signIn')}</Button>
     </Card>
   </main>;
 }

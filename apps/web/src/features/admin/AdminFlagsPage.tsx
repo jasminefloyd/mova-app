@@ -16,6 +16,7 @@ const labels: Record<Switch['key'], { name: string; note: string }> = {
   marketing_social: { name: 'Social publishing', note: 'Delivery stays unavailable until platform app review and account publishing connections are complete.' },
   marketing_web_push: { name: 'Marketing web push', note: 'Delivery stays unavailable until VAPID, opt-in and preference controls are complete.' },
   marketing_wallet: { name: 'Wallet marketing', note: 'Only eligible Google Wallet reward notices may use this switch. Apple Wallet updates remain transactional.' },
+  trial_enabled: { name: 'Free trial', note: 'New owners are offered 30 days of AI + Growth with a card on file. Turn on after the Stripe test-clock run passes, together with VITE_TRIAL_ENABLED for the website copy.' },
 };
 
 export default function AdminFlagsPage() {

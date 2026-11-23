@@ -1,0 +1,108 @@
+/* Free trial and plan locks (boards T1, T3–T12). Built from the boards' CSS, on the design tokens. */
+
+/* T3 trial strip (days 1–23), in the Home banner slot */
+.mova-trial-strip { display: flex; align-items: center; gap: 10px; border: 1px solid var(--mint); border-radius: 16px; padding: 9px 12px; background: var(--surface-alt); color: var(--ink-primary); font-size: 13px; }
+.mova-trial-strip__dot { display: flex; flex: none; width: 28px; height: 28px; align-items: center; justify-content: center; border-radius: 14px; background: var(--forest); color: var(--mint); }
+.mova-trial-strip__copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 1px; }
+.mova-trial-strip__copy strong { font-size: 13.5px; font-weight: 700; }
+.mova-trial-strip__copy > span { color: var(--ink-muted); font-size: 12px; }
+.mova-trial-strip a { flex: none; color: var(--forest); font-size: 13px; font-weight: 700; text-decoration: none; }
+.mova-trial-meter { height: 4px; margin-top: 5px; overflow: hidden; border-radius: 2px; background: var(--line); }
+.mova-trial-meter i { display: block; height: 100%; border-radius: 2px; background: var(--forest); }
+
+/* T4 / T7 / T11 banner variants (the base is .mova-home-banner in styles.css) */
+.mova-home-banner--trial { border-color: #EBD3C1; background: var(--surface-warm); }
+.mova-home-banner--alert { border-color: #E8C4BE; background: #FBEFEC; }
+.mova-home-banner--alert .mova-home-banner__action--solid { background: var(--danger, #9A3B2E); }
+.mova-home-banner--alert .mova-home-banner__copy > strong, .mova-home-banner--trial .mova-home-banner__copy > strong, .mova-home-banner--locked .mova-home-banner__copy > strong { white-space: normal; }
+.mova-home-banner__tile--alert { background: var(--danger, #9A3B2E); color: #fff; box-shadow: none; }
+.mova-home-banner__tile--lock { color: var(--mint); box-shadow: none; }
+.mova-trial-days { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; line-height: 1; }
+.mova-trial-days b { color: var(--ivory); font: 800 18px var(--font-display, Manrope), sans-serif; }
+.mova-trial-days small { color: var(--mint); font: 700 8.5px var(--font-ui, "DM Sans"), sans-serif; letter-spacing: .4px; text-transform: uppercase; }
+
+/* T8 / T10 lock card and the greyed screen under it */
+.mova-lock-card { position: relative; display: flex; flex-direction: column; gap: 10px; overflow: hidden; margin: var(--space-3) 0; border-radius: 22px; padding: 18px; background: var(--forest); color: var(--ivory); }
+.mova-lock-card__leaf { position: absolute; top: -26px; right: -26px; fill: var(--botanical); }
+.mova-lock-card__tag { position: relative; display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; height: 26px; border-radius: 13px; padding: 0 10px; background: #264E3E; color: var(--mint); font-size: 12px; font-weight: 700; }
+.mova-page .mova-lock-card h2, .mova-lock-card h2 { position: relative; display: block; margin: 0; color: var(--ivory); font: 800 21px/1.2 var(--font-display, Manrope), sans-serif; letter-spacing: -.3px; }
+.mova-lock-card p { position: relative; margin: 0; color: var(--mint); font-size: 14px; line-height: 1.45; }
+.mova-lock-card .mova-button { position: relative; width: 100%; border-radius: var(--radius-pill, 999px); }
+.mova-lock-card__more { position: relative; align-self: center; color: var(--ivory); font-size: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.mova-locked { opacity: .42; filter: grayscale(.35); pointer-events: none; user-select: none; }
+.mova-lock-badge { display: inline-flex; align-items: center; gap: 4px; height: 22px; border-radius: 11px; padding: 0 8px; background: #EBEEE8; color: var(--ink-secondary); font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.mova-lock-badge--growth { background: var(--forest); color: var(--mint); }
+
+/* T5 / T6 plan page */
+.mova-trial-card { display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--mint); border-radius: 20px; padding: 16px; background: var(--surface-alt); }
+.mova-trial-card__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mova-trial-card__top strong, .mova-trial-card h2 { margin: 0; font: 800 18px/1.25 var(--font-display, Manrope), sans-serif; }
+.mova-trial-card__days { border-radius: 12px; padding: 3px 9px; background: var(--forest); color: var(--mint); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.mova-trial-card dl { display: grid; gap: 6px; margin: 4px 0 0; font-size: 13.5px; }
+.mova-trial-card dl div { display: flex; justify-content: space-between; gap: 10px; }
+.mova-trial-card dt { color: var(--ink-muted); }
+.mova-trial-card dd { margin: 0; font-weight: 600; text-align: right; }
+.mova-trial-card p { margin: 0; color: var(--ink-secondary); font-size: 14px; line-height: 1.45; }
+.mova-trial-card--ended { border-color: var(--line); background: var(--surface); }
+.mova-trial-card--offer { position: relative; overflow: hidden; border: 0; background: var(--forest); color: var(--ivory); }
+.mova-trial-card--offer h2 { color: var(--ivory); }
+.mova-trial-card--offer p { color: var(--mint); }
+.mova-trial-card .mova-link-button { align-self: flex-start; color: var(--forest); }
+.mova-section-label { margin: var(--space-5) 0 var(--space-2); color: var(--ink-muted); font: 700 12px var(--font-ui, "DM Sans"), sans-serif; letter-spacing: .6px; text-transform: uppercase; }
+.mova-pick { display: grid; gap: 10px; }
+.mova-pick__opt { position: relative; display: flex; align-items: flex-start; gap: 12px; border: 1px solid var(--line); border-radius: 18px; padding: 14px; background: var(--surface); cursor: pointer; }
+.mova-pick__opt input { position: absolute; opacity: 0; pointer-events: none; }
+.mova-pick__opt.is-on { border: 2px solid var(--forest); padding: 13px; }
+.mova-pick__opt:focus-within { outline: 2px solid var(--focus, var(--forest)); outline-offset: 2px; }
+.mova-pick__rad { display: flex; flex: none; width: 22px; height: 22px; align-items: center; justify-content: center; margin-top: 1px; border: 2px solid var(--line-control); border-radius: 50%; }
+.mova-pick__opt.is-on .mova-pick__rad { border-color: var(--forest); }
+.mova-pick__opt.is-on .mova-pick__rad i { width: 10px; height: 10px; border-radius: 50%; background: var(--forest); }
+.mova-pick__copy { display: flex; flex: 1; flex-direction: column; gap: 3px; }
+.mova-pick__row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.mova-pick__row strong { font: 800 16px var(--font-display, Manrope), sans-serif; }
+.mova-pick__row span { font-size: 14px; font-weight: 700; }
+.mova-pick__copy small { color: var(--ink-muted); font-size: 12.5px; line-height: 1.4; }
+
+/* T9 unlock sheet */
+.mova-unlock { display: flex; flex-direction: column; gap: 12px; }
+.mova-unlock > p { margin: 0; color: var(--ink-secondary); font-size: 14px; line-height: 1.45; }
+.mova-unlock .mova-button { width: 100%; min-height: 52px; border-radius: var(--radius-pill, 999px); }
+.mova-unlock__note { text-align: center; font-size: 12.5px !important; }
+.mova-card-line { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--ink-secondary); font-size: 13.5px; }
+.mova-card-line b { color: var(--ink-primary); }
+
+/* T1 start trial */
+.mova-start-trial { display: flex; flex-direction: column; gap: 16px; max-width: 520px; margin: 0 auto; padding: 16px 20px 28px; }
+.mova-start-trial__brand { margin: 0; color: var(--forest); font: 800 24px var(--font-display, Manrope), sans-serif; letter-spacing: -.5px; }
+.mova-start-trial__hero { position: relative; display: flex; flex-direction: column; gap: 10px; overflow: hidden; border-radius: 26px; padding: 22px 20px 20px; background: var(--forest); color: var(--ivory); }
+.mova-start-trial__leaf { position: absolute; top: -34px; right: -30px; fill: var(--botanical); }
+.mova-start-trial__overline { position: relative; color: var(--mint); font-size: 12.5px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; }
+.mova-start-trial__hero h1 { position: relative; margin: 0; color: var(--ivory); font: 800 30px/1.08 var(--font-display, Manrope), sans-serif; letter-spacing: -.6px; }
+.mova-start-trial__hero p { position: relative; margin: 0; color: var(--mint); font-size: 15px; line-height: 1.45; }
+.mova-start-trial__list { display: grid; margin: 0; border: 1px solid var(--line); border-radius: 20px; padding: 4px 16px; background: var(--surface); list-style: none; }
+.mova-start-trial__list li { display: flex; align-items: center; gap: 12px; padding: 11px 0; font-size: 14.5px; line-height: 1.35; }
+.mova-start-trial__list li + li { border-top: 1px solid #EBEEE8; }
+.mova-start-trial__list strong { display: block; font-weight: 700; }
+.mova-start-trial__icon { display: flex; flex: none; width: 34px; height: 34px; align-items: center; justify-content: center; border-radius: 17px; background: var(--mint); color: var(--forest); }
+.mova-start-trial__timeline { display: grid; margin: 0; padding: 2px 0 0 4px; list-style: none; }
+.mova-start-trial__timeline li { position: relative; display: flex; gap: 14px; padding: 0 0 14px; font-size: 14px; line-height: 1.4; }
+.mova-start-trial__timeline li::before { position: absolute; top: 18px; bottom: 0; left: 7px; width: 2px; background: var(--line); content: ''; }
+.mova-start-trial__timeline li:last-child { padding-bottom: 0; }
+.mova-start-trial__timeline li:last-child::before { display: none; }
+.mova-start-trial__timeline i { flex: none; width: 16px; height: 16px; margin-top: 2px; border: 2px solid var(--forest); border-radius: 50%; background: var(--surface); }
+.mova-start-trial__timeline li:first-child i { background: var(--forest); }
+.mova-start-trial__timeline strong { display: block; font-size: 14.5px; }
+.mova-start-trial .mova-button { width: 100%; min-height: 54px; border-radius: var(--radius-pill, 999px); }
+.mova-start-trial__note { margin: 0; color: var(--ink-muted); font-size: 12.5px; line-height: 1.45; text-align: center; }
+.mova-start-trial__free { align-self: center; min-height: 44px; border: 0; background: transparent; color: var(--forest); font: 700 15px var(--font-ui, "DM Sans"), sans-serif; cursor: pointer; }
+.mova-sms-opt { display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 18px; padding: 14px; background: var(--surface); }
+.mova-sms-opt__row { display: flex; align-items: flex-start; gap: 12px; color: var(--ink-muted); font-size: 13px; line-height: 1.4; cursor: pointer; }
+.mova-sms-opt__row input { flex: none; width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--forest); }
+.mova-sms-opt__row strong { display: block; color: var(--ink-primary); font-size: 14.5px; }
+.mova-sms-opt__field { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 46px; border: 1px solid var(--line-control); border-radius: 12px; padding: 0 12px; font-size: 14px; }
+.mova-sms-opt__field span { color: var(--ink-muted); }
+.mova-sms-opt__field input { min-width: 0; flex: 1; border: 0; background: transparent; color: var(--ink-primary); font: 600 14px var(--font-ui, "DM Sans"), sans-serif; text-align: right; }
+.mova-sms-opt__field input:focus { outline: none; }
+.mova-sms-opt__field:focus-within { outline: 2px solid var(--focus, var(--forest)); outline-offset: 1px; }
+.mova-sms-opt small { color: var(--ink-muted); font-size: 11.5px; line-height: 1.4; }
+.mova-field-error { margin: 0; color: var(--danger, #9A3B2E); font-size: 13px; }

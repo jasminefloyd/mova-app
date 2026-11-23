@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type FormE
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { Button, Chip, ErrorState, ScreenHeader, TextArea, TextField } from '../../components';
+import { Button, Chip, ErrorState, Icon, ScreenHeader, TextArea, TextField } from '../../components';
 import { operatorUrl } from '../../app/operator-url';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
+import { usePlan } from '../billing/PlanProvider';
+import { isLocked } from '../billing/plan-api';
 
 type Profile = { display_name: string; bio: string; specialties: string[]; handle: string; preferred_locale: 'en-US' | 'es-US'; profile_photo_path: string | null; cover_photo_path: string | null; cover_source?: 'upload' | 'unsplash'; cover_image_url?: string | null; cover_credit_name?: string | null; cover_credit_url?: string | null; cover_unsplash_url?: string | null; contact_phone?: string | null; contact_email?: string | null; website_url?: string | null; social_links?: Partial<Record<SocialKey, string>> | null };
 type CoverCredit = { name: string; url: string; unsplashUrl: string };
@@ -203,6 +205,9 @@ export function ProfileSettingsPage() {
   if (!client || !businessId) return <main className="mova-page"><ErrorState title={t('settings.identityError')} retryLabel={t('settings.retry')} onRetry={() => void load()} /></main>;
   const accept = 'image/jpeg,image/png,image/webp,image/heic,image/heif';
   const coverImage = coverPreview ?? coverUrl;
+  const { summary: planSummary } = usePlan();
+  const coverLocked = isLocked(planSummary, 'custom_cover');
+  const handleLocked = isLocked(planSummary, 'custom_handle');
   const avatar = photoPreview ?? photoUrl;
   return <main className="mova-page mova-settings-page mova-profile-edit">
     <ScreenHeader onBack={() => navigate(operatorUrl(businessId, 'settings'))} backLabel={t('settings.close')}
@@ -212,7 +217,7 @@ export function ProfileSettingsPage() {
     {profile && <form className="mova-form-stack" onSubmit={(event) => void save(event)}>
       <section className="mova-profile-edit__photos" aria-label={t('settings.photos')}>
         <div className="mova-profile-edit__cover" role="img" aria-label={t('settings.coverPhoto')} style={coverImage ? { backgroundImage: `url("${coverImage}")` } : undefined}>
-          <Link className="mova-profile-edit__cover-button" to={operatorUrl(businessId, 'settings/profile/cover')}>{t('settings.changeCover')}</Link>
+          <Link className="mova-profile-edit__cover-button" to={operatorUrl(businessId, 'settings/profile/cover')}>{coverLocked && <Icon name="lock" size={14} />}{t('settings.changeCover')}</Link>
         </div>
         {credit && !coverPreview && <p className="mova-profile-edit__credit">{t('coverPicker.photoCredit')} <a href={credit.url} target="_blank" rel="noopener noreferrer">{credit.name}</a> / <a href={credit.unsplashUrl} target="_blank" rel="noopener noreferrer">{t('coverPicker.unsplash')}</a></p>}
         <div className="mova-profile-edit__avatar-row">
@@ -227,10 +232,11 @@ export function ProfileSettingsPage() {
         <span className="mova-field__label">{t('onboarding.handleLabel')}</span>
         <span className={`mova-input mova-profile-edit__handle-box${handleError ? ' is-invalid' : ''}`}>
           <span aria-hidden="true">{t('settings.handlePrefix')}</span>
-          <input aria-label={t('onboarding.handleLabel')} value={draft.handle} maxLength={30} autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-invalid={Boolean(handleError)} aria-describedby="profile-handle-note"
+          <input aria-label={t('onboarding.handleLabel')} value={draft.handle} maxLength={30} autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-invalid={Boolean(handleError)} aria-describedby="profile-handle-note" readOnly={handleLocked}
             onChange={(event) => { setHandleError(null); edit({ handle: event.currentTarget.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }); }} />
         </span>
-        {handleError ? <span className="mova-field__error" id="profile-handle-note" role="alert">{t(`onboarding.handleStatus.${handleError}`)}</span>
+        {handleLocked ? <span className="mova-field__hint" id="profile-handle-note"><Icon name="lock" size={14} /> {t('planGate.handle')} <Link to={operatorUrl(businessId, 'settings/plan')}>{t('planGate.compare')}</Link></span>
+          : handleError ? <span className="mova-field__error" id="profile-handle-note" role="alert">{t(`onboarding.handleStatus.${handleError}`)}</span>
           : <span className="mova-field__hint" id="profile-handle-note">{draft.handle !== profile.handle ? t('settings.handleChangeWarning') : t('settings.handleWarning')}</span>}
       </label>
 

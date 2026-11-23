@@ -14,6 +14,8 @@ export type WelcomeEmailVars = {
   /** Where the hero leaf image is hosted (the web app's public folder). */
   assetBaseUrl?: string | null;
   postalAddress?: string | null;
+  /** WP7: the free trial is on (trial_enabled), so the plan line talks about the trial instead of Free. */
+  trial?: boolean;
 };
 
 const esc = (value: string) => value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
@@ -34,6 +36,7 @@ const COPY = {
     ],
     action: 'Finish setting up',
     plan: 'You’re on the Free plan: $0 a month, and no Mova fee on cash or on payments the salon collects.',
+    planTrial: 'Your 30-day AI + Growth trial starts when you open Mova. You can switch to Pro or Free anytime.',
     why: 'You got this email because you have a Mova account. Questions? Reply to this email and a person will answer.',
     tagline: 'Your business moves with you.',
   },
@@ -51,6 +54,7 @@ const COPY = {
     ],
     action: 'Terminar configuración',
     plan: 'Estás en el plan Gratis: $0 al mes, y Mova no cobra comisión por efectivo ni por pagos que cobre el salón.',
+    planTrial: 'Tu prueba de 30 días de AI + Growth empieza cuando abras Mova. Puedes cambiar a Pro o Gratis cuando quieras.',
     why: 'Recibiste este correo porque tienes una cuenta de Mova. ¿Preguntas? Responde a este correo y una persona te contestará.',
     tagline: 'Tu negocio se mueve contigo.',
   },
@@ -89,7 +93,7 @@ export function renderWelcomeEmail(locale: EmailLocale, vars: WelcomeEmailVars) 
     + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;background:#FFFFFF;border:1px solid #DCE1D9;border-radius:20px;border-collapse:separate"><tr><td style="padding:6px 20px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table></td></tr></table></td></tr>`;
 
   const cta = settings ? `<tr><td style="padding:20px 32px 0"><a href="${esc(settings)}" style="display:block;height:54px;line-height:54px;border-radius:27px;background:#18392F;color:#F7F5EF;text-align:center;text-decoration:none;font-family:${UI};font-size:16px;font-weight:700">${esc(c.action)}</a></td></tr>` : '';
-  const plan = `<tr><td style="padding:20px 32px 0"><p style="margin:0;font-family:${UI};font-size:15px;line-height:1.55;color:#3F4D46">${esc(c.plan)}</p></td></tr>`;
+  const plan = `<tr><td style="padding:20px 32px 0"><p style="margin:0;font-family:${UI};font-size:15px;line-height:1.55;color:#3F4D46">${esc(vars.trial ? c.planTrial : c.plan)}</p></td></tr>`;
   const footer = `<tr><td style="padding-top:24px"><div style="border-top:1px solid #DCE1D9;padding:20px 32px 26px;font-family:${UI};font-size:12px;line-height:1.55;color:#4F5F57">${esc(c.why)}<br><br><b style="font-family:${DISPLAY};font-size:14px;font-weight:800;color:#18392F">mova</b> · ${esc(c.tagline)} · mova-beauty.co<br>${address}</div></td></tr>`;
 
   const html = `<!doctype html><html lang="${lang === 'es-US' ? 'es' : 'en'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">`
@@ -104,7 +108,7 @@ export function renderWelcomeEmail(locale: EmailLocale, vars: WelcomeEmailVars) 
   const text = [
     c.headline(name), '', c.lead, page ? `${c.yourPage}: ${page}` : '', '', c.stepsTitle,
     ...c.steps.map(([title, body], index) => `${index + 1}. ${title}: ${body}${stepLinks[index] ? ` ${stepLinks[index]}` : ''}`),
-    '', settings ? `${c.action}: ${settings}` : '', '', c.plan, '', c.why, '', `Mova · ${vars.postalAddress || '[MAILING ADDRESS]'}`,
+    '', settings ? `${c.action}: ${settings}` : '', '', vars.trial ? c.planTrial : c.plan, '', c.why, '', `Mova · ${vars.postalAddress || '[MAILING ADDRESS]'}`,
   ].filter((line, index, all) => !(line === '' && all[index - 1] === '')).join('\n');
 
   return { subject: c.subject(name), preview: c.preview, text, html };

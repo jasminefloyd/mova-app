@@ -2,6 +2,7 @@ import type { SmsDb } from './send.ts';
 import type { SmsInbound, SmsProvider } from './types.ts';
 import { keywordReply, parseKeyword, type SmsKeyword } from './policy.ts';
 import { reserveSpend } from '../spend.ts';
+import { accountKeywordReply } from './account.ts';
 
 export type InboundOutcome = { keyword: SmsKeyword | null; businesses: number; replies: number };
 
@@ -9,8 +10,22 @@ export type InboundOutcome = { keyword: SmsKeyword | null; businesses: number; r
  * Records an inbound text and applies STOP/START/HELP (task 4.4). Keyword confirmations are the only
  * texts sent without consent, as carriers require; they are logged as transactional replies.
  */
-export async function handleInboundSms(db: SmsDb, provider: SmsProvider, inbound: SmsInbound, now = new Date()): Promise<InboundOutcome> {
+export async function handleInboundSms(db: SmsDb, provider: SmsProvider, inbound: SmsInbound, now = new Date(), accountNumber?: string | null): Promise<InboundOutcome> {
   const keyword = parseKeyword(inbound.text);
+  // Mova's platform number carries only trial and billing texts to stylists (account consent, not client consent).
+  if (accountNumber && inbound.to === accountNumber) {
+    if (!keyword) return { keyword: null, businesses: 0, replies: 0 };
+    if (keyword !== 'help') {
+      const { error } = await db.rpc('mova_account_sms_keyword', { p_phone: inbound.from, p_keyword: keyword });
+      if (error) throw new Error('INBOUND_SAVE_FAILED');
+    }
+    try {
+      await provider.send({ to: inbound.from, from: inbound.to, body: accountKeywordReply(keyword), idempotencyKey: `account-keyword:${inbound.providerMessageId ?? `${inbound.from}:${now.toISOString()}`}` });
+      return { keyword, businesses: 0, replies: 1 };
+    } catch {
+      return { keyword, businesses: 0, replies: 0 };
+    }
+  }
   const { data, error } = await db.rpc('mova_sms_handle_inbound', {
     p_to: inbound.to, p_from: inbound.from, p_text: inbound.text, p_keyword: keyword,
     p_provider: provider.name, p_provider_message_id: inbound.providerMessageId, p_now: now.toISOString(),

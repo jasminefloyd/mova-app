@@ -9,6 +9,8 @@ import { smsProviderFromEnv } from '../_shared/providers/sms/index.ts';
 import { deliverStylistAlert, wantsEmail } from '../_shared/stylist-alerts.ts';
 import { notificationEventFor } from '../_shared/notification-preferences.ts';
 import { vapidFromEnv } from '../_shared/web-push.ts';
+import { deliverAccountMessage, isAccountEvent, type AccountPayload } from '../_shared/account-messages.ts';
+import { sendAccountSms } from '../_shared/providers/sms/account.ts';
 import { emailProviderFromEnv, sendEmail, type AppointmentEmailVars, type EmailDb, type EmailTemplateId } from '../_shared/providers/email/index.ts';
 
 const equal = (left: string, right: string) => {
@@ -29,6 +31,18 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
     await consumeSlotOpened(db, smsProviderFromEnv(env), outboxEvent.id, env);
   }
   if (!outboxEvent.artist_business_id) return;
+
+  // Free trial and plan billing messages (D7): email, push and text to the business owner. Account
+  // messages skip the in-app inbox and the per-event notification choices.
+  if (isAccountEvent(outboxEvent.event_type)) {
+    const env = (name: string) => Deno.env.get(name);
+    await deliverAccountMessage(db as never, {
+      email: emailProviderFromEnv(env) ?? emailProviderFromEnv((name) => name === 'MOVA_MESSAGING_LIVE_EMAIL' ? 'true' : env(name)),
+      vapid: vapidFromEnv(env), sms: smsProviderFromEnv(env), env,
+      baseUrl: env('MOVA_EMAIL_PUBLIC_BASE_URL') ?? 'https://mova-beauty.co', postalAddress: env('MOVA_EMAIL_POSTAL_ADDRESS') ?? null,
+    }, { eventType: outboxEvent.event_type, artistBusinessId: outboxEvent.artist_business_id, outboxEventId: outboxEvent.id, payload: outboxEvent.payload as AccountPayload });
+    return;
+  }
 
   const eventAgeMs = Date.now() - Date.parse(outboxEvent.occurred_at);
   // Do not create fresh-looking inbox alerts for events that sat in the queue for a day.
@@ -114,6 +128,7 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
   if (outboxEvent.event_type === 'artist.welcome' && welcomeEnabled) {
     if (!welcomeEmailProvider) throw new Error('WELCOME_EMAIL_PROVIDER_NOT_CONFIGURED');
     const { data: context, error } = await db.rpc('mova_stylist_welcome_email_context', { p_artist_business_id: outboxEvent.artist_business_id });
+    const { data: trialSwitch } = await db.from('mova_platform_switches').select('enabled').eq('key', 'trial_enabled').maybeSingle();
     if (error) throw new Error('STYLIST_EMAIL_CONTEXT_FAILED');
     const value = context as { recipients?: Array<{ email: string; name: string; first_name?: string | null }>; vars?: AppointmentEmailVars; artist_business_id?: string; locale?: string; handle?: string | null; business_number?: number | null } | null;
     const base = (Deno.env.get('MOVA_EMAIL_PUBLIC_BASE_URL') ?? 'https://mova-beauty.co').replace(/\/$/, '');
@@ -133,6 +148,7 @@ async function processOutboxEvent(db: ReturnType<typeof serviceClient>, eventId:
             locationsUrl: operator ? `${operator}/settings/locations` : null,
             qrUrl: operator ? `${operator}/settings/qr` : null,
             assetBaseUrl: base,
+            trial: (trialSwitch as { enabled?: boolean } | null)?.enabled === true,
           },
           postalAddress: Deno.env.get('MOVA_EMAIL_POSTAL_ADDRESS') },
         idempotencyKey: `email:${outboxEvent.id}:stylist:${recipient.email.toLowerCase()}`,
@@ -215,6 +231,16 @@ Deno.serve(withSystemRequestLogging('job-worker', async (request) => {
         if (!fee) throw new Error('STRIPE_FEE_NOT_SETTLED');
         const { error: feeError } = await db.rpc('mova_stripe_record_processor_fee', { p_payment_id: job.payload.payment_id, p_fee_minor: fee.feeMinor });
         if (feeError) throw new Error('STRIPE_FEE_SAVE_FAILED');
+      } else if (job.job_type === 'account_sms' && typeof job.payload?.user_id === 'string' && typeof job.payload?.body === 'string') {
+        // A trial or billing text held for quiet hours (9:00–20:00 business time).
+        const env = (name: string) => Deno.env.get(name);
+        const { data: consent } = await db.from('mova_account_sms_consents').select('phone_e164').eq('user_id', job.payload.user_id).is('revoked_at', null).maybeSingle();
+        const outcome = await sendAccountSms(db as never, smsProviderFromEnv(env), env, {
+          userId: job.payload.user_id, artistBusinessId: job.payload.artist_business_id, phone: consent?.phone_e164 ?? null,
+          eventType: String(job.payload.event_type), body: job.payload.body, idempotencyKey: String(job.payload.idempotency_key),
+          timeZone: String(job.payload.time_zone || 'America/New_York'), trialStartedAt: job.payload.trial_started_at ?? null,
+        });
+        if (outcome.status === 'failed') throw new Error('ACCOUNT_SMS_FAILED');
       } else if (job.job_type === 'appointment_reminder' && typeof job.payload?.appointment_id === 'string') {
         const emailProvider = emailProviderFromEnv((name) => Deno.env.get(name));
         if (!emailProvider) throw new Error('EMAIL_PROVIDER_NOT_CONFIGURED');
@@ -227,7 +253,7 @@ Deno.serve(withSystemRequestLogging('job-worker', async (request) => {
       if (completeError || completed !== true) throw new Error('JOB_LEASE_LOST');
       succeeded += 1;
     } catch (error) {
-      const code = error instanceof Error && ['JOB_TYPE_UNSUPPORTED','JOB_LEASE_LOST','APPOINTMENT_EMAIL_FAILED','STRIPE_FEE_NOT_SETTLED','STRIPE_FEE_SAVE_FAILED','EMAIL_PROVIDER_NOT_CONFIGURED','APPOINTMENT_EMAIL_CONTEXT_FAILED','STRIPE_TEST_MODE_DISABLED','STRIPE_TEST_CONFIGURATION_MISSING','CHECKOUT_COMPLETED_AWAITING_WEBHOOK','CHECKOUT_EXPIRY_NOT_CONFIRMED','CHECKOUT_SESSION_STATUS_INVALID','CHECKOUT_HOLD_RELEASE_FAILED','STRIPE_REFUND_RESPONSE_INVALID','STRIPE_REFUND_STATUS_SAVE_FAILED','STRIPE_REFUND_FAILED'].includes(error.message)
+      const code = error instanceof Error && ['JOB_TYPE_UNSUPPORTED','JOB_LEASE_LOST','APPOINTMENT_EMAIL_FAILED','STRIPE_FEE_NOT_SETTLED','STRIPE_FEE_SAVE_FAILED','EMAIL_PROVIDER_NOT_CONFIGURED','APPOINTMENT_EMAIL_CONTEXT_FAILED','STRIPE_TEST_MODE_DISABLED','STRIPE_TEST_CONFIGURATION_MISSING','CHECKOUT_COMPLETED_AWAITING_WEBHOOK','CHECKOUT_EXPIRY_NOT_CONFIRMED','CHECKOUT_SESSION_STATUS_INVALID','CHECKOUT_HOLD_RELEASE_FAILED','STRIPE_REFUND_RESPONSE_INVALID','STRIPE_REFUND_STATUS_SAVE_FAILED','STRIPE_REFUND_FAILED','ACCOUNT_EMAIL_FAILED','ACCOUNT_SMS_FAILED','ACCOUNT_MESSAGE_CONTEXT_FAILED'].includes(error.message)
         ? error.message : 'JOB_HANDLER_FAILED';
       const { data: status, error: failError } = await db.rpc('mova_fail_background_job', {
         p_job_id: job.id, p_worker_id: workerId, p_error_code: code,

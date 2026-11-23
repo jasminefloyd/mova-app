@@ -1,7 +1,7 @@
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { MetaFunction } from 'react-router';
-import { conciergeEnabled, publicReviewsEnabled, rebookingAutopilotEnabled, seatFillerEnabled, textsEnabled, walletClientCardEnabled } from '../../lib/env';
+import { conciergeEnabled, publicReviewsEnabled, rebookingAutopilotEnabled, seatFillerEnabled, textsEnabled, trialMarketingEnabled, walletClientCardEnabled } from '../../lib/env';
 import { ButtonLink, JsonLd, useSiteShell } from './parts';
 import { breadcrumbLd, faqLd, pageMeta, shellFromMatches, softwareLd } from './seo';
 
@@ -39,7 +39,7 @@ export default function PricingPage() {
     ['always2Label', 'always2Value'],
     ['always3Label', 'always3Value'],
   ] as const;
-  const faqs = [1, 2, 3, 4] as const;
+  const faqs = trialMarketingEnabled ? [1, 2, 3, 5, 4] as const : [1, 2, 3, 4] as const;
 
   return <div>
     <JsonLd data={softwareLd(shell, { withOffers: true })} />
@@ -47,7 +47,7 @@ export default function PricingPage() {
     <JsonLd data={breadcrumbLd(shell, [[t('website.nav.pricing'), '/pricing']])} />
     <section className="mova-site__container mova-site__centered" aria-labelledby="price-h" style={{ paddingBlock: 'clamp(40px, 6vw, 80px) 32px' }}>
       <h1 id="price-h" className="mova-site__h1" style={{ maxWidth: 820, fontSize: 'clamp(38px, 5vw, 60px)' }}>{t('website.pricing.headlineA')} <span className="mova-site__accent">{t('website.pricing.headlineB')}</span></h1>
-      <p className="mova-site__lead" style={{ maxWidth: 620, fontSize: 'clamp(17px, 1.6vw, 19px)' }}>{t('website.pricing.intro')}</p>
+      <p className="mova-site__lead" style={{ maxWidth: 620, fontSize: 'clamp(17px, 1.6vw, 19px)' }}>{t(trialMarketingEnabled ? 'website.pricing.introTrial' : 'website.pricing.intro')}</p>
     </section>
 
     <section className="mova-site__container" aria-label={t('website.pricing.headlineA')} style={{ paddingBottom: 'clamp(48px, 6vw, 80px)' }}>
@@ -64,7 +64,7 @@ export default function PricingPage() {
             <ul>{includedFeatures[key].filter((feature) => rolloutVisibility[feature] ?? true).map((feature) => <li key={feature}>{t(`website.pricing.features.${feature}`)}</li>)}</ul>
             {key === 'growth' && <p className="mova-site__coming-soon"><span>{t('website.pricing.comingSoon')}</span> {t('website.pricing.features.aiPricePilot')}</p>}
           </div>
-          <ButtonLink to="/signup" variant={featured ? 'peach' : 'plan'}>{t('website.pricing.startFree')}</ButtonLink>
+          <ButtonLink to="/signup" variant={featured ? 'peach' : 'plan'}>{t(trialMarketingEnabled ? 'website.pricing.startTrial' : 'website.pricing.startFree')}</ButtonLink>
         </article>)}
       </div>
       <p className="mova-site__fine">{t('website.pricing.processing')}</p>
@@ -87,7 +87,7 @@ export default function PricingPage() {
           <summary>{t(`website.pricing.faq${index}Q`)}</summary>
           {index === 4
             ? <p><Trans i18nKey="website.pricing.faq4A" components={{ calc: <Link to="/calculator" /> }} /></p>
-            : <p>{t(`website.pricing.faq${index}A`)}</p>}
+            : <p>{t(index === 3 && trialMarketingEnabled ? 'website.pricing.faq3ATrial' : `website.pricing.faq${index}A`)}</p>}
         </details>)}
       </div>
     </section>

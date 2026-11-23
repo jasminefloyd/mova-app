@@ -20,6 +20,19 @@ export async function adminRpc<T>(fn: string, args: Record<string, unknown> = {}
   return data as T;
 }
 
+/** Calls an admin Edge Function (for actions that go to Stripe first). The function checks the admin role. */
+export async function adminFunction<T>(name: string, body: Record<string, unknown>): Promise<T> {
+  const supabase = createMovaSupabaseClient();
+  const { data, error } = await supabase.functions.invoke<{ data?: T }>(name, { body });
+  if (error) {
+    const context = (error as { context?: Response }).context;
+    let parsed: { data?: { code?: string }; error?: { code?: string } } | null;
+    try { parsed = context && typeof context.json === 'function' ? await context.json() : null; } catch { parsed = null; }
+    throw new AdminError(parsed?.data?.code ?? parsed?.error?.code ?? 'UNKNOWN');
+  }
+  return (data?.data ?? {}) as T;
+}
+
 function extractCode(message: string | undefined): string {
   const match = /^[A-Z][A-Z0-9_]{2,}$/.exec((message ?? '').trim());
   return match ? match[0] : 'UNKNOWN';
@@ -28,6 +41,11 @@ function extractCode(message: string | undefined): string {
 /** Plain-English text for database codes the screens can show. */
 const messages: Record<string, string> = {
   PLATFORM_ADMIN_REQUIRED: 'This account does not have admin access.',
+  NOT_TRIALING: 'This stylist is not in a free trial right now.',
+  DAYS_INVALID: 'Extend by 1 to 30 days.',
+  SUBSCRIPTION_LIVE: 'This stylist has a live subscription. End or cancel it in Stripe before granting a new trial.',
+  STRIPE_UPDATE_FAILED: 'Stripe did not accept the change. Nothing was changed.',
+  BILLING_NOT_CONFIGURED: 'Stripe billing is not set up in this environment.',
   SLUG_TAKEN: 'Another guide already uses this URL.',
   SLUG_INVALID: 'Use lowercase letters, numbers and hyphens for the URL (3 to 120 characters).',
   TITLE_INVALID: 'Add a title (up to 140 characters).',
@@ -181,7 +199,7 @@ export type SupportList = {
   counts: { all: number; new: number; in_progress: number; waiting_on_stylist: number; resolved: number };
 };
 
-export type Switch = { key: 'autopilot' | 'concierge' | 'seat_filler' | 'zelle' | 'reviews' | 'spanish' | 'tap_to_pay' | 'marketing_email' | 'marketing_social' | 'marketing_web_push' | 'marketing_wallet'; enabled: boolean; reason: string | null; updated_at: string; updated_by: string | null };
+export type Switch = { key: 'autopilot' | 'concierge' | 'seat_filler' | 'zelle' | 'reviews' | 'spanish' | 'tap_to_pay' | 'marketing_email' | 'marketing_social' | 'marketing_web_push' | 'marketing_wallet' | 'trial_enabled'; enabled: boolean; reason: string | null; updated_at: string; updated_by: string | null };
 
 export type Health = {
   checked_at: string;
@@ -203,3 +221,13 @@ export type ActivityRow = {
 export type ActivityPage = { rows: ActivityRow[]; has_more: boolean };
 
 export type BlogStatusFilter = 'all' | 'published' | 'scheduled' | 'drafts';
+
+export type AdminStylistTrial = {
+  enabled: boolean; state: string; eligible: boolean; admin_assigned: boolean; plan_key: string;
+  offered_at: string | null; declined_at: string | null; started_at: string | null; ends_at: string | null; ended_at: string | null;
+  days_left: number | null; after_trial_plan: string | null; subscription_status: string | null; cancel_at_period_end: boolean;
+  card: { brand: string | null; last4: string } | null; card_fingerprint: string | null; stripe_subscription_id: string | null;
+  past_due_since: string | null; grace_ends_at: string | null;
+  messages: Array<{ event_type: string; occurred_at: string; delivered_at: string | null }>;
+  texts: Array<{ event_type: string; status: string; reason: string | null; created_at: string }>;
+};

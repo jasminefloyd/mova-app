@@ -2143,7 +2143,8 @@
       "firstName": "First name",
       "lastName": "Last name",
       "namesPrivate": "Only you see your name. Clients see your display name and link.",
-      "nameRequired": "Enter your first and last name."
+      "nameRequired": "Enter your first and last name.",
+      "freeTitleTrial": "30 days of AI + Growth, free"
     },
     "legal": {
       "terms": "Terms",
@@ -2213,7 +2214,8 @@
     "notice": {
       "confirmed": "Your plan is updated.",
       "cancelled": "Checkout was cancelled. Your plan hasn't changed.",
-      "failed": "We couldn't change your plan. Try again."
+      "failed": "We couldn't change your plan. Try again.",
+      "saved": "Saved. We'll remind you before your trial ends."
     }
   },
   "messaging": {
@@ -2555,7 +2557,12 @@
         "revenueCenter": "AI Revenue Center forecasts and open-slot insights",
         "missedCallTextback": "Missed-call text-back",
         "aiPricePilot": "PricePilot"
-      }
+      },
+      "introTrial": "Try AI + Growth free for 30 days. Then pick the plan that fits.",
+      "startTrial": "Start your free trial",
+      "faq3ATrial": "Yes. Every new stylist gets 30 days of AI + Growth free. Before it ends, keep it, switch to Pro, or go to Free. You can change plans anytime in Settings.",
+      "faq5Q": "Do I need a card for the trial?",
+      "faq5A": "Yes. You add a card when the trial starts. You won't be charged until it ends, and you can switch to Free before then to pay nothing."
     },
     "calculator": {
       "eyebrow": "Free calculator · no signup",
@@ -3030,5 +3037,188 @@
     "differentEmail": "Use a different email",
     "invalid": "That code didn’t work. Check the email or send a new code.",
     "sent": "We sent a new code."
+  },
+  "trial": {
+    "confirming": "Starting your free trial…",
+    "start": {
+      "overline": "Your first {{days}} days",
+      "title": "Try everything in AI + Growth, free.",
+      "lead": "Let Mova fill your chair and market you. Pick your plan before the trial ends.",
+      "includes": "What's included",
+      "features": {
+        "marketing": {
+          "title": "Marketing that fills open slots",
+          "body": "Mova drafts it, you approve it."
+        },
+        "pricePilot": {
+          "title": "PricePilot",
+          "body": "See how your prices compare nearby."
+        },
+        "revenue": {
+          "title": "AI Revenue Center",
+          "body": "This month's forecast and where the money is."
+        },
+        "calendar": {
+          "title": "Calendar sync and advanced reports",
+          "body": "Plus your Mova reviews shown on your page."
+        }
+      },
+      "timeline": "How the trial works",
+      "today": "Today · free trial starts",
+      "todayBody": "Nothing is charged today.",
+      "reminder": "{{date}} · reminder",
+      "reminderBody": "We remind you a week before it ends.",
+      "ends": "{{date}} · {{price}}/month starts",
+      "endsBody": "Or switch to Pro ({{pro}}) or Free before then.",
+      "sms": {
+        "title": "Text me trial and billing reminders",
+        "body": "We also send them by email, and once you allow it, push.",
+        "mobile": "Mobile",
+        "invalid": "Enter a 10-digit US mobile number.",
+        "consent": "Up to 5 texts about your trial and billing. Msg & data rates may apply. Reply STOP to opt out."
+      },
+      "cta": "Add card and start free trial",
+      "note": "Payments through Mova use the Free rate (1.5%) during your trial. Cancel anytime in Settings › Plan.",
+      "free": "Continue on Free",
+      "notice": {
+        "cancelled": "No card added. You can start your trial anytime from Settings › Plan.",
+        "failed": "We couldn't open checkout. Try again.",
+        "used": "This account already had a free trial. Your plans are in Settings › Plan."
+      }
+    },
+    "plan": {
+      "title": "AI + Growth · free trial",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left",
+      "ends": "Trial ends",
+      "then": "Then",
+      "thenFree": "Free · no charge",
+      "perMonth": "{{price}}/month",
+      "perMonthShort": "{{price}}/mo",
+      "feeUntil": "Mova fee until then",
+      "feeFree": "{{fee}} (Free rate)",
+      "updateCard": "Update card",
+      "afterTitle": "After your trial",
+      "after": {
+        "ai_growth": {
+          "title": "Stay on AI + Growth",
+          "body": "Keep everything. + {{fee}} per Mova payment."
+        },
+        "pro": {
+          "title": "Switch to Pro",
+          "body": "AI Revenue Center and rebooking autopilot lock. PricePilot drops to 25 lookups a month. + {{fee}} per Mova payment."
+        },
+        "free": {
+          "title": "Go to Free",
+          "body": "Paid features lock and you're not charged. Nothing is deleted. + {{fee}} per Mova payment."
+        }
+      },
+      "reminders": "You can change this until {{date}}. We'll remind you 7 days and 1 day before by email, push and text.",
+      "endedTitle": "Your AI + Growth trial ended {{date}}",
+      "endedBody": "Marketing, PricePilot, AI Revenue Center and calendar sync are locked. Your campaigns, prices and settings are saved and come back when you unlock.",
+      "unlockCharges": "Unlocking charges {{card}} right away.",
+      "unlock": "Unlock {{plan}}",
+      "offerTitle": "Try AI + Growth free for {{days}} days",
+      "offerBody": "Everything Mova does, with a card added now and no charge until the trial ends. Switch to Pro or Free anytime.",
+      "offerCta": "Start free trial"
+    }
+  },
+  "billingBanner": {
+    "trialRegion": "Free trial",
+    "lockedRegion": "Trial ended",
+    "stripTitle_one": "AI + Growth free trial · {{count}} day left",
+    "stripTitle_other": "AI + Growth free trial · {{count}} days left",
+    "stripThen": "Then {{price}}/month on {{date}}",
+    "stripFree": "Then Free on {{date}} · no charge",
+    "plan": "Plan",
+    "days_one": "day",
+    "days_other": "days",
+    "endsTitle": "Trial ends {{date}}",
+    "endsBody": "Then {{price}}/month for {{plan}}. Switch anytime.",
+    "endsFree": "Then you move to Free. You won't be charged.",
+    "manage": "Manage",
+    "failedTitle": "Payment didn't go through",
+    "failedBody": "Update your card by {{date}} to keep {{plan}}.",
+    "updateCard": "Update card",
+    "lockedTitle": "Your trial has ended",
+    "lockedBody": "Marketing and PricePilot are paused. Your setup is saved.",
+    "unlock": "Unlock",
+    "tryFree": "Try free"
+  },
+  "planGate": {
+    "tagPro": "Pro and AI + Growth",
+    "tagGrowth": "AI + Growth",
+    "unlockPro": "Unlock with Pro · {{price}}/mo",
+    "unlockGrowth": "Unlock AI + Growth · {{price}}/mo",
+    "startTrial": "Start your free trial",
+    "compare": "Compare plans",
+    "badgePro": "Pro",
+    "badgeGrowth": "AI + Growth",
+    "marketing": {
+      "title": "Marketing is locked",
+      "body": "Your campaign and drafts are saved. Unlock to send again.",
+      "name": "Marketing"
+    },
+    "revenue": {
+      "title": "AI Revenue Center is locked",
+      "bodyPro": "You're on Pro. Forecasts, open-slot insights and rebooking autopilot come with AI + Growth.",
+      "body": "Forecasts, open-slot insights and rebooking autopilot come with AI + Growth.",
+      "name": "AI Revenue Center"
+    },
+    "calendarSync": {
+      "title": "Calendar sync is locked",
+      "body": "Your connection is saved. Unlock to keep Google Calendar and Mova in step.",
+      "name": "Calendar sync"
+    },
+    "reports": {
+      "title": "Advanced reports are locked",
+      "body": "Your history is saved. Unlock to see trends, sources and marketing results.",
+      "name": "Advanced reports"
+    },
+    "reviews": {
+      "title": "Public reviews are locked",
+      "body": "Your reviews are saved. Unlock to show them on your page.",
+      "name": "Public reviews"
+    },
+    "cover": {
+      "title": "Custom covers are locked",
+      "body": "Your page shows the default cover. Your photo is saved and comes back when you unlock.",
+      "name": "Custom cover"
+    },
+    "handle": "Changing your page link needs Pro. Your current link keeps working."
+  },
+  "unlock": {
+    "title": "Unlock a plan",
+    "titleFeature": "Unlock {{feature}}",
+    "lead": "Pick a plan. Your saved work comes back right away.",
+    "choose": "Choose a plan",
+    "perMonth": "{{price}}/mo",
+    "proAdds": "Marketing, seat filler, calendar sync, public reviews, advanced reports.",
+    "growthAdds": "Everything in Pro, plus PricePilot, AI Revenue Center and rebooking autopilot.",
+    "payWith": "Pay with",
+    "change": "Change",
+    "pay": "Pay {{price}} and unlock",
+    "note": "Billed monthly. Cancel or switch anytime in Settings › Plan.",
+    "close": "Close",
+    "error": "We couldn't charge your card. Try again or update your card.",
+    "done": "{{plan}} is on. Your saved {{feature}} is back.",
+    "yourSetup": "setup"
+  },
+  "accountSms": {
+    "title": "Trial and billing texts",
+    "on": "On · {{phone}}",
+    "off": "Off",
+    "turnOff": "Turn off",
+    "turnOn": "Turn on",
+    "phone": "Mobile number",
+    "save": "Save",
+    "invalid": "Enter a 10-digit US mobile number.",
+    "consent": "Up to 5 texts about your trial and billing. Msg & data rates may apply. Reply STOP to opt out.",
+    "error": "We couldn't save this. Try again."
+  },
+  "settingsPlan": {
+    "trialDays_one": "{{plan}} · trial · {{count}} day left",
+    "trialDays_other": "{{plan}} · trial · {{count}} days left",
+    "trialEnded": "Free · trial ended"
   }
 }

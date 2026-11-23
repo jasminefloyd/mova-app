@@ -1,3 +1,4 @@
+import { PlanGate } from '../billing/PlanGate';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -124,6 +125,8 @@ export function CalendarSyncPage() {
     <ScreenHeader onBack={() => navigate(operatorUrl(businessId, 'settings'))} backLabel={t('settings.close')} /><h1>{t('calendarSync.title')}</h1>
     <HonestyBanner>{t('calendarSync.oneWay')}</HonestyBanner>
     {identityLoading || loading ? <p role="status" aria-busy="true">{t('calendarSync.loading')}</p> : <>
+      {/* T12: Google Calendar sync comes with Pro; the Apple and Outlook feed stays on every plan. */}
+      <PlanGate feature="google_calendar_sync" requiredPlan="pro" title={t('planGate.calendarSync.title')} body={t('planGate.calendarSync.body')} featureName={t('planGate.calendarSync.name')}>
       <Card className="mova-calendar-sync__card">
         <div className="mova-calendar-sync__heading"><h2>{t('calendarSync.googleTitle')}</h2><span className={connected ? 'mova-calendar-sync__connected' : ''}>{connected ? `✓ ${t('calendarSync.connectedLabel')}` : t('calendarSync.notConnected')}</span></div>
         {connected && google ? <Link className="mova-google-account__connected mova-calendar-sync__account" to={operatorUrl(businessId, 'settings/google')} style={{ textDecoration: 'none' }}>
@@ -151,6 +154,7 @@ export function CalendarSyncPage() {
             : <Button disabled={busy} onClick={() => void setCalendarSync(true)}>{t('google.calendar.turnOn')}</Button>}
         </>}
       </Card>
+      </PlanGate>
       <Card className="mova-calendar-sync__card">
         <h2>{t('calendarSync.appleTitle')}</h2><p>{t('calendarSync.appleDescription')}</p>
         <div className="mova-calendar-sync__feed" aria-label={t('calendarSync.privateLink')}><span aria-hidden="true">▣</span><code>{displayFeed}</code></div>

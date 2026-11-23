@@ -17,7 +17,7 @@ Deno.serve(withSystemRequestLogging('messaging-inbound-sms', async (request) => 
   if (!inbound) return respond({ code: 'INVALID_WEBHOOK_SIGNATURE' }, 401);
   try {
     const db = serviceClient();
-    const outcome = await handleInboundSms(db as unknown as SmsDb, provider, inbound);
+    const outcome = await handleInboundSms(db as unknown as SmsDb, provider, inbound, new Date(), Deno.env.get('MOVA_ACCOUNT_SMS_FROM') ?? null);
     // Task 5.5: a non-keyword text from a known client can go to the concierge (flag, default off).
     const model = conciergeModelFromEnv((name) => Deno.env.get(name));
     const conciergeEnabled = await platformSwitchEnabled('concierge');

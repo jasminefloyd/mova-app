@@ -1,5 +1,5 @@
 /** ✕ on a Home banner hides it on this device for 15 days, whichever banner it is. */
-export type HomeBannerKind = 'install' | 'upsell';
+export type HomeBannerKind = 'install' | 'upsell' | 'trial' | 'locked';
 const DAYS = 15;
 const key = (kind: HomeBannerKind) => `mova_home_banner_dismissed_${kind}`;
 

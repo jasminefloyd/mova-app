@@ -5,6 +5,9 @@ import { Button, EmptyState, ErrorState, ScreenHeader } from '../../components';
 import { operatorUrl } from '../../app/operator-url';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { GoogleActionError, invokeGoogle } from '../google/googleApi';
+import { PlanGate } from '../billing/PlanGate';
+import { usePlan } from '../billing/PlanProvider';
+import { isLocked } from '../billing/plan-api';
 import './cover-picker.css';
 
 // Board 16f: choose a profile cover from free Unsplash photos, or upload one. Photos come from the
@@ -98,10 +101,13 @@ export function CoverPickerPage() {
   };
 
   const chosen = photos.find((photo) => photo.id === selected) ?? null;
+  const coverLocked = isLocked(usePlan().summary, 'custom_cover');
 
   return <main className="mova-page mova-cover-picker">
     <ScreenHeader title={t('coverPicker.title')} onBack={() => navigate(operatorUrl(businessId, 'settings/profile'))} backLabel={t('coverPicker.close')}
-      trailing={<label className="mova-button mova-button--secondary mova-cover-picker__upload">{t('coverPicker.upload')}<input type="file" accept={COVER_ACCEPT} disabled={busy !== null} onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; if (file) void upload(file); }} /></label>} />
+      trailing={coverLocked ? undefined : <label className="mova-button mova-button--secondary mova-cover-picker__upload">{t('coverPicker.upload')}<input type="file" accept={COVER_ACCEPT} disabled={busy !== null} onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ''; if (file) void upload(file); }} /></label>} />
+    {/* T12: custom covers come with Pro. The default cover shows until then; a saved photo comes back on unlock. */}
+    <PlanGate feature="custom_cover" requiredPlan="pro" title={t('planGate.cover.title')} body={t('planGate.cover.body')} featureName={t('planGate.cover.name')}>
     {busy === 'uploading' && <p role="status">{t('coverPicker.uploading')}</p>}
 
     <div role="img" aria-label={t('coverPicker.preview')} className="mova-cover-picker__preview" style={chosen ? { backgroundImage: `url("${chosen.imageUrl}")` } : undefined} />
@@ -136,6 +142,7 @@ export function CoverPickerPage() {
     <div className="mova-cover-picker__footer">
       <Button loading={busy === 'saving'} disabled={!selected || busy !== null} onClick={() => void useCover()}>{t('coverPicker.useCover')}</Button>
     </div>
+    </PlanGate>
   </main>;
 }
 

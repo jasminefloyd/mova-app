@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { Button, Card, EmptyState, ErrorState, Icon, OfflineBanner, ScreenHeader, Sheet, StatusChip, TextArea, TextField } from '../../components';
 import { operatorUrl } from '../../app/operator-url';
+import { LockCard } from '../billing/PlanGate';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import './marketing.css';
 
@@ -88,7 +89,7 @@ export default function MarketingPage() {
       if (openingResult.error || businessResult.error) throw openingResult.error ?? businessResult.error;
       setStatus(nextStatus);
       setBusinessName(businessResult.data?.name ?? '');
-      setOpenings((openingResult.data ?? []).map((row: any) => ({ id: row.id, starts_at: row.starts_at, service_name_snapshot: row.service_name_snapshot, service_id: row.service_id, location_id: row.location_id, location_name: row.mova_locations?.name ?? '' })));
+      setOpenings((openingResult.data ?? []).map((row: { id: string; starts_at: string; service_name_snapshot: string; service_id: string; location_id: string; mova_locations?: unknown }) => ({ id: row.id, starts_at: row.starts_at, service_name_snapshot: row.service_name_snapshot, service_id: row.service_id, location_id: row.location_id, location_name: (Array.isArray(row.mova_locations) ? row.mova_locations[0] : row.mova_locations as { name?: string } | null)?.name ?? '' })));
     } catch { setFailed(true); }
     finally { setLoading(false); }
   }, [client, businessId]);
@@ -124,7 +125,6 @@ export default function MarketingPage() {
       .catch(() => { if (current) setHomeCounts({}); });
     return () => { current = false; };
   // Counts on the landing page are fetched from the same consent-aware preview as the wizard.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, openings, campaignAvailable, businessId]);
 
   const loadAudience = async () => {
@@ -150,7 +150,7 @@ export default function MarketingPage() {
     } catch { setMessage(t('marketing.previewError')); }
   };
 
-  useEffect(() => { if (view === 'campaign' && step === 2 && status) void loadAudience(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [view, step, segment, goal, serviceId, status?.channels]);
+  useEffect(() => { if (view === 'campaign' && step === 2 && status) void loadAudience(); }, [view, step, segment, goal, serviceId, status?.channels]);
 
   const segmentsForGoal = (value: Goal): Segment[] => value === 'fill_opening' ? ['booked_service', 'recent_180', 'consented_clients']
     : value === 'rebook' ? ['lapsed_60', 'recent_180', 'consented_clients']
@@ -213,15 +213,11 @@ export default function MarketingPage() {
     <ScreenHeader onBack={back} backLabel={t('marketing.back')} />
     {!online && <OfflineBanner>{t('marketing.offline')}</OfflineBanner>}
 
-    {view === 'home' && !campaignAvailable && <>
-      <header className="mova-marketing-heading"><h1>{t('marketing.title')}</h1><p>{t('marketing.planAvailability')}</p></header>
-      <Card tone="inverse" className="mova-marketing-locked"><h2>{t('marketing.lockedTitle')}</h2><p>{t('marketing.lockedDetail')}</p><Button variant="on-dark" onClick={() => navigate(operatorUrl(businessId, 'settings/plan'))}>{t('marketing.seePlans')}</Button></Card>
-      <Card className="mova-marketing-mini-preview"><span className="mova-marketing-eyebrow">{t('marketing.samplePreview')}</span><div className="mova-marketing-preview-row"><span className="mova-marketing-icon">📅</span><span><strong>{t('marketing.sampleOpening')}</strong><small>{t('marketing.sampleAudience')}</small></span></div></Card>
-      <p className="mova-marketing-reassurance">{t('marketing.reassurance')}</p>
-    </>}
-
-    {view === 'home' && campaignAvailable && <>
+    {view === 'home' && <>
       <header className="mova-marketing-heading"><h1>{t('marketing.title')}</h1><p>{t('marketing.homeIntro')}</p></header>
+      {/* T8: on a plan without marketing the screen stays visible, locked, with what unlocks it. */}
+      {!campaignAvailable && <LockCard requiredPlan="pro" title={t('planGate.marketing.title')} body={t('planGate.marketing.body')} featureName={t('planGate.marketing.name')} />}
+      <div className={campaignAvailable ? 'mova-marketing-home' : 'mova-marketing-home mova-locked'} {...(campaignAvailable ? {} : { 'aria-hidden': true, inert: true })}>
       {(() => { const draft = status.campaigns.find((campaign) => campaign.status === 'draft'); return <Card tone="inverse" className="mova-marketing-hero"><h2>{draft ? draft.name : openings[0] ? t('marketing.openingHero', { date: localDateTime(openings[0].starts_at, i18n.resolvedLanguage ?? 'en-US') }) : t('marketing.heroTitle')}</h2><p>{draft ? t('marketing.draftReady') : openings[0] ? t('marketing.openingEligible', { count: homeCounts.opening ?? '—' }) : t('marketing.heroDetail')}</p><Button variant="on-dark" onClick={() => draft ? void openDraft(draft.id) : setView('ideas')}>{draft ? t('marketing.reviewDraft') : t('marketing.createCampaign')}</Button></Card>; })()}
         <section className="mova-marketing-ideas"><h2>{t('marketing.moreIdeas')}</h2>
         <button type="button" className="mova-marketing-idea" onClick={() => openCampaign('rebook')}><span className="mova-marketing-icon">↶</span><span><strong>{t('marketing.winbackIdea')}</strong><small>{t('marketing.winbackDetail')}</small></span><b>{homeCounts.winback ?? '—'}<small>{t('marketing.clients')}</small></b></button>
@@ -231,6 +227,7 @@ export default function MarketingPage() {
         {status.campaigns.length ? <ul className="mova-marketing-campaigns">{status.campaigns.map((campaign) => <li key={campaign.id}><Card><div className="mova-marketing-campaign"><div><strong>{campaign.name}</strong><small>{t(`marketing.goalName.${campaign.goal}`, { defaultValue: campaign.goal })}</small></div><StatusChip status={campaign.status === 'sent' ? 'confirmed' : campaign.status === 'failed' ? 'cancelled' : 'pending'}>{t(`marketing.status.${campaign.status}`, { defaultValue: campaign.status })}</StatusChip></div><small>{(campaign.mova_marketing_campaign_channels ?? []).map((item) => channelTitle(item.channel)).join(' · ')}{campaign.scheduled_at ? ` · ${localDateTime(campaign.scheduled_at, i18n.resolvedLanguage ?? 'en-US')}` : ` · ${t('marketing.notScheduled')}`}</small>{campaign.status === 'draft' && <Button variant="secondary" disabled={busy || !online} onClick={() => void openDraft(campaign.id)}>{t('marketing.edit')}</Button>}{['draft','scheduled'].includes(campaign.status) && <Button variant="ghost" disabled={busy || !online} onClick={() => void cancel(campaign.id)}>{t('marketing.cancel')}</Button>}</Card></li>)}</ul> : <EmptyState title={t('marketing.emptyTitle')} detail={t('marketing.emptyDetail')} action={<Button onClick={() => setView('ideas')}>{t('marketing.createCampaign')}</Button>} />}
       </section>
       <button type="button" className="mova-marketing-channel-entry" onClick={() => setView('channels')}><span><strong>{t('marketing.channels')}</strong><small>{t('marketing.channelSummary', { ready: channels.filter((channel) => status.channels[channel].ready).length, available: channels.filter((channel) => status.channels[channel].plan).length })}</small></span><Icon name="chevron" size={20} /></button>
+      </div>
       {message && <p className="mova-marketing-message" role="status">{message}</p>}
     </>}
 
