@@ -154,6 +154,8 @@
 .mova-site__feature-anchors { display: flex; flex-wrap: wrap; gap: 8px; }
 .mova-site__chip { min-height: 44px; display: inline-flex; align-items: center; padding: 0 16px; border-radius: 22px; border: 1px solid var(--site-line-strong); background: var(--site-white); color: var(--site-ink); font-size: var(--fs-body-s); font-weight: 600; text-decoration: none; }
 .mova-site__chip[aria-current="page"], .mova-site__chip[aria-current="page"], .mova-site__chip[aria-pressed="true"] { background: var(--site-ink); border-color: var(--site-ink); color: var(--site-bg); }
+/* The site-wide link rule (.mova-site a:not(...)) sets color: inherit and is more specific; keep selected chip text light. */
+.mova-site a.mova-site__chip[aria-current="page"][href], .mova-site button.mova-site__chip[aria-pressed="true"] { color: var(--site-bg); }
 .mova-site__feature-band { background: var(--site-bg); }
 .mova-site__feature-band--alt { background: var(--site-mist); }
 
@@ -248,6 +250,10 @@
 .mova-site__prose figure img { width: 100%; height: auto; border-radius: var(--radius-xl); display: block; }
 .mova-site__prose figcaption { font-size: var(--fs-body-s); color: var(--site-muted); }
 .mova-site__prose ul, .mova-site__prose ol { margin: 0; padding-left: 24px; display: flex; flex-direction: column; gap: 8px; }
+/* The global reset removes list markers; guide lists need them back. */
+.mova-site__prose ul { list-style: disc; }
+.mova-site__prose ol { list-style: decimal; }
+.mova-site__prose li::marker { color: var(--site-sage); }
 .mova-site__prose strong { color: var(--site-ink); }
 .mova-site__prose hr { width: 100%; border: 0; border-top: 1px solid var(--site-line); margin: 8px 0; }
 .mova-site__callout { padding: 20px 22px; border-radius: var(--radius-xl); display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-body-l); line-height: 1.55; }
@@ -260,6 +266,7 @@
 .mova-site__guide-button { margin: 0; }
 .mova-site__guide-banner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px 24px; padding: 24px 26px; border-radius: var(--radius-2xl); background: var(--site-ink); color: var(--site-bg); }
 .mova-site__guide-banner strong { display: block; font: 800 21px/1.25 Manrope, system-ui, sans-serif; }
+.mova-site__prose .mova-site__guide-banner strong { color: var(--site-bg); }
 .mova-site__guide-banner span { display: block; margin-top: 4px; font-size: var(--fs-body); color: var(--site-mint); }
 .mova-site__guide-banner .mova-site__button { background: var(--site-peach); color: var(--site-ink); }
 .mova-site__before-after > div { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
