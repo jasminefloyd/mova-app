@@ -2560,7 +2560,27 @@
     "reported": "Review report submitted for platform review",
     "howWasVisit": "How was your {{service}} with {{artist}}?",
     "displayNameNotice": "If it’s shown on {{artist}}’s page, it appears as {{name}} · verified visit",
-    "alsoGoogle": "Also leave it on Google"
+    "alsoGoogle": "Also leave it on Google",
+    "replySaved": "Reply saved.",
+    "replyEmailed": "Reply saved and emailed to {{name}}.",
+    "willEmail": "We’ll email this reply to {{name}}.",
+    "editNotEmailed": "Edits show in the app but aren’t emailed again.",
+    "suggest": "Suggest a reply",
+    "suggesting": "Writing a suggestion…",
+    "suggestError": "A suggestion isn’t available right now. You can write your own.",
+    "deleteReply": "Delete reply",
+    "confirmDeleteReply": "Tap again to delete from Google",
+    "unsubscribe": {
+      "title": "Stop review emails?",
+      "body": "You won’t get emails about your reviews from this stylist anymore. Appointment emails don’t change.",
+      "confirm": "Stop review emails",
+      "doneTitle": "You’re unsubscribed.",
+      "doneBody": "You won’t get review emails from {{name}} anymore.",
+      "doneBodyNoName": "You won’t get these review emails anymore.",
+      "invalidTitle": "This link isn’t valid",
+      "invalidBody": "It may be incomplete. Try opening it again from the email.",
+      "error": "We couldn’t do that just now. Try again."
+    }
   },
   "website": {
     "nav": {

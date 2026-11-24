@@ -2560,7 +2560,27 @@
     "reported": "La reseña se envió al equipo de revisión de la plataforma",
     "howWasVisit": "¿Cómo estuvo tu {{service}} con {{artist}}?",
     "displayNameNotice": "Si se muestra en la página de {{artist}}, aparece como {{name}} · visita verificada",
-    "alsoGoogle": "También puedes dejar una reseña en Google"
+    "alsoGoogle": "También puedes dejar una reseña en Google",
+    "replySaved": "Respuesta guardada.",
+    "replyEmailed": "Respuesta guardada y enviada por correo a {{name}}.",
+    "willEmail": "Enviaremos esta respuesta por correo a {{name}}.",
+    "editNotEmailed": "Los cambios se ven en la app, pero no se vuelven a enviar por correo.",
+    "suggest": "Sugerir una respuesta",
+    "suggesting": "Escribiendo una sugerencia…",
+    "suggestError": "No hay una sugerencia disponible ahora. Puedes escribir la tuya.",
+    "deleteReply": "Borrar respuesta",
+    "confirmDeleteReply": "Toca otra vez para borrarla de Google",
+    "unsubscribe": {
+      "title": "¿Dejar de recibir correos de reseñas?",
+      "body": "Ya no recibirás correos sobre tus reseñas de tu estilista. Los correos de tus citas no cambian.",
+      "confirm": "Dejar de recibirlos",
+      "doneTitle": "Listo, ya no los recibirás.",
+      "doneBody": "Ya no recibirás correos de reseñas de {{name}}.",
+      "doneBodyNoName": "Ya no recibirás estos correos de reseñas.",
+      "invalidTitle": "Este enlace no es válido",
+      "invalidBody": "Puede estar incompleto. Ábrelo otra vez desde el correo.",
+      "error": "No pudimos hacerlo ahora. Inténtalo de nuevo."
+    }
   },
   "website": {
     "nav": {

@@ -41,10 +41,11 @@ test('TC-GOOGLE-38D-01 shows what is waiting for Google and sends only those cha
   expect(calls).toContainEqual({ action: 'push' });
 });
 
-test('TC-GOOGLE-38E-01 replies to a Google review from the Reputation screen', async ({ page }) => {
+test('TC-GOOGLE-38E-01 replies to a Google review from the Reputation screen, with one AI suggestion', async ({ page }) => {
   await openOperatorPage(page, '/');
-  const replies = await functionCalls(page, 'review-management', (action) => (action === 'reply_google' ? { saved: true, reply_status: 'posted' } : {
-    reviews: [], settings: { ask_after_visit: false, google_review_url: null }, email_delivery_enabled: false,
+  const replies = await functionCalls(page, 'review-management', (action) => (action === 'reply_google' ? { saved: true, reply_status: 'posted' }
+    : action === 'suggest_reply' ? { suggestion: 'Thank you, Kim! So glad you loved it.', reused: false } : {
+    reviews: [], settings: { ask_after_visit: false, google_review_url: null }, email_delivery_enabled: false, ai_reply_available: true,
     google_reviews: [{ id: 'g1', rating: 5, body: 'Beautiful work.', display_name: 'Kim T.', provider_created_at: '2026-11-03T12:00:00Z', reply_body: null, reply_status: 'none' }],
     summary: { count: 1, average: 5, awaiting_reply: 1, stars: { '5': 1, '4': 0, '3': 0, '2': 0, '1': 0 }, mova_count: 0, mova_average: null, google_count: 1, google_average: 5 },
   }));
@@ -52,12 +53,37 @@ test('TC-GOOGLE-38E-01 replies to a Google review from the Reputation screen', a
   await page.goto('/BID-1/reports/reputation');
 
   await expect(page.getByText('Beautiful work.')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Reply on Google' })).toBeVisible();
-  await page.getByRole('button', { name: 'Reply on Google' }).click();
+  await expect(page.getByRole('button', { name: 'Reply on Google' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Reply', exact: true }).click();
   const reply = page.getByLabel('Your reply');
   await expect(reply).toBeVisible();
-  await reply.fill('Thank you, Kim!');
+  await page.getByRole('button', { name: /Suggest a reply/ }).click();
+  await expect(reply).toHaveValue('Thank you, Kim! So glad you loved it.');
+  await expect(page.getByRole('button', { name: /Suggest a reply/ })).toHaveCount(0);
+  await reply.fill('Thank you, Kim! See you soon.');
   await page.getByRole('button', { name: 'Post reply to Google' }).click();
   await expect(page.getByText('Your reply is on Google.')).toBeVisible();
-  expect(replies).toContainEqual({ action: 'reply_google', review_id: 'g1', reply: 'Thank you, Kim!' });
+  expect(replies).toContainEqual({ action: 'suggest_reply', review_id: 'g1', source: 'google' });
+  expect(replies).toContainEqual({ action: 'reply_google', review_id: 'g1', reply: 'Thank you, Kim! See you soon.' });
+});
+
+test('TC-REVIEWS-38B-01 replies to a Mova review: one Reply button, the client is emailed, no Report', async ({ page }) => {
+  await openOperatorPage(page, '/');
+  const calls = await functionCalls(page, 'review-management', (action) => (action === 'reply' ? { saved: true, emailed: 'sent' } : {
+    reviews: [{ id: 'r1', rating: 5, tags: ['great_results'], body: 'Best silk press.', display_name: 'Keisha D.', moderation_status: 'approved', artist_reply: null, reply_emailed_at: null, created_at: '2026-11-20T12:00:00Z', mova_appointments: { service_name_snapshot: 'Silk press' } }],
+    google_reviews: [], settings: { ask_after_visit: true, google_review_url: null }, email_delivery_enabled: false, reply_email_enabled: true, ai_reply_available: false,
+    summary: { count: 1, average: 5, awaiting_reply: 1, stars: { '5': 1, '4': 0, '3': 0, '2': 0, '1': 0 }, mova_count: 1, mova_average: 5, google_count: 0, google_average: null },
+  }));
+  await functionCalls(page, 'calendar-google-connect', () => ({ google: null }));
+  await page.goto('/BID-1/reports/reputation');
+
+  await expect(page.getByText('Best silk press.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Report review' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Suggest a reply/ })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Reply', exact: true }).click();
+  await expect(page.getByText('We’ll email this reply to Keisha D.')).toBeVisible();
+  await page.getByLabel('Your reply').fill('Thank you, Keisha!');
+  await page.getByRole('button', { name: 'Save reply' }).click();
+  await expect(page.getByText('Reply saved and emailed to Keisha D.')).toBeVisible();
+  expect(calls).toContainEqual({ action: 'reply', review_id: 'r1', reply: 'Thank you, Keisha!' });
 });

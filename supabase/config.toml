@@ -58,6 +58,9 @@ verify_jwt = false
 [functions.review-public-context]
 verify_jwt = false
 
+[functions.email-unsubscribe]
+verify_jwt = false
+
 [functions.review-submit]
 verify_jwt = false
 

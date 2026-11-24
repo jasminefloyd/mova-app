@@ -56,8 +56,8 @@ describe('Get paid', () => {
   it('creates a texted pay link and opens Messages with it', async () => {
     const host = mount(); await flush();
     await act(async () => { button(host, 'Send $70.00 pay link').click(); }); await flush();
-    expect(requests[0].url).toContain('/functions/v1/paylink-create');
-    expect(requests[0].body).toEqual({ appointment_id: 'ap-1', channel: 'sms' });
+    expect(requests[0]!.url).toContain('/functions/v1/paylink-create');
+    expect(requests[0]!.body).toEqual({ appointment_id: 'ap-1', channel: 'sms' });
     expect(host.textContent).toContain('Pay link ready');
     const text = Array.from(host.querySelectorAll('a')).find((a) => a.textContent === 'Text Andrea the link') as HTMLAnchorElement;
     expect(text.getAttribute('href')).toBe(`sms:+13125550148?&body=${encodeURIComponent('Hi Andrea, here’s your link to pay $70.00: https://mova-beauty.co/pay/abc')}`);
@@ -68,7 +68,7 @@ describe('Get paid', () => {
     const qr = host.querySelector('input[name="card-delivery"][value="qr"]') as HTMLInputElement;
     await act(async () => { qr.click(); });
     await act(async () => { button(host, 'Show a pay QR code').click(); }); await flush();
-    expect(requests[0].body).toEqual({ appointment_id: 'ap-1', channel: 'qr' });
+    expect(requests[0]!.body).toEqual({ appointment_id: 'ap-1', channel: 'qr' });
     expect(host.textContent).toContain('Scan to pay $70.00');
     expect(host.querySelector('[data-testid="qr"]')?.getAttribute('data-value')).toBe('https://mova-beauty.co/pay/abc');
   });

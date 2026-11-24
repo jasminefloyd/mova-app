@@ -2,6 +2,7 @@ import type { EmailLocale, EmailTemplateId } from './types.ts';
 import { renderWelcomeEmail, type WelcomeEmailVars } from './welcome.ts';
 import { renderStylistAlertEmail, type StylistAlertEmailVars } from './stylist-alert.ts';
 import { renderAccountEmail, type AccountEmailVars } from './account.ts';
+import { renderReviewReplyEmail, type ReviewReplyEmailVars } from './review-reply.ts';
 
 export const EMAIL_TEMPLATES: EmailTemplateId[] = ['booking_confirmation', 'request_received', 'request_accepted', 'request_declined', 'appointment_reminder'];
 export const PROPOSED_EMAIL_TEMPLATES: EmailTemplateId[] = ['appointment_moved', 'appointment_cancelled', 'review_request', 'stylist_welcome', 'stylist_new_request'];
@@ -21,6 +22,8 @@ export type AppointmentEmailVars = {
   alert?: Omit<StylistAlertEmailVars, 'postalAddress'>;
   /** stylist_trial_ending, stylist_payment_failed, stylist_trial_ended (EM13–EM15). */
   account?: Omit<AccountEmailVars, 'postalAddress'>;
+  /** review_reply only (RV-D1). */
+  reviewReply?: Omit<ReviewReplyEmailVars, 'postalAddress'>;
 };
 
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
@@ -82,6 +85,10 @@ export function renderEmail(id: EmailTemplateId, locale: EmailLocale, vars: Appo
   if (id === 'stylist_trial_ending' || id === 'stylist_payment_failed' || id === 'stylist_trial_ended') {
     if (!vars.account) throw new Error('ACCOUNT_EMAIL_VARS_MISSING');
     return renderAccountEmail(lang, { ...vars.account, postalAddress: vars.postalAddress ?? null });
+  }
+  if (id === 'review_reply') {
+    if (!vars.reviewReply) throw new Error('REVIEW_REPLY_EMAIL_VARS_MISSING');
+    return renderReviewReplyEmail(lang, { ...vars.reviewReply, postalAddress: vars.postalAddress ?? null });
   }
   if (id === 'stylist_welcome') {
     return renderWelcomeEmail(lang, { ...vars.welcome, firstName: vars.welcome?.firstName || vars.stylistName || vars.businessName, postalAddress: vars.postalAddress ?? null });

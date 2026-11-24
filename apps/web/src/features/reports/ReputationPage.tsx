@@ -7,11 +7,11 @@ import { operatorUrl } from '../../app/operator-url';
 import { GoogleActionError, invokeGoogle, type GoogleConnection } from '../google/googleApi';
 import '../google/google.css';
 
-type Review = { id: string; rating: number; tags: string[]; body: string; display_name: string; moderation_status: string; artist_reply: string | null; created_at: string; mova_appointments?: { service_name_snapshot: string } | null };
+type Review = { id: string; rating: number; tags: string[]; body: string; display_name: string; moderation_status: string; artist_reply: string | null; reply_emailed_at?: string | null; created_at: string; mova_appointments?: { service_name_snapshot: string } | null };
 type GoogleReview = { id: string; rating: number; body: string; display_name: string; provider_created_at: string | null; reply_body: string | null; reply_status: 'none' | 'queued' | 'posted' | 'failed' };
 type Settings = { ask_after_visit: boolean; google_review_url: string | null };
 type RatingSummary = { count: number; average: number | null; awaiting_reply: number; stars: Record<string, number>; mova_count: number; mova_average: number | null; google_count: number; google_average: number | null };
-type ReviewResponse = { reviews?: Review[]; google_reviews?: GoogleReview[]; summary?: RatingSummary | null; settings?: Settings; email_delivery_enabled?: boolean };
+type ReviewResponse = { reviews?: Review[]; google_reviews?: GoogleReview[]; summary?: RatingSummary | null; settings?: Settings; email_delivery_enabled?: boolean; reply_email_enabled?: boolean; ai_reply_available?: boolean; suggestion?: string; emailed?: string };
 
 export function ReputationPage() {
   const { t, i18n } = useTranslation();
@@ -46,6 +46,13 @@ export function ReputationPage() {
   const [googleNotice, setGoogleNotice] = useState('');
   // 38e: Google shows replies under the business, so the note names the business, not the Google account.
   const [listingName, setListingName] = useState<string | null>(null);
+  // RV-D1/RV-D2: first replies are emailed; one AI suggestion per review, used once per open reply box.
+  const [replyEmailEnabled, setReplyEmailEnabled] = useState(false);
+  const [aiAvailable, setAiAvailable] = useState(false);
+  const [suggestedFor, setSuggestedFor] = useState<string | null>(null);
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestError, setSuggestError] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const call = useCallback(async (payload: Record<string, unknown>): Promise<ReviewResponse> => {
     if (!client || !businessId) throw new Error('IDENTITY_REQUIRED');
@@ -73,6 +80,8 @@ export function ReputationPage() {
       setSettings(next);
       setGoogleUrl(next.google_review_url ?? '');
       setEmailEnabled(data.email_delivery_enabled === true);
+      setReplyEmailEnabled(data.reply_email_enabled === true);
+      setAiAvailable(data.ai_reply_available === true);
     } catch {
       setError(true);
     } finally {
@@ -100,6 +109,8 @@ export function ReputationPage() {
   };
   const deleteGoogleReply = async (review: GoogleReview) => {
     if (!client || !businessId) return;
+    if (confirmDelete !== review.id) { setConfirmDelete(review.id); return; }
+    setConfirmDelete(null);
     setGoogleBusy(true);
     setGoogleNotice('');
     try {
@@ -130,21 +141,12 @@ export function ReputationPage() {
   const saveReply = async () => {
     setBusy(true);
     try {
-      await call({ action: 'reply', review_id: replyId, reply });
+      const result = await call({ action: 'reply', review_id: replyId, reply });
+      const reviewer = reviews.find((item) => item.id === replyId)?.display_name ?? '';
       setReplyId('');
       setReply('');
+      setNotice(result.emailed === 'sent' ? t('reviews.replyEmailed', { name: reviewer }) : t('reviews.replySaved'));
       await load();
-    } catch {
-      setNotice(t('reviews.saveError'));
-    } finally {
-      setBusy(false);
-    }
-  };
-  const report = async (review: Review) => {
-    setBusy(true);
-    try {
-      await call({ action: 'report', review_id: review.id, reason: 'other', details: '' });
-      setNotice(t('reviews.reported'));
     } catch {
       setNotice(t('reviews.saveError'));
     } finally {
@@ -155,7 +157,19 @@ export function ReputationPage() {
   const filteredMova = filter === 'google' ? [] : reviews.filter((review) => filter === 'needs_reply' ? !review.artist_reply : true);
   const filteredGoogle = filter === 'mova' ? [] : googleReviews.filter((review) => filter === 'needs_reply' ? review.reply_status === 'none' : true);
   const totalCount = summary?.count ?? 0;
-  const startReply = (review: Review) => { setReplyId(review.id); setReply(review.artist_reply ?? ''); };
+  const startReply = (review: Review) => { setReplyId(review.id); setReply(review.artist_reply ?? ''); setSuggestedFor(null); setSuggestError(''); };
+  const suggest = async (reviewId: string, source: 'mova' | 'google', apply: (text: string) => void) => {
+    setSuggesting(true); setSuggestError('');
+    try {
+      const result = await call({ action: 'suggest_reply', review_id: reviewId, source });
+      if (typeof result.suggestion !== 'string') throw new Error('NO_SUGGESTION');
+      apply(result.suggestion);
+      setSuggestedFor(reviewId);
+    } catch { setSuggestError(t('reviews.suggestError')); } finally { setSuggesting(false); }
+  };
+  const suggestLink = (reviewId: string, source: 'mova' | 'google', apply: (text: string) => void) => aiAvailable && suggestedFor !== reviewId
+    ? <button type="button" className="mova-review-suggest" disabled={suggesting} onClick={() => void suggest(reviewId, source, apply)}><span aria-hidden="true">✦</span>{suggesting ? t('reviews.suggesting') : t('reviews.suggest')}</button>
+    : null;
 
   return <main className={`mova-page mova-reputation-page${isSettings ? ' is-settings' : ''}`}>
     {isSettings && <ScreenHeader title={t('reviews.title')} onBack={() => navigate(operatorUrl(businessId, 'settings'))} backLabel={t('privacy.back')} />}
@@ -212,10 +226,10 @@ export function ReputationPage() {
                 {review.reply_body && review.reply_status !== 'none'
                   ? <blockquote><strong>{t('reviews.yourReply')}</strong><p>{review.reply_body}</p>
                     {review.reply_status === 'failed' && <p role="alert">{t('google.reply.failed')}</p>}
-                    {googleReady && <div className="mova-google-reply-actions"><Button variant="secondary" disabled={googleBusy} onClick={() => { setGoogleReplyFor(review); setGoogleReplyText(review.reply_body ?? ''); }}>{t('google.reply.editReply')}</Button><Button variant="ghost" disabled={googleBusy} onClick={() => void deleteGoogleReply(review)}>{t('google.reply.deleteReply')}</Button></div>}
+                    {googleReady && <div className="mova-review-reply-links"><button type="button" className="mova-link-button" disabled={googleBusy} onClick={() => { setGoogleReplyFor(review); setGoogleReplyText(review.reply_body ?? ''); setSuggestedFor(null); setSuggestError(''); }}>{t('google.reply.editReply')}</button><button type="button" className="mova-link-button mova-review-reply-links__muted" disabled={googleBusy} onClick={() => void deleteGoogleReply(review)}>{confirmDelete === review.id ? t('reviews.confirmDeleteReply') : t('reviews.deleteReply')}</button></div>}
                   </blockquote>
                   : googleReady
-                    ? <Button variant="secondary" disabled={googleBusy} onClick={() => { setGoogleReplyFor(review); setGoogleReplyText(''); }}>{t('google.reply.replyOnGoogle')}</Button>
+                    ? <Button variant="secondary" disabled={googleBusy} onClick={() => { setGoogleReplyFor(review); setGoogleReplyText(''); setSuggestedFor(null); setSuggestError(''); }}>{t('reviews.reply')}</Button>
                     : <p className="mova-google-reply-note">{t('google.reply.notConnected')}</p>}
               </Card>)}
               {filteredMova.map((review) => <Card key={review.id} className="mova-review-card">
@@ -226,17 +240,20 @@ export function ReputationPage() {
                 {review.body && <p>{review.body}</p>}
                 <p className="mova-review-status">{t(`reviews.moderation.${review.moderation_status}`)}</p>
                 {replyId === review.id
-                  ? <div className="mova-review-reply"><TextArea label={t('reviews.replyLabel')} value={reply} maxLength={2000} onChange={(event) => setReply(event.currentTarget.value)} /><Button loading={busy} disabled={!reply.trim()} onClick={() => void saveReply()}>{t('reviews.saveReply')}</Button></div>
+                  ? <div className="mova-review-reply"><TextArea label={t('reviews.replyLabel')} value={reply} maxLength={2000} onChange={(event) => setReply(event.currentTarget.value)} />
+                    {suggestLink(review.id, 'mova', setReply)}{suggestError && suggestedFor !== review.id && <p className="mova-review-suggest__error" role="alert">{suggestError}</p>}
+                    {replyEmailEnabled && <p className="mova-review-reply__note">{review.reply_emailed_at || review.artist_reply ? t('reviews.editNotEmailed') : t('reviews.willEmail', { name: review.display_name })}</p>}
+                    <Button loading={busy} disabled={!reply.trim()} onClick={() => void saveReply()}>{t('reviews.saveReply')}</Button></div>
                   : review.artist_reply
-                    ? <blockquote><strong>{t('reviews.yourReply')}</strong><p>{review.artist_reply}</p><Button variant="secondary" onClick={() => startReply(review)}>{t('reviews.editReply')}</Button></blockquote>
+                    ? <blockquote><strong>{t('reviews.yourReply')}</strong><p>{review.artist_reply}</p><div className="mova-review-reply-links"><button type="button" className="mova-link-button" onClick={() => startReply(review)}>{t('reviews.editReply')}</button></div></blockquote>
                     : <Button variant="secondary" onClick={() => startReply(review)}>{t('reviews.reply')}</Button>}
-                <Button variant="ghost" disabled={busy} onClick={() => void report(review)}>{t('reviews.report')}</Button>
               </Card>)}
             </div>}
           <Sheet open={googleReplyFor !== null} title={t('google.reply.title')} closeLabel={t('google.reply.close')} onClose={() => setGoogleReplyFor(null)}>
             {googleReplyFor && <div className="mova-google-reply-form">
               <blockquote className="mova-google-reply-quote"><div><strong>{googleReplyFor.display_name || t('reviews.googleReviewer')}</strong><span aria-label={t('reviews.stars', { count: googleReplyFor.rating })}>{'★'.repeat(googleReplyFor.rating)}{'☆'.repeat(5 - googleReplyFor.rating)}</span></div>{googleReplyFor.body && <p>{googleReplyFor.body}</p>}</blockquote>
               <TextArea label={t('google.reply.label')} value={googleReplyText} maxLength={4096} onChange={(event) => setGoogleReplyText(event.currentTarget.value)} />
+              {suggestLink(googleReplyFor.id, 'google', setGoogleReplyText)}{suggestError && suggestedFor !== googleReplyFor.id && <p className="mova-review-suggest__error" role="alert">{suggestError}</p>}
               <small>{googleReplyText.length}/4096</small>
               <p className="mova-google-reply-note">{t('google.reply.posts', { name: listingName ?? googleConnection?.google_account_email ?? '' })}</p>
               <Button loading={googleBusy} disabled={googleBusy || !googleReplyText.trim()} onClick={() => void postGoogleReply()}>{t('google.reply.post')}</Button>
