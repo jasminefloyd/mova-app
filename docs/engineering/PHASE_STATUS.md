@@ -17,6 +17,8 @@
 
 ## Current audit work log
 
+- 2026-11-23 admin stylist detail returned HTTP 405 because PostgREST ran the `STABLE` RPC in a read-only transaction and the function inserts a view audit record. Migration 0117 marks the existing function `VOLATILE` and reloads the PostgREST schema cache. Local PostgREST reproduced HTTP 405 / SQLSTATE 25006 before the migration and returned HTTP 200 with the expected detail and one audit record afterward. All 75 pgTAP files passed (1,363 assertions), including stylist and non-MFA access denials. `pnpm fn:check` passed. Production migration awaits approval.
+
 - 2026-11-23 review replies (RV-D2) add review-specific Claude Haiku 5.5 and GPT-6 Luna model settings and support both providers’ current API parameters.
 
 - 2026-11-23 PricePilot (CR-019): built PricePilot to boards PP1–PP8 with the owner's answers (PP-D1–PP-D4). Migration 0113 adds settings, auto-found salons, location geocodes, a BLS cache, dismissals, a change log, discovery runs and the atomic apply function. `price-pilot` is rewritten (overview, detail, enable, find_salons, add_menu, apply, dismiss, settings_save, remove_source). `job-dispatch` runs the weekly salon search and menu reading. New screens: overview, service detail with the update sheet and Needs data state, review all, who we compared, sources and settings, and the off state; en-US and es-US copy. pgTAP (72 files incl. 0113), 457 Vitest cases, lint, locales, `deno check` on all functions and the Revenue Center e2e pass; the three navigation e2e failures predate this change. Not applied or deployed. Google Places, Firecrawl, the Census geocoder and the BLS API were not called from this environment, so live provider behaviour is unverified.

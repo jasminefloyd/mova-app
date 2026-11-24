@@ -1,5 +1,10 @@
 begin;
-select plan(16);
+select plan(19);
+
+-- PostgREST uses function volatility to choose the transaction mode for RPC POSTs.
+select is((select provolatile::text from pg_proc
+  where oid = 'public.mova_admin_stylist_detail(uuid)'::regprocedure), 'v',
+  'stylist detail RPC allows its audit write in a POST transaction');
 
 insert into auth.users (id, email) values
   ('ad690000-0000-4000-8000-000000000001', 'reads-admin@mova.invalid'),
@@ -25,6 +30,14 @@ select set_config('request.jwt.claims', '{"sub":"ad690000-0000-4000-8000-0000000
 set local role authenticated;
 select throws_ok($$select public.mova_admin_overview()$$, '42501', 'PLATFORM_ADMIN_REQUIRED', 'stylists cannot read the overview');
 select throws_ok($$select public.mova_admin_stylists()$$, '42501', 'PLATFORM_ADMIN_REQUIRED', 'stylists cannot list stylists');
+select throws_ok($$select public.mova_admin_stylist_detail('ad690000-0000-4000-8000-000000000101')$$,
+  '42501', 'PLATFORM_ADMIN_REQUIRED', 'stylists cannot open admin stylist detail');
+reset role;
+
+select set_config('request.jwt.claims', '{"sub":"ad690000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}', true);
+set local role authenticated;
+select throws_ok($$select public.mova_admin_stylist_detail('ad690000-0000-4000-8000-000000000101')$$,
+  '42501', 'PLATFORM_ADMIN_REQUIRED', 'admin stylist detail requires MFA');
 reset role;
 
 -- Admin.
