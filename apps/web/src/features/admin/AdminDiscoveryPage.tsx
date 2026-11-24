@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { adminErrorText, adminRpc } from './admin-api';
 import { formatChange, formatCount, formatPercent } from './admin-format';
 import { Card, ErrorNote, Kpi, Loading, PageHead, Segmented } from './AdminPrimitives';
-import type { Discovery, DiscoveryRow, TrafficTotals } from './discovery-data';
+import type { Discovery, DiscoveryRow, GeographyRow, TrafficTotals } from './discovery-data';
 
 type Period = '24h' | '7d' | '28d' | '3mo' | 'custom';
 type DateRange = { start: string; end: string };
@@ -51,9 +51,9 @@ function DataTable({ columns, rows, empty }: { columns: string[]; rows: { key: s
 
 const locationNames = new Intl.DisplayNames(['en-US'], { type: 'region' });
 
-function rowLabel(row: DiscoveryRow): string {
-  if (row.kind === 'country' && /^[A-Z]{2}$/.test(row.label)) return locationNames.of(row.label) ?? row.label;
-  return row.label;
+function geographyLabel({ city, region, country }: GeographyRow): string {
+  const name = country === 'US' ? 'USA' : /^[A-Z]{2}$/.test(country) ? locationNames.of(country) ?? country : country;
+  return [city, region, name].filter(Boolean).join(', ') || 'Unknown';
 }
 
 function TrafficTable({ rows, kind, label, limit = 50, compact = false }: {
@@ -63,7 +63,7 @@ function TrafficTable({ rows, kind, label, limit = 50, compact = false }: {
     columns={[label, 'Sessions', ...(!compact ? ['Visitors'] : []), 'Verified signups', 'Signup rate']}
     rows={rows.filter(row => row.kind === kind).slice(0, limit).map(row => ({
       key: row.label,
-      cells: [rowLabel(row), formatCount(row.sessions), ...(!compact ? [row.visitors ? formatCount(row.visitors) : '—'] : []),
+      cells: [row.label, formatCount(row.sessions), ...(!compact ? [row.visitors ? formatCount(row.visitors) : '—'] : []),
         formatCount(row.signups), formatPercent(row.converted, row.sessions, 1)],
     }))}
     empty="No traffic recorded in this view."
@@ -78,7 +78,6 @@ const breakdowns: { kind: DiscoveryRow['kind']; title: string; column: string }[
   { kind: 'referrer', title: 'Referrers', column: 'Referrer domain' },
   { kind: 'device', title: 'Devices', column: 'Device type' },
   { kind: 'browser', title: 'Browsers', column: 'Browser' },
-  { kind: 'country', title: 'Geography', column: 'Country' },
 ];
 
 export function AdminDiscoveryOverview() {
@@ -147,6 +146,18 @@ export default function AdminDiscoveryPage() {
       {breakdowns.map(section => <Card key={section.kind} title={section.title}>
         <TrafficTable rows={data.breakdown} kind={section.kind} label={section.column} />
       </Card>)}
+      <Card title="Geography">
+        <p className="small muted">Approximate location of each visit. Earlier sessions may have incomplete geography.</p>
+        <DataTable columns={['Location', 'Sessions', 'Visitors', 'Verified signups', 'Signup rate']}
+          rows={(data.geography ?? data.breakdown.filter(row => row.kind === 'country').map(row => ({
+            ...row, city: '', region: '', country: row.label === 'Unknown' ? '' : row.label,
+          }))).map(row => ({
+            key: JSON.stringify([row.city, row.region, row.country]),
+            cells: [geographyLabel(row), formatCount(row.sessions), row.visitors ? formatCount(row.visitors) : '—',
+              formatCount(row.signups), formatPercent(row.converted, row.sessions, 1)],
+          }))}
+          empty="No locations recorded in this period." />
+      </Card>
       <Card title="Website page traffic">
         <DataTable columns={['Page', 'Page views', 'Sessions with a view']} rows={data.pages.map(row => ({
           key: row.path, cells: [row.path, formatCount(row.views), formatCount(row.sessions)],

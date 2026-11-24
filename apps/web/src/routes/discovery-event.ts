@@ -16,7 +16,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const content = campaign && d.content === PRICEPILOT_CONTENT ? d.content : '';
   const referrer = d.referrer ?? '';
   const { device, browser } = clientDimensions(request.headers.get('user-agent') ?? '');
-  const country = request.headers.get('x-vercel-ip-country') ?? '';
+  const geography = visitorGeography(request.headers);
   try {
     const response = await fetch(`${url.replace(/\/$/, '')}/rest/v1/rpc/mova_record_website_traffic_event`, {
       method: 'POST',
@@ -26,7 +26,7 @@ export async function action({ request }: ActionFunctionArgs) {
         p_channel: d.channel,
         p_source: referrer || (campaign ? 'google' : ['google', 'bing'].includes(d.source) && d.channel === 'paid search' ? d.source : ''),
         p_campaign: campaign, p_content: content, p_signup_click: d.signupClick,
-        p_audience: { visitor: d.visitor ?? null, referrer, device, browser, country: /^[A-Z]{2}$/.test(country) ? country : '' },
+        p_audience: { visitor: d.visitor ?? null, referrer, device, browser, ...geography },
       }),
       signal: AbortSignal.timeout(2500),
     });
@@ -34,6 +34,25 @@ export async function action({ request }: ActionFunctionArgs) {
   } catch {
     return new Response(null, { status: 503 });
   }
+}
+
+function visitorGeography(headers: Headers) {
+  const country = headers.get('x-vercel-ip-country') ?? '';
+  if (!/^[A-Z]{2}$/.test(country)) return { country: '', region: '', city: '' };
+  const region = headers.get('x-vercel-ip-country-region') ?? '';
+  return {
+    country,
+    region: /^[A-Z0-9]{1,3}$/.test(region) ? region : '',
+    city: decodeCity(headers.get('x-vercel-ip-city') ?? ''),
+  };
+}
+
+function decodeCity(raw: string): string {
+  if (raw.length > 1440) return '';
+  try {
+    const city = decodeURIComponent(raw).normalize('NFC').trim();
+    return city.length <= 120 && /^[\p{L}\p{M}\p{N}\p{Pd} .,'’&()/]+$/u.test(city) ? city : '';
+  } catch { return ''; }
 }
 
 function parseJson(raw: string): unknown {

@@ -23,6 +23,10 @@ test('Overview reports corrected rates, activation, subscriptions, and Discovery
         periods.push(body);
         return { start: '2026-10-28T15:00:00Z', through: '2026-11-24T15:00:00Z', current: traffic, prior: traffic,
           breakdown: [landing, ad, { ...ad, kind: 'device', label: 'Mobile' }, { ...ad, kind: 'country', label: 'US' }],
+          geography: [
+            { city: 'Brooklyn', region: 'NY', country: 'US', sessions: 8, visitors: 5, signups: 2, converted: 2 },
+            { city: '', region: '', country: 'CA', sessions: 6, visitors: 3, signups: 0, converted: 0 },
+          ],
           pages: [{ path: '/calculator', views: 13, sessions: 10 }], calculator: { used: 8, signup_clicks: 3, signups: 2 } };
       },
     },
@@ -38,7 +42,8 @@ test('Overview reports corrected rates, activation, subscriptions, and Discovery
   await expect(page.getByRole('heading', { name: 'Discovery', exact: true })).toBeVisible();
   await expect(page.getByText('Returning visitors', { exact: true })).toBeVisible();
   await expect(page.getByRole('row').filter({ hasText: 'aig_pp_search / pricepilot' })).toContainText('14.3%');
-  await expect(page.getByRole('row').filter({ hasText: 'United States' })).toBeVisible();
+  await expect(page.getByRole('rowheader', { name: 'Brooklyn, NY, USA' })).toBeVisible();
+  await expect(page.getByRole('rowheader', { name: 'Canada', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Last 24 hours', exact: true }).click();
   await expect.poll(() => periods).toContainEqual({ p_period: '24h' });
   await page.getByRole('button', { name: '3 months', exact: true }).click();

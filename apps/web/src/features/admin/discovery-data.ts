@@ -17,12 +17,18 @@ export type DiscoveryRow = {
   signups: number;
   converted: number;
 };
+export type GeographyRow = Pick<DiscoveryRow, 'sessions' | 'visitors' | 'signups' | 'converted'> & {
+  city: string;
+  region: string;
+  country: string;
+};
 export type Discovery = {
   start: string;
   through: string;
   current: TrafficTotals;
   prior: TrafficTotals;
   breakdown: DiscoveryRow[];
+  geography?: GeographyRow[];
   pages: { path: string; views: number; sessions: number }[];
   calculator: { used: number; signup_clicks: number; signups: number };
 };

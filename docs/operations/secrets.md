@@ -31,9 +31,9 @@ The root `.env.example` contains placeholder values only. Hosted secrets are con
 
 ## Admin Discovery
 
-Apply migrations 0119 through 0121 before releasing the web app. The first-party collector uses the existing server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Overview shows the last 28 days through the current time. Discovery supports rolling periods and inclusive custom UTC dates. Its calculator data is collected at UTC calendar-day resolution.
+Apply migrations 0119 through 0122 before releasing the web app. The first-party collector uses the existing server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Overview shows the last 28 days through the current time. Discovery supports rolling periods and inclusive custom UTC dates. Its calculator data is collected at UTC calendar-day resolution.
 
-The collector respects Global Privacy Control. It stores a random browser identifier, public page paths, referrer hostnames, browser family, device class, and the country code from Vercel request headers. It does not store IP addresses or raw user-agent strings. Earlier sessions and page views remain available, with visitor identity and audience details shown only when collected.
+The collector respects Global Privacy Control. It stores a random browser identifier, public page paths, referrer hostnames, browser family, device class, and city, state or region code, and country code from Vercel request headers. It does not store IP addresses or raw user-agent strings. Earlier sessions and page views remain available, with visitor identity and audience details shown only when collected.
 
 The active UTM pair is `utm_campaign=aig_pp_search` and `utm_content=pricepilot`. Traffic sources are derived separately from referrals and recognized ad click markers. Published guides use their canonical URLs and remain reportable by landing page.
 
