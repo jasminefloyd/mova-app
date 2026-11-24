@@ -1,7 +1,7 @@
 import { createMovaSupabaseClient } from '../../lib/supabase';
 
 // Every admin screen reads and writes through these database functions. The database checks the
-// platform admin role and a two-step session on each call, so this module only shapes requests.
+// platform admin roster on each call, so this module only shapes requests.
 
 export class AdminError extends Error {
   readonly code: string;
@@ -122,7 +122,7 @@ export function isAdminError(error: unknown, code: string): boolean {
 export type WhoAmI = { is_admin: boolean; display_name?: string };
 
 export type OverviewWindow = {
-  active_stylists: number; new_signups: number; bookings_made: number; completed: number; no_shows: number;
+  active_stylists: number; new_signups: number; bookings_made: number; appointments_due: number; completed: number; no_shows: number;
   processed_minor: number; fees_minor: number; recorded_minor: number; salon_minor: number;
   seat_filler_filled: number; seat_filler_offered: number; seat_filler_total: number;
   autopilot_sent: number; autopilot_rebooked: number; concierge_conversations: number; concierge_handed: number;
@@ -132,7 +132,6 @@ export type Overview = {
   days: number;
   current: OverviewWindow;
   prior: OverviewWindow;
-  funnel: { waitlist: number; invited: number; signed_up: number; published_page: number; stripe_connected: number; first_booking: number };
   weekly_active: { week: string; stylists: number }[];
   top_stylists: { business_id: string; bid: number; name: string; business_name: string; completed: number; processed_minor: number }[];
   needs_nudge: { quiet: number; items: { business_id: string; bid: number; name: string; business_name: string; reason: 'quiet' | 'stripe_restricted' | 'published_no_bookings' }[] };

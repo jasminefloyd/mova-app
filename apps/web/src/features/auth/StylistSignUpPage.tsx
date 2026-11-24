@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import type { ReactNode } from 'react';
@@ -8,6 +8,7 @@ import { sendStylistEmailCode } from './email-code';
 import { trialMarketingEnabled } from '../../lib/env';
 import { completeCalculatorSignup } from '../website/calculator-analytics';
 import { installGoogleAdsTag, trackGoogleAdsSignup } from '../website/google-ads';
+import { discoverySignupVisit, trackDiscoveryPage } from '../website/discovery-analytics';
 import './stylist-auth.css';
 
 function FeatureIcon({ children }: { children: ReactNode }) {
@@ -29,6 +30,8 @@ export default function StylistSignUpPage() {
   const signupStartedAt = useRef<number | null>(null);
   const navigate = useNavigate();
   useEffect(installGoogleAdsTag, []);
+  const { key } = useLocation();
+  useEffect(() => trackDiscoveryPage('/signup', key), [key]);
 
   // "Start free" in the pitch scrolls down to the form and puts the cursor in First name.
   const startFree = () => {
@@ -49,8 +52,9 @@ export default function StylistSignUpPage() {
 
   const send = async () => {
     if (!supabase) return false;
+    const discoveryVisit = await discoverySignupVisit();
     const startedAt = Date.now();
-    const result = await sendStylistEmailCode(supabase, { email, create: true, firstName, lastName, locale: 'en-US' });
+    const result = await sendStylistEmailCode(supabase, { email, create: true, firstName, lastName, locale: 'en-US', ...(discoveryVisit ? { discoveryVisit } : {}) });
     if (result.ok) signupStartedAt.current ??= startedAt;
     return result.ok;
   };

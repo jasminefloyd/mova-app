@@ -67,6 +67,35 @@ async function landFromEmailLink(page: Page, query = '') {
 }
 
 test.describe('stylist sign-up (/signup)', () => {
+  test('carries the first campaign and landing visit into new stylist Auth creation', async ({ page }) => {
+    const requests = await mockAuth(page);
+    const events: Record<string, unknown>[] = [];
+    await page.route('**/api/discovery-event', async route => {
+      const request = route.request();
+      expect(await request.headerValue('origin')).toBe(new URL(request.url()).origin);
+      events.push(request.postDataJSON() as Record<string, unknown>);
+      await route.fulfill({ status: 204 });
+    });
+    let calculatorOrigin: string | null = null;
+    await page.route('**/api/calculator-event', async route => {
+      calculatorOrigin = await route.request().headerValue('origin');
+      await route.fulfill({ status: 204 });
+    });
+    await page.goto('/calculator?utm_source=google&utm_medium=cpc&utm_campaign=november');
+    await expect.poll(() => events.length).toBe(1);
+    const visit = events[0]?.visit;
+    expect(events[0]).toMatchObject({ landing: '/calculator', path: '/calculator', channel: 'paid search', source: 'google', medium: 'cpc', campaign: 'november' });
+    await page.locator('a[href="/signup?from=calculator"]').click();
+    await expect.poll(() => calculatorOrigin).toBe(new URL(page.url()).origin);
+    await expect.poll(() => events.some(event => event.signupClick === true && event.visit === visit)).toBe(true);
+    await expect.poll(() => events.some(event => event.path === '/signup' && event.visit === visit)).toBe(true);
+    await page.locator('#stylist-signup-first').fill('Test');
+    await page.locator('#stylist-signup-last').fill('Stylist');
+    await page.locator('#stylist-signup-email').fill('new-stylist@mova.invalid');
+    await page.locator('#stylist-signup-first').locator('xpath=ancestor::form').locator('button[type="submit"]').click();
+    await expect.poll(() => requests.otp[0]?.body.data).toMatchObject({ mova_discovery_visit: visit });
+  });
+
   for (const newAccount of [true, false]) {
     test(`calculator attribution counts ${newAccount ? 'a newly verified account' : 'no conversion for an existing account'}`, async ({ page }) => {
       await mockAuth(page);
@@ -145,7 +174,7 @@ test.describe('stylist sign-up (/signup)', () => {
     await expect(page.getByText('invite-only', { exact: false })).toHaveCount(0);
   });
 
-  test('asks for first name, last name and email, then emails a secure link (no password)', async ({ page }) => {
+  test('asks for first name, last name and email, then sends a sign-in code', async ({ page }) => {
     const requests = await mockAuth(page, { otp: 'ok' });
     await page.goto('/signup');
     await expect(page.getByLabel('Password')).toHaveCount(0);
@@ -163,7 +192,7 @@ test.describe('stylist sign-up (/signup)', () => {
       create_user: true,
       data: { first_name: 'Ari', last_name: 'Monroe', preferred_locale: 'en-US' },
     });
-    expect(requests.otp[0]?.redirectTo).toMatch(/\/auth\/confirm\?returnTo=%2Fonboarding%2Fprofile$/);
+    expect(requests.otp[0]?.redirectTo).toBeNull();
   });
 
   test('"Use a different email" goes back to the form', async ({ page }) => {

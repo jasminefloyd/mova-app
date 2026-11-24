@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { I18nextProvider } from 'react-i18next';
-import { Outlet, useLoaderData } from 'react-router';
+import { Outlet, useLoaderData, useLocation } from 'react-router';
 import type { LoaderFunctionArgs } from 'react-router';
 import i18n from '../../i18n';
 import { JsonLd, SiteShellContext } from './parts';
@@ -8,6 +8,7 @@ import { localeFromUrl, publicBaseUrl, siteGraph, type ShellData } from './seo';
 import { WebsiteFooter } from './WebsiteFooter';
 import { WebsiteNav } from './WebsiteNav';
 import { installGoogleAdsTag } from './google-ads';
+import { trackDiscoveryPage, trackDiscoverySignupClick } from './discovery-analytics';
 import './website.css';
 
 // Route module for the public website. Google Fonts is the only stylesheet we load from outside.
@@ -27,6 +28,8 @@ let browserLocaleSynced = false;
 export default function WebsiteLayout() {
   const shell = useLoaderData<typeof loader>();
   useEffect(installGoogleAdsTag, []);
+  const { pathname, key } = useLocation();
+  useEffect(() => trackDiscoveryPage(pathname, key), [pathname, key]);
   const onServer = typeof document === 'undefined';
   // On the server each request gets its own i18n copy, so a Spanish request is rendered in Spanish
   // without changing the language for anyone else.
@@ -37,7 +40,10 @@ export default function WebsiteLayout() {
     if (shell.explicitLocale && i18n.language !== shell.locale) void i18n.changeLanguage(shell.locale);
   }
   const page = <SiteShellContext.Provider value={shell}>
-    <div className="mova-site" lang={shell.locale}>
+    <div className="mova-site" lang={shell.locale} onClickCapture={event => {
+      const link = event.target instanceof Element ? event.target.closest('a') : null;
+      if (link?.origin === window.location.origin && link.pathname === '/signup') trackDiscoverySignupClick(pathname);
+    }}>
       <WebsiteNav />
       <Outlet />
       <WebsiteFooter />

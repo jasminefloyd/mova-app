@@ -385,3 +385,15 @@
   .adm .btn, .adm .btn.sm, .adm .chip, .adm .seg > * { min-height: var(--tap-min); }
   .adm .input, .adm .select { min-height: var(--tap-min); font-size: var(--fs-body-l); }
 }
+
+/* Analytics tables keep their column labels visible as the table scrolls on narrow screens. */
+.adm .analytics-table .tbl { min-width: 0; }
+.adm .analytics-table .tbl thead { display: table-header-group; }
+.adm .analytics-table .tbl th[scope="row"] {
+  font-size: var(--fs-body-s);
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

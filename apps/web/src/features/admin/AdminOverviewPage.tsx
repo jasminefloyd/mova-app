@@ -5,11 +5,14 @@ import { adminErrorText, adminRpc, type Overview, type OverviewWindow } from './
 import { downloadText, formatChange, formatCount, formatMoneyWhole, formatPercent, isoWeekLabel, toCsv } from './admin-format';
 import { Card, ErrorNote, Kpi, Loading, PageHead, Segmented } from './AdminPrimitives';
 
+import { AdminDiscoveryOverview } from './AdminDiscoveryPage';
+import { AdminActivation, AdminSubscriptionMetrics } from './AdminGrowthMetrics';
+
 type WindowKey = '7' | '30' | '90';
 
 const kpis: { key: keyof OverviewWindow; label: string; money?: boolean; percentage?: boolean; note?: string }[] = [
   { key: 'active_stylists', label: 'Active stylists' },
-  { key: 'new_signups', label: 'New signups' },
+  { key: 'new_signups', label: 'New stylist businesses' },
   { key: 'bookings_made', label: 'Bookings made' },
   { key: 'no_shows', label: 'No-show rate', percentage: true },
   { key: 'processed_minor', label: 'Processed by Mova', money: true },
@@ -34,7 +37,9 @@ export default function AdminOverviewPage() {
   function exportCsv() {
     const data = overview.data;
     if (!data) return;
-    const rows = kpis.map((kpi) => [kpi.label, data.current[kpi.key], data.prior[kpi.key]]);
+    const rows = kpis.map(kpi => kpi.percentage
+      ? [kpi.label, formatPercent(data.current.no_shows, data.current.appointments_due, 1), formatPercent(data.prior.no_shows, data.prior.appointments_due, 1)]
+      : [kpi.label, data.current[kpi.key], data.prior[kpi.key]]);
     downloadText(`mova-overview-${days}d.csv`, toCsv(['Metric', `Last ${days} days`, 'Prior period'], rows));
   }
 
@@ -54,11 +59,6 @@ export default function AdminOverviewPage() {
         const star = formatChange(perStylist(o.current), perStylist(o.prior));
         const weeks = o.weekly_active;
         const maxWeek = Math.max(1, ...weeks.map((entry) => entry.stylists));
-        const funnel = [
-          ['Waitlist', o.funnel.waitlist], ['Invited', o.funnel.invited], ['Signed up', o.funnel.signed_up],
-          ['Published page', o.funnel.published_page], ['Stripe connected', o.funnel.stripe_connected], ['First booking', o.funnel.first_booking],
-        ] as const;
-        const funnelMax = Math.max(1, ...funnel.map(([, count]) => count));
         const languageTotal = Math.max(1, o.language.en_us + o.language.es_us);
         // North-star trend: weekly active stylists as a filled line (A2).
         const points = weeks.map((row, index) => [weeks.length > 1 ? index / (weeks.length - 1) * 400 : 200, 56 - row.stylists / maxWeek * 48] as const);
@@ -74,24 +74,18 @@ export default function AdminOverviewPage() {
           <div className="k4">
             {kpis.map((kpi) => {
               const current = o.current[kpi.key];
-              const change = formatChange(current, o.prior[kpi.key]);
-              const value = kpi.money ? formatMoneyWhole(current) : kpi.percentage ? formatPercent(current, o.current.bookings_made) : formatCount(current);
+              const change = kpi.percentage
+                ? formatChange(current / (o.current.appointments_due || 1), o.prior.no_shows / (o.prior.appointments_due || 1))
+                : formatChange(current, o.prior[kpi.key]);
+              const value = kpi.money ? formatMoneyWhole(current) : kpi.percentage ? formatPercent(current, o.current.appointments_due, 1) : formatCount(current);
               return <Kpi key={kpi.key} label={kpi.label} value={value} note={kpi.note ?? <span className={`${change.direction === 'up' ? 'up' : change.direction === 'down' ? 'down' : ''}`}>{change.text}</span>} />;
             })}
           </div>
-          <div className="cols2">
-            <Card title="Growth funnel" aside={<span className="small muted">All time</span>}>
-              <ul className="funnel">{funnel.map(([label, count]) => (
-                <li key={label}><span>{label}</span><span className="bar" aria-hidden="true"><i style={{ width: `${Math.max(2, count / funnelMax * 100)}%` }} /></span><b className="num">{formatCount(count)}</b></li>
-              ))}</ul>
-              <p className="small muted">{formatPercent(o.funnel.signed_up, o.funnel.invited)} of invites become signups · {formatPercent(o.funnel.first_booking, o.funnel.signed_up)} of signups take a first booking.</p>
-            </Card>
-            <Card title="Active stylists by week" aside={<span className="small muted">Signed in and had a booking</span>}>
+            <Card title="Active stylists by week" aside={<span className="small muted">Stylists with a booking created that week</span>}>
               {weeks.length === 0 ? <p className="muted">No activity in this period.</p> : <div className="weekly-bars">{weeks.map((row, index) => (
                 <div key={row.week} title={`${isoWeekLabel(row.week)} · ${formatCount(row.stylists)}`} className={index === weeks.length - 1 ? 'is-current' : ''}><b>{formatCount(row.stylists)}</b><i style={{ height: `${Math.max(8, row.stylists / maxWeek * 100)}%` }} /><small>{isoWeekLabel(row.week)}</small></div>
               ))}</div>}
             </Card>
-          </div>
           <div className="k3">
             <Kpi label="Seat filler" value={formatCount(o.current.seat_filler_filled)} note={`open slots refilled · ${formatPercent(o.current.seat_filler_filled, o.current.seat_filler_offered)} of slots offered`} />
             <Kpi label="Rebooking autopilot" value={formatPercent(o.current.autopilot_rebooked, o.current.autopilot_sent)} note={`rebooked from ${formatCount(o.current.autopilot_sent)} reminder texts`} />
@@ -128,6 +122,9 @@ export default function AdminOverviewPage() {
           </div>
         </>;
       })() : null}
+      <AdminDiscoveryOverview />
+      <AdminActivation />
+      <AdminSubscriptionMetrics days={Number(days)} />
     </>
   );
 }

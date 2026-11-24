@@ -94,6 +94,7 @@ export default [
     route('signin', '../src/features/admin/AdminSignInPage.tsx'),
     layout('../src/features/admin/AdminLayout.tsx', [
       index('../src/features/admin/AdminOverviewPage.tsx'),
+      route('discovery', '../src/features/admin/AdminDiscoveryPage.tsx'),
       route('stylists', '../src/features/admin/AdminStylistsPage.tsx'),
       route('stylists/:businessId', '../src/features/admin/AdminStylistDetailPage.tsx'),
       route('stylists/:businessId/audit', '../src/features/admin/AdminAuditLogPage.tsx'),
@@ -115,6 +116,8 @@ export default [
   route('api/calendar-sync', '../src/routes/calendar-sync.ts'),
   route('api/reports-refresh', '../src/routes/reports-refresh.ts'),
   route('api/calculator-event', '../src/routes/calculator-event.ts'),
+  route('api/discovery-event', '../src/routes/discovery-event.ts'),
+  route('api/admin-search-discovery', '../src/routes/admin-search-discovery.ts'),
   route('feed/:token', '../src/routes/calendar-feed.ts'),
   route('pay/:code', '../src/routes/paylink-redirect.ts'),
 ] satisfies RouteConfig;

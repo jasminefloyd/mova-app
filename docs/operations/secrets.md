@@ -29,6 +29,19 @@ Use separate credentials for development and production. The product owner has d
 
 The root `.env.example` contains placeholder values only. Hosted secrets are configured separately in each platform's secret store.
 
+## Admin Discovery and Search Console
+
+Apply migration 0119 before releasing the web app. The first-party traffic collector uses the existing server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. The report offers 28 completed UTC days of Mova traffic and uses the latest finalized 28 days in Google Search Console. Browser tracking respects Global Privacy Control and stores public paths, bounded campaign labels, and the referrer hostname. Google queries are aggregate-only.
+
+For organic search data, enable the Search Console API in a Google Cloud project and grant a dedicated service account read access to the verified Mova property in Search Console. Set these **server-only Vercel variables** and redeploy.
+
+| Variable | Value |
+|---|---|
+| `MOVA_SEARCH_CONSOLE_SERVICE_ACCOUNT` | Service-account JSON with `client_email` and `private_key`. Keep the key in the Vercel secret store. |
+| `MOVA_SEARCH_CONSOLE_SITE` | Exact Search Console property identifier, such as `sc-domain:mova-beauty.co` for a domain property or `https://mova-beauty.co/` for a URL-prefix property. |
+
+The server checks the admin roster before requesting Google data. Discovery shows an explicit disconnected state until these variables are set. Website traffic, signup attribution, and the calculator counters load independently of Google.
+
 ## Stripe plan subscriptions
 
 Plan billing has a separate mode from the test-only checkout used for stylist deposits and pay links. Set `MOVA_STRIPE_BILLING_MODE=live` and `STRIPE_API_KEY` to a platform Stripe secret or restricted live key with permission to create/retrieve Checkout Sessions and Billing Portal Sessions. Set `MOVA_STRIPE_PRICE_PRO` and `MOVA_STRIPE_PRICE_AI_GROWTH` to active monthly USD price IDs in that same live account. The configured prices should be $19/month and $39/month. Do not set `MOVA_STRIPE_TEST_MODE` to enable subscriptions; that flag controls unrelated payment functions. Configure an active default Stripe Billing Portal with both prices available for subscription updates. `OPERATOR_BASE_URL` must be the same origin stylists sign in on (`https://mova-beauty.co`) so Stripe returns to the existing browser session. The local sample defaults plan billing to test mode; production live mode is enabled only by the production Edge Function secrets.
