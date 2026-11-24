@@ -67,7 +67,7 @@ async function landFromEmailLink(page: Page, query = '') {
 }
 
 test.describe('stylist sign-up (/signup)', () => {
-  test('carries the first campaign and landing visit into new stylist Auth creation', async ({ page }) => {
+  test('keeps the landing visit and ignores unapproved UTMs through signup', async ({ page }) => {
     const requests = await mockAuth(page);
     const events: Record<string, unknown>[] = [];
     await page.route('**/api/discovery-event', async route => {
@@ -84,7 +84,7 @@ test.describe('stylist sign-up (/signup)', () => {
     await page.goto('/calculator?utm_source=google&utm_medium=cpc&utm_campaign=november');
     await expect.poll(() => events.length).toBe(1);
     const visit = events[0]?.visit;
-    expect(events[0]).toMatchObject({ landing: '/calculator', path: '/calculator', channel: 'paid search', source: 'google', medium: 'cpc', campaign: 'november' });
+    expect(events[0]).toMatchObject({ landing: '/calculator', path: '/calculator', channel: 'direct / unknown', source: '', medium: '', campaign: '', content: '', visitor: expect.any(String) });
     await page.locator('a[href="/signup?from=calculator"]').click();
     await expect.poll(() => calculatorOrigin).toBe(new URL(page.url()).origin);
     await expect.poll(() => events.some(event => event.signupClick === true && event.visit === visit)).toBe(true);
@@ -108,8 +108,9 @@ test.describe('stylist sign-up (/signup)', () => {
     await page.goto('/signup?utm_source=google&utm_medium=cpc&utm_campaign=aig_pp_search&utm_content=pricepilot');
     await expect.poll(() => events.length).toBe(2);
     const ad = events[1];
-    expect(ad).toMatchObject({ landing: '/signup', channel: 'paid search', source: 'google', medium: 'cpc', campaign: 'aig_pp_search', content: 'pricepilot' });
+    expect(ad).toMatchObject({ landing: '/signup', channel: 'paid search', source: 'google', medium: '', campaign: 'aig_pp_search', content: 'pricepilot' });
     expect(ad?.visit).not.toBe(events[0]?.visit);
+    expect(ad?.visitor).toBe(events[0]?.visitor);
     await page.getByLabel('First name').fill('Test');
     await page.getByLabel('Last name').fill('Stylist');
     await page.getByLabel('Email', { exact: true }).fill(user.email);

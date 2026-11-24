@@ -31,9 +31,11 @@ The root `.env.example` contains placeholder values only. Hosted secrets are con
 
 ## Admin Discovery
 
-Apply migrations 0119 and 0120 before releasing the web app. The first-party traffic collector uses the existing server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Discovery shows campaign traffic for the current UTC day and a comparison across completed UTC days. Browser tracking respects Global Privacy Control and stores public paths, bounded campaign labels, and the referrer hostname.
+Apply migrations 0119 through 0121 before releasing the web app. The first-party collector uses the existing server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Overview shows the last 28 days through the current time. Discovery supports rolling periods and inclusive custom UTC dates. Its calculator data is collected at UTC calendar-day resolution.
 
-External campaigns can tag links using `utm_source`, `utm_medium`, `utm_campaign`, and `utm_content`. When a guide publishes, its editor offers a share link with `utm_source=mova`, `utm_medium=guide`, `utm_campaign=guides`, and the saved guide slug as `utm_content`. The guide's canonical address stays untagged.
+The collector respects Global Privacy Control. It stores a random browser identifier, public page paths, referrer hostnames, browser family, device class, and the country code from Vercel request headers. It does not store IP addresses or raw user-agent strings. Earlier sessions and page views remain available, with visitor identity and audience details shown only when collected.
+
+The active UTM pair is `utm_campaign=aig_pp_search` and `utm_content=pricepilot`. Traffic sources are derived separately from referrals and recognized ad click markers. Published guides use their canonical URLs and remain reportable by landing page.
 
 ## Stripe plan subscriptions
 

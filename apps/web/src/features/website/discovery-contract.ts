@@ -3,6 +3,9 @@ import { z } from 'zod';
 export const discoveryPath = z.string().regex(/^\/(?:features|pricing|calculator|signup|guides(?:\/[a-z0-9-]{1,140})?)?$/);
 export const discoveryLabel = z.string().regex(/^[a-z0-9._-]{0,100}$/);
 export const discoveryContent = z.string().regex(/^[a-z0-9._-]{0,120}$/);
+export const PRICEPILOT_CAMPAIGN = 'aig_pp_search';
+export const PRICEPILOT_CONTENT = 'pricepilot';
+
 export const discoveryEvent = z.object({
   visit: z.string().uuid(),
   event: z.string().uuid(),
@@ -13,6 +16,8 @@ export const discoveryEvent = z.object({
   medium: discoveryLabel,
   campaign: discoveryLabel,
   content: discoveryContent.optional(),
+  visitor: z.string().uuid().optional(),
+  referrer: discoveryLabel.optional(),
   signupClick: z.boolean(),
 }).strict();
 export type DiscoveryEvent = z.infer<typeof discoveryEvent>;

@@ -174,7 +174,7 @@ test.describe('guides', () => {
     await expect(page.getByRole('navigation', { name: 'More guides' }).getByRole('link', { name: 'Practical note 01' })).toHaveCount(0);
   });
 
-  test('published guide share links capture UTMs and keep the canonical URL clean', async ({ page }) => {
+  test('published guides track landing pages without accepting guide UTMs', async ({ page }) => {
     const visits: Record<string, unknown>[] = [];
     await page.route('**/api/discovery-event', async route => {
       visits.push(route.request().postDataJSON() as Record<string, unknown>);
@@ -186,7 +186,7 @@ test.describe('guides', () => {
     await expect(page.getByRole('heading', { name: "We couldn't find that guide." })).toBeVisible();
     await page.goto(`/guides/${slug}${params}`);
     await expect.poll(() => visits.length).toBe(1);
-    expect(visits[0]).toMatchObject({ path: `/guides/${slug}`, landing: `/guides/${slug}`, source: 'mova', medium: 'guide', campaign: 'guides', content: slug });
+    expect(visits[0]).toMatchObject({ path: `/guides/${slug}`, landing: `/guides/${slug}`, source: '', medium: '', campaign: '', content: '' });
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', new RegExp(`/guides/${slug}$`));
   });
 

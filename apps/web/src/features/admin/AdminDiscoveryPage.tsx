@@ -1,33 +1,41 @@
-import { type ReactNode } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { adminErrorText, adminRpc } from './admin-api';
 import { formatChange, formatCount, formatPercent } from './admin-format';
-import { Card, ErrorNote, Kpi, Loading, PageHead } from './AdminPrimitives';
-import type { Discovery, DiscoveryRow, VisitTotals } from './discovery-data';
+import { Card, ErrorNote, Kpi, Loading, PageHead, Segmented } from './AdminPrimitives';
+import type { Discovery, DiscoveryRow, TrafficTotals } from './discovery-data';
 
-function useDiscovery() {
+type Period = '24h' | '7d' | '28d' | '3mo' | 'custom';
+type DateRange = { start: string; end: string };
+const rangeDate = new Intl.DateTimeFormat('en-US', {
+  month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC',
+});
+
+function useDiscovery(period: Period, range?: DateRange) {
   return useQuery({
-    queryKey: ['admin', 'discovery'],
-    queryFn: () => adminRpc<Discovery>('mova_admin_discovery'),
+    queryKey: ['admin', 'website-traffic', period, range],
+    queryFn: () => adminRpc<Discovery>('mova_admin_website_traffic', {
+      p_period: period,
+      ...(period === 'custom' && range ? { p_start: range.start, p_end: range.end } : {}),
+    }),
   });
 }
 
-function change(current: number | undefined, prior: number | undefined) {
-  return current !== undefined && prior !== undefined ? `${formatChange(current, prior).text} vs prior 28 days` : undefined;
-}
-
-function DiscoveryKpis({ current, prior }: {
-  current: VisitTotals | null | undefined; prior: VisitTotals | null | undefined;
-}) {
-  const currentRate = current?.visits ? current.converted / current.visits : undefined;
-  const priorRate = prior?.visits ? prior.converted / prior.visits : undefined;
-  const metric = (value: number | undefined) => value === undefined ? '—' : formatCount(value);
+function DiscoveryKpis({ current, prior, details = false }: { current: TrafficTotals; prior: TrafficTotals; details?: boolean }) {
+  const hasVisitors = current.identified_sessions > 0;
+  const change = (value: number, previous: number) => formatChange(value, previous).text;
   return <div className="k4">
-    <Kpi label="Website visits" value={metric(current?.visits)} note={change(current?.visits, prior?.visits)} />
-    <Kpi label="Visits with a signup link click" value={metric(current?.signup_clicks)} note={change(current?.signup_clicks, prior?.signup_clicks)} />
-    <Kpi label="Verified stylist signups" value={metric(current?.signups)} note={change(current?.signups, prior?.signups)} />
-    <Kpi label="Visit to signup rate" value={current ? formatPercent(current.converted, current.visits, 1) : '—'} note={change(currentRate, priorRate)} />
+    <Kpi label="Visitors" value={hasVisitors || !current.sessions ? formatCount(current.visitors) : '—'}
+      note={hasVisitors && prior.identified_sessions ? change(current.visitors, prior.visitors) : undefined} />
+    <Kpi label="Sessions" value={formatCount(current.sessions)} note={change(current.sessions, prior.sessions)} />
+    <Kpi label="Page views" value={formatCount(current.page_views)} note={change(current.page_views, prior.page_views)} />
+    <Kpi label="Signup conversion" value={formatPercent(current.converted, current.sessions, 1)} note={`${formatCount(current.signups)} verified stylist signups`} />
+    {details && <>
+      <Kpi label="New visitors" value={hasVisitors || !current.sessions ? formatCount(current.new_users) : '—'} />
+      <Kpi label="Returning visitors" value={hasVisitors || !current.sessions ? formatCount(current.returning_users) : '—'} />
+      <Kpi label="Visits with a signup link click" value={formatCount(current.signup_clicks)} />
+    </>}
   </div>;
 }
 
@@ -41,67 +49,115 @@ function DataTable({ columns, rows, empty }: { columns: string[]; rows: { key: s
   </table></div>;
 }
 
-function trafficLabel(row: DiscoveryRow) {
-  if (row.kind === 'landing') return row.landing_path;
-  if (row.kind === 'channel') return row.channel;
-  return [row.source, row.medium, row.campaign, ...(row.content ? [row.content] : [])].map(value => value || '—').join(' / ');
+const locationNames = new Intl.DisplayNames(['en-US'], { type: 'region' });
+
+function rowLabel(row: DiscoveryRow): string {
+  if (row.kind === 'country' && /^[A-Z]{2}$/.test(row.label)) return locationNames.of(row.label) ?? row.label;
+  return row.label;
 }
 
-function TrafficTable({ rows, kind, limit = 25, compact = false }: { rows: DiscoveryRow[]; kind: DiscoveryRow['kind']; limit?: number; compact?: boolean }) {
+function TrafficTable({ rows, kind, label, limit = 50, compact = false }: {
+  rows: DiscoveryRow[]; kind: DiscoveryRow['kind']; label: string; limit?: number; compact?: boolean;
+}) {
   return <DataTable
-    columns={[kind === 'landing' ? 'Landing page' : kind === 'channel' ? 'Channel' : 'Source / medium / campaign / content', 'Visits', ...(compact ? [] : ['Signup clicks']), 'Verified signups', 'Signup rate']}
+    columns={[label, 'Sessions', ...(!compact ? ['Visitors'] : []), 'Verified signups', 'Signup rate']}
     rows={rows.filter(row => row.kind === kind).slice(0, limit).map(row => ({
-      key: JSON.stringify([row.landing_path, row.channel, row.source, row.medium, row.campaign, row.content]),
-      cells: [trafficLabel(row), formatCount(row.visits), ...(compact ? [] : [formatCount(row.signup_clicks)]), formatCount(row.signups), formatPercent(row.converted, row.visits, 1)],
+      key: row.label,
+      cells: [rowLabel(row), formatCount(row.sessions), ...(!compact ? [row.visitors ? formatCount(row.visitors) : '—'] : []),
+        formatCount(row.signups), formatPercent(row.converted, row.sessions, 1)],
     }))}
-    empty="No traffic recorded in this period."
+    empty="No traffic recorded in this view."
   />;
 }
 
+const breakdowns: { kind: DiscoveryRow['kind']; title: string; column: string }[] = [
+  { kind: 'landing', title: 'Landing page conversion', column: 'Landing page' },
+  { kind: 'campaign', title: 'UTM campaign tracking', column: 'Campaign / content' },
+  { kind: 'channel', title: 'Traffic channels', column: 'Channel' },
+  { kind: 'source', title: 'Traffic sources', column: 'Source' },
+  { kind: 'referrer', title: 'Referrers', column: 'Referrer domain' },
+  { kind: 'device', title: 'Devices', column: 'Device type' },
+  { kind: 'browser', title: 'Browsers', column: 'Browser' },
+  { kind: 'country', title: 'Geography', column: 'Country' },
+];
+
 export function AdminDiscoveryOverview() {
-  const traffic = useDiscovery();
+  const traffic = useDiscovery('28d');
   return <Card title="Discovery" aside={<Link className="link-sm" to="/admin/discovery">View discovery report</Link>}>
-    <p className="small muted">Last 28 days compared with the previous 28 days.</p>
-    <DiscoveryKpis current={traffic.data?.current} prior={traffic.data?.prior} />
+    <p className="small muted">Last 28 days through now, compared with the previous 28 days.</p>
     {traffic.isPending && <Loading />}
     {traffic.isError && <div className="row"><ErrorNote message={adminErrorText(traffic.error)} /><button type="button" className="btn sm" onClick={() => void traffic.refetch()}>Retry traffic</button></div>}
-    {traffic.data && <div className="cols2">
-      <section className="stack"><h3 className="h2">Top landing pages</h3><TrafficTable rows={traffic.data.breakdown} kind="landing" limit={3} compact /></section>
-      <section className="stack"><h3 className="h2">Top sources and campaigns</h3><TrafficTable rows={traffic.data.breakdown} kind="campaign" limit={3} compact /></section>
-    </div>}
+    {traffic.data && <>
+      <DiscoveryKpis current={traffic.data.current} prior={traffic.data.prior} />
+      <div className="cols2">
+        <section className="stack"><h3 className="h2">Top landing pages</h3><TrafficTable rows={traffic.data.breakdown} kind="landing" label="Landing page" limit={3} compact /></section>
+        <section className="stack"><h3 className="h2">Top traffic sources</h3><TrafficTable rows={traffic.data.breakdown} kind="source" label="Source" limit={3} compact /></section>
+      </div>
+    </>}
   </Card>;
 }
 
 export default function AdminDiscoveryPage() {
-  const traffic = useDiscovery();
+  const [period, setPeriod] = useState<Period>('28d');
+  const [customOpen, setCustomOpen] = useState(false);
+  const [customRange, setCustomRange] = useState<DateRange>();
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [rangeError, setRangeError] = useState('');
+  const today = new Date().toISOString().slice(0, 10);
+  const traffic = useDiscovery(period, period === 'custom' ? customRange : undefined);
+  const data = traffic.data;
+
+  function changePeriod(next: Period) {
+    setCustomOpen(next === 'custom');
+    setRangeError('');
+    if (next !== 'custom') setPeriod(next);
+  }
+
+  function applyCustom(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!from || !to || from > to || to > today) {
+      setRangeError('Choose a start and end date in order, ending today or earlier.');
+      return;
+    }
+    setRangeError('');
+    setCustomRange({ start: from, end: to });
+    setPeriod('custom');
+  }
   return <>
-    <PageHead title="Discovery" sub="See how people find Mova, where they land, and which visits lead to a verified stylist account." actions={<Link className="btn sm" to="/admin">Overview</Link>} />
-    <DiscoveryKpis current={traffic.data?.current} prior={traffic.data?.prior} />
+    <PageHead title="Discovery" sub="Website traffic and verified stylist signups"
+      actions={<Link className="btn sm" to="/admin">Overview</Link>} />
+    <Segmented<Period> label="Traffic period" value={customOpen ? 'custom' : period} onChange={changePeriod} options={[
+      { value: '24h', label: 'Last 24 hours' }, { value: '7d', label: '7 days' }, { value: '28d', label: '28 days' },
+      { value: '3mo', label: '3 months' }, { value: 'custom', label: 'Custom' },
+    ]} />
+    {customOpen && <form className="row toolbar-form" onSubmit={applyCustom}>
+      <label className="field"><span className="lbl">Start date (UTC)</span><input className="input" type="date" value={from} max={today} required onChange={event => setFrom(event.target.value)} /></label>
+      <label className="field"><span className="lbl">End date (UTC)</span><input className="input" type="date" value={to} max={today} required onChange={event => setTo(event.target.value)} /></label>
+      <button type="submit" className="btn sm">Apply range</button>
+      {rangeError && <ErrorNote message={rangeError} />}
+    </form>}
     {traffic.isPending && <Loading />}
     {traffic.isError && <div className="row"><ErrorNote message={adminErrorText(traffic.error)} /><button type="button" className="btn sm" onClick={() => void traffic.refetch()}>Retry traffic</button></div>}
-    {traffic.data && <>
-      <Card title="Campaign traffic today">
-        <p className="small muted">Visits so far today (UTC). The 28-day comparison uses completed days.</p>
-        <TrafficTable rows={traffic.data.today_campaigns ?? []} kind="campaign" />
-      </Card>
-      <Card title="Landing page conversion">
-        <p className="small muted">28 days through {traffic.data.through} UTC. The landing page and campaign that started the visit get credit. Signup rate is the share of visits with at least one verified stylist signup.</p>
-        <TrafficTable rows={traffic.data.breakdown} kind="landing" />
-      </Card>
+    {data && <>
+      <DiscoveryKpis current={data.current} prior={data.prior} details />
+      <p className="small muted">{rangeDate.format(new Date(data.start))} to {rangeDate.format(new Date(data.through))} UTC. Signup rates are based on sessions. Visitors are counted per browser. A session in a tab ends after 30 minutes of inactivity. Returning visitors were first seen before the selected period.
+        {data.current.identified_sessions < data.current.sessions ? ` Visitor history is available for ${formatCount(data.current.identified_sessions)} of ${formatCount(data.current.sessions)} sessions.` : ''}
+      </p>
+      {breakdowns.map(section => <Card key={section.kind} title={section.title}>
+        <TrafficTable rows={data.breakdown} kind={section.kind} label={section.column} />
+      </Card>)}
       <Card title="Website page traffic">
-        <DataTable columns={['Page', 'Page views', 'Visits with a view']} rows={traffic.data.pages.map(row => ({
-          key: row.path, cells: [row.path, formatCount(row.views), formatCount(row.visits)],
+        <DataTable columns={['Page', 'Page views', 'Sessions with a view']} rows={data.pages.map(row => ({
+          key: row.path, cells: [row.path, formatCount(row.views), formatCount(row.sessions)],
         }))} empty="No page views recorded in this period." />
       </Card>
-      <Card title="Channels and campaigns">
-        <div className="stack"><TrafficTable rows={traffic.data.breakdown} kind="channel" /><TrafficTable rows={traffic.data.breakdown} kind="campaign" /></div>
-      </Card>
       <Card title="Calculator acquisition">
-        <p className="small muted">Activity in the same 28-day reporting window from the calculator’s existing counters.</p>
+        <p className="small muted">Calendar-day totals for the UTC dates covered by this period.</p>
         <div className="k3">
-          <Kpi label="Calculator uses" value={formatCount(traffic.data.calculator.used)} />
-          <Kpi label="Start free clicks" value={formatCount(traffic.data.calculator.signup_clicks)} />
-          <Kpi label="Verified signups" value={formatCount(traffic.data.calculator.signups)} />
+          <Kpi label="Calculator uses" value={formatCount(data.calculator.used)} />
+          <Kpi label="Start free clicks" value={formatCount(data.calculator.signup_clicks)} />
+          <Kpi label="Verified signups" value={formatCount(data.calculator.signups)} />
         </div>
       </Card>
     </>}

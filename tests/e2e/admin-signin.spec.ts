@@ -10,6 +10,35 @@ async function verifyEmail(page: Page, email: string) {
 }
 
 test.describe('admin sign-in gate', () => {
+  test('retries a missing admin JavaScript chunk once without clearing site data', async ({ page }) => {
+    await mockAdminApi(page, { signedIn: false, isAdmin: false });
+    let freshDocument = false;
+    let recoveries = 0;
+    await page.route('**/admin/signin?**', async route => {
+      const url = new URL(route.request().url());
+      if (url.searchParams.has('__mova_reload')) {
+        freshDocument = true;
+        recoveries++;
+      }
+      await route.continue();
+    });
+    await page.route('**/assets/entry.client-*.js', async route => {
+      if (freshDocument) return route.continue();
+      await route.fulfill({ status: 404, headers: { 'Cache-Control': 'no-store' }, body: '' });
+    });
+    await page.goto('/admin/signin?email=staff%40mova.invalid', { waitUntil: 'commit' }).catch(() => undefined);
+    await expect.poll(() => recoveries).toBe(1);
+    await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Email me a sign-in code' })).toBeVisible();
+    await expect(page).toHaveURL(/\/admin\/signin\?email=staff%40mova.invalid$/);
+  });
+
+  test('admin documents request no HTTP caching', async ({ request }) => {
+    const response = await request.get('/admin/signin');
+    expect(response.status()).toBe(200);
+    expect(response.headers()['cache-control']).toBe('private, no-store');
+  });
+
   test('sends a signed-out visitor to sign-in and keeps the return address', async ({ page }) => {
     await mockAdminApi(page, { signedIn: false, isAdmin: false });
     await page.goto('/admin/stylists');

@@ -106,3 +106,21 @@ test('service worker never caches auth, function or storage responses, and keeps
   const cacheNames = await page.evaluate(() => caches.keys());
   expect(cacheNames.some((name) => /^workbox-precache/.test(name))).toBe(true);
 });
+
+test('admin refresh never serves stale HTML from the worker page cache', async ({ page, context }) => {
+  await page.goto('/login');
+  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  await page.goto('/admin/signin');
+  await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
+  await page.evaluate(async () => {
+    const cache = await caches.open('mova-pages-v1');
+    await cache.put('/admin/signin', new Response('stale admin HTML', { headers: { 'Content-Type': 'text/html' } }));
+  });
+  await context.setOffline(true);
+  const response = await page.reload();
+  expect(response?.status()).toBe(503);
+  await expect(page.locator('body')).toHaveText('The Admin Console requires an internet connection. Reconnect and refresh.');
+  await context.setOffline(false);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+});

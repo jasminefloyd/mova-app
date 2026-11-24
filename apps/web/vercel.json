@@ -3,6 +3,12 @@
   "framework": "react-router",
   "installCommand": "corepack pnpm install --frozen-lockfile",
   "buildCommand": "cd ../.. && corepack pnpm build",
+  "headers": [
+    {
+      "source": "/__manifest",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    }
+  ],
   "crons": [
     {
       "path": "/api/booking-expiry",

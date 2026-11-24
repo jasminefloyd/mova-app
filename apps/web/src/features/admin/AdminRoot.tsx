@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Outlet } from 'react-router';
-import type { LoaderFunctionArgs } from 'react-router';
+import { useEffect, useState } from 'react';
+import { data, Outlet } from 'react-router';
+import type { HeadersFunction, LoaderFunctionArgs } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ADMIN_RELOAD_PARAM } from '../../pwa/admin-asset-recovery';
 import './admin.css';
 
 // The admin portal is available on the dedicated host and at /admin on the main site.
@@ -20,8 +21,10 @@ export function loader({ request }: LoaderFunctionArgs) {
   if (!isAdminHost(new URL(request.url).hostname)) {
     throw new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
   }
-  return null;
+  return data(null, { headers: { 'Cache-Control': 'private, no-store' } });
 }
+
+export const headers: HeadersFunction = () => ({ 'Cache-Control': 'private, no-store' });
 
 export function meta() {
   return [{ title: 'Mova Beauty Admin' }, { name: 'robots', content: 'noindex, nofollow' }];
@@ -38,6 +41,12 @@ export function createAdminQueryClient() {
 
 export default function AdminRoot() {
   const [queryClient] = useState(createAdminQueryClient);
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has(ADMIN_RELOAD_PARAM)) return;
+    url.searchParams.delete(ADMIN_RELOAD_PARAM);
+    window.history.replaceState(window.history.state, '', url.href);
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />

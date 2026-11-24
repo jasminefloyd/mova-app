@@ -1,20 +1,29 @@
-export type VisitTotals = { visits: number; signup_clicks: number; signups: number; converted: number };
-export type DiscoveryRow = VisitTotals & {
-  kind: 'landing' | 'channel' | 'campaign';
-  landing_path: string | null;
-  channel: string | null;
-  source: string | null;
-  medium: string | null;
-  campaign: string | null;
-  content: string | null;
+export type TrafficTotals = {
+  visitors: number;
+  identified_sessions: number;
+  new_users: number;
+  returning_users: number;
+  sessions: number;
+  page_views: number;
+  signup_clicks: number;
+  signups: number;
+  converted: number;
+};
+export type DiscoveryRow = {
+  kind: 'landing' | 'channel' | 'source' | 'referrer' | 'campaign' | 'device' | 'browser' | 'country';
+  label: string;
+  sessions: number;
+  visitors: number;
+  signups: number;
+  converted: number;
 };
 export type Discovery = {
+  start: string;
   through: string;
-  current: VisitTotals | null;
-  prior: VisitTotals | null;
+  current: TrafficTotals;
+  prior: TrafficTotals;
   breakdown: DiscoveryRow[];
-  today_campaigns: DiscoveryRow[];
-  pages: { path: string; views: number; visits: number }[];
+  pages: { path: string; views: number; sessions: number }[];
   calculator: { used: number; signup_clicks: number; signups: number };
 };
 export type ActivationCohort = {

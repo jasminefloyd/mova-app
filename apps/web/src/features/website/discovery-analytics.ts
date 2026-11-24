@@ -1,27 +1,28 @@
-import { discoveryContent, discoveryLabel, discoveryPath, type DiscoveryEvent } from './discovery-contract';
+import { discoveryLabel, discoveryPath, PRICEPILOT_CAMPAIGN, PRICEPILOT_CONTENT, type DiscoveryEvent } from './discovery-contract';
 
 const key = 'mova_discovery_visit';
+const visitorKey = 'mova_discovery_browser';
 const visitTimeout = 30 * 60 * 1000;
-type Visit = Pick<DiscoveryEvent, 'visit' | 'landing' | 'channel' | 'source' | 'medium' | 'campaign' | 'content'> & { seenAt: number };
+type Visit = Pick<DiscoveryEvent, 'visit' | 'landing' | 'channel' | 'source' | 'medium' | 'campaign' | 'content' | 'referrer'> & { seenAt: number };
 let visit: Visit | undefined;
 let lastPage: string | undefined;
 let pending: { visit: string; request: Promise<unknown> } | undefined;
 
-function label(value: string | null, validator = discoveryLabel): string {
-  const candidate = value?.trim().toLowerCase().replace(/ +/g, '-') ?? '';
-  return validator.safeParse(candidate).success ? candidate : '';
+function browserVisitor(): string | undefined {
+  try {
+    const saved = localStorage.getItem(visitorKey);
+    if (saved && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(saved)) return saved;
+    const id = crypto.randomUUID();
+    localStorage.setItem(visitorKey, id);
+    return id;
+  } catch { return undefined; }
 }
 
-function channelFor(source: string, medium: string, host: string, tagged: boolean, hasPaidClick: boolean): Visit['channel'] {
-  if (hasPaidClick) return 'paid search';
-  if (medium === 'email') return 'email';
-  if (/^(social|social-media|paid-social|paidsocial)$/.test(medium)
-    || /^(instagram|facebook|meta|tiktok|linkedin|youtube|reddit|pinterest|twitter|x)$/.test(source)
-    || /(^|\.)(instagram\.com|facebook\.com|tiktok\.com|linkedin\.com|youtube\.com|reddit\.com|pinterest\.com|x\.com|t\.co)$/.test(host)) return 'social';
-  if (/^(cpc|ppc|paidsearch|paid-search|sem)$/.test(medium)) return 'paid search';
-  if (medium === 'organic' || /(^|\.)(google\.(?:com|[a-z]{2,3}|co\.[a-z]{2}|com\.[a-z]{2})|bing\.com|search\.yahoo\.com|duckduckgo\.com)$/.test(host)) return 'organic search';
-  if (medium === 'referral' || (!tagged && host)) return 'referral';
-  return tagged ? 'other campaign' : 'direct / unknown';
+function channelFor(host: string, paidSearch: boolean): Visit['channel'] {
+  if (paidSearch) return 'paid search';
+  if (/(^|\.)(instagram\.com|facebook\.com|tiktok\.com|linkedin\.com|youtube\.com|reddit\.com|pinterest\.com|x\.com|t\.co)$/.test(host)) return 'social';
+  if (/(^|\.)(google\.(?:com|[a-z]{2,3}|co\.[a-z]{2}|com\.[a-z]{2})|bing\.com|search\.yahoo\.com|duckduckgo\.com)$/.test(host)) return 'organic search';
+  return host ? 'referral' : 'direct / unknown';
 }
 
 function activeVisit(path: string): Visit | undefined {
@@ -35,23 +36,21 @@ function activeVisit(path: string): Visit | undefined {
   }
   const now = Date.now();
   const params = new URLSearchParams(window.location.search);
-  const source = label(params.get('utm_source'));
-  const medium = label(params.get('utm_medium'));
-  const campaign = label(params.get('utm_campaign'));
-  const content = label(params.get('utm_content'), discoveryContent);
-  const newCampaign = visit && ((source && source !== visit.source) || (medium && medium !== visit.medium)
-    || (campaign && campaign !== visit.campaign) || (content && content !== visit.content));
+  const campaign = params.get('utm_campaign') === PRICEPILOT_CAMPAIGN ? PRICEPILOT_CAMPAIGN : '';
+  const content = campaign && params.get('utm_content') === PRICEPILOT_CONTENT ? PRICEPILOT_CONTENT : '';
+  const newCampaign = campaign && (campaign !== visit?.campaign || content !== (visit?.content ?? ''));
   if (!visit || !(now - visit.seenAt < visitTimeout) || newCampaign) {
     let host = '';
     try {
       const referrer = new URL(document.referrer);
-      if (referrer.hostname.replace(/^www\./, '') !== window.location.hostname.replace(/^www\./, '')) host = label(referrer.hostname);
+      if (referrer.hostname.replace(/^www\./, '') !== window.location.hostname.replace(/^www\./, '')) host = discoveryLabel.safeParse(referrer.hostname).data ?? '';
     } catch { /* No usable external referrer. */ }
     const hasPaidClick = ['gclid', 'gbraid', 'wbraid', 'msclkid'].some(name => params.has(name));
     visit = {
       visit: crypto.randomUUID(), landing: path, seenAt: now,
-      channel: channelFor(source, medium, host, Boolean(source || medium || campaign || content), hasPaidClick),
-      source: source || (hasPaidClick ? (params.has('msclkid') ? 'bing' : 'google') : host), medium, campaign, content,
+      channel: channelFor(host, Boolean(campaign) || hasPaidClick),
+      source: campaign ? 'google' : hasPaidClick ? (params.has('msclkid') ? 'bing' : 'google') : host,
+      medium: '', campaign, content, referrer: host,
     };
   }
   visit.seenAt = now;
@@ -62,8 +61,9 @@ function activeVisit(path: string): Visit | undefined {
 function send(path: string, signupClick: boolean) {
   const active = activeVisit(path);
   if (!active) return;
-  const { visit, landing, channel, source, medium, campaign, content = '' } = active;
-  const event: DiscoveryEvent = { visit, landing, channel, source, medium, campaign, content, path, signupClick, event: crypto.randomUUID() };
+  const { visit, landing, channel, source, campaign, content = '', referrer = '' } = active;
+  const visitor = browserVisitor();
+  const event: DiscoveryEvent = { visit, landing, channel, source, medium: '', campaign, content, referrer, ...(visitor ? { visitor } : {}), path, signupClick, event: crypto.randomUUID() };
   pending = {
     visit,
     request: fetch('/api/discovery-event', { method: 'POST', body: JSON.stringify(event), credentials: 'omit', keepalive: true, referrerPolicy: 'origin' })

@@ -6,6 +6,16 @@ export const PRIVATE_API_NAVIGATION_DENYLIST = [
   /^\/graphql\/v1\//,
 ] as const;
 
+export const ADMIN_HOST = 'admin.mova-beauty.co';
+
+export function isAdminPath(pathname: string): boolean {
+  return /^\/admin(?:\/|$)/.test(pathname);
+}
+
+export function isAdminUrl(url: URL): boolean {
+  return url.hostname === ADMIN_HOST || isAdminPath(url.pathname);
+}
+
 /** Files precached by the service worker (the app build and /offline.html). */
 export const PWA_PRECACHE_POLICY: { globPatterns: string[] } = {
   globPatterns: ['**/*.{css,html,ico,js,png,svg,webmanifest,woff2}'],

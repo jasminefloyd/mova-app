@@ -148,9 +148,7 @@ function BlogEditor({ initial, categories }: { initial: BlogDraft; categories: s
   const isPublished = draft.liveState === 'published';
   const isScheduled = draft.liveState === 'scheduled';
   const shareUrl = publishedSlug
-    ? new URL(`/guides/${encodeURIComponent(publishedSlug)}?${new URLSearchParams({
-      utm_source: 'mova', utm_medium: 'guide', utm_campaign: 'guides', utm_content: publishedSlug,
-    })}`, publicBaseUrl()).href
+    ? new URL(`/guides/${encodeURIComponent(publishedSlug)}`, publicBaseUrl()).href
     : null;
   async function copyShareLink() {
     if (!shareUrl) return;
@@ -186,10 +184,10 @@ function BlogEditor({ initial, categories }: { initial: BlogDraft; categories: s
       />
       {banner ? <p className={banner.kind === 'ok' ? 'notice' : 'error-text'} role={banner.kind === 'ok' ? 'status' : 'alert'}>{banner.text}</p> : null}
 
-      {shareUrl && <Card title="Tracked share link">
-        <p className="small muted">Share this link to see visits and verified stylist signups for this guide in Discovery.</p>
-        <label className="field"><span className="lbl">Guide tracking link</span><input className="input" type="url" readOnly value={shareUrl} onFocus={event => event.currentTarget.select()} /></label>
-        <div className="row"><button type="button" className="btn sm" onClick={() => void copyShareLink()}>Copy tracked link</button><span className="small" role="status">{copyStatus}</span></div>
+      {shareUrl && <Card title="Share guide">
+        <p className="small muted">Discovery tracks visits and verified stylist signups by the page visitors land on.</p>
+        <label className="field"><span className="lbl">Public guide link</span><input className="input" type="url" readOnly value={shareUrl} onFocus={event => event.currentTarget.select()} /></label>
+        <div className="row"><button type="button" className="btn sm" onClick={() => void copyShareLink()}>Copy guide link</button><span className="small" role="status">{copyStatus}</span></div>
       </Card>}
 
       {showPreview ? (

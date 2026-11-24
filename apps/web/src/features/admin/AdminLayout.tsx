@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation, useNavigate } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AdminAccountRequests } from './AdminAccountClosure';
 import { AdminNav } from './AdminNav';
+import { ADMIN_RELOAD_PARAM } from '../../pwa/admin-asset-recovery';
 import { currentAdminSession, IDLE_LIMIT_MS, signOutAdmin } from './admin-session';
 import { Loading } from './AdminPrimitives';
 
@@ -41,7 +42,10 @@ export default function AdminLayout() {
 
   if (session.isPending) return <div className="adm"><div className="main"><Loading label="Checking your admin session" /></div></div>;
   if (!session.data) {
-    const returnTo = encodeURIComponent(`${location.pathname}${location.search}`);
+    const params = new URLSearchParams(location.search);
+    params.delete(ADMIN_RELOAD_PARAM);
+    const search = params.size ? `?${params}` : '';
+    const returnTo = encodeURIComponent(`${location.pathname}${search}`);
     return <Navigate to={`/admin/signin?returnTo=${returnTo}${idle ? '&reason=idle' : ''}`} replace />;
   }
   return (

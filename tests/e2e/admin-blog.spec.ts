@@ -60,28 +60,28 @@ test.describe('guides writer', () => {
     await expect(page.getByText('Draft saved.')).toBeVisible();
     await expect(page).toHaveURL(/\/admin\/blog\/b0000000-0000-4000-8000-000000000001$/);
     expect(store.modes).toEqual(['draft']);
-    await expect(page.getByLabel('Guide tracking link')).toHaveCount(0);
+    await expect(page.getByLabel('Public guide link')).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Schedule' }).click();
     await expect(page.getByText(/Scheduled for .* Eastern\./)).toBeVisible();
     expect(store.modes).toEqual(['draft', 'schedule']);
     const scheduled = store.current();
     expect(scheduled?.['live_state']).toBe('scheduled');
-    await expect(page.getByLabel('Guide tracking link')).toHaveCount(0);
+    await expect(page.getByLabel('Public guide link')).toHaveCount(0);
     expect(Date.parse(String(scheduled?.['published_at']))).toBeGreaterThan(Date.now());
 
     await page.getByRole('button', { name: 'Publish now' }).click();
     await expect(page.getByText('Published. The guide is live now.')).toBeVisible();
     expect(store.modes).toEqual(['draft', 'schedule', 'publish']);
     expect(store.current()?.['live_state']).toBe('published');
-    const trackedUrl = 'https://mova-beauty.co/guides/booth-rent-is-only-one-line-on-the-bill?utm_source=mova&utm_medium=guide&utm_campaign=guides&utm_content=booth-rent-is-only-one-line-on-the-bill';
-    await expect(page.getByLabel('Guide tracking link')).toHaveValue(trackedUrl);
+    const trackedUrl = 'https://mova-beauty.co/guides/booth-rent-is-only-one-line-on-the-bill';
+    await expect(page.getByLabel('Public guide link')).toHaveValue(trackedUrl);
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
-    await page.getByRole('button', { name: 'Copy tracked link' }).click();
+    await page.getByRole('button', { name: 'Copy guide link' }).click();
     await expect(page.getByText('Link copied.')).toBeVisible();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(trackedUrl);
     await page.getByLabel('Web address (slug)').fill('unsaved-change');
-    await expect(page.getByLabel('Guide tracking link')).toHaveValue(trackedUrl);
+    await expect(page.getByLabel('Public guide link')).toHaveValue(trackedUrl);
 
     await page.goto('/admin/blog');
     await expect(page.getByRole('link', { name: 'Booth rent is only one line on the bill' })).toBeVisible();

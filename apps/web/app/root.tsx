@@ -5,6 +5,8 @@ import stylesheet from '../src/styles.css?url';
 import launchScreens from '../src/pwa/launch-screens.json';
 import { AppErrorBoundary } from '../src/app/AppErrorBoundary';
 import { PwaInstallProvider } from '../src/pwa/PwaInstallProvider';
+import { adminAssetRecoveryScript } from '../src/pwa/admin-asset-recovery';
+import { isAdminPath } from '../src/pwa/cache-policy';
 
 export const links: LinksFunction = () => [{ rel: 'stylesheet', href: stylesheet }];
 
@@ -19,6 +21,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [location.pathname]);
   return <html lang={lang}>
     <head><meta charSet="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      {isAdminPath(location.pathname) && <script dangerouslySetInnerHTML={{ __html: adminAssetRecoveryScript }} />}
       <meta name="theme-color" content="#18392F" /><link rel="manifest" href="/manifest.webmanifest" />
       <link rel="icon" href="/icons/favicon-48.png" type="image/png" sizes="48x48" /><link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32" />
       <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="mobile-web-app-capable" content="yes" />

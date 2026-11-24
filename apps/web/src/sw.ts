@@ -2,7 +2,8 @@
 /**
  * Mova service worker.
  * - Precaches the app build, plus the offline page.
- * - Pages: network first; a page opened before is served from the cache when offline, otherwise /offline.html.
+ * - Stylist and public pages: network first, with a cached or generic fallback offline.
+ * - Admin pages: always use the network so a refresh cannot load an old admin document.
  * - Supabase reads (REST GETs): network first with a 7-day cache, so the schedule, clients and appointments
  *   last loaded stay readable offline. Writes are never cached or queued.
  * - Push: shows the stylist alert, updates the app badge, opens the right screen on tap.
@@ -11,7 +12,7 @@ import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { NetworkFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
-import { PRIVATE_API_NAVIGATION_DENYLIST, isCacheableDataRequest } from './pwa/cache-policy';
+import { ADMIN_HOST, PRIVATE_API_NAVIGATION_DENYLIST, isAdminUrl, isCacheableDataRequest } from './pwa/cache-policy';
 
 declare const self: ServiceWorkerGlobalScope & { __WB_MANIFEST: Array<{ url: string; revision: string | null }> };
 
@@ -21,6 +22,34 @@ const OFFLINE_URL = '/offline.html';
 
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
+
+const adminOrigin = self.location.hostname === ADMIN_HOST;
+if (adminOrigin) self.addEventListener('install', (event) => event.waitUntil(self.skipWaiting()));
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    if (await caches.has(PAGE_CACHE)) {
+      const cache = await caches.open(PAGE_CACHE);
+      const requests = await cache.keys();
+      await Promise.all(requests.filter(request => isAdminUrl(new URL(request.url))).map(request => cache.delete(request)));
+    }
+    if (adminOrigin) await self.clients.claim();
+  })());
+});
+
+registerRoute(
+  ({ request, url }) => request.mode === 'navigate' && url.origin === self.location.origin && isAdminUrl(url),
+  async ({ request }) => {
+    try {
+      return await fetch(request, { cache: 'no-store' });
+    } catch {
+      return new Response('The Admin Console requires an internet connection. Reconnect and refresh.', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
+      });
+    }
+  },
+);
 
 const pages = new NetworkFirst({
   cacheName: PAGE_CACHE,
