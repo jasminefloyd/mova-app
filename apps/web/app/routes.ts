@@ -117,7 +117,6 @@ export default [
   route('api/reports-refresh', '../src/routes/reports-refresh.ts'),
   route('api/calculator-event', '../src/routes/calculator-event.ts'),
   route('api/discovery-event', '../src/routes/discovery-event.ts'),
-  route('api/admin-search-discovery', '../src/routes/admin-search-discovery.ts'),
   route('feed/:token', '../src/routes/calendar-feed.ts'),
   route('pay/:code', '../src/routes/paylink-redirect.ts'),
 ] satisfies RouteConfig;

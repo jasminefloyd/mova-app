@@ -1,15 +1,15 @@
-import { discoveryLabel, discoveryPath, type DiscoveryEvent } from './discovery-contract';
+import { discoveryContent, discoveryLabel, discoveryPath, type DiscoveryEvent } from './discovery-contract';
 
 const key = 'mova_discovery_visit';
 const visitTimeout = 30 * 60 * 1000;
-type Visit = Pick<DiscoveryEvent, 'visit' | 'landing' | 'channel' | 'source' | 'medium' | 'campaign'> & { seenAt: number };
+type Visit = Pick<DiscoveryEvent, 'visit' | 'landing' | 'channel' | 'source' | 'medium' | 'campaign' | 'content'> & { seenAt: number };
 let visit: Visit | undefined;
 let lastPage: string | undefined;
 let pending: { visit: string; request: Promise<unknown> } | undefined;
 
-function label(value: string | null): string {
+function label(value: string | null, validator = discoveryLabel): string {
   const candidate = value?.trim().toLowerCase().replace(/ +/g, '-') ?? '';
-  return discoveryLabel.safeParse(candidate).success ? candidate : '';
+  return validator.safeParse(candidate).success ? candidate : '';
 }
 
 function channelFor(source: string, medium: string, host: string, tagged: boolean, hasPaidClick: boolean): Visit['channel'] {
@@ -34,21 +34,24 @@ function activeVisit(path: string): Visit | undefined {
     } catch { /* Use memory if browser storage is unavailable. */ }
   }
   const now = Date.now();
-  if (!visit || !(now - visit.seenAt < visitTimeout)) {
-    const params = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(window.location.search);
+  const source = label(params.get('utm_source'));
+  const medium = label(params.get('utm_medium'));
+  const campaign = label(params.get('utm_campaign'));
+  const content = label(params.get('utm_content'), discoveryContent);
+  const newCampaign = visit && ((source && source !== visit.source) || (medium && medium !== visit.medium)
+    || (campaign && campaign !== visit.campaign) || (content && content !== visit.content));
+  if (!visit || !(now - visit.seenAt < visitTimeout) || newCampaign) {
     let host = '';
     try {
       const referrer = new URL(document.referrer);
       if (referrer.hostname.replace(/^www\./, '') !== window.location.hostname.replace(/^www\./, '')) host = label(referrer.hostname);
     } catch { /* No usable external referrer. */ }
-    const source = label(params.get('utm_source'));
-    const medium = label(params.get('utm_medium'));
-    const campaign = label(params.get('utm_campaign'));
     const hasPaidClick = ['gclid', 'gbraid', 'wbraid', 'msclkid'].some(name => params.has(name));
     visit = {
       visit: crypto.randomUUID(), landing: path, seenAt: now,
-      channel: channelFor(source, medium, host, Boolean(source || medium || campaign), hasPaidClick),
-      source: source || (hasPaidClick ? (params.has('msclkid') ? 'bing' : 'google') : host), medium, campaign,
+      channel: channelFor(source, medium, host, Boolean(source || medium || campaign || content), hasPaidClick),
+      source: source || (hasPaidClick ? (params.has('msclkid') ? 'bing' : 'google') : host), medium, campaign, content,
     };
   }
   visit.seenAt = now;
@@ -59,8 +62,8 @@ function activeVisit(path: string): Visit | undefined {
 function send(path: string, signupClick: boolean) {
   const active = activeVisit(path);
   if (!active) return;
-  const { visit, landing, channel, source, medium, campaign } = active;
-  const event: DiscoveryEvent = { visit, landing, channel, source, medium, campaign, path, signupClick, event: crypto.randomUUID() };
+  const { visit, landing, channel, source, medium, campaign, content = '' } = active;
+  const event: DiscoveryEvent = { visit, landing, channel, source, medium, campaign, content, path, signupClick, event: crypto.randomUUID() };
   pending = {
     visit,
     request: fetch('/api/discovery-event', { method: 'POST', body: JSON.stringify(event), credentials: 'omit', keepalive: true, referrerPolicy: 'origin' })

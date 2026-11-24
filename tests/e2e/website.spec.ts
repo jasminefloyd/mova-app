@@ -144,6 +144,17 @@ test.describe('guides', () => {
     expect(text).not.toContain('TO BE');
   });
 
+  test('the signup ad destination is crawlable and requests exclusion from organic results', async ({ request }) => {
+    const robots = await (await request.get('/robots.txt')).text();
+    expect(robots).not.toMatch(/^Disallow:\s*\/signup/m);
+    expect(robots).toMatch(/^Disallow:\s*\/login$/m);
+    for (const path of ['/signup', '/signup?utm_source=google&utm_medium=cpc&utm_campaign=aig_pp_search&utm_content=pricepilot']) {
+      const response = await request.get(path);
+      expect(response.status()).toBe(200);
+      expect(await response.text()).toContain('<meta name="robots" content="noindex,follow"/>');
+    }
+  });
+
   test('article renders blocks, SEO tags and related guides, and drops unsafe links', async ({ page }) => {
     await page.goto('/guides/ai-isnt-what-is-making-beauty-less-personal');
     await expect(page).toHaveTitle("AI isn't what's making beauty less personal | mova");
@@ -161,6 +172,22 @@ test.describe('guides', () => {
     expect(types.sort()).toEqual(['Article', 'BreadcrumbList', 'Organization+WebSite']);
     await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article');
     await expect(page.getByRole('navigation', { name: 'More guides' }).getByRole('link', { name: 'Practical note 01' })).toHaveCount(0);
+  });
+
+  test('published guide share links capture UTMs and keep the canonical URL clean', async ({ page }) => {
+    const visits: Record<string, unknown>[] = [];
+    await page.route('**/api/discovery-event', async route => {
+      visits.push(route.request().postDataJSON() as Record<string, unknown>);
+      await route.fulfill({ status: 204 });
+    });
+    const slug = 'ai-isnt-what-is-making-beauty-less-personal';
+    const params = `?utm_source=mova&utm_medium=guide&utm_campaign=guides&utm_content=${slug}`;
+    await page.goto('/guides/no-such-guide' + params);
+    await expect(page.getByRole('heading', { name: "We couldn't find that guide." })).toBeVisible();
+    await page.goto(`/guides/${slug}${params}`);
+    await expect.poll(() => visits.length).toBe(1);
+    expect(visits[0]).toMatchObject({ path: `/guides/${slug}`, landing: `/guides/${slug}`, source: 'mova', medium: 'guide', campaign: 'guides', content: slug });
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', new RegExp(`/guides/${slug}$`));
   });
 
   test('noindex articles tell search engines not to index them', async ({ page }) => {

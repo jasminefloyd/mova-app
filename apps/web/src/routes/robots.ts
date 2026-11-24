@@ -1,7 +1,7 @@
 import { publicBaseUrl } from '../features/website/seo';
 
 // Private areas: sign-in, the stylist app (/BID-…), admin, per-client links and server endpoints.
-const PRIVATE_PATHS = ['/admin', '/api/', '/auth', '/login', '/signup', '/reset-password', '/signin', '/me', '/onboarding/', '/BID-', '/b/', '/c/', '/s/', '/slot/', '/review/', '/pay/', '/feed/', '/growth', '/money', '/reports'];
+const PRIVATE_PATHS = ['/admin', '/api/', '/auth', '/login', '/reset-password', '/signin', '/me', '/onboarding/', '/BID-', '/b/', '/c/', '/s/', '/slot/', '/review/', '/pay/', '/feed/', '/growth', '/money', '/reports'];
 // AI search and assistant crawlers are welcome on the public pages (same rules as everyone else).
 // They are named so the choice is explicit and easy to change.
 const AI_CRAWLERS = ['GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot-Extended', 'Amazonbot', 'CCBot', 'meta-externalagent', 'Bytespider', 'DuckAssistBot', 'MistralAI-User'];

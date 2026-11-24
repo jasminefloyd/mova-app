@@ -17,6 +17,10 @@
 
 ## Current audit work log
 
+- 2026-11-24 signup crawl rules: the production PricePilot ad URL and untagged signup both returned HTTP 200, but the wildcard robots group disallowed `/signup` for search inspection. Removed that disallow locally and added route-level `noindex,follow` to keep signup URLs out of organic results while allowing inspection. The change requires a web deployment.
+
+- 2026-11-24 Discovery campaign tracking: production already recorded visits to the `aig_pp_search` signup link. Migration 0120 adds the ad or link label from `utm_content` and campaign totals for the current UTC day. The guide editor generates a tracked share link once a guide publishes, and the public article keeps its canonical URL. Removed the Search Console section and API integration at owner direction. All 1,394 pgTAP assertions, 474 unit tests, 10 focused browser checks, lint, typecheck and the Edge Function checks passed. Applied 0120 in production with owner approval and verified the ad-content writer, current-day report and private raw-visit grants before the web release.
+
 - 2026-11-24 Google Ads account replacement: removed the old Ads loader, destination and conversion label from the application. Public marketing and stylist signup load `GTM-KT7RSDNS`. The `mova_stylist_signup` data-layer event runs once after a new stylist verifies their email, with USD 1.00 and no account identifiers in the event. The Google Ads conversion action and matching trigger still need to be configured in the new account and published in Tag Manager.
 
 - 2026-11-24 guide draft: with owner approval, saved the prepared booth-rent guide in production through the existing admin save function. Verified the draft-list entry, the empty publication date, and the matching save audit record. The existing guide schema and functions already support this workflow.

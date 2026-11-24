@@ -6,12 +6,14 @@ export type DiscoveryRow = VisitTotals & {
   source: string | null;
   medium: string | null;
   campaign: string | null;
+  content: string | null;
 };
 export type Discovery = {
   through: string;
   current: VisitTotals | null;
   prior: VisitTotals | null;
   breakdown: DiscoveryRow[];
+  today_campaigns: DiscoveryRow[];
   pages: { path: string; views: number; visits: number }[];
   calculator: { used: number; signup_clicks: number; signups: number };
 };
@@ -38,15 +40,4 @@ export type SubscriptionSummary = {
   billing_events: { payment_failures: number; cancellations: number };
   deletion_requests: number;
   open_deletion_requests: number;
-};
-export type SearchMetrics = { clicks: number; impressions: number; ctr: number; position: number };
-export type SearchRow = SearchMetrics & { keys: string[] };
-export type SearchDiscovery = { state: 'not_configured' | 'unavailable' } | {
-  state: 'ready';
-  start: string;
-  through: string;
-  current: SearchMetrics | null;
-  prior: SearchMetrics | null;
-  terms: SearchRow[];
-  pages: SearchRow[];
 };

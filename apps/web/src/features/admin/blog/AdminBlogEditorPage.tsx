@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminErrorText, adminRpc } from '../admin-api';
 import { dayInZone, formatDateTime } from '../admin-format';
+import { publicBaseUrl } from '../../website/seo';
 import { Card, ConfirmDialog, ErrorNote, Loading, PageHead, Pill } from '../AdminPrimitives';
 import { AddBlockMenu, BlockField, BlockPreview } from './BlockEditor';
 import {
@@ -37,6 +38,8 @@ function BlogEditor({ initial, categories }: { initial: BlogDraft; categories: s
   const location = useLocation();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<BlogDraft>(initial);
+  const [publishedSlug, setPublishedSlug] = useState(initial.liveState === 'published' ? initial.slug : null);
+  const [copyStatus, setCopyStatus] = useState('');
   const [tagsText, setTagsText] = useState(initial.tags.join(', '));
   const [scheduleDate, setScheduleDate] = useState(dayInZone(new Date(), PUBLISH_TIME_ZONE, 1));
   const [scheduleTime, setScheduleTime] = useState('09:00');
@@ -64,6 +67,8 @@ function BlogEditor({ initial, categories }: { initial: BlogDraft; categories: s
   function applyRecord(post: Record<string, unknown>) {
     const saved = draftFromRecord(post);
     setDraft(saved);
+    setPublishedSlug(saved.liveState === 'published' ? saved.slug : null);
+    setCopyStatus('');
     setTagsText(saved.tags.join(', '));
     if (saved.id) queryClient.setQueryData(['admin', 'blog', saved.id], { post, categories });
     void queryClient.invalidateQueries({ queryKey: ['admin', 'blog-list'] });
@@ -142,6 +147,20 @@ function BlogEditor({ initial, categories }: { initial: BlogDraft; categories: s
 
   const isPublished = draft.liveState === 'published';
   const isScheduled = draft.liveState === 'scheduled';
+  const shareUrl = publishedSlug
+    ? new URL(`/guides/${encodeURIComponent(publishedSlug)}?${new URLSearchParams({
+      utm_source: 'mova', utm_medium: 'guide', utm_campaign: 'guides', utm_content: publishedSlug,
+    })}`, publicBaseUrl()).href
+    : null;
+  async function copyShareLink() {
+    if (!shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopyStatus('Link copied.');
+    } catch {
+      setCopyStatus('Select the link to copy it.');
+    }
+  }
   const field = (label: string, key: keyof DraftFieldErrors, input: ReactNode) => (
     <label className="field">
       <span className="lbl">{label}</span>
@@ -166,6 +185,12 @@ function BlogEditor({ initial, categories }: { initial: BlogDraft; categories: s
         </>}
       />
       {banner ? <p className={banner.kind === 'ok' ? 'notice' : 'error-text'} role={banner.kind === 'ok' ? 'status' : 'alert'}>{banner.text}</p> : null}
+
+      {shareUrl && <Card title="Tracked share link">
+        <p className="small muted">Share this link to see visits and verified stylist signups for this guide in Discovery.</p>
+        <label className="field"><span className="lbl">Guide tracking link</span><input className="input" type="url" readOnly value={shareUrl} onFocus={event => event.currentTarget.select()} /></label>
+        <div className="row"><button type="button" className="btn sm" onClick={() => void copyShareLink()}>Copy tracked link</button><span className="small" role="status">{copyStatus}</span></div>
+      </Card>}
 
       {showPreview ? (
         <Card title={draft.title}>

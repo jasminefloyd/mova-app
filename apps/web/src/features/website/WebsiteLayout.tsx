@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { I18nextProvider } from 'react-i18next';
-import { Outlet, useLoaderData, useLocation } from 'react-router';
+import { Outlet, useLoaderData, useLocation, useMatches } from 'react-router';
 import type { LoaderFunctionArgs } from 'react-router';
 import i18n from '../../i18n';
 import { JsonLd, SiteShellContext } from './parts';
@@ -29,7 +29,11 @@ export default function WebsiteLayout() {
   const shell = useLoaderData<typeof loader>();
   useEffect(installGoogleTagManager, []);
   const { pathname, key } = useLocation();
-  useEffect(() => trackDiscoveryPage(pathname, key), [pathname, key]);
+  const matches = useMatches();
+  const trackable = !pathname.startsWith('/guides/') || matches.some(match => match.id === 'guide-article' && match.data);
+  useEffect(() => {
+    if (trackable) trackDiscoveryPage(pathname, key);
+  }, [pathname, key, trackable]);
   const onServer = typeof document === 'undefined';
   // On the server each request gets its own i18n copy, so a Spanish request is rendered in Spanish
   // without changing the language for anyone else.
@@ -42,7 +46,7 @@ export default function WebsiteLayout() {
   const page = <SiteShellContext.Provider value={shell}>
     <div className="mova-site" lang={shell.locale} onClickCapture={event => {
       const link = event.target instanceof Element ? event.target.closest('a') : null;
-      if (link?.origin === window.location.origin && link.pathname === '/signup') trackDiscoverySignupClick(pathname);
+      if (trackable && link?.origin === window.location.origin && link.pathname === '/signup') trackDiscoverySignupClick(pathname);
     }}>
       <WebsiteNav />
       <Outlet />

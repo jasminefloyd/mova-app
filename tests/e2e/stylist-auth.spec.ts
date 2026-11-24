@@ -96,6 +96,27 @@ test.describe('stylist sign-up (/signup)', () => {
     await expect.poll(() => requests.otp[0]?.body.data).toMatchObject({ mova_discovery_visit: visit });
   });
 
+  test('attributes direct signup landing to the PricePilot ad even after an earlier visit', async ({ page }) => {
+    const requests = await mockAuth(page);
+    const events: Record<string, unknown>[] = [];
+    await page.route('**/api/discovery-event', async route => {
+      events.push(route.request().postDataJSON() as Record<string, unknown>);
+      await route.fulfill({ status: 204 });
+    });
+    await page.goto('/pricing');
+    await expect.poll(() => events.length).toBe(1);
+    await page.goto('/signup?utm_source=google&utm_medium=cpc&utm_campaign=aig_pp_search&utm_content=pricepilot');
+    await expect.poll(() => events.length).toBe(2);
+    const ad = events[1];
+    expect(ad).toMatchObject({ landing: '/signup', channel: 'paid search', source: 'google', medium: 'cpc', campaign: 'aig_pp_search', content: 'pricepilot' });
+    expect(ad?.visit).not.toBe(events[0]?.visit);
+    await page.getByLabel('First name').fill('Test');
+    await page.getByLabel('Last name').fill('Stylist');
+    await page.getByLabel('Email', { exact: true }).fill(user.email);
+    await page.getByRole('button', { name: 'Create account' }).click();
+    await expect.poll(() => requests.otp[0]?.body.data).toMatchObject({ mova_discovery_visit: ad?.visit });
+  });
+
   for (const newAccount of [true, false]) {
     test(`calculator attribution counts ${newAccount ? 'a newly verified account' : 'no conversion for an existing account'}`, async ({ page }) => {
       await mockAuth(page);

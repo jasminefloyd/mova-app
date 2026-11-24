@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
+import type { MetaFunction } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import type { ReactNode } from 'react';
@@ -10,6 +11,12 @@ import { completeCalculatorSignup } from '../website/calculator-analytics';
 import { installGoogleTagManager, trackTagManagerSignup } from '../website/google-tag-manager';
 import { discoverySignupVisit, trackDiscoveryPage } from '../website/discovery-analytics';
 import './stylist-auth.css';
+
+// Google can crawl the ad destination, and signup variants stay out of organic search.
+export const meta: MetaFunction = () => [
+  { title: 'Mova Beauty Create Account' },
+  { name: 'robots', content: 'noindex,follow' },
+];
 
 function FeatureIcon({ children }: { children: ReactNode }) {
   return <span className="stylist-auth__feature-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{children}</svg></span>;

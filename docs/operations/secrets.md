@@ -29,18 +29,11 @@ Use separate credentials for development and production. The product owner has d
 
 The root `.env.example` contains placeholder values only. Hosted secrets are configured separately in each platform's secret store.
 
-## Admin Discovery and Search Console
+## Admin Discovery
 
-Apply migration 0119 before releasing the web app. The first-party traffic collector uses the existing server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. The report offers 28 completed UTC days of Mova traffic and uses the latest finalized 28 days in Google Search Console. Browser tracking respects Global Privacy Control and stores public paths, bounded campaign labels, and the referrer hostname. Google queries are aggregate-only.
+Apply migrations 0119 and 0120 before releasing the web app. The first-party traffic collector uses the existing server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Discovery shows campaign traffic for the current UTC day and a comparison across completed UTC days. Browser tracking respects Global Privacy Control and stores public paths, bounded campaign labels, and the referrer hostname.
 
-For organic search data, enable the Search Console API in a Google Cloud project and grant a dedicated service account read access to the verified Mova property in Search Console. Set these **server-only Vercel variables** and redeploy.
-
-| Variable | Value |
-|---|---|
-| `MOVA_SEARCH_CONSOLE_SERVICE_ACCOUNT` | Service-account JSON with `client_email` and `private_key`. Keep the key in the Vercel secret store. |
-| `MOVA_SEARCH_CONSOLE_SITE` | Exact Search Console property identifier, such as `sc-domain:mova-beauty.co` for a domain property or `https://mova-beauty.co/` for a URL-prefix property. |
-
-The server checks the admin roster before requesting Google data. Discovery shows an explicit disconnected state until these variables are set. Website traffic, signup attribution, and the calculator counters load independently of Google.
+External campaigns can tag links using `utm_source`, `utm_medium`, `utm_campaign`, and `utm_content`. When a guide publishes, its editor offers a share link with `utm_source=mova`, `utm_medium=guide`, `utm_campaign=guides`, and the saved guide slug as `utm_content`. The guide's canonical address stays untagged.
 
 ## Stripe plan subscriptions
 

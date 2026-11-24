@@ -18,7 +18,7 @@ export async function action({ request }: ActionFunctionArgs) {
       headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         p_visit: d.visit, p_event: d.event, p_path: d.path, p_landing: d.landing,
-        p_channel: d.channel, p_source: d.source, p_medium: d.medium, p_campaign: d.campaign, p_signup_click: d.signupClick,
+        p_channel: d.channel, p_source: d.source, p_medium: d.medium, p_campaign: d.campaign, p_content: d.content ?? '', p_signup_click: d.signupClick,
       }),
       signal: AbortSignal.timeout(2500),
     });
