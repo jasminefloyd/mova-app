@@ -5,7 +5,7 @@ import { ButtonLink, JsonLd, useSiteShell } from '../parts';
 import { articleLd, breadcrumbLd, shellFromMatches, socialMeta } from '../seo';
 import { absoluteUrl, formatGuideDate } from './guide-format';
 import { fetchGuide, GuidesRequestError } from './guides-api';
-import { GuideBlocks } from './GuideBlocks';
+import { GuideBlocks, faqLd } from './GuideBlocks';
 
 // W5 Guide article. SEO comes from the server's seo fields (with fallbacks already applied there).
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -98,6 +98,7 @@ export default function GuideArticlePage() {
     </div>
     <JsonLd data={articleLd(publicBaseUrl, post, canonical, post.cover ? absoluteUrl(post.cover.url, publicBaseUrl) : null)} />
     <JsonLd data={breadcrumbLd(shell, [[t('website.nav.guides'), '/guides'], [post.title, `/guides/${encodeURIComponent(post.slug)}`]])} />
+    {faqLd(post.body) && <JsonLd data={faqLd(post.body)} />}
   </article>;
 }
 

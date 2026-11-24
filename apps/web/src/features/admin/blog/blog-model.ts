@@ -10,7 +10,45 @@ export type Block =
   | { type: 'quote'; content: InlineRun[]; cite?: string }
   | { type: 'image'; url: string; alt: string; caption?: string }
   | { type: 'callout'; tone: 'tip' | 'note'; content: InlineRun[] }
-  | { type: 'divider' };
+  | { type: 'divider' }
+  // A13·v2 blocks (migration 0125).
+  | { type: 'takeaways'; items: InlineRun[][] }
+  | { type: 'button'; label: string; href: string; variant: 'banner' | 'button'; title?: string; text?: string }
+  | { type: 'before_after'; before: Photo; after: Photo; caption?: string }
+  | { type: 'video'; provider: VideoProvider; id: string; caption?: string }
+  | { type: 'table'; header: boolean; rows: string[][] }
+  | { type: 'faq'; items: Array<{ question: string; answer: InlineRun[] }> };
+
+export type Photo = { url: string; alt: string };
+export type VideoProvider = 'youtube' | 'vimeo' | 'instagram';
+export const VIDEO_ID: Record<VideoProvider, RegExp> = { youtube: /^[A-Za-z0-9_-]{11}$/, vimeo: /^[0-9]{6,12}$/, instagram: /^[A-Za-z0-9_-]{5,40}$/ };
+
+/** Reads a pasted YouTube, Vimeo or Instagram link. Returns null for anything else. */
+export function parseVideoUrl(input: string): { provider: VideoProvider; id: string } | null {
+  let url: URL;
+  try { url = new URL(input.trim()); } catch { return null; }
+  if (url.protocol !== 'https:') return null;
+  const host = url.hostname.replace(/^www\./, '').replace(/^m\./, '');
+  const parts = url.pathname.split('/').filter(Boolean);
+  let found: { provider: VideoProvider; id: string } | null = null;
+  if (host === 'youtu.be') found = { provider: 'youtube', id: parts[0] ?? '' };
+  else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+    const id = url.searchParams.get('v') ?? (['shorts', 'embed', 'live'].includes(parts[0] ?? '') ? parts[1] : null);
+    if (id) found = { provider: 'youtube', id };
+  } else if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+    const id = [...parts].reverse().find((part) => /^[0-9]+$/.test(part));
+    if (id) found = { provider: 'vimeo', id };
+  } else if (host === 'instagram.com' && ['p', 'reel', 'tv'].includes(parts[0] ?? '') && parts[1]) {
+    found = { provider: 'instagram', id: parts[1] };
+  }
+  return found && VIDEO_ID[found.provider].test(found.id) ? found : null;
+}
+
+/** Button links: https, or a page on the Mova site (/signup). */
+export function isButtonHref(href: string): boolean {
+  const value = href.trim();
+  return value.length > 0 && value.length <= LIMITS.url && (/^https:\/\//i.test(value) || (value.startsWith('/') && !value.startsWith('//')));
+}
 
 export type BlockType = Block['type'];
 
@@ -78,6 +116,12 @@ export function blockText(block: Block): string {
     case 'image': return `${block.alt} ${block.caption ?? ''}`;
     case 'callout': return inlineText(block.content);
     case 'divider': return '';
+    case 'takeaways': return block.items.map(inlineText).join(' ');
+    case 'button': return `${block.title ?? ''} ${block.text ?? ''} ${block.label}`;
+    case 'before_after': return block.caption ?? '';
+    case 'video': return block.caption ?? '';
+    case 'table': return block.rows.flat().join(' ');
+    case 'faq': return block.items.map((item) => `${item.question} ${inlineText(item.answer)}`).join(' ');
   }
 }
 
@@ -112,6 +156,34 @@ export function bodyProblems(blocks: Block[]): BlockProblem[] {
         if (!runsOk(block.content, 1) || inlineText(block.content).trim().length === 0) add('A callout needs text.');
         break;
       case 'divider':
+        break;
+      case 'takeaways':
+        if (block.items.length === 0 || block.items.length > 8 || block.items.some((item) => !runsOk(item, 1) || inlineText(item).trim().length === 0)) add('Key takeaways need 1 to 8 points, each with text.');
+        break;
+      case 'button':
+        if (block.label.trim().length === 0 || block.label.length > 60) add('A button needs a label (up to 60 characters).');
+        if (!isButtonHref(block.href)) add('Button links must start with https:// or be a Mova page like /signup.');
+        if ((block.title?.length ?? 0) > 120 || (block.text?.length ?? 0) > 240) add('The banner text is too long.');
+        break;
+      case 'before_after':
+        if (!isHttpsUrl(block.before.url) || !isHttpsUrl(block.after.url)) add('Add both photos (links must start with https://).');
+        if (block.before.alt.trim().length === 0 || block.after.alt.trim().length === 0 || block.before.alt.length > 240 || block.after.alt.length > 240) add('Both photos need alt text that describes them.');
+        if ((block.caption?.length ?? 0) > LIMITS.imageCaption) add('The caption is too long.');
+        break;
+      case 'video':
+        if (!VIDEO_ID[block.provider]?.test(block.id)) add('Paste a YouTube, Vimeo or Instagram link.');
+        if ((block.caption?.length ?? 0) > LIMITS.imageCaption) add('The caption is too long.');
+        break;
+      case 'table': {
+        const width = block.rows[0]?.length ?? 0;
+        if (block.rows.length === 0 || block.rows.length > 30 || width === 0 || width > 6 || block.rows.some((row) => row.length !== width)) add('Tables have 1 to 30 rows and 1 to 6 columns.');
+        if (block.rows.some((row) => row.some((cell) => cell.length > 200))) add('Table cells hold up to 200 characters.');
+        if (block.rows.every((row) => row.every((cell) => cell.trim().length === 0))) add('Add some text to this table, or remove it.');
+        break;
+      }
+      case 'faq':
+        if (block.items.length === 0 || block.items.length > 20) add('An FAQ has 1 to 20 questions.');
+        if (block.items.some((item) => item.question.trim().length === 0 || item.question.length > 200 || !runsOk(item.answer, 1) || inlineText(item.answer).trim().length === 0)) add('Every FAQ question needs an answer.');
         break;
     }
   });
@@ -234,7 +306,17 @@ export function seoChecks(draft: BlogDraft): SeoCheck[] {
     { id: 'alt', label: 'Cover image has alt text', ok: draft.coverUrl.trim().length === 0 || draft.coverAlt.trim().length > 0 },
     { id: 'canonical', label: 'Canonical link is https or empty', ok: draft.canonicalUrl.trim().length === 0 || isHttpsUrl(draft.canonicalUrl) },
     { id: 'heading', label: 'Has at least one section heading', ok: hasHeading },
+    { id: 'body-alt', label: bodyImagesMissingAlt(draft.body) === 0 ? 'Images in the body have alt text' : `${bodyImagesMissingAlt(draft.body)} image${bodyImagesMissingAlt(draft.body) === 1 ? '' : 's'} in the body ${bodyImagesMissingAlt(draft.body) === 1 ? 'is' : 'are'} missing alt text`, ok: bodyImagesMissingAlt(draft.body) === 0 },
   ];
+}
+
+/** Photos in the body (images and before-and-after pairs) without alt text. */
+export function bodyImagesMissingAlt(blocks: Block[]): number {
+  return blocks.reduce((total, block) => {
+    if (block.type === 'image') return total + (block.alt.trim() ? 0 : 1);
+    if (block.type === 'before_after') return total + (block.before.alt.trim() ? 0 : 1) + (block.after.alt.trim() ? 0 : 1);
+    return total;
+  }, 0);
 }
 
 /** Payload for mova_admin_blog_save. Empty optional text becomes null. */
@@ -271,6 +353,12 @@ export function newBlock(type: BlockType): Block {
     case 'image': return { type, url: '', alt: '' };
     case 'callout': return { type, tone: 'tip', content: [{ text: '' }] };
     case 'divider': return { type };
+    case 'takeaways': return { type, items: [[{ text: '' }]] };
+    case 'button': return { type, label: 'Start free', href: '/signup', variant: 'banner', title: '', text: '' };
+    case 'before_after': return { type, before: { url: '', alt: '' }, after: { url: '', alt: '' } };
+    case 'video': return { type, provider: 'youtube', id: '' };
+    case 'table': return { type, header: true, rows: [['', ''], ['', '']] };
+    case 'faq': return { type, items: [{ question: '', answer: [{ text: '' }] }] };
   }
 }
 

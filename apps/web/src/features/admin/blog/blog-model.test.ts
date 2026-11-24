@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   bodyProblems, draftErrors, draftFromRecord, draftPayload, emptyDraft, hasErrors, isSafeHref, moveBlock, newBlock,
-  parseTags, readingMinutes, removeBlock, seoChecks, slugify, zonedWallTimeToInstant, type BlogDraft, type Block,
+  parseTags, parseVideoUrl, readingMinutes, removeBlock, seoChecks, slugify, zonedWallTimeToInstant, type BlogDraft, type Block,
 } from './blog-model';
 
 const now = new Date('2026-11-08T15:00:00.000Z');
@@ -95,10 +95,37 @@ describe('draftErrors', () => {
 });
 
 describe('seoChecks', () => {
-  it('has eight checks and counts the ones that need work', () => {
+  it('has nine checks and counts the ones that need work', () => {
     const checks = seoChecks(filledDraft({ metaDescription: '', ogImageUrl: '', coverUrl: '' }));
-    expect(checks).toHaveLength(8);
+    expect(checks).toHaveLength(9);
     expect(checks.filter((check) => !check.ok).map((check) => check.id)).toEqual(['description', 'social']);
+  });
+
+  it('counts body photos without alt text (A13·v2)', () => {
+    const body: Block[] = [
+      { type: 'image', url: 'https://img.example/a.jpg', alt: '' },
+      { type: 'before_after', before: { url: 'https://img.example/b.jpg', alt: 'Before' }, after: { url: 'https://img.example/c.jpg', alt: '' } },
+    ];
+    const check = seoChecks(filledDraft({ body })).find((item) => item.id === 'body-alt');
+    expect(check).toEqual({ id: 'body-alt', label: '2 images in the body are missing alt text', ok: false });
+  });
+
+  it('reads YouTube, Vimeo and Instagram links and refuses anything else', () => {
+    expect(parseVideoUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=10')).toEqual({ provider: 'youtube', id: 'dQw4w9WgXcQ' });
+    expect(parseVideoUrl('https://youtu.be/dQw4w9WgXcQ')).toEqual({ provider: 'youtube', id: 'dQw4w9WgXcQ' });
+    expect(parseVideoUrl('https://www.youtube.com/shorts/dQw4w9WgXcQ')).toEqual({ provider: 'youtube', id: 'dQw4w9WgXcQ' });
+    expect(parseVideoUrl('https://vimeo.com/76979871')).toEqual({ provider: 'vimeo', id: '76979871' });
+    expect(parseVideoUrl('https://www.instagram.com/reel/C1a2b3c4d5/')).toEqual({ provider: 'instagram', id: 'C1a2b3c4d5' });
+    expect(parseVideoUrl('http://youtu.be/dQw4w9WgXcQ')).toBeNull();
+    expect(parseVideoUrl('https://evil.example/watch?v=dQw4w9WgXcQ')).toBeNull();
+    expect(parseVideoUrl('not a link')).toBeNull();
+  });
+
+  it('checks the new blocks like the database does', () => {
+    expect(bodyProblems([{ type: 'button', label: 'Go', href: 'javascript:x', variant: 'button' }]).map((p) => p.message)).toEqual(['Button links must start with https:// or be a Mova page like /signup.']);
+    expect(bodyProblems([{ type: 'table', header: true, rows: [['', '']] }])).toHaveLength(1);
+    expect(bodyProblems([{ type: 'faq', items: [{ question: 'Why?', answer: [] }] }])).toHaveLength(1);
+    expect(bodyProblems([{ type: 'video', provider: 'youtube', id: 'dQw4w9WgXcQ' }, { type: 'takeaways', items: [[{ text: 'One' }]] }])).toEqual([]);
   });
 
   it('falls back to the title when the meta title is empty', () => {

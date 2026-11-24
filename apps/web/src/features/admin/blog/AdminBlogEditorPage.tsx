@@ -5,10 +5,11 @@ import { adminErrorText, adminRpc } from '../admin-api';
 import { dayInZone, formatDateTime } from '../admin-format';
 import { publicBaseUrl } from '../../website/seo';
 import { Card, ConfirmDialog, ErrorNote, Loading, PageHead, Pill } from '../AdminPrimitives';
-import { AddBlockMenu, BlockField, BlockPreview } from './BlockEditor';
+import { BlockPreview } from './BlockPreview';
+import { BodyEditor } from './editor/BodyEditor';
 import {
-  bodyProblems, CATEGORIES, draftErrors, draftFromRecord, draftPayload, emptyDraft, hasErrors, moveBlock, newBlock, parseTags,
-  PUBLISH_TIME_ZONE, readingMinutes, removeBlock, seoChecks, slugify, zonedWallTimeToInstant, type Block, type BlockType, type BlogDraft,
+  CATEGORIES, draftErrors, draftFromRecord, draftPayload, emptyDraft, hasErrors, parseTags,
+  PUBLISH_TIME_ZONE, readingMinutes, seoChecks, slugify, zonedWallTimeToInstant, type BlogDraft,
   type DraftFieldErrors, type SaveMode,
 } from './blog-model';
 
@@ -52,15 +53,10 @@ function BlogEditor({ initial, categories }: { initial: BlogDraft; categories: s
   const [showPreview, setShowPreview] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const isSaved = draft.id !== null;
-  const problems = new Map(bodyProblems(draft.body).map((p) => [p.index, p.message]));
   const checks = seoChecks(draft);
 
   function set<K extends keyof BlogDraft>(key: K, value: BlogDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
-  }
-
-  function setBlock(index: number, next: Block) {
-    set('body', draft.body.map((block, i) => (i === index ? next : block)));
   }
 
   /** Applies a record the database sent back, after a save, unpublish or refresh. */
@@ -221,23 +217,7 @@ function BlogEditor({ initial, categories }: { initial: BlogDraft; categories: s
               {field('Credit (optional)', 'coverAlt', <input className="input" value={draft.coverCredit} maxLength={200} onChange={(e) => set('coverCredit', e.target.value)} />)}
             </Card>
 
-            <Card title="Body">
-              {draft.body.length === 0 ? <p className="muted">No blocks yet. Add a heading or paragraph to start.</p> : null}
-              {draft.body.map((block, index) => (
-                <div key={index} className="blk-row">
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <BlockField block={block} index={index} problem={problems.get(index)} onChange={(next) => setBlock(index, next)} />
-                  </div>
-                  <div className="blk-tools">
-                    <button type="button" className="btn sm ghost" aria-label="Move block up" disabled={index === 0} onClick={() => set('body', moveBlock(draft.body, index, -1))}>Up</button>
-                    <button type="button" className="btn sm ghost" aria-label="Move block down" disabled={index === draft.body.length - 1} onClick={() => set('body', moveBlock(draft.body, index, 1))}>Down</button>
-                    <button type="button" className="btn sm ghost" aria-label="Remove block" onClick={() => set('body', removeBlock(draft.body, index))}>Remove</button>
-                  </div>
-                </div>
-              ))}
-              {errors.body ? <p className="error-text" role="alert">{errors.body}</p> : null}
-              <AddBlockMenu onAdd={(type: BlockType) => set('body', [...draft.body, newBlock(type)])} />
-            </Card>
+            <BodyEditor initial={draft.body} onChange={(blocks) => set('body', blocks)} problem={errors.body} />
           </div>
 
           <div className="stack">

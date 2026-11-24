@@ -8,7 +8,13 @@ export type Block =
   | { type: 'quote'; content: Inline[]; cite?: string }
   | { type: 'image'; url: string; alt: string; caption?: string }
   | { type: 'callout'; tone: 'tip' | 'note'; content: Inline[] }
-  | { type: 'divider' };
+  | { type: 'divider' }
+  | { type: 'takeaways'; items: Inline[][] }
+  | { type: 'button'; label: string; href: string; variant: 'banner' | 'button'; title?: string; text?: string }
+  | { type: 'before_after'; before: { url: string; alt: string }; after: { url: string; alt: string }; caption?: string }
+  | { type: 'video'; provider: 'youtube' | 'vimeo' | 'instagram'; id: string; caption?: string }
+  | { type: 'table'; header: boolean; rows: string[][] }
+  | { type: 'faq'; items: Array<{ question: string; answer: Inline[] }> };
 
 export type PostSummary = {
   slug: string;

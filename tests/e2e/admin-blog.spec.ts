@@ -53,8 +53,8 @@ test.describe('guides writer', () => {
     await page.getByRole('button', { name: 'From title' }).click();
     await page.getByLabel(/^Summary/).fill('What a stylist pays beyond the booth rent, and how to plan for it.');
     await page.getByLabel('Category').selectOption('Money');
-    await page.getByRole('button', { name: '+ Paragraph' }).click();
-    await page.getByLabel('Text', { exact: true }).fill('Most stylists count only the booth rent. Supplies, insurance and card fees add up.');
+    await page.getByRole('textbox', { name: 'Guide body' }).click();
+    await page.keyboard.type('Most stylists count only the booth rent. Supplies, insurance and card fees add up.');
 
     await page.getByRole('button', { name: 'Save draft' }).first().click();
     await expect(page.getByText('Draft saved.')).toBeVisible();
@@ -94,10 +94,50 @@ test.describe('guides writer', () => {
     await page.getByLabel('Title', { exact: true }).fill('A guide without a category');
     await page.getByRole('button', { name: 'From title' }).click();
     await page.getByLabel(/^Summary/).fill('Summary text.');
-    await page.getByRole('button', { name: '+ Paragraph' }).click();
-    await page.getByLabel('Text', { exact: true }).fill('Body text.');
+    await page.getByRole('textbox', { name: 'Guide body' }).click();
+    await page.keyboard.type('Body text.');
     await page.getByRole('button', { name: 'Publish now' }).click();
     await expect(page.getByText('Choose a category before publishing.')).toBeVisible();
     expect(store.modes).toEqual([]);
+  });
+
+  test('A13·v2 body editor: markdown, the "/" menu, an FAQ and image alt text are saved as blocks', async ({ page }) => {
+    const store = blogStore();
+    await mockAdminApi(page, { signedIn: true, isAdmin: true, rpc: store.rpc });
+    await page.goto('/admin/blog/new');
+    await page.getByLabel('Title', { exact: true }).fill('Pricing a loc retwist');
+    await page.getByRole('button', { name: 'From title' }).click();
+    const body = page.getByRole('textbox', { name: 'Guide body' });
+    await body.click();
+    await page.keyboard.type('## Start with your time');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('A retwist takes two to three hours.');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('/faq');
+    const menu = page.getByRole('menu', { name: 'Add a block' });
+    await expect(menu.getByRole('menuitem', { name: /FAQ/ })).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(menu).toHaveCount(0);
+    await page.keyboard.type('How long does it take?');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Usually two to three hours.');
+
+    // Insert an image from the toolbar; it is flagged until it has alt text.
+    await page.getByRole('button', { name: 'Insert' }).click();
+    await page.getByRole('menu', { name: 'Insert a block' }).getByRole('menuitem', { name: /^Image/ }).click();
+    const bodyCard = page.getByRole('region', { name: 'Body' });
+    await bodyCard.getByLabel('Image link (https://)').fill('https://images.example/retwist.jpg');
+    await expect(bodyCard.getByText('Add alt text', { exact: true })).toBeVisible();
+    await expect(page.getByText('1 image in the body is missing alt text')).toBeVisible();
+    await bodyCard.getByLabel('Alt text', { exact: true }).fill('Stylist retwisting locs');
+    await expect(page.getByText('Images in the body have alt text')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Save draft' }).first().click();
+    await expect(page.getByText('Draft saved.')).toBeVisible();
+    const saved = store.current()?.['body'] as Array<Record<string, unknown>>;
+    expect(saved.map((block) => block['type'])).toEqual(['heading', 'paragraph', 'faq', 'image']);
+    expect(saved[0]).toEqual({ type: 'heading', level: 2, text: 'Start with your time' });
+    expect(saved[2]).toEqual({ type: 'faq', items: [{ question: 'How long does it take?', answer: [{ text: 'Usually two to three hours.' }] }] });
+    expect(saved[3]).toEqual({ type: 'image', url: 'https://images.example/retwist.jpg', alt: 'Stylist retwisting locs' });
   });
 });

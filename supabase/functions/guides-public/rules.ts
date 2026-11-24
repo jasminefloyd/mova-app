@@ -13,7 +13,17 @@ export type Block =
   | { type: 'quote'; content: Inline[]; cite?: string }
   | { type: 'image'; url: string; alt: string; caption?: string }
   | { type: 'callout'; tone: 'tip' | 'note'; content: Inline[] }
-  | { type: 'divider' };
+  | { type: 'divider' }
+  // A13·v2 (2026-11-24): six richer blocks. Still data only; see migration 0125.
+  | { type: 'takeaways'; items: Inline[][] }
+  | { type: 'button'; label: string; href: string; variant: 'banner' | 'button'; title?: string; text?: string }
+  | { type: 'before_after'; before: Photo; after: Photo; caption?: string }
+  | { type: 'video'; provider: VideoProvider; id: string; caption?: string }
+  | { type: 'table'; header: boolean; rows: string[][] }
+  | { type: 'faq'; items: Array<{ question: string; answer: Inline[] }> };
+export type Photo = { url: string; alt: string };
+export type VideoProvider = 'youtube' | 'vimeo' | 'instagram';
+export const VIDEO_ID: Record<VideoProvider, RegExp> = { youtube: /^[A-Za-z0-9_-]{11}$/, vimeo: /^[0-9]{6,12}$/, instagram: /^[A-Za-z0-9_-]{5,40}$/ };
 
 export type Seo = {
   meta_title: string;
@@ -144,6 +154,14 @@ function sanitizeInlines(value: unknown): Inline[] | null {
   return value.map(sanitizeInline).filter((item): item is Inline => item !== null);
 }
 
+function photo(value: unknown): Photo | null {
+  if (!value || typeof value !== 'object') return null;
+  const raw = value as Record<string, unknown>;
+  const url = safeHref(raw.url);
+  if (!url) return null;
+  return { url, alt: text(raw.alt, 500) ?? '' };
+}
+
 /** Keeps only the block shapes in the contract. Unknown or malformed blocks are dropped, never passed through. */
 export function sanitizeBlocks(value: unknown): Block[] {
   if (!Array.isArray(value)) return [];
@@ -198,6 +216,63 @@ export function sanitizeBlocks(value: unknown): Block[] {
       case 'divider':
         blocks.push({ type: 'divider' });
         break;
+      case 'takeaways': {
+        if (!Array.isArray(raw.items)) break;
+        const items = raw.items.map(sanitizeInlines).filter((entry): entry is Inline[] => entry !== null && entry.length > 0).slice(0, 8);
+        if (items.length) blocks.push({ type: 'takeaways', items });
+        break;
+      }
+      case 'button': {
+        const label = text(raw.label, 60);
+        const href = safeHref(raw.href);
+        if (!label || !href) break;
+        const block: Block = { type: 'button', label, href, variant: raw.variant === 'banner' ? 'banner' : 'button' };
+        const title = text(raw.title, 120);
+        const body = text(raw.text, 240);
+        if (title) block.title = title;
+        if (body) block.text = body;
+        blocks.push(block);
+        break;
+      }
+      case 'before_after': {
+        const before = photo(raw.before);
+        const after = photo(raw.after);
+        if (!before || !after) break;
+        const block: Block = { type: 'before_after', before, after };
+        const caption = text(raw.caption, 500);
+        if (caption) block.caption = caption;
+        blocks.push(block);
+        break;
+      }
+      case 'video': {
+        const provider = raw.provider === 'youtube' || raw.provider === 'vimeo' || raw.provider === 'instagram' ? raw.provider : null;
+        const id = text(raw.id, 60);
+        if (!provider || !id || !VIDEO_ID[provider].test(id)) break;
+        const block: Block = { type: 'video', provider, id };
+        const caption = text(raw.caption, 500);
+        if (caption) block.caption = caption;
+        blocks.push(block);
+        break;
+      }
+      case 'table': {
+        if (!Array.isArray(raw.rows)) break;
+        const rows = raw.rows.filter(Array.isArray).slice(0, 30).map((row) => (row as unknown[]).slice(0, 6).map((cell) => text(cell, 200) ?? ''));
+        const width = Math.max(0, ...rows.map((row) => row.length));
+        if (!rows.length || !width) break;
+        blocks.push({ type: 'table', header: raw.header === true, rows: rows.map((row) => [...row, ...Array(width - row.length).fill('')]) });
+        break;
+      }
+      case 'faq': {
+        if (!Array.isArray(raw.items)) break;
+        const items = raw.items.slice(0, 20).flatMap((entry) => {
+          if (!entry || typeof entry !== 'object') return [];
+          const question = text((entry as Record<string, unknown>).question, 200);
+          const answer = sanitizeInlines((entry as Record<string, unknown>).answer);
+          return question && answer && answer.length ? [{ question, answer }] : [];
+        });
+        if (items.length) blocks.push({ type: 'faq', items });
+        break;
+      }
       default:
         break;
     }

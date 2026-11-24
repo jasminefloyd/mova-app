@@ -126,6 +126,28 @@ Deno.test('GUIDES-PUB-08 body keeps only contract block shapes and drops anythin
   ], 'sanitized body');
 });
 
+Deno.test('GUIDES-PUB-08b the six A13·v2 blocks pass through cleaned, and bad ones are dropped', () => {
+  const blocks = sanitizeBlocks([
+    { type: 'takeaways', items: [[{ text: 'One' }], 'nope', []] },
+    { type: 'button', label: 'Start free', href: '/signup', variant: 'banner', title: 'Know what salons charge', text: 'Free.' },
+    { type: 'button', label: 'Bad', href: 'javascript:alert(1)', variant: 'button' },
+    { type: 'before_after', before: { url: 'https://a.example/b.jpg', alt: 'Before' }, after: { url: 'data:x', alt: 'After' } },
+    { type: 'before_after', before: { url: 'https://a.example/b.jpg', alt: 'Before' }, after: { url: 'https://a.example/a.jpg', alt: 'After' } },
+    { type: 'video', provider: 'youtube', id: 'dQw4w9WgXcQ' },
+    { type: 'video', provider: 'youtube', id: '"><script>' },
+    { type: 'table', header: true, rows: [['A', 'B'], ['C']] },
+    { type: 'faq', items: [{ question: 'Why?', answer: [{ text: 'Because.' }] }, { question: '', answer: [{ text: 'x' }] }] },
+  ]);
+  same(blocks, [
+    { type: 'takeaways', items: [[{ text: 'One' }]] },
+    { type: 'button', label: 'Start free', href: '/signup', variant: 'banner', title: 'Know what salons charge', text: 'Free.' },
+    { type: 'before_after', before: { url: 'https://a.example/b.jpg', alt: 'Before' }, after: { url: 'https://a.example/a.jpg', alt: 'After' } },
+    { type: 'video', provider: 'youtube', id: 'dQw4w9WgXcQ' },
+    { type: 'table', header: true, rows: [['A', 'B'], ['C', '']] },
+    { type: 'faq', items: [{ question: 'Why?', answer: [{ text: 'Because.' }] }] },
+  ], 'rich blocks');
+});
+
 Deno.test('GUIDES-PUB-09 SEO fields fall back to title and summary when empty', () => {
   const full = toFull(row({ slug: 'seo', meta_title: '  ', meta_description: '', canonical_url: 'javascript:x', noindex: true, og_image_url: 'https://cdn.example/x.jpg' }));
   same(full.seo, {

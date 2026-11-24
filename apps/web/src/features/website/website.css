@@ -253,6 +253,32 @@
 .mova-site__callout { padding: 20px 22px; border-radius: var(--radius-xl); display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-body-l); line-height: 1.55; }
 .mova-site__callout--tip { background: var(--site-mint); color: var(--site-ink); }
 .mova-site__callout--note { background: var(--site-blush); color: var(--site-ink); }
+/* Guide blocks added with the A13·v2 editor */
+.mova-site__takeaways { padding: 20px 24px; border: 2px solid var(--site-ink); border-radius: var(--radius-xl); display: flex; flex-direction: column; gap: 8px; color: var(--site-ink); }
+.mova-site__takeaways > strong { font: 800 13px/1.2 Manrope, system-ui, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; }
+.mova-site__takeaways ul { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 4px; }
+.mova-site__guide-button { margin: 0; }
+.mova-site__guide-banner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px 24px; padding: 24px 26px; border-radius: var(--radius-2xl); background: var(--site-ink); color: var(--site-bg); }
+.mova-site__guide-banner strong { display: block; font: 800 21px/1.25 Manrope, system-ui, sans-serif; }
+.mova-site__guide-banner span { display: block; margin-top: 4px; font-size: var(--fs-body); color: var(--site-mint); }
+.mova-site__guide-banner .mova-site__button { background: var(--site-peach); color: var(--site-ink); }
+.mova-site__before-after > div { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mova-site__before-after span { position: relative; display: block; }
+.mova-site__before-after img { width: 100%; height: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--radius-xl); display: block; }
+.mova-site__before-after b { position: absolute; left: 10px; top: 10px; padding: 3px 9px; border-radius: 9px; background: rgba(255, 255, 255, .92); color: var(--site-ink); font-size: 12.5px; }
+.mova-site__video { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.mova-site__video-frame { position: relative; aspect-ratio: 16 / 9; border-radius: var(--radius-xl); overflow: hidden; background: var(--site-ink); }
+.mova-site__video[data-provider="instagram"] .mova-site__video-frame { aspect-ratio: 4 / 5; max-width: 480px; }
+.mova-site__video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.mova-site__video-frame button { position: absolute; inset: 0; width: 100%; border: 0; background: none; color: var(--site-bg); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; font: 600 14px "DM Sans", system-ui, sans-serif; }
+.mova-site__video-frame button > span { width: 68px; height: 68px; border-radius: 50%; background: var(--site-bg); color: var(--site-ink); display: flex; align-items: center; justify-content: center; padding-left: 4px; }
+.mova-site__video-frame button:focus-visible { outline: 3px solid var(--site-peach); outline-offset: -3px; }
+.mova-site__video figcaption, .mova-site__before-after figcaption { font-size: var(--fs-body-s); color: var(--site-muted); text-align: center; }
+.mova-site__guide-table { overflow-x: auto; border: 1px solid var(--site-line); border-radius: var(--radius-l); background: var(--site-white); }
+.mova-site__guide-table table { width: 100%; border-collapse: collapse; font-size: var(--fs-body); }
+.mova-site__guide-table th, .mova-site__guide-table td { padding: 11px 14px; text-align: left; border-top: 1px solid var(--site-line); }
+.mova-site__guide-table thead th { border-top: 0; background: var(--site-mist); font-weight: 700; color: var(--site-ink); }
+.mova-site__guide-faq details p { font-size: var(--fs-body); }
 .mova-site__prose-cta { padding: 24px; border-radius: var(--radius-2xl); background: var(--site-ink); color: var(--site-bg); display: flex; flex-direction: column; gap: 14px; font-size: var(--fs-display-s); line-height: 1.5; }
 .mova-site__prose-cta .mova-site__button { align-self: flex-start; background: var(--site-bg); color: var(--site-ink); }
 .mova-site__side { flex: 0 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px; position: sticky; top: 16px; }
