@@ -357,8 +357,6 @@
 .adm-signin-card .adm-code-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
 .adm-signin-card .adm-code-grid input { min-width: 0; height: 56px; padding: 0; border-radius: 14px; text-align: center; font: 800 22px 'Manrope', sans-serif; }
 .adm-signin-card .btn { height: 54px; border-radius: 27px; font-size: var(--fs-body-l); }
-.adm-enroll { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.adm-enroll img { background: var(--ivory); border-radius: var(--radius-m); }
 .adm-signin-note { margin: 0; color: var(--mint); font-size: var(--fs-caption); text-align: center; }
 @container (max-width: 760px) {
   .adm .shell { align-content: start; }

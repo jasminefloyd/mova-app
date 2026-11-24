@@ -11,20 +11,19 @@ function base64url(value: unknown): string {
   return Buffer.from(JSON.stringify(value)).toString('base64url');
 }
 
-export function accessToken(aal: 'aal1' | 'aal2'): string {
+function accessToken(): string {
   const now = Math.floor(Date.now() / 1000);
-  const payload = { aud: 'authenticated', role: 'authenticated', sub: adminUserId, email: 'staff@mova.invalid', aal, session_id: 'playwright-admin', iat: now, exp: now + 3600 };
+  const payload = { aud: 'authenticated', role: 'authenticated', sub: adminUserId, email: 'staff@mova.invalid', aal: 'aal1', session_id: 'playwright-admin', iat: now, exp: now + 3600 };
   return [base64url({ alg: 'HS256', typ: 'JWT' }), base64url(payload), 'playwright-signature'].join('.');
 }
 
 export const adminUser = {
   id: adminUserId, aud: 'authenticated', role: 'authenticated', email: 'staff@mova.invalid',
   app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: {}, created_at: '2026-01-01T00:00:00.000Z',
-  factors: [{ id: 'totp-1', friendly_name: 'Mova admin', factor_type: 'totp', status: 'verified', created_at: '2026-01-01T00:00:00.000Z', updated_at: '2026-01-01T00:00:00.000Z' }],
 };
 
-function session(aal: 'aal1' | 'aal2') {
-  return { access_token: accessToken(aal), token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'playwright-refresh', user: adminUser };
+function session() {
+  return { access_token: accessToken(), token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'playwright-refresh', user: adminUser };
 }
 
 export async function fulfillJson(route: Route, value: unknown, status = 200) {
@@ -50,7 +49,7 @@ export const shellStubs: Record<string, (body: Record<string, unknown>) => unkno
 };
 
 /**
- * Sets up the Supabase mocks. `signedIn` seeds a two-step session in local storage. `isAdmin` decides what
+ * Sets up the Supabase mocks. `signedIn` seeds an email-code session in local storage. `isAdmin` decides what
  * mova_admin_whoami says. `rpc` answers the other database functions by name.
  */
 export async function mockAdminApi(page: Page, options: {
@@ -62,16 +61,14 @@ export async function mockAdminApi(page: Page, options: {
   if (options.signedIn) {
     await page.addInitScript(({ storageKey, value }) => {
       localStorage.setItem(storageKey, JSON.stringify(value));
-    }, { storageKey: key, value: session('aal2') });
+    }, { storageKey: key, value: session() });
   }
   await page.route('**/auth/v1/**', async (route) => {
     if (route.request().method() === 'OPTIONS') return fulfillJson(route, null);
     const path = new URL(route.request().url()).pathname;
     if (path.endsWith('/user')) return fulfillJson(route, adminUser);
-    if (path.endsWith('/token')) return fulfillJson(route, session('aal1'));
-    if (path === '/auth/v1/verify') return fulfillJson(route, session('aal1'));
-    if (path.endsWith('/verify')) return fulfillJson(route, session('aal2'));
-    if (path.endsWith('/challenge')) return fulfillJson(route, { id: 'challenge-1', expires_at: Math.floor(Date.now() / 1000) + 300 });
+    if (path.endsWith('/token')) return fulfillJson(route, session());
+    if (path === '/auth/v1/verify') return fulfillJson(route, session());
     return fulfillJson(route, {});
   });
   await page.route('**/rest/v1/rpc/**', async (route) => {

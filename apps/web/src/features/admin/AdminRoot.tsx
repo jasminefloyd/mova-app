@@ -6,7 +6,7 @@ import './admin.css';
 
 // The admin portal is available on the dedicated host and at /admin on the main site.
 // Vercel's host redirects are convenience routing only; this route still relies on the
-// staff sign-in, MFA session, and server-side platform-admin checks for access control.
+// staff sign-in and server-side platform-admin checks for access control.
 export function isAdminHost(hostname: string): boolean {
   return hostname === 'admin.mova-beauty.co'
     || hostname === 'mova-beauty.co'

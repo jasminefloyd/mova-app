@@ -25,18 +25,25 @@ test.describe('admin sign-in gate', () => {
     await expect(page).toHaveURL(/\/admin\/signin/);
   });
 
-  test('lets a platform admin through after the authenticator code', async ({ page }) => {
+  test('lets a rostered admin through with only the email code and records the sign-in', async ({ page }) => {
+    const auditEntries: unknown[] = [];
+    const factorRequests: string[] = [];
+    page.on('request', request => {
+      if (request.url().includes('/auth/v1/factors')) factorRequests.push(request.url());
+    });
     await mockAdminApi(page, {
       signedIn: false,
       isAdmin: true,
-      rpc: { mova_admin_stylists: () => ({ stylists: [], total: 0, counts: { all: 0, active: 0, onboarding: 0, quiet: 0, restricted: 0, suspended: 0 } }) },
+      rpc: {
+        mova_admin_record_sign_in: body => { auditEntries.push(body); return null; },
+        mova_admin_stylists: () => ({ stylists: [], total: 0, counts: { all: 0, active: 0, onboarding: 0, quiet: 0, restricted: 0, suspended: 0 } }),
+      },
     });
     await page.goto('/admin/signin?returnTo=%2Fadmin%2Fstylists');
     await verifyEmail(page, 'staff@mova.invalid');
-    await expect(page.getByRole('heading', { name: 'Authenticator code' })).toBeVisible();
-    for (const [i, digit] of [...'123456'].entries()) await page.getByLabel(`Authenticator code, digit ${i + 1}`).fill(digit);
-    await page.getByRole('button', { name: 'Verify and sign in' }).click();
     await expect(page).toHaveURL(/\/admin\/stylists$/);
     await expect(page.getByRole('heading', { name: 'Stylists' })).toBeVisible();
+    expect(auditEntries).toEqual([{ p_device: expect.any(String) }]);
+    expect(factorRequests).toEqual([]);
   });
 });

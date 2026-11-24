@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { adminRpc } from './admin-api';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import { currentAdminSession, deviceLabel, safeReturnTo, signOutAdmin } from './admin-session';
 
-type Step = 'email' | 'email-code' | 'authenticator';
+type Step = 'email' | 'email-code';
 
 function AdminCodeDigits({ value, onChange, disabled, label }: { value: string; onChange: (value: string) => void; disabled: boolean; label: string }) {
   const refs = useRef<Array<HTMLInputElement | null>>([]);
@@ -54,7 +54,7 @@ function AdminCodeDigits({ value, onChange, disabled, label }: { value: string; 
   </div>;
 }
 
-/** Passwordless email link/code followed by the required authenticator factor. */
+/** Email-code sign-in for existing accounts on the System Admin roster. */
 export default function AdminSignInPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -64,67 +64,18 @@ export default function AdminSignInPage() {
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState(params.get('email') ?? '');
   const [code, setCode] = useState('');
-  const [factorId, setFactorId] = useState<string | null>(null);
-  const [enrolling, setEnrolling] = useState<{ qr: string; secret: string } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const sessionTransition = useRef<Promise<void> | null>(null);
 
-  const prepareAdminSecondFactor = useCallback(async () => {
-    if (step === 'authenticator') return;
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-    const who = await adminRpc<{ is_admin: boolean }>('mova_admin_whoami');
-    if (!who.is_admin) {
-      await signOutAdmin();
-      setStep('email');
-      setMessage('This account does not have System Admin access.');
-      return;
-    }
-
-    const { data: factors, error: listError } = await supabase.auth.mfa.listFactors();
-    if (listError) throw listError;
-    const verified = factors.totp.find((factor) => factor.status === 'verified');
-    if (verified) {
-      setFactorId(verified.id);
-      setEnrolling(null);
-    } else {
-      // Remove abandoned, unverified enrollment factors before starting a fresh setup.
-      for (const factor of factors.totp) await supabase.auth.mfa.unenroll({ factorId: factor.id });
-      const { data: enroll, error: enrollError } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Mova admin' });
-      if (enrollError || !enroll) throw enrollError ?? new Error('Authenticator enrollment failed');
-      setFactorId(enroll.id);
-      setEnrolling({ qr: enroll.totp.qr_code, secret: enroll.totp.secret });
-    }
-    setCode('');
-    setMessage(null);
-    setStep('authenticator');
-  }, [step, supabase]);
-
-  const continueWithSession = useCallback(() => {
-    if (sessionTransition.current) return sessionTransition.current;
-    sessionTransition.current = prepareAdminSecondFactor().finally(() => { sessionTransition.current = null; });
-    return sessionTransition.current;
-  }, [prepareAdminSecondFactor]);
-
-  // Secure email links return to this route. Supabase consumes the callback and restores the session.
   useEffect(() => {
     let active = true;
-    const handleSession = () => {
-      if (!active) return;
-      void continueWithSession().catch(() => {
-        if (active) setMessage('Could not verify your admin access. Request a new sign-in link.');
-      });
-    };
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) window.setTimeout(handleSession, 0);
-    });
     void currentAdminSession().then((session) => {
       if (active && session) navigate(returnTo, { replace: true });
-    }).catch(() => undefined);
-    void supabase.auth.getSession().then(({ data: { session } }) => { if (session) handleSession(); }).catch(() => undefined);
-    return () => { active = false; subscription.unsubscribe(); };
-  }, [continueWithSession, navigate, returnTo, supabase]);
+    }).catch(() => {
+      if (active) setMessage('Could not check your admin session. Try signing in again.');
+    });
+    return () => { active = false; };
+  }, [navigate, returnTo]);
 
   const idleNotice = params.get('reason') === 'idle' ? 'You were signed out after 30 minutes without activity.' : null;
 
@@ -153,38 +104,29 @@ export default function AdminSignInPage() {
     setBusy(true);
     setMessage(null);
     try {
-      const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'email' });
-      if (error) throw error;
-      await continueWithSession();
+      const { data, error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'email' });
+      if (error || !data.session) {
+        setCode('');
+        setMessage('That email code did not work. Use the newest code in your email.');
+        return;
+      }
+
+      const admin = await currentAdminSession();
+      if (!admin) {
+        await signOutAdmin();
+        setStep('email');
+        setCode('');
+        setMessage('This account does not have System Admin access.');
+        return;
+      }
+
+      try { await adminRpc('mova_admin_record_sign_in', { p_device: deviceLabel() }); } catch { /* best effort audit entry */ }
+      queryClient.removeQueries({ queryKey: ['admin'] });
+      navigate(returnTo, { replace: true });
     } catch {
       setCode('');
-      setMessage('That email code did not work. Use the newest code in your email.');
+      setMessage('Could not complete sign-in. Request a new code and try again.');
     } finally { setBusy(false); }
-  }
-
-  async function submitAuthenticatorCode(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!factorId) return;
-    setBusy(true);
-    setMessage(null);
-    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code: code.trim() });
-    if (error) {
-      setBusy(false);
-      setMessage('That code did not work. Use the newest code in your authenticator app.');
-      return;
-    }
-    const session = await currentAdminSession();
-    if (!session) {
-      await signOutAdmin();
-      setBusy(false);
-      setStep('email');
-      setCode('');
-      setMessage('This account does not have System Admin access.');
-      return;
-    }
-    try { await adminRpc('mova_admin_record_sign_in', { p_device: deviceLabel() }); } catch { /* best effort audit entry */ }
-    queryClient.removeQueries({ queryKey: ['admin'] });
-    navigate(returnTo, { replace: true });
   }
 
   return (
@@ -203,7 +145,7 @@ export default function AdminSignInPage() {
             {message ? <p className="error-text" role="status">{message}</p> : null}
             <button type="submit" className="btn pri" disabled={busy}>{busy ? 'Sending…' : 'Email me a sign-in code'}</button>
           </form>
-        ) : step === 'email-code' ? (
+        ) : (
           <form className="adm-signin-card" aria-labelledby="as-h" onSubmit={(event) => void submitEmailCode(event)}>
             <h1 id="as-h" className="h1">Check your email</h1>
             <p className="sub">Enter the six-digit code sent to <strong>{email.trim()}</strong>.</p>
@@ -215,18 +157,6 @@ export default function AdminSignInPage() {
             <button type="submit" className="btn pri" disabled={busy || code.length !== 6}>{busy ? 'Verifying…' : 'Verify email'}</button>
             <button type="button" className="btn sm ghost" disabled={busy} onClick={() => void sendCode()}>{busy ? 'Sending…' : 'Resend code'}</button>
             <button type="button" className="btn sm ghost" onClick={() => { setStep('email'); setCode(''); setMessage(null); }}>Change email</button>
-          </form>
-        ) : (
-          <form className="adm-signin-card" aria-labelledby="as-h" onSubmit={(event) => void submitAuthenticatorCode(event)}>
-            <h1 id="as-h" className="h1">Authenticator code</h1>
-            <p className="sub">{enrolling ? 'Scan this code with your authenticator app, then enter the six-digit code it shows.' : 'Enter the six-digit code from your Mova admin authenticator app.'}</p>
-            {enrolling ? <div className="adm-enroll"><img src={enrolling.qr} alt="Authenticator setup QR code" width={180} height={180} /><p className="small">Can’t scan? Enter this key: <span className="mono">{enrolling.secret}</span></p></div> : null}
-            <div className="field">
-              <label>6-digit authenticator code</label>
-              <AdminCodeDigits value={code} onChange={setCode} disabled={busy} label="Authenticator code" />
-            </div>
-            {message ? <p className="error-text" role="alert">{message}</p> : null}
-            <button type="submit" className="btn pri" disabled={busy || code.length !== 6}>{busy ? 'Verifying…' : 'Verify and sign in'}</button>
           </form>
         )}
         <p className="adm-signin-note">Every sign-in and action here is logged. Sessions end after 30 minutes idle.</p>

@@ -17,6 +17,8 @@
 
 ## Current audit work log
 
+- 2026-11-23 admin email-code sign-in: the owner requested removing the authenticator requirement. Migration 0118 authorizes signed-in accounts on the System Admin roster through the existing server guard. The portal accepts the verified email-code session, records sign-in and retains the 30-minute idle timeout. Local verification passed all 75 pgTAP files (1,362 assertions), five admin browser tests with mocked Auth, lint, typecheck and Edge Function checks. Applied 0118 to production with owner approval and verified the recorded version, roster check and anonymous execute denial before releasing the web app.
+
 - 2026-11-23 admin stylist detail returned HTTP 405 because PostgREST ran the `STABLE` RPC in a read-only transaction and the function inserts a view audit record. Migration 0117 marks the existing function `VOLATILE` and reloads the PostgREST schema cache. Local PostgREST reproduced HTTP 405 / SQLSTATE 25006 before the migration and returned HTTP 200 with the expected detail and one audit record afterward. All 75 pgTAP files passed (1,363 assertions), including stylist and non-MFA access denials. `pnpm fn:check` passed. Applied 0117 to production with owner approval and verified the recorded version and function volatility.
 
 - 2026-11-23 Google Ads sign-up measurement loads the supplied Google tag on the production marketing and stylist sign-up pages. It records the supplied USD 1.00 conversion after a new stylist verifies their email code. Focused browser checks intercept the tag and Auth requests to avoid sending test conversions.

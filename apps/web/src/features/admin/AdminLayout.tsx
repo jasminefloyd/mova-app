@@ -6,7 +6,7 @@ import { AdminNav } from './AdminNav';
 import { currentAdminSession, IDLE_LIMIT_MS, signOutAdmin } from './admin-session';
 import { Loading } from './AdminPrimitives';
 
-/** Gate for every admin screen. Anyone without a two-step admin session goes to sign-in. */
+/** Gate for every admin screen. Anyone without an admin session goes to sign-in. */
 export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();

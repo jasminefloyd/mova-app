@@ -1,5 +1,5 @@
 begin;
-select plan(19);
+select plan(18);
 
 -- PostgREST uses function volatility to choose the transaction mode for RPC POSTs.
 select is((select provolatile::text from pg_proc
@@ -26,7 +26,7 @@ values ('ad690000-0000-4000-8000-000000000101', 'settings.profile_updated', 'art
 select is((select business_number::int from public.mova_artist_businesses where id = 'ad690000-0000-4000-8000-000000000102'), 2, 'the second stylist is BID-2');
 
 -- Stylists cannot read the admin reads.
-select set_config('request.jwt.claims', '{"sub":"ad690000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}', true);
+select set_config('request.jwt.claims', '{"sub":"ad690000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}', true);
 set local role authenticated;
 select throws_ok($$select public.mova_admin_overview()$$, '42501', 'PLATFORM_ADMIN_REQUIRED', 'stylists cannot read the overview');
 select throws_ok($$select public.mova_admin_stylists()$$, '42501', 'PLATFORM_ADMIN_REQUIRED', 'stylists cannot list stylists');
@@ -35,13 +35,6 @@ select throws_ok($$select public.mova_admin_stylist_detail('ad690000-0000-4000-8
 reset role;
 
 select set_config('request.jwt.claims', '{"sub":"ad690000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}', true);
-set local role authenticated;
-select throws_ok($$select public.mova_admin_stylist_detail('ad690000-0000-4000-8000-000000000101')$$,
-  '42501', 'PLATFORM_ADMIN_REQUIRED', 'admin stylist detail requires MFA');
-reset role;
-
--- Admin.
-select set_config('request.jwt.claims', '{"sub":"ad690000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}', true);
 set local role authenticated;
 select ok(public.mova_admin_overview() ? 'funnel' and public.mova_admin_overview() ? 'current', 'the overview returns the funnel and the current window');
 select is((select (public.mova_admin_overview() -> 'funnel' ->> 'published_page')::int), 1, 'the funnel counts published pages');

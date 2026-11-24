@@ -18,9 +18,9 @@ select ok(not has_function_privilege('authenticated', 'public.mova_grant_platfor
 select set_config('request.jwt.claims', '', true);
 select ok(not public.mova_is_platform_admin(), 'no session is not an admin');
 
--- Admin on a one-step session (aal1): denied until the second step is done.
+-- A rostered admin can sign in with email OTP alone.
 select set_config('request.jwt.claims', '{"sub":"ad660000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}', true);
-select ok(not public.mova_is_platform_admin(), 'admin on a one-step session is not an admin');
+select ok(public.mova_is_platform_admin(), 'admin on an email-code session is an admin');
 
 -- Admin on a two-step session: allowed.
 select set_config('request.jwt.claims', '{"sub":"ad660000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}', true);

@@ -75,7 +75,7 @@ export function AdminNav({ name }: { name: string }) {
         ))}
       </div>
       <div className="anav-foot">
-        <span><strong>{name}</strong><br /><span className="small">Super admin · 2-step on</span></span>
+        <span><strong>{name}</strong><br /><span className="small">Super admin</span></span>
         <button type="button" className="btn sm ghost" onClick={() => void signOut()}>Sign out</button>
       </div>
     </nav>
