@@ -3394,7 +3394,7 @@
         },
         "pro": {
           "title": "Switch to Pro",
-          "body": "AI Revenue Center and rebooking autopilot lock. PricePilot drops to 25 lookups a month. + {{fee}} per Mova payment."
+          "body": "AI Revenue Center, Seat Filler, PricePilot and rebooking autopilot lock. + {{fee}} per Mova payment."
         },
         "free": {
           "title": "Go to Free",

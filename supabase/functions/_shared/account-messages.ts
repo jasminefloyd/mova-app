@@ -76,11 +76,11 @@ export function buildAccountMessage(eventType: AccountEventType, context: Accoun
         : (es ? `El ${ends} empieza tu plan ${planName(after)} a ${planPrice(after)} al mes con ${card}.` : `On ${ends} your ${planName(after)} plan starts at ${planPrice(after)}/month on ${card}.`);
       const rows: Array<[string, string]> = es ? [
         [`Quedarte en AI + Growth · ${planPrice('ai_growth')}/mes`, 'No tienes que hacer nada. Todo sigue funcionando.'],
-        [`Cambiar a Pro · ${planPrice('pro')}/mes`, 'El Centro de ingresos con IA y el reagendado automático se bloquean. PricePilot baja a 25 consultas al mes.'],
+        [`Cambiar a Pro · ${planPrice('pro')}/mes`, 'El Centro de ingresos con IA, el relleno de espacios, PricePilot y el reagendado automático se bloquean.'],
         ['Pasar a Gratis · $0', 'Las funciones de pago se bloquean y no se te cobra. No se borra nada.'],
       ] : [
         [`Stay on AI + Growth · ${planPrice('ai_growth')}/month`, 'Nothing to do. Everything keeps working.'],
-        [`Switch to Pro · ${planPrice('pro')}/month`, 'AI Revenue Center and rebooking autopilot lock. PricePilot drops to 25 lookups a month.'],
+        [`Switch to Pro · ${planPrice('pro')}/month`, 'AI Revenue Center, Seat Filler, PricePilot and rebooking autopilot lock.'],
         ['Go to Free · $0', "Paid features lock and you're not charged. Nothing is deleted."],
       ];
       return {

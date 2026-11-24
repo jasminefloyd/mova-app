@@ -1,0 +1,10 @@
+begin;
+select plan(6);
+select is((select entitlements#>>'{features,ai_price_pilot}' from public.mova_plan_catalog where plan_key='free'),'false','Free has no PricePilot');
+select is((select entitlements#>>'{features,ai_price_pilot}' from public.mova_plan_catalog where plan_key='pro'),'false','Pro has no PricePilot');
+select is((select entitlements#>>'{features,ai_price_pilot}' from public.mova_plan_catalog where plan_key='ai_growth'),'true','AI + Growth includes PricePilot');
+select is((select (entitlements#>>'{limits,price_pilot_lookups_monthly}')::int from public.mova_plan_catalog where plan_key='free'),0,'Free has no checks');
+select is((select (entitlements#>>'{limits,price_pilot_lookups_monthly}')::int from public.mova_plan_catalog where plan_key='pro'),0,'Pro has no checks');
+select is((select (entitlements#>>'{limits,price_pilot_lookups_monthly}')::int from public.mova_plan_catalog where plan_key='ai_growth'),50,'AI + Growth has 50 checks a month');
+select * from finish();
+rollback;

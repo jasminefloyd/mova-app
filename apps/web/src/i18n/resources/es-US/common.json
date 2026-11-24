@@ -3394,7 +3394,7 @@
         },
         "pro": {
           "title": "Cambiar a Pro",
-          "body": "El Centro de ingresos con IA y el reagendado automático se bloquean. PricePilot baja a 25 consultas al mes. + {{fee}} por pago con Mova."
+          "body": "El Centro de ingresos con IA, el relleno de espacios, PricePilot y el reagendado automático se bloquean. + {{fee}} por pago con Mova."
         },
         "free": {
           "title": "Pasar a Gratis",
