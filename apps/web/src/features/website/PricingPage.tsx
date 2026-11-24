@@ -15,8 +15,8 @@ const plans = [
 ] as const;
 const includedFeatures = {
   free: ['page', 'calendar', 'unlimited', 'clientNotes', 'guestBooking', 'payments', 'bookingEmail', 'languages', 'basicReports', 'privateReviews'],
-  pro: ['publicReviews', 'advancedReports', 'seatFiller', 'textAutopilot', 'textReminders', 'rebookingAssist', 'googleCalendar', 'customCover'],
-  growth: ['rebookingAutopilot', 'concierge', 'instagramConcierge', 'walletCard', 'revenueCenter', 'missedCallTextback'],
+  pro: ['publicReviews', 'advancedReports', 'textAutopilot', 'textReminders', 'rebookingAssist', 'googleCalendar', 'customCover'],
+  growth: ['seatFiller', 'rebookingAutopilot', 'concierge', 'instagramConcierge', 'walletCard', 'revenueCenter', 'missedCallTextback'],
 } as const;
 
 const rolloutVisibility: Readonly<Record<string, boolean>> = {

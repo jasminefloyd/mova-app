@@ -1,0 +1,10 @@
+begin;
+select plan(6);
+select is((select entitlements#>>'{features,seat_filler}' from public.mova_plan_catalog where plan_key='free'),'false','Free has no Seat Filler');
+select is((select entitlements#>>'{features,seat_filler}' from public.mova_plan_catalog where plan_key='pro'),'false','Pro has no Seat Filler: it is part of the AI Revenue Center');
+select is((select entitlements#>>'{features,seat_filler}' from public.mova_plan_catalog where plan_key='ai_growth'),'true','AI + Growth includes Seat Filler');
+select is((select entitlements#>>'{features,marketing_email}' from public.mova_plan_catalog where plan_key='free'),'false','Marketing stays off on Free');
+select is((select entitlements#>>'{features,marketing_email}' from public.mova_plan_catalog where plan_key='pro'),'true','Marketing stays on for Pro');
+select is((select entitlements#>>'{features,google_calendar_sync}' from public.mova_plan_catalog where plan_key='pro'),'true','Google Calendar sync stays on Pro');
+select * from finish();
+rollback;
