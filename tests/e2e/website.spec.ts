@@ -109,11 +109,16 @@ test.describe('public website', () => {
     await expect.poll(() => events).toEqual(['calculator_used', 'start_free_clicked']);
   });
 
-  test('Spanish pricing copy renders from the es-US catalog', async ({ page }) => {
-    await page.goto('/pricing?locale=es-US');
-    await expect(page.getByRole('heading', { level: 1, name: /Planes sencillos/ })).toBeVisible();
-    await expect(page.locator('.mova-site__plans a[href="/signup"]')).toHaveCount(3);
-    await expect(page.locator('.mova-site__plans a[href="/signup"]').first()).toHaveText('Empieza gratis');
+  test('the shared marketing footer links to Jasmine Floyd with campaign tracking and has no language switch', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('mova_guest_locale', 'es-US'));
+    await page.goto('/');
+    const footer = page.getByRole('contentinfo');
+    await expect(footer.getByRole('link', { name: '© 2026 Jasmine Floyd' })).toHaveAttribute('href', 'https://jasmine.floydmethod.com/?utm_campaign=mova-copyright');
+    await expect(footer.getByRole('button', { name: /^(EN|ES)$/ })).toHaveCount(0);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
+    await footer.getByRole('link', { name: 'Pricing' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: /Simple plans/ })).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem('mova_guest_locale'))).toBe('es-US');
   });
 
   test('public pages fit a 320 px screen without sideways scrolling', async ({ page }) => {
@@ -158,17 +163,23 @@ test.describe('guides', () => {
     await expect(page.getByRole('link', { name: 'Manage appointments across salons' })).toBeVisible();
   });
 
-  test('Spanish pages are rendered in Spanish on the server, with their own canonical and structured data', async ({ page, request }) => {
+  test('old marketing locale URLs redirect to English and retain campaign and guide filters', async ({ page, request }) => {
+    for (const path of ['/', '/pricing', '/guides', '/guides/ai-isnt-what-is-making-beauty-less-personal']) {
+      const base = `${path}?utm_campaign=qa&category=Booking`;
+      const response = await request.get(`${base}&locale=es-US`, { maxRedirects: 0 });
+      expect(response.status()).toBe(301);
+      expect(response.headers().location).toBe(base);
+    }
     const html = await (await request.get('/pricing?locale=es-US')).text();
-    expect(html).toContain('<html lang="es-US"');
-    expect(html).toContain('Planes sencillos.');
-    expect(html).toMatch(/rel="canonical" href="[^"]+\/pricing\?locale=es-US"/);
+    expect(html).toContain('<html lang="en-US"');
+    expect(html).toContain('Simple plans.');
+    expect(html).toMatch(/rel="canonical" href="[^"]+\/pricing"/);
+    expect(html).not.toMatch(/hreflang=|og:locale:alternate/);
     await page.goto('/pricing?locale=es-US');
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Planes sencillos.');
-    await expect(page.locator('link[rel="alternate"][hreflang="en-US"]')).toHaveAttribute('href', /\/pricing$/);
+    await expect(page).toHaveURL(/\/pricing$/);
+    await expect(page.getByRole('navigation', { name: 'Website' }).getByRole('link', { name: 'Features' })).toHaveAttribute('href', '/features');
     const types = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((text) => (JSON.parse(text) as { '@type'?: string })['@type']);
     expect(types).toEqual(expect.arrayContaining(['SoftwareApplication', 'FAQPage', 'BreadcrumbList']));
-    await expect(page.getByRole('navigation', { name: 'Sitio web' }).getByRole('link', { name: 'Funciones' })).toHaveAttribute('href', '/features?locale=es-US');
   });
 
   test('robots.txt and llms.txt describe the public site', async ({ request }) => {

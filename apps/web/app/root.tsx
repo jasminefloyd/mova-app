@@ -1,4 +1,4 @@
-import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation, useRouteError } from 'react-router';
+import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation, useMatches, useRouteError } from 'react-router';
 import { useEffect } from 'react';
 import type { LinksFunction } from 'react-router';
 import stylesheet from '../src/styles.css?url';
@@ -11,11 +11,11 @@ import { isAdminPath } from '../src/pwa/cache-policy';
 export const links: LinksFunction = () => [{ rel: 'stylesheet', href: stylesheet }];
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  // Public pages take their language from ?locale=, so the document language matches the content that was rendered.
   const location = useLocation();
-  const lang = new URLSearchParams(location.search).get('locale') === 'es-US' ? 'es-US' : 'en-US';
+  const website = useMatches().some(match => match.id === 'website-shell');
+  const lang = !website && new URLSearchParams(location.search).get('locale') === 'es-US' ? 'es-US' : 'en-US';
   useEffect(() => {
-    // The calculator and guide articles supply localized titles through route metadata.
+    // The calculator and guide articles supply titles through route metadata.
     if (/^\/(calculator\/?|guides\/[^/]+\/?)$/.test(location.pathname)) return;
     document.title = `Mova Beauty ${pageName(location.pathname)}`;
   }, [location.pathname]);

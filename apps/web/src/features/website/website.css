@@ -307,9 +307,8 @@
 .mova-site__footer-col h2 { margin: 0 0 6px; font-size: var(--fs-caption); font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--site-mint); font-family: "DM Sans", system-ui, sans-serif; }
 .mova-site__footer-col a, .mova-site__footer-col span { min-height: 44px; display: flex; align-items: center; color: var(--site-bg); text-decoration: none; font-size: var(--fs-body); }
 .mova-site__footer-col .mova-site__muted-text { color: var(--site-mint); }
-.mova-site__footer-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-top: 24px; border-top: 1px solid var(--site-sage); }
-.mova-site__footer-bottom span { font-size: var(--fs-caption); color: var(--site-mint); }
-.mova-site__footer .mova-public-locale-toggle button { color: var(--site-bg); }
+.mova-site__footer-bottom { padding-top: 24px; border-top: 1px solid var(--site-sage); color: var(--site-mint); font-size: var(--fs-caption); }
+.mova-site__footer-bottom a { display: inline-flex; align-items: center; min-height: var(--tap-min); text-underline-offset: 3px; }
 
 /* Phone and small screens. Content reflows; nothing scrolls sideways at 320px. */
 @media (max-width: 720px) {

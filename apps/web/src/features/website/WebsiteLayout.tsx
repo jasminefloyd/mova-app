@@ -1,10 +1,10 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
-import { Outlet, useLoaderData, useLocation, useMatches } from 'react-router';
+import { Outlet, redirect, useLoaderData, useLocation, useMatches } from 'react-router';
 import type { LoaderFunctionArgs } from 'react-router';
 import i18n from '../../i18n';
 import { JsonLd, SiteShellContext } from './parts';
-import { localeFromUrl, publicBaseUrl, siteGraph, type ShellData } from './seo';
+import { publicBaseUrl, siteGraph, type ShellData } from './seo';
 import { WebsiteFooter } from './WebsiteFooter';
 import { WebsiteNav } from './WebsiteNav';
 import { installGoogleTagManager } from './google-tag-manager';
@@ -18,12 +18,17 @@ export const links = () => [
   { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Manrope:wght@600;700;800&display=swap' },
 ];
 
-// The language comes from ?locale= so each language has its own URL that search engines can index.
-export function loader({ request }: LoaderFunctionArgs): ShellData & { explicitLocale: boolean } {
-  return { locale: localeFromUrl(request.url), publicBaseUrl: publicBaseUrl(), explicitLocale: new URL(request.url).searchParams.has('locale') };
+// Retire old locale URLs while keeping campaign tags and guide filters.
+export function loader({ request }: LoaderFunctionArgs): ShellData | Response {
+  const url = new URL(request.url);
+  if (url.searchParams.has('locale')) {
+    url.searchParams.delete('locale');
+    return redirect(url.pathname.replace(/^\/+/, '/') + url.search, 301);
+  }
+  return { publicBaseUrl: publicBaseUrl() };
 }
 
-let browserLocaleSynced = false;
+const websiteI18n = i18n.cloneInstance({ lng: 'en-US', initAsync: false });
 
 export default function WebsiteLayout() {
   const shell = useLoaderData<typeof loader>();
@@ -34,25 +39,17 @@ export default function WebsiteLayout() {
   useEffect(() => {
     if (trackable) trackDiscoveryPage(pathname, key);
   }, [pathname, key, trackable]);
-  const onServer = typeof document === 'undefined';
-  // On the server each request gets its own i18n copy, so a Spanish request is rendered in Spanish
-  // without changing the language for anyone else.
-  const serverI18n = useMemo(() => (onServer && shell.locale !== 'en-US' ? i18n.cloneInstance({ lng: shell.locale, initAsync: false }) : null), [onServer, shell.locale]);
-  // In the browser the first render must match that HTML, so the shared instance switches before hydration.
-  if (!onServer && !browserLocaleSynced) {
-    browserLocaleSynced = true;
-    if (shell.explicitLocale && i18n.language !== shell.locale) void i18n.changeLanguage(shell.locale);
-  }
-  const page = <SiteShellContext.Provider value={shell}>
-    <div className="mova-site" lang={shell.locale} onClickCapture={event => {
-      const link = event.target instanceof Element ? event.target.closest('a') : null;
-      if (trackable && link?.origin === window.location.origin && link.pathname === '/signup') trackDiscoverySignupClick(pathname);
-    }}>
-      <WebsiteNav />
-      <Outlet />
-      <WebsiteFooter />
-      <JsonLd data={siteGraph(shell)} />
-    </div>
-  </SiteShellContext.Provider>;
-  return serverI18n ? <I18nextProvider i18n={serverI18n}>{page}</I18nextProvider> : page;
+  return <I18nextProvider i18n={websiteI18n}>
+    <SiteShellContext.Provider value={shell}>
+      <div className="mova-site" lang="en-US" onClickCapture={event => {
+        const link = event.target instanceof Element ? event.target.closest('a') : null;
+        if (trackable && link?.origin === window.location.origin && link.pathname === '/signup') trackDiscoverySignupClick(pathname);
+      }}>
+        <WebsiteNav />
+        <Outlet />
+        <WebsiteFooter />
+        <JsonLd data={siteGraph(shell)} />
+      </div>
+    </SiteShellContext.Provider>
+  </I18nextProvider>;
 }

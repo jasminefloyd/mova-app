@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useLocation } from 'react-router';
+import { Outlet, useLocation, useMatches } from 'react-router';
 import { createPublicQueryClient } from '../lib/query-client';
 import { GUEST_LOCALE_KEY } from './locale';
 import { readStoredLocale } from './locale';
@@ -8,10 +8,11 @@ import { useLocale } from './LocaleProvider';
 
 export function PublicShell() {
   const [queryClient] = useState(createPublicQueryClient);
+  const website = useMatches().some(match => match.id === 'website-shell');
   // Every public page (showcase, booking, scan, client card, manage booking, review) draws its own wordmark,
   // so the shell header would show a second one (task 2.3).
-  return <ShellFrame queryClient={queryClient} localeStorageKey={GUEST_LOCALE_KEY} showBrandHeader={false}>
-    <PublicLocaleSync />
+  return <ShellFrame queryClient={queryClient} localeStorageKey={GUEST_LOCALE_KEY} showBrandHeader={false} {...(website ? { fixedLocale: 'en-US' as const } : {})}>
+    {!website && <PublicLocaleSync />}
     <Outlet />
   </ShellFrame>;
 }

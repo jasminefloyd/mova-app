@@ -1,12 +1,9 @@
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { PublicLocaleToggle } from '../../app/PublicLocaleToggle';
-import { useLocalePath } from './parts';
 
 export function WebsiteFooter() {
   const { t } = useTranslation();
-  const localePath = useLocalePath();
-  return <footer className="mova-site__footer">
+  return <footer className="mova-site__footer" role="contentinfo">
     <div className="mova-site__container mova-site__footer-inner">
       <div className="mova-site__footer-top">
         <div className="mova-site__footer-about">
@@ -16,14 +13,14 @@ export function WebsiteFooter() {
         <div className="mova-site__footer-cols">
           <nav aria-label={t('website.footer.product')} className="mova-site__footer-col">
             <h2>{t('website.footer.product')}</h2>
-            <Link to={localePath('/features')}>{t('website.footer.features')}</Link>
-            <Link to={localePath('/pricing')}>{t('website.footer.pricing')}</Link>
+            <Link to="/features">{t('website.footer.features')}</Link>
+            <Link to="/pricing">{t('website.footer.pricing')}</Link>
             <Link to="/signup">{t('website.footer.createAccount')}</Link>
           </nav>
           <nav aria-label={t('website.footer.learn')} className="mova-site__footer-col">
             <h2>{t('website.footer.learn')}</h2>
-            <Link to={localePath('/calculator')}>{t('website.footer.calculatorLink')}</Link>
-            <Link to={localePath('/guides')}>{t('website.footer.guides')}</Link>
+            <Link to="/calculator">{t('website.footer.calculatorLink')}</Link>
+            <Link to="/guides">{t('website.footer.guides')}</Link>
           </nav>
           <nav aria-label={t('website.footer.account')} className="mova-site__footer-col">
             <h2>{t('website.footer.account')}</h2>
@@ -34,8 +31,7 @@ export function WebsiteFooter() {
         </div>
       </div>
       <div className="mova-site__footer-bottom">
-        <span>{t('website.footer.copyright')}</span>
-        <PublicLocaleToggle />
+        <a href="https://jasmine.floydmethod.com/?utm_campaign=mova-copyright">{t('website.footer.copyright')}</a>
       </div>
     </div>
   </footer>;

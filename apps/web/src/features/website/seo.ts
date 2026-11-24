@@ -1,10 +1,8 @@
 import i18n from '../../i18n';
 
-// SEO helpers for the public website: page meta tags, hreflang links and JSON-LD (schema.org) builders.
-// Every string comes from the locale catalogs so search engines and AI assistants read the same copy people do.
+// SEO helpers for the English-language marketing site.
 
-export type SiteLocale = 'en-US' | 'es-US';
-export type ShellData = { locale: SiteLocale; publicBaseUrl: string };
+export type ShellData = { publicBaseUrl: string };
 export type SeoPage = 'home' | 'features' | 'pricing' | 'calculator' | 'guides';
 type MetaTag = Record<string, string>;
 
@@ -22,38 +20,17 @@ export function publicBaseUrl(): string {
   return (env?.PUBLIC_BASE_URL || DEFAULT_BASE_URL).replace(/\/$/, '');
 }
 
-export function localeFromUrl(url: string): SiteLocale {
-  return new URL(url, DEFAULT_BASE_URL).searchParams.get('locale') === 'es-US' ? 'es-US' : 'en-US';
-}
-
-/** English is the default URL; Spanish adds ?locale=es-US. Each language is its own canonical page. */
-export function pageUrl(base: string, path: string, locale: SiteLocale): string {
-  const url = `${base}${path === '/' ? '/' : path}`;
-  return locale === 'es-US' ? `${url}?locale=es-US` : url;
-}
-
 /** Reads the website shell loader data from a meta function's `matches`. */
 export function shellFromMatches(matches: readonly ({ id: string; data?: unknown } | undefined)[]): ShellData {
   const data = matches.find((match) => match?.id === 'website-shell')?.data as Partial<ShellData> | undefined;
-  return { locale: data?.locale === 'es-US' ? 'es-US' : 'en-US', publicBaseUrl: data?.publicBaseUrl ?? DEFAULT_BASE_URL };
+  return { publicBaseUrl: data?.publicBaseUrl ?? DEFAULT_BASE_URL };
 }
 
-const translate = (locale: SiteLocale) => i18n.getFixedT(locale, 'common');
+const translate = () => i18n.getFixedT('en-US', 'common');
 
-/** hreflang links for a page that exists in both languages. */
-export function alternateLinks(base: string, path: string): MetaTag[] {
-  return [
-    { tagName: 'link', rel: 'alternate', hrefLang: 'en-US', href: pageUrl(base, path, 'en-US') },
-    { tagName: 'link', rel: 'alternate', hrefLang: 'es-US', href: pageUrl(base, path, 'es-US') },
-    { tagName: 'link', rel: 'alternate', hrefLang: 'x-default', href: pageUrl(base, path, 'en-US') },
-  ];
-}
-
-/** Title, description, canonical, hreflang, Open Graph and Twitter tags shared by every public page. */
-export function socialMeta(options: { title: string; description: string; canonical: string; base: string; locale: SiteLocale; type?: 'website' | 'article'; image?: string | null; imageAlt?: string }): MetaTag[] {
-  const { title, description, canonical, base, locale } = options;
+export function socialMeta(options: { title: string; description: string; canonical: string; base: string; type?: 'website' | 'article'; image?: string | null; imageAlt?: string }): MetaTag[] {
+  const { title, description, canonical, base } = options;
   const image = options.image ?? `${base}${OG_IMAGE_PATH}`;
-  const other = locale === 'es-US' ? 'en_US' : 'es_US';
   return [
     { title },
     { name: 'description', content: description },
@@ -63,8 +40,7 @@ export function socialMeta(options: { title: string; description: string; canoni
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },
     { property: 'og:url', content: canonical },
-    { property: 'og:locale', content: locale.replace('-', '_') },
-    { property: 'og:locale:alternate', content: other },
+    { property: 'og:locale', content: 'en_US' },
     { property: 'og:image', content: image },
     ...(options.imageAlt ? [{ property: 'og:image:alt', content: options.imageAlt }] : []),
     { name: 'twitter:card', content: 'summary_large_image' },
@@ -78,19 +54,15 @@ const PAGE_PATHS: Record<SeoPage, string> = { home: '/', features: '/features', 
 
 /** Meta tags for one of the fixed website pages. */
 export function pageMeta(page: SeoPage, shell: ShellData): MetaTag[] {
-  const t = translate(shell.locale);
+  const t = translate();
   const path = PAGE_PATHS[page];
-  return [
-    ...socialMeta({
-      title: t(`website.seo.${page}.title`),
-      description: t(`website.seo.${page}.description`),
-      canonical: pageUrl(shell.publicBaseUrl, path, shell.locale),
-      base: shell.publicBaseUrl,
-      locale: shell.locale,
-      imageAlt: t('website.seo.imageAlt'),
-    }),
-    ...alternateLinks(shell.publicBaseUrl, path),
-  ];
+  return socialMeta({
+    title: t(`website.seo.${page}.title`),
+    description: t(`website.seo.${page}.description`),
+    canonical: `${shell.publicBaseUrl}${path}`,
+    base: shell.publicBaseUrl,
+    imageAlt: t('website.seo.imageAlt'),
+  });
 }
 
 /** Serializes JSON-LD. "<" is escaped so content can never close the script tag. */
@@ -103,8 +75,8 @@ const websiteId = (base: string) => `${base}/#website`;
 const softwareId = (base: string) => `${base}/#software`;
 
 /** Organization + WebSite, emitted on every website page so each page's entities can point at them. */
-export function siteGraph({ publicBaseUrl: base, locale }: ShellData) {
-  const t = translate(locale);
+export function siteGraph({ publicBaseUrl: base }: ShellData) {
+  const t = translate();
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -127,31 +99,31 @@ export function siteGraph({ publicBaseUrl: base, locale }: ShellData) {
         name: 'Mova',
         url: `${base}/`,
         description: t('website.seo.home.description'),
-        inLanguage: ['en-US', 'es-US'],
+        inLanguage: 'en-US',
         publisher: { '@id': organizationId(base) },
       },
     ],
   };
 }
 
-function planOffers(base: string, locale: SiteLocale) {
-  const t = translate(locale);
+function planOffers(base: string) {
+  const t = translate();
   return PLAN_PRICES.map(({ key, price, fee }) => ({
     '@type': 'Offer',
     name: t(`website.pricing.${key}`),
     price,
     priceCurrency: 'USD',
     description: `${t(`website.pricing.${fee}`)}. ${t('website.pricing.processing')}`,
-    url: pageUrl(base, '/pricing', locale),
+    url: `${base}/pricing`,
     availability: 'https://schema.org/InStock',
     priceSpecification: { '@type': 'UnitPriceSpecification', price, priceCurrency: 'USD', billingDuration: 'P1M', unitText: 'MONTH' },
   }));
 }
 
 /** The product itself. There are no ratings or reviews here on purpose: we only publish what is real. */
-export function softwareLd({ publicBaseUrl: base, locale }: ShellData, options: { withOffers?: boolean } = {}) {
-  const t = translate(locale);
-  const features = ['showcase', 'booking', 'clients', 'money', 'revenue', 'concierge', 'clientCard', 'reports'] as const;
+export function softwareLd({ publicBaseUrl: base }: ShellData, options: { withOffers?: boolean } = {}) {
+  const t = translate();
+  const features = ['showcase', 'booking', 'clients', 'money', 'clientCard', 'reports'] as const;
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
@@ -165,18 +137,21 @@ export function softwareLd({ publicBaseUrl: base, locale }: ShellData, options: 
     inLanguage: ['en-US', 'es-US'],
     image: `${base}${OG_IMAGE_PATH}`,
     screenshot: ['home', 'showcase', 'clients', 'revenue', 'concierge'].map((name) => `${base}/media/landing/${name}.png`),
-    featureList: features.map((key) => `${t(`website.features.${key}Eyebrow`)}: ${t(`website.features.${key}TitleA`)} ${t(`website.features.${key}TitleB`)}`),
+    featureList: [
+      ...features.map((key) => `${t(`website.features.${key}Eyebrow`)}: ${t(`website.features.${key}TitleA`)} ${t(`website.features.${key}TitleB`)}`),
+      t('website.features.tools.revenue.title'),
+    ],
     audience: { '@type': 'BusinessAudience', audienceType: t('website.seo.audience') },
     publisher: { '@id': organizationId(base) },
     offers: options.withOffers
-      ? planOffers(base, locale)
-      : { '@type': 'AggregateOffer', lowPrice: '0', highPrice: '39', priceCurrency: 'USD', offerCount: PLAN_PRICES.length, url: pageUrl(base, '/pricing', locale) },
+      ? planOffers(base)
+      : { '@type': 'AggregateOffer', lowPrice: '0', highPrice: '39', priceCurrency: 'USD', offerCount: PLAN_PRICES.length, url: `${base}/pricing` },
   };
 }
 
 /** Pricing questions and answers. Unfinished placeholder answers (in square brackets) are left out. */
-export function faqLd(locale: SiteLocale) {
-  const t = translate(locale);
+export function faqLd() {
+  const t = translate();
   const strip = (value: string) => value.replace(/<[^>]+>/g, '').trim();
   const entries = [1, 2, 3, 4]
     .map((index) => ({ question: strip(t(`website.pricing.faq${index}Q`)), answer: strip(t(`website.pricing.faq${index}A`)) }))
@@ -184,24 +159,24 @@ export function faqLd(locale: SiteLocale) {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    inLanguage: locale,
+    inLanguage: 'en-US',
     mainEntity: entries.map(({ question, answer }) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })),
   };
 }
 
 /** The booth rent vs. commission calculator, a free tool. */
-export function calculatorLd({ publicBaseUrl: base, locale }: ShellData) {
-  const t = translate(locale);
+export function calculatorLd({ publicBaseUrl: base }: ShellData) {
+  const t = translate();
   return {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: t('website.seo.calculator.name'),
-    url: pageUrl(base, '/calculator', locale),
+    url: `${base}/calculator`,
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'Web',
     browserRequirements: 'Requires JavaScript',
     description: t('website.seo.calculator.description'),
-    inLanguage: locale,
+    inLanguage: 'en-US',
     isAccessibleForFree: true,
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     publisher: { '@id': organizationId(base) },
@@ -209,25 +184,25 @@ export function calculatorLd({ publicBaseUrl: base, locale }: ShellData) {
 }
 
 /** Breadcrumb trail. Items are [name, path]; the home crumb is added for you. */
-export function breadcrumbLd({ publicBaseUrl: base, locale }: ShellData, items: readonly (readonly [string, string])[]) {
-  const t = translate(locale);
+export function breadcrumbLd({ publicBaseUrl: base }: ShellData, items: readonly (readonly [string, string])[]) {
+  const t = translate();
   const trail = [[t('website.seo.homeCrumb'), '/'] as const, ...items];
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: trail.map(([name, path], index) => ({ '@type': 'ListItem', position: index + 1, name, item: pageUrl(base, path, locale) })),
+    itemListElement: trail.map(([name, path], index) => ({ '@type': 'ListItem', position: index + 1, name, item: `${base}${path}` })),
   };
 }
 
 /** The guides index as a collection of articles. */
 export function guidesListLd(shell: ShellData, posts: readonly { slug: string; title: string }[]) {
-  const t = translate(shell.locale);
+  const t = translate();
   return {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: t('website.seo.guides.title'),
     description: t('website.seo.guides.description'),
-    url: pageUrl(shell.publicBaseUrl, '/guides', shell.locale),
+    url: `${shell.publicBaseUrl}/guides`,
     isPartOf: { '@id': websiteId(shell.publicBaseUrl) },
     mainEntity: {
       '@type': 'ItemList',

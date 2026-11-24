@@ -13,7 +13,7 @@ const clean = (value: string) => value.replace(/<[^>]+>/g, '').replace(/\s+/g, '
 export function llmsTxt(base: string, guides: readonly Pick<PostSummary, 'slug' | 'title' | 'summary'>[]): string {
   const t = i18n.getFixedT('en-US', 'common');
   const text = (key: string) => clean(t(key));
-  const features = ['showcase', 'booking', 'clients', 'money', 'revenue', 'concierge', 'clientCard', 'reports'] as const;
+  const features = ['showcase', 'booking', 'clients', 'money', 'clientCard', 'reports'] as const;
   const faqs = [1, 2, 3, 4].map((index) => [text(`website.pricing.faq${index}Q`), text(`website.pricing.faq${index}A`)] as const).filter(([, answer]) => !answer.startsWith('['));
   const lines = [
     '# Mova',
@@ -37,6 +37,7 @@ export function llmsTxt(base: string, guides: readonly Pick<PostSummary, 'slug' 
     '## Features',
     '',
     ...features.map((key) => `- ${text(`website.features.${key}Eyebrow`)}: ${text(`website.features.${key}Body`)}`),
+    `- ${text('website.features.tools.revenue.title')}: ${text('website.features.tools.revenue.body')}`,
     '',
     '## Pages',
     '',
@@ -52,7 +53,6 @@ export function llmsTxt(base: string, guides: readonly Pick<PostSummary, 'slug' 
     '## Optional',
     '',
     `- [Sitemap](${base}/sitemap.xml)`,
-    `- [Spanish home page](${base}/?locale=es-US)`,
     '',
   ];
   return lines.join('\n');

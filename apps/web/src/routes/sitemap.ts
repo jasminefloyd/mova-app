@@ -17,10 +17,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const guides = await guidesResponse.json() as { slug: string; published_at: string }[];
   const esc = (value: string) => value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[char]!);
   const staticPaths = ['/', '/features', '/pricing', '/calculator', '/guides'];
-  const staticUrls = staticPaths.map((path) => {
-    const loc = `${base}${path}`;
-    return `<url><loc>${esc(loc)}</loc><xhtml:link rel="alternate" hreflang="en-US" href="${esc(loc)}"/><xhtml:link rel="alternate" hreflang="es-US" href="${esc(`${loc}?locale=es-US`)}"/><xhtml:link rel="alternate" hreflang="x-default" href="${esc(loc)}"/></url>`;
-  });
+  const staticUrls = staticPaths.map((path) => `<url><loc>${esc(`${base}${path}`)}</loc></url>`);
   const profileUrls = rows.map(({ handle, updated_at }) => {
     const loc = `${base}/a/${encodeURIComponent(handle)}`;
     return `<url><loc>${esc(loc)}</loc><lastmod>${new Date(updated_at).toISOString()}</lastmod><xhtml:link rel="alternate" hreflang="en-US" href="${esc(`${loc}?locale=en-US`)}"/><xhtml:link rel="alternate" hreflang="es-US" href="${esc(`${loc}?locale=es-US`)}"/><xhtml:link rel="alternate" hreflang="x-default" href="${esc(`${loc}?locale=en-US`)}"/></url>`;

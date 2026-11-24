@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { isRouteErrorResponse, Link, useLoaderData, useRouteError } from 'react-router';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
 import { ButtonLink, JsonLd, useSiteShell } from '../parts';
-import { articleLd, breadcrumbLd, shellFromMatches, socialMeta } from '../seo';
+import { articleLd, breadcrumbLd, socialMeta } from '../seo';
 import { absoluteUrl, formatGuideDate } from './guide-format';
 import { fetchGuide, GuidesRequestError } from './guides-api';
 import { GuideBlocks, faqLd } from './GuideBlocks';
@@ -21,7 +21,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
   }
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data, matches }) => {
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
   if (!data?.post) return [{ title: 'Mova Beauty Guides' }];
   const { post, publicBaseUrl } = data;
   // The server already applies these fallbacks; repeating them keeps the tags right if a field arrives empty.
@@ -34,7 +34,6 @@ export const meta: MetaFunction<typeof loader> = ({ data, matches }) => {
       description: seo.meta_description,
       canonical,
       base: publicBaseUrl,
-      locale: shellFromMatches(matches).locale,
       type: 'article',
       image: image ? absoluteUrl(image, publicBaseUrl) : null,
       ...(post.cover?.alt ? { imageAlt: post.cover.alt } : {}),

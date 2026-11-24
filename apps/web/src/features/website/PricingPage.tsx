@@ -43,7 +43,7 @@ export default function PricingPage() {
 
   return <div>
     <JsonLd data={softwareLd(shell, { withOffers: true })} />
-    <JsonLd data={faqLd(shell.locale)} />
+    <JsonLd data={faqLd()} />
     <JsonLd data={breadcrumbLd(shell, [[t('website.nav.pricing'), '/pricing']])} />
     <section className="mova-site__container mova-site__centered" aria-labelledby="price-h" style={{ paddingBlock: 'clamp(40px, 6vw, 80px) 32px' }}>
       <h1 id="price-h" className="mova-site__h1" style={{ maxWidth: 820, fontSize: 'clamp(38px, 5vw, 60px)' }}>{t('website.pricing.headlineA')} <span className="mova-site__accent">{t('website.pricing.headlineB')}</span></h1>

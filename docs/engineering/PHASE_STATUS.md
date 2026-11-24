@@ -17,6 +17,8 @@
 
 ## Current audit work log
 
+- 2026-11-24 English-only marketing site: removed the shared marketing footer language switch, fixed the marketing site to English, and redirected its locale URLs to the same page while preserving campaign tags and guide filters. Marketing metadata, sitemap entries and llms.txt use the English URLs. The copyright link points to Jasmine Floyd’s profile with the mova-copyright campaign. Product and booking language settings are outside this change.
+
 - 2026-11-24 W2 Features redesign: implemented the owner-provided desktop and phone layouts with jump links, a two-column Essentials grid, a three-column AI + Growth grid and the signup panel. Both grids stack on phones and hide the desktop checklists. The page retains English and Spanish, uses the existing rollout flags for availability, and shows the trial CTA only when trial marketing is enabled. Compared local Chromium screenshots at 1440 and 390 pixels against the designs. The combined release passed all 24 focused Chromium checks, lint and typecheck.
 
 - 2026-11-24 Guide editor v2 release: verified production had all migration records 0106–0124, then individually applied and verified 0125. Redeployed price-pilot v26, job-dispatch v27, job-worker v28, review-management v26, email-unsubscribe v3 and guides-public v22 with their existing JWT settings. Vercel deployment dpl_B2sAZyJ7XJZyJXZaxvYZJAdzN7Kc served commit 4ba73fb and the Guides, Calculator and Pricing routes and admin editor assets returned HTTP 200. The clean checkout installed the frozen lockfile and built successfully. All 20 focused browser checks passed after correcting the pre-existing article title assertion temporarily in the test checkout. The released commit contains the original test assertion.

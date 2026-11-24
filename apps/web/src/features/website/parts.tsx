@@ -1,5 +1,4 @@
 import { createContext, useContext, type ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { DEFAULT_BASE_URL, jsonLdString, type ShellData } from './seo';
 
@@ -51,13 +50,5 @@ export const SiteShellContext = createContext<ShellData | null>(null);
 
 /** Language and public base URL for the page being rendered. */
 export function useSiteShell(): ShellData {
-  const { i18n } = useTranslation();
-  const data = useContext(SiteShellContext);
-  return data ?? { locale: i18n.language === 'es-US' ? 'es-US' : 'en-US', publicBaseUrl: DEFAULT_BASE_URL };
-}
-
-/** Keeps a visitor (and a crawler) on the Spanish pages: public links carry ?locale=es-US when the page is Spanish. */
-export function useLocalePath(): (path: string) => string {
-  const { locale } = useSiteShell();
-  return (path) => (locale === 'es-US' ? `${path}?locale=es-US` : path);
+  return useContext(SiteShellContext) ?? { publicBaseUrl: DEFAULT_BASE_URL };
 }

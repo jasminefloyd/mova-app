@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { MetaFunction } from 'react-router';
 import { Icon, type IconName } from '../../components';
 import { clientProfilesEnabled, conciergeEnabled, rebookingAutopilotEnabled, seatFillerEnabled, trialMarketingEnabled, walletClientCardEnabled } from '../../lib/env';
-import { ButtonLink, Bullets, Eyebrow, JsonLd, useLocalePath, useSiteShell } from './parts';
+import { ButtonLink, Bullets, Eyebrow, JsonLd, useSiteShell } from './parts';
 import { breadcrumbLd, pageMeta, PLAN_PRICES, shellFromMatches, softwareLd } from './seo';
 import './features.css';
 
@@ -49,7 +49,6 @@ const growthPrice = PLAN_PRICES.find(plan => plan.key === 'growth')?.price;
 export default function FeaturesPage() {
   const { t } = useTranslation();
   const shell = useSiteShell();
-  const localePath = useLocalePath();
   const visibleEssentials = essentials.filter(({ key }) => key !== 'clientCard' || clientProfilesEnabled);
   return <div className="features-page">
     <JsonLd data={softwareLd(shell)} />
@@ -107,7 +106,7 @@ export default function FeaturesPage() {
           </div>
           <div className="features-growth__buttons">
             <ButtonLink to="/signup" variant="peach">{t(trialMarketingEnabled ? 'website.pricing.startTrial' : 'website.nav.startFree')}</ButtonLink>
-            <ButtonLink to={localePath('/pricing')} variant="secondary">{t('website.features.comparePlans')}</ButtonLink>
+            <ButtonLink to="/pricing" variant="secondary">{t('website.features.comparePlans')}</ButtonLink>
           </div>
         </div>
       </div>
