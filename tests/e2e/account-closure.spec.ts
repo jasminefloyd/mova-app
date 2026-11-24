@@ -42,12 +42,13 @@ for (const paid of [false, true]) {
 
 test('admin sees the request, archives, restores and must give three confirmations to delete', async ({ page }) => {
   let state: 'scheduled' | 'archived' | null = 'scheduled';
+  const displayName = "D'Angelo’s Studio";
   const calls: string[] = [];
   await mockAdminApi(page, { signedIn: true, isAdmin: true, rpc: {
-    mova_admin_account_closures: () => state ? [{ artist_business_id: business, display_name: 'Demo Stylist', business_number: 1, source: 'stylist', state, ends_at: ends }] : [],
+    mova_admin_account_closures: () => state ? [{ artist_business_id: business, display_name: displayName, business_number: 1, source: 'stylist', state, ends_at: ends }] : [],
     mova_admin_stylist_detail: () => ({
       business: { id: business, bid: 1, name: 'Demo Studio', status: state === 'archived' ? 'suspended' : 'active' },
-      profile: { display_name: 'Demo Stylist', handle: 'demo-studio', is_published: true, preferred_locale: 'en-US' },
+      profile: { display_name: displayName, handle: 'demo-studio', is_published: true, preferred_locale: 'en-US' },
       plan: { name: 'Free' }, metrics: {}, fee: {}, overrides: [], feedback: [],
     }),
     mova_admin_stylists: () => ({ stylists: [], total: 0, counts: {} }),
@@ -56,7 +57,7 @@ test('admin sees the request, archives, restores and must give three confirmatio
     if (route.request().method() === 'OPTIONS') return fulfillJson(route, null);
     const body = route.request().postDataJSON();
     calls.push(body.action);
-    if (body.action === 'delete') expect(body).toMatchObject({ display_name: 'Demo Stylist', confirm_delete_forever: true });
+    if (body.action === 'delete') expect(body).toMatchObject({ display_name: displayName, confirm_delete_forever: true });
     state = body.action === 'archive' ? 'archived' : null;
     return fulfillJson(route, { data: {} });
   });
@@ -79,13 +80,13 @@ test('admin sees the request, archives, restores and must give three confirmatio
   await dialog.getByLabel('Stylist display name').fill('Wrong name');
   await dialog.getByRole('button', { name: 'Continue' }).click();
   await expect(dialog).toContainText('The name must match');
-  await dialog.getByLabel('Stylist display name').fill('Demo Stylist');
+  await dialog.getByLabel('Stylist display name').fill(displayName);
   await dialog.getByRole('button', { name: 'Continue' }).click();
   await expect(dialog.getByRole('heading')).toHaveText('Delete this account forever?');
   await dialog.getByRole('button', { name: 'Nevermind' }).click();
   expect(calls).toEqual(['archive', 'restore']);
   await reachName();
-  await dialog.getByLabel('Stylist display name').fill('Demo Stylist');
+  await dialog.getByLabel('Stylist display name').fill(displayName);
   await dialog.getByRole('button', { name: 'Continue' }).click();
   await dialog.getByRole('button', { name: 'Delete forever' }).click();
   await expect(page).toHaveURL('/admin/stylists');

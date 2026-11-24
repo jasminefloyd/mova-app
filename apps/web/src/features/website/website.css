@@ -97,8 +97,6 @@
 .mova-site__split { display: flex; flex-wrap: wrap; align-items: center; gap: 40px 72px; }
 .mova-site__split-copy { flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
 .mova-site__split-art { flex: 1 1 320px; display: flex; justify-content: center; }
-.mova-site__feature-screen { width: min(100%, 293px); aspect-ratio: 390 / 844; overflow: hidden; box-sizing: border-box; border: 7px solid color-mix(in srgb, var(--forest) 65%, black); border-radius: 44px; background: var(--site-bg); box-shadow: 0 40px 80px rgba(24, 57, 47, 0.22); }
-.mova-site__feature-screen img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .mova-site__split--reverse { flex-direction: row-reverse; }
 .mova-site__bullets { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
 .mova-site__bullets li { display: flex; gap: 10px; font-size: var(--fs-body); line-height: 1.45; }
@@ -156,8 +154,6 @@
 .mova-site__chip[aria-current="page"], .mova-site__chip[aria-current="page"], .mova-site__chip[aria-pressed="true"] { background: var(--site-ink); border-color: var(--site-ink); color: var(--site-bg); }
 /* The site-wide link rule (.mova-site a:not(...)) sets color: inherit and is more specific; keep selected chip text light. */
 .mova-site a.mova-site__chip[aria-current="page"][href], .mova-site button.mova-site__chip[aria-pressed="true"] { color: var(--site-bg); }
-.mova-site__feature-band { background: var(--site-bg); }
-.mova-site__feature-band--alt { background: var(--site-mist); }
 
 /* Pricing (W3) */
 .mova-site__centered { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; }
@@ -331,7 +327,6 @@
   .mova-site__landing-hero .mova-site__hero-copy { flex-basis: 100%; }
   .mova-site__landing-phones { flex: 0 0 100%; min-height: clamp(340px, 92vw, 480px); }
   .mova-site__landing-phone { border-width: 5px; border-radius: 30px; }
-  .mova-site__feature-screen { width: min(72%, 280px); border-width: 5px; border-radius: 30px; }
   .mova-site__landing-phone--back { right: 12%; top: 3%; width: 39%; }
   .mova-site__landing-phone--front { left: 12%; bottom: 1%; width: 42%; }
   .mova-site__landing-problems, .mova-site__landing-steps { grid-template-columns: 1fr; }

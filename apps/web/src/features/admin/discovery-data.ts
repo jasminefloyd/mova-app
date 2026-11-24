@@ -25,6 +25,7 @@ export type GeographyRow = Pick<DiscoveryRow, 'sessions' | 'visitors' | 'signups
 export type Discovery = {
   start: string;
   through: string;
+  traffic_span?: { first_at: string; last_at: string } | null;
   current: TrafficTotals;
   prior: TrafficTotals;
   breakdown: DiscoveryRow[];

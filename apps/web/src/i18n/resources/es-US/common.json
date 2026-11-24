@@ -2694,22 +2694,6 @@
       "headlineB": "donde sea que esté tu silla.",
       "intro": "Mova es una sola app para tu página, reservas, clientes, pagos y seguimientos. Está hecha alrededor de un hecho: tus clientes te siguen a ti, no al edificio.",
       "jumpLabel": "Ir a una función",
-      "jumpShowcase": "Tu página",
-      "jumpBooking": "Reservas",
-      "jumpClients": "Clientes y notas",
-      "jumpMoney": "Cobra",
-      "jumpRevenue": "Centro de ingresos con IA",
-      "jumpConcierge": "Conserje con IA",
-      "jumpClientCard": "Para tus clientes",
-      "jumpReports": "Reportes y reseñas",
-      "showcaseScreenAlt": "Página pública de artista de Mova con el perfil de la estilista y sus servicios disponibles para reservar",
-      "bookingScreenAlt": "Pantalla de reservas de Mova con días y horarios disponibles por ubicación",
-      "clientsScreenAlt": "Perfil de cliente en Mova con notas privadas sobre el cabello y detalles de visitas",
-      "moneyScreenAlt": "Pantalla Dinero de Mova con valor de servicios, formas de pago, cargos y actividad reciente",
-      "revenueScreenAlt": "Centro de ingresos con IA de Mova con pronóstico mensual, rebooking y herramientas para llenar espacios",
-      "conciergeScreenAlt": "Bandeja de entrada del Conserje con IA de Mova con solicitudes pendientes y conversaciones atendidas",
-      "clientCardScreenAlt": "Perfil de cliente en Mova con tarjeta digital de la estilista, próxima cita y lista de estilistas guardadas",
-      "reportsScreenAlt": "Panel de Reportes de Mova con ingresos, reservas, reputación, tráfico del perfil y marketing",
       "showcaseEyebrow": "Tu página",
       "showcaseTitleA": "Una página. Un código QR.",
       "showcaseTitleB": "Todas las ubicaciones.",
@@ -2738,20 +2722,6 @@
       "money1": "Sin cargo de Mova en efectivo ni en pagos cobrados por el salón",
       "money2": "Pagos con tarjeta procesados por Stripe",
       "money3": "Una vista mensual de lo que realmente te queda (un estimado, claramente marcado)",
-      "revenueEyebrow": "Centro de ingresos con IA",
-      "revenueTitleA": "Llena las cancelaciones.",
-      "revenueTitleB": "Trae de vuelta a las clientas frecuentes.",
-      "revenueBody": "Mova aprende el tiempo habitual de regreso de cada cliente y detecta huecos en tu semana. Redacta los mensajes; tú los apruebas o configuras reglas una vez.",
-      "revenue1": "Relleno de huecos: envía mensajes a las clientas frecuentes adecuadas en pequeñas tandas y se detiene cuando el horario se reserva",
-      "revenue2": "Recordatorios de reserva en piloto automático, solo para clientes que dijeron sí",
-      "revenue3": "Mensajes de recuperación que envías tú, más un pronóstico mensual de ingresos",
-      "conciergeEyebrow": "Conserje con IA",
-      "conciergeTitleA": "Un segundo par de manos",
-      "conciergeTitleB": "para tus DM.",
-      "conciergeBody": "Tu asistente responde mensajes, llamadas perdidas y chats en tu página, en inglés o en español. Reserva horarios libres en tu suite y envía solicitudes para horarios del salón. Siempre dice que es IA.",
-      "concierge1": "Las cotizaciones, quejas y excepciones siempre llegan a ti",
-      "concierge2": "Nunca cotiza un precio que tú no fijaste ni cobra en el salón",
-      "concierge3": "Apágalo en cualquier conversación, en cualquier momento",
       "clientCardEyebrow": "Para tus clientes",
       "clientCardTitleA": "Una tarjeta de cliente",
       "clientCardTitleB": "en su bolsillo.",
@@ -2767,7 +2737,58 @@
       "reports2": "Responde a las reseñas; nadie puede editar lo que escribió un cliente",
       "reports3": "Ve qué canales traen reservas: Instagram, QR, Google, directo",
       "ctaTitle": "Empieza gratis hoy.",
-      "ctaBody": "Crea tu cuenta en unos minutos. El plan Gratis cuesta $0 al mes, y puedes cambiar de plan cuando quieras."
+      "ctaBody": "Crea tu cuenta en unos minutos. El plan Gratis cuesta $0 al mes, y puedes cambiar de plan cuando quieras.",
+      "essentialsLabel": "Lo esencial",
+      "essentialsTitleA": "Las herramientas del día a día,",
+      "essentialsTitleB": "en una sola app.",
+      "clientCardWebBody": "Después de reservar, tus clientes pueden volver a tu página y reservar de nuevo, estés en el salón que estés. Pueden reservar como invitados o usar un perfil gratis de Mova con todos sus estilistas.",
+      "growthTitleA": "Llena los horarios cancelados. Haz que tus clientes habituales regresen.",
+      "growthTitleB": "Pon el precio adecuado.",
+      "growthIntro": "El plan IA + Crecimiento te ayuda a llenar tu agenda y promocionar tu negocio. Mova prepara los mensajes. Tú los apruebas o defines las reglas una sola vez.",
+      "growthPrice": "${{price}}/mes",
+      "growthPlan": "Todo lo de Pro, más las herramientas de abajo.",
+      "growthPlanTrial": "Todo lo de Pro, más las herramientas de abajo. Pruébalo gratis por 30 días.",
+      "approvalTitle": "Tú apruebas cada cambio.",
+      "approvalBody": "Los mensajes de texto solo se envían a quienes dieron su permiso. Tú siempre decides los precios.",
+      "comparePlans": "Comparar planes",
+      "tools": {
+        "revenue": {
+          "title": "Centro de Ingresos con IA",
+          "body": "Ve el pronóstico del mes y de dónde vienen tus ingresos. Mova aprende cuándo suele volver cada cliente y detecta los horarios libres de la semana.",
+          "point1": "Pronóstico mensual de ingresos",
+          "point2": "Horarios libres de las próximas semanas"
+        },
+        "seatFiller": {
+          "title": "Llena horarios libres",
+          "body": "Una cancelación libera un horario. Mova avisa por texto a tus clientes habituales en grupos pequeños y se detiene en cuanto alguien reserva.",
+          "point1": "El primero en reservar se queda con el horario",
+          "point2": "Los demás reciben un aviso de que el horario ya se ocupó"
+        },
+        "rebooking": {
+          "title": "Recordatorios automáticos",
+          "body": "Tus clientes habituales reciben un recordatorio cuando les toca volver, con mensajes que tú ya aprobaste.",
+          "point1": "Solo para clientes que dieron su permiso",
+          "point2": "Se detiene cuando reservan o cancelan los avisos"
+        },
+        "marketing": {
+          "title": "Marketing",
+          "body": "Campañas para llenar horarios libres. Mova prepara los borradores y tú los apruebas.",
+          "point1": "Mensajes para recuperar clientes que tú envías",
+          "point2": "Solo se envían con tu aprobación"
+        },
+        "pricePilot": {
+          "title": "PricePilot",
+          "body": "Compara tu menú con precios locales verificados y sugiere un rango y un precio para cada servicio.",
+          "point1": "Tú decides tus precios",
+          "point2": "Compara tus precios con los menús de la zona"
+        },
+        "concierge": {
+          "title": "Asistente con IA",
+          "body": "Responde mensajes, llamadas perdidas y consultas en tu página de reservas mientras trabajas. Las cotizaciones, quejas y consultas especiales te llegan a ti.",
+          "point1": "Siempre indica que es IA",
+          "point2": "Los precios siempre los decides tú"
+        }
+      }
     },
     "pricing": {
       "headlineA": "Planes sencillos.",

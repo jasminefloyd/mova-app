@@ -95,10 +95,12 @@ test('changing the Discovery range replaces every section with data for that ran
 
   await mockAdminApi(page, { isAdmin: true, signedIn: true, rpc: {
     mova_admin_website_traffic: body => {
-      const short = (body as { p_period: string }).p_period === '24h';
+      const period = (body as { p_period: string }).p_period;
+      const short = period === '24h';
       return {
-        start: short ? '2026-11-23T15:00:00Z' : '2026-10-27T15:00:00Z',
+        start: short ? '2026-11-23T15:00:00Z' : period === '7d' ? '2026-11-17T15:00:00Z' : '2026-10-27T15:00:00Z',
         through: '2026-11-24T15:00:00Z',
+        traffic_span: short ? null : { first_at: '2026-11-22T13:00:00Z', last_at: '2026-11-22T15:00:00Z' },
         current: short ? empty : totals,
         prior: empty,
         breakdown: short ? [] : breakdown,
@@ -115,13 +117,23 @@ test('changing the Discovery range replaces every section with data for that ran
   const kpi = (label: string) => page.locator('.kpi').filter({ has: page.getByText(label, { exact: true }) }).locator('.big');
   const rows = [...breakdown.map(row => row.label), 'Brooklyn, NY, USA', '/pricing'];
   for (const label of rows) await expect(page.getByRole('rowheader', { name: label, exact: true })).toBeVisible();
+  await expect(page.getByText(/^Selected range/)).toContainText('Oct 27');
+  await expect(page.getByText(/^Recorded traffic/)).toContainText('Nov 22');
   await expect(kpi('Sessions')).toHaveText('12');
   await expect(kpi('Page views')).toHaveText('17');
   await expect(kpi('Signup conversion')).toHaveText('25.0%');
   await expect(kpi('Calculator uses')).toHaveText('9');
 
+  await page.getByRole('button', { name: '7 days', exact: true }).click();
+  await expect(page.getByText(/^Selected range/)).toContainText('Nov 17');
+  await expect(page.getByText(/^Recorded traffic/)).toContainText('Nov 22');
+  await expect(kpi('Sessions')).toHaveText('12');
+
   await page.getByRole('button', { name: 'Last 24 hours' }).click();
   await expect(page.getByText('Website traffic and verified stylist signups · Last 24 hours')).toBeVisible();
+  await expect(page.getByText(/^Selected range/)).toContainText('Nov 23');
+  await expect(page.getByText('No sessions or page views were recorded in this range.')).toBeVisible();
+  await expect(page.getByText(/^Recorded traffic/)).toHaveCount(0);
   for (const label of rows) await expect(page.getByRole('rowheader', { name: label, exact: true })).toHaveCount(0);
   for (const label of ['Visitors', 'Sessions', 'Page views', 'New visitors', 'Returning visitors',
     'Visits with a signup link click', 'Calculator uses', 'Start free clicks', 'Verified signups']) {

@@ -1,82 +1,119 @@
 import { useTranslation } from 'react-i18next';
 import type { MetaFunction } from 'react-router';
-import { clientProfilesEnabled, conciergeEnabled } from '../../lib/env';
-import { ButtonLink, Bullets, Eyebrow, JsonLd, useSiteShell } from './parts';
-import { breadcrumbLd, pageMeta, shellFromMatches, softwareLd } from './seo';
+import { Icon, type IconName } from '../../components';
+import { clientProfilesEnabled, conciergeEnabled, rebookingAutopilotEnabled, seatFillerEnabled, trialMarketingEnabled, walletClientCardEnabled } from '../../lib/env';
+import { ButtonLink, Bullets, Eyebrow, JsonLd, useLocalePath, useSiteShell } from './parts';
+import { breadcrumbLd, pageMeta, PLAN_PRICES, shellFromMatches, softwareLd } from './seo';
+import './features.css';
 
 export const meta: MetaFunction = ({ matches }) => pageMeta('features', shellFromMatches(matches));
 
-type FeatureKey = 'showcase' | 'booking' | 'clients' | 'money' | 'revenue' | 'concierge' | 'clientCard' | 'reports';
+const essentials = [
+  { key: 'showcase', id: 'showcase', icon: 'qr' },
+  { key: 'booking', id: 'booking', icon: 'calendar' },
+  { key: 'clients', id: 'clients', icon: 'user' },
+  { key: 'money', id: 'money', icon: 'payment' },
+  { key: 'clientCard', id: 'clientcard', icon: 'phone' },
+  { key: 'reports', id: 'reports', icon: 'reports' },
+] as const;
 
-// W2 Features. Each section pairs the feature copy with its matching app design screen.
-const features: Array<{ id: FeatureKey; anchor: string; screen: string; alt: string; reverse?: boolean; band: 'base' | 'alt' }> = [
-  { id: 'showcase', anchor: 'showcase', screen: 'stylist-page', alt: 'showcaseScreenAlt', band: 'base' },
-  { id: 'booking', anchor: 'booking', screen: 'booking', alt: 'bookingScreenAlt', reverse: true, band: 'alt' },
-  { id: 'clients', anchor: 'clients', screen: 'clients', alt: 'clientsScreenAlt', band: 'base' },
-  { id: 'money', anchor: 'money', screen: 'money', alt: 'moneyScreenAlt', reverse: true, band: 'alt' },
-  { id: 'revenue', anchor: 'revenue', screen: 'revenue', alt: 'revenueScreenAlt', band: 'base' },
-  { id: 'concierge', anchor: 'concierge', screen: 'concierge', alt: 'conciergeScreenAlt', reverse: true, band: 'alt' },
-  { id: 'clientCard', anchor: 'clientcard', screen: 'client-card', alt: 'clientCardScreenAlt', band: 'base' },
-  { id: 'reports', anchor: 'reports', screen: 'reports', alt: 'reportsScreenAlt', reverse: true, band: 'alt' },
-];
+const growthTools = [
+  { key: 'revenue', id: 'revenue', icon: 'trend', available: true },
+  { key: 'seatFiller', id: 'seat-filler', icon: 'seat', available: seatFillerEnabled },
+  { key: 'rebooking', id: 'rebooking', icon: 'refresh', available: rebookingAutopilotEnabled },
+  { key: 'marketing', id: 'marketing', icon: 'megaphone', available: true },
+  { key: 'pricePilot', id: 'pricepilot', icon: 'tag', available: true },
+  { key: 'concierge', id: 'concierge', icon: 'message', available: conciergeEnabled },
+] as const;
 
-const bulletKeys: Record<FeatureKey, [string, string, string]> = {
-  showcase: ['showcase1', 'showcase2', 'showcase3'],
-  booking: ['booking1', 'booking2', 'booking3'],
-  clients: ['clients1', 'clients2', 'clients3'],
-  money: ['money1', 'money2', 'money3'],
-  revenue: ['revenue1', 'revenue2', 'revenue3'],
-  concierge: ['concierge1', 'concierge2', 'concierge3'],
-  clientCard: ['clientCard1', 'clientCard2', 'clientCard3'],
-  reports: ['reports1', 'reports2', 'reports3'],
-};
+const additionalIcons = {
+  payment: 'M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2ZM2 10h20m-15 4h4',
+  phone: 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm3 17h2',
+  trend: 'm3 16 6-6 4 4 7-7m-5 0h5v5',
+  seat: 'M6 11V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v6M5 11h14a2 2 0 0 1 2 2v3H3v-3a2 2 0 0 1 2-2Zm0 5v5m14-5v5',
+  megaphone: 'M3 9h4l5-4v14l-5-4H3Zm13 0a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12',
+  tag: 'M3 3h8l10 10a1.5 1.5 0 0 1 0 2l-6 6a1.5 1.5 0 0 1-2 0L3 11Zm4 4h.01',
+} as const;
+type AdditionalIcon = keyof typeof additionalIcons;
 
-const titleKeys: Record<FeatureKey, { eyebrow: string; a: string; b: string; body: string; jump: string }> = {
-  showcase: { eyebrow: 'showcaseEyebrow', a: 'showcaseTitleA', b: 'showcaseTitleB', body: 'showcaseBody', jump: 'jumpShowcase' },
-  booking: { eyebrow: 'bookingEyebrow', a: 'bookingTitleA', b: 'bookingTitleB', body: 'bookingBody', jump: 'jumpBooking' },
-  clients: { eyebrow: 'clientsEyebrow', a: 'clientsTitleA', b: 'clientsTitleB', body: 'clientsBody', jump: 'jumpClients' },
-  money: { eyebrow: 'moneyEyebrow', a: 'moneyTitleA', b: 'moneyTitleB', body: 'moneyBody', jump: 'jumpMoney' },
-  revenue: { eyebrow: 'revenueEyebrow', a: 'revenueTitleA', b: 'revenueTitleB', body: 'revenueBody', jump: 'jumpRevenue' },
-  concierge: { eyebrow: 'conciergeEyebrow', a: 'conciergeTitleA', b: 'conciergeTitleB', body: 'conciergeBody', jump: 'jumpConcierge' },
-  clientCard: { eyebrow: 'clientCardEyebrow', a: 'clientCardTitleA', b: 'clientCardTitleB', body: 'clientCardBody', jump: 'jumpClientCard' },
-  reports: { eyebrow: 'reportsEyebrow', a: 'reportsTitleA', b: 'reportsTitleB', body: 'reportsBody', jump: 'jumpReports' },
-};
+function FeatureIcon({ name }: { name: IconName | AdditionalIcon }) {
+  return <span className="features-card__icon" aria-hidden="true">
+    {name in additionalIcons
+      ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={additionalIcons[name as AdditionalIcon]} /></svg>
+      : <Icon name={name as IconName} size={20} />}
+  </span>;
+}
+
+const growthPrice = PLAN_PRICES.find(plan => plan.key === 'growth')?.price;
 
 export default function FeaturesPage() {
   const { t } = useTranslation();
   const shell = useSiteShell();
-  const visibleFeatures = features.filter(({ id }) => (id !== 'concierge' || conciergeEnabled) && (id !== 'clientCard' || clientProfilesEnabled));
-  return <div>
+  const localePath = useLocalePath();
+  const visibleEssentials = essentials.filter(({ key }) => key !== 'clientCard' || clientProfilesEnabled);
+  return <div className="features-page">
     <JsonLd data={softwareLd(shell)} />
     <JsonLd data={breadcrumbLd(shell, [[t('website.nav.features'), '/features']])} />
-    <section className="mova-site__container" style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBlock: 'clamp(40px, 6vw, 80px) 24px' }} aria-labelledby="feat-h">
+
+    <section className="mova-site__container features-hero" aria-labelledby="feat-h">
       <Eyebrow>{t('website.features.eyebrow')}</Eyebrow>
-      <h1 id="feat-h" className="mova-site__h1" style={{ maxWidth: 860, fontSize: 'clamp(36px, 4.8vw, 60px)' }}>{t('website.features.headlineA')} <span className="mova-site__accent">{t('website.features.headlineB')}</span></h1>
-      <p className="mova-site__lead" style={{ maxWidth: 680 }}>{t('website.features.intro')}</p>
-      <nav aria-label={t('website.features.jumpLabel')} className="mova-site__feature-anchors" style={{ marginTop: 8 }}>
-        {visibleFeatures.map(({ id, anchor }) => <a className="mova-site__chip" key={id} href={`#${anchor}`}>{t(`website.features.${titleKeys[id].jump}`)}</a>)}
+      <h1 id="feat-h" className="mova-site__h1">{t('website.features.headlineA')} <span className="mova-site__accent">{t('website.features.headlineB')}</span></h1>
+      <p className="mova-site__lead">{t('website.features.intro')}</p>
+      <nav aria-label={t('website.features.jumpLabel')} className="mova-site__feature-anchors">
+        {visibleEssentials.map(({ key, id }) => <a className="mova-site__chip" key={id} href={`#${id}`}>{t(`website.features.${key}Eyebrow`)}</a>)}
+        <a className="mova-site__chip features-growth-link" href="#growth">{t('website.pricing.growth')}</a>
       </nav>
     </section>
 
-    {visibleFeatures.map(({ id, anchor, screen, alt, reverse, band }) => {
-      const keys = titleKeys[id];
-      const copy = <div className="mova-site__split-copy">
-        <Eyebrow>{t(`website.features.${keys.eyebrow}`)}</Eyebrow>
-        <h2 id={`${anchor}-h`} className="mova-site__h2" style={{ fontSize: 'clamp(28px, 3vw, 40px)', letterSpacing: -0.6 }}>{t(`website.features.${keys.a}`)} <span className="mova-site__accent">{t(`website.features.${keys.b}`)}</span></h2>
-        <p className="mova-site__lead" style={{ fontSize: 17 }}>{t(`website.features.${keys.body}`)}</p>
-        <Bullets items={bulletKeys[id].map((key) => t(`website.features.${key}`))} />
-      </div>;
-      const figure = <div className="mova-site__split-art"><div className="mova-site__feature-screen"><img src={`/media/features/${screen}.png`} alt={t(`website.features.${alt}`)} loading="lazy" /></div></div>;
-      return <section key={id} id={anchor} aria-labelledby={`${anchor}-h`} className={`mova-site__band${band === 'alt' ? ' mova-site__band--mist' : ''}`}>
-        <div className="mova-site__container mova-site__section">
-          <div className={`mova-site__split${reverse ? ' mova-site__split--reverse' : ''}`}>
-            {reverse ? <>{figure}{copy}</> : <>{copy}{figure}</>}
+    <section className="features-essentials" aria-labelledby="essentials-h">
+      <div className="mova-site__container mova-site__section">
+        <Eyebrow>{t('website.features.essentialsLabel')}</Eyebrow>
+        <h2 id="essentials-h" className="mova-site__h2">{t('website.features.essentialsTitleA')} <span className="mova-site__accent">{t('website.features.essentialsTitleB')}</span></h2>
+        <div className="features-essentials__grid">
+          {visibleEssentials.map(({ key, id, icon }) => <article key={id} id={id} className="features-card" aria-labelledby={`${id}-h`}>
+            <div className="features-card__top">
+              <FeatureIcon name={icon} />
+              <Eyebrow>{t(`website.features.${key}Eyebrow`)}</Eyebrow>
+            </div>
+            <h3 id={`${id}-h`}>{t(`website.features.${key}TitleA`)} <span className="mova-site__accent">{t(`website.features.${key}TitleB`)}</span></h3>
+            <p>{t(key === 'clientCard' && !walletClientCardEnabled ? 'website.features.clientCardWebBody' : `website.features.${key}Body`)}</p>
+            <Bullets items={[1, 2, 3].map(index => t(`website.features.${key}${index}`))} />
+          </article>)}
+        </div>
+      </div>
+    </section>
+
+    <section id="growth" className="features-growth" aria-labelledby="growth-h">
+      <div className="mova-site__container mova-site__section">
+        <Eyebrow>{t('website.pricing.growth')}</Eyebrow>
+        <h2 id="growth-h" className="mova-site__h2">{t('website.features.growthTitleA')} <span className="mova-site__accent">{t('website.features.growthTitleB')}</span></h2>
+        <p className="features-growth__intro">{t('website.features.growthIntro')}</p>
+        <p className="features-growth__plan"><strong>{t('website.features.growthPrice', { price: growthPrice })}</strong> {t(trialMarketingEnabled ? 'website.features.growthPlanTrial' : 'website.features.growthPlan')}</p>
+        <div className="features-growth__grid">
+          {growthTools.map(({ key, id, icon, available }) => <article id={id} key={id} className="features-card" aria-labelledby={`${id}-h`}>
+            <div className="features-card__top">
+              <FeatureIcon name={icon} />
+              {!available && <span className="features-card__status">{t('website.pricing.comingSoon')}</span>}
+            </div>
+            <h3 id={`${id}-h`}>{t(`website.features.tools.${key}.title`)}</h3>
+            <p>{t(`website.features.tools.${key}.body`)}</p>
+            <Bullets items={[1, 2].map(index => t(`website.features.tools.${key}.point${index}`))} />
+          </article>)}
+        </div>
+        <div className="features-growth__actions">
+          <div>
+            <p className="features-growth__actions-title">{t('website.features.approvalTitle')}</p>
+            <p>{t('website.features.approvalBody')}</p>
+          </div>
+          <div className="features-growth__buttons">
+            <ButtonLink to="/signup" variant="peach">{t(trialMarketingEnabled ? 'website.pricing.startTrial' : 'website.nav.startFree')}</ButtonLink>
+            <ButtonLink to={localePath('/pricing')} variant="secondary">{t('website.features.comparePlans')}</ButtonLink>
           </div>
         </div>
-      </section>;
-    })}
+      </div>
+    </section>
 
-    <section className="mova-site__container" aria-labelledby="fcta-h" style={{ paddingBlock: 'clamp(48px, 6vw, 96px)' }}>
+    <section className="mova-site__container features-signup" aria-labelledby="fcta-h">
       <div className="mova-site__cta">
         <div className="mova-site__cta-copy">
           <h2 id="fcta-h">{t('website.features.ctaTitle')}</h2>

@@ -105,8 +105,13 @@ export default function AdminDiscoveryPage() {
     {traffic.isPending && <Loading />}
     {traffic.isError && <div className="row"><ErrorNote message={adminErrorText(traffic.error)} /><button type="button" className="btn sm" onClick={() => void traffic.refetch()}>Retry traffic</button></div>}
     {data && <>
+      <div className="small muted" role="status">
+        <div>Selected range · {rangeDate.formatRange(new Date(data.start), new Date(data.through))} UTC</div>
+        {data.traffic_span && <div>Recorded traffic · {rangeDate.formatRange(new Date(data.traffic_span.first_at), new Date(data.traffic_span.last_at))} UTC</div>}
+        {data.traffic_span === null && <div>No sessions or page views were recorded in this range.</div>}
+      </div>
       <DiscoveryKpis current={data.current} prior={data.prior} details />
-      <p className="small muted">{rangeDate.format(new Date(data.start))} to {rangeDate.format(new Date(data.through))} UTC. Signup rates are based on sessions that started in this range. Visitors are counted per browser. A session in a tab ends after 30 minutes of inactivity. Returning visitors were first seen before the selected period.
+      <p className="small muted">Signup rates are based on sessions that started in this range. Visitors are counted per browser. A session in a tab ends after 30 minutes of inactivity. Returning visitors were first seen before the selected period.
         {data.current.identified_sessions < data.current.sessions ? ` Visitor history is available for ${formatCount(data.current.identified_sessions)} of ${formatCount(data.current.sessions)} sessions.` : ''}
       </p>
       {breakdowns.map(section => <Card key={section.kind} title={section.title}>

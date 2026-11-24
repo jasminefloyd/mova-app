@@ -31,6 +31,39 @@ test.describe('public website', () => {
     await expect(page.locator('header').getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/login');
   });
 
+  test('Features presents the Essentials and AI + Growth grids and reflows on phones', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/features');
+    const essentials = page.getByRole('region', { name: 'The everyday tools, in one app.' });
+    const growth = page.getByRole('region', { name: 'Fill cancellations. Bring regulars back. Get priced right.' });
+    const anchors = page.getByRole('navigation', { name: 'Jump to a feature' });
+    await expect(essentials.getByRole('heading', { level: 3 }).first()).toHaveText('One page. One QR code. Every location.');
+    await expect(growth.getByRole('heading', { level: 3 })).toHaveText([
+      'AI Revenue Center', 'Seat Filler', 'Rebooking autopilot', 'Marketing', 'PricePilot', 'AI Concierge',
+    ]);
+    await expect(growth.getByText('$39/month')).toBeVisible();
+    await expect(growth.getByRole('link', { name: 'Compare plans' })).toHaveAttribute('href', '/pricing');
+    await expect(growth.locator('a[href="/signup"]')).toBeVisible();
+    await expect(essentials.getByText('A profile photo clients recognize')).toBeVisible();
+    const columns = (selector: string) => page.locator(selector).evaluate(grid => getComputedStyle(grid).gridTemplateColumns.split(' ').length);
+    expect(await columns('.features-essentials__grid')).toBe(2);
+    expect(await columns('.features-growth__grid')).toBe(3);
+    await anchors.getByRole('link', { name: 'Reports & reviews' }).click();
+    await expect(page).toHaveURL(/#reports$/);
+    const growthLink = anchors.getByRole('link', { name: 'AI + Growth' });
+    expect(await growthLink.evaluate(link => getComputedStyle(link).color === getComputedStyle(link).backgroundColor)).toBe(false);
+    await growthLink.click();
+    await expect(page).toHaveURL(/#growth$/);
+    await expect(growth.getByRole('heading', { level: 2 })).toBeInViewport();
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await columns('.features-essentials__grid')).toBe(1);
+    expect(await columns('.features-growth__grid')).toBe(1);
+    await expect(essentials.getByText('A profile photo clients recognize')).toBeHidden();
+    await expect(growth.getByText('A monthly revenue forecast')).toBeHidden();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  });
+
   test('pricing shows the three plans at $0, $19 and $39 with no proposed-pricing badge', async ({ page }) => {
     await page.goto('/pricing');
     await expect(page.getByRole('heading', { level: 1, name: /Simple plans/ })).toBeVisible();
@@ -165,7 +198,7 @@ test.describe('guides', () => {
 
   test('article renders blocks, SEO tags and related guides, and drops unsafe links', async ({ page }) => {
     await page.goto('/guides/ai-isnt-what-is-making-beauty-less-personal');
-    await expect(page).toHaveTitle("AI isn't what's making beauty less personal | mova");
+    await expect(page).toHaveTitle("AI isn't what's making beauty less personal | Mova Beauty");
     await expect(page.getByRole('heading', { level: 1, name: "AI isn't what's making beauty less personal" })).toBeVisible();
     await expect(page.getByRole('heading', { level: 2, name: 'The client remembers. Does the system?' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Read the Phorest survey' })).toHaveAttribute('href', 'https://www.phorest.example/survey');

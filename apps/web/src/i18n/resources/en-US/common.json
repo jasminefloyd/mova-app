@@ -2694,22 +2694,6 @@
       "headlineB": "wherever your chair is.",
       "intro": "Mova is one app for your page, bookings, clients, payments and follow-ups. It is built around one fact: your clients follow you, not the building.",
       "jumpLabel": "Jump to a feature",
-      "jumpShowcase": "Your page",
-      "jumpBooking": "Booking",
-      "jumpClients": "Clients & notes",
-      "jumpMoney": "Get paid",
-      "jumpRevenue": "AI Revenue Center",
-      "jumpConcierge": "AI Concierge",
-      "jumpClientCard": "For your clients",
-      "jumpReports": "Reports & reviews",
-      "showcaseScreenAlt": "Mova public artist page showing the stylist profile and bookable services",
-      "bookingScreenAlt": "Mova client booking screen with available days and appointment times by location",
-      "clientsScreenAlt": "Mova stylist client profile with private hair notes and visit details",
-      "moneyScreenAlt": "Mova Money screen with service value, payment sources, fees and recent activity",
-      "revenueScreenAlt": "Mova AI Revenue Center with monthly forecast, rebooking and open slot tools",
-      "conciergeScreenAlt": "Mova AI Concierge inbox with requests needing attention and handled conversations",
-      "clientCardScreenAlt": "Mova client profile with digital stylist card, upcoming appointment and saved stylist list",
-      "reportsScreenAlt": "Mova Reports dashboard with revenue, bookings, reputation, profile traffic and marketing",
       "showcaseEyebrow": "Your page",
       "showcaseTitleA": "One page. One QR code.",
       "showcaseTitleB": "Every location.",
@@ -2738,20 +2722,6 @@
       "money1": "No Mova fee on cash or salon-collected payments",
       "money2": "Card payments processed by Stripe",
       "money3": "A monthly view of what you actually take home (an estimate, clearly labelled)",
-      "revenueEyebrow": "AI Revenue Center",
-      "revenueTitleA": "Fill cancellations.",
-      "revenueTitleB": "Bring regulars back.",
-      "revenueBody": "Mova learns each client's usual return time and spots open gaps in your week. It drafts the texts; you approve them or set rules once.",
-      "revenue1": "Seat filler: texts the right regulars in small waves and stops when the slot books",
-      "revenue2": "Rebooking reminders on autopilot, only to clients who said yes",
-      "revenue3": "Win-back messages you send yourself, plus a monthly revenue forecast",
-      "conciergeEyebrow": "AI Concierge",
-      "conciergeTitleA": "A second pair of hands",
-      "conciergeTitleB": "for your DMs.",
-      "conciergeBody": "Your assistant answers texts, missed calls and chat on your page, in English or Spanish. It books open times at your suite and sends requests for salon times. It always says it's AI.",
-      "concierge1": "Quotes, complaints and exceptions always come to you",
-      "concierge2": "Never quotes a price you didn't set or takes payment at the salon",
-      "concierge3": "Turn it off for any conversation, any time",
       "clientCardEyebrow": "For your clients",
       "clientCardTitleA": "A client card",
       "clientCardTitleB": "in their pocket.",
@@ -2767,7 +2737,58 @@
       "reports2": "Reply to reviews; nobody can edit what a client wrote",
       "reports3": "See which channels bring bookings: Instagram, QR, Google, direct",
       "ctaTitle": "Start free today.",
-      "ctaBody": "Create your account in a few minutes. The Free plan is $0 a month, and you can upgrade any time."
+      "ctaBody": "Create your account in a few minutes. The Free plan is $0 a month, and you can upgrade any time.",
+      "essentialsLabel": "The essentials",
+      "essentialsTitleA": "The everyday tools,",
+      "essentialsTitleB": "in one app.",
+      "clientCardWebBody": "After booking, clients can return to your page and rebook, whichever salon you’re at. They can book as a guest, or keep one free Mova profile for every stylist they see.",
+      "growthTitleA": "Fill cancellations. Bring regulars back.",
+      "growthTitleB": "Get priced right.",
+      "growthIntro": "The AI + Growth plan fills your chair and markets you. Mova does the work and drafts every message. You approve it or set rules once.",
+      "growthPrice": "${{price}}/month",
+      "growthPlan": "Everything in Pro, plus the tools below.",
+      "growthPlanTrial": "Everything in Pro, plus the tools below. Try it free for 30 days.",
+      "approvalTitle": "You approve every change.",
+      "approvalBody": "Texts only go to clients who said yes, and prices always come from you.",
+      "comparePlans": "Compare plans",
+      "tools": {
+        "revenue": {
+          "title": "AI Revenue Center",
+          "body": "This month’s forecast and where the money is. Mova learns each client’s usual return time and spots the open gaps in your week.",
+          "point1": "A monthly revenue forecast",
+          "point2": "Open-slot insights for the weeks ahead"
+        },
+        "seatFiller": {
+          "title": "Seat Filler",
+          "body": "A cancellation opens a slot. Mova texts the right regulars in small waves and stops the moment it books.",
+          "point1": "First to book gets the spot",
+          "point2": "Everyone else gets a polite “just taken”"
+        },
+        "rebooking": {
+          "title": "Rebooking autopilot",
+          "body": "Regulars get a reminder when they are due back, sent from messages you approved once.",
+          "point1": "Only to clients who said yes",
+          "point2": "Stops when they book or opt out"
+        },
+        "marketing": {
+          "title": "Marketing",
+          "body": "Campaigns that fill open slots. Mova drafts them, you approve them.",
+          "point1": "Win-back messages you send yourself",
+          "point2": "Never sent without your OK"
+        },
+        "pricePilot": {
+          "title": "PricePilot",
+          "body": "Compares your menu with verified local prices and suggests a range and a price for each service.",
+          "point1": "Your prices stay your call",
+          "point2": "See where you sit against nearby menus"
+        },
+        "concierge": {
+          "title": "AI Concierge",
+          "body": "Answers texts, missed calls and your booking page while you’re behind the chair. Quotes, complaints and anything unusual come straight to you.",
+          "point1": "Always says it’s AI",
+          "point2": "Prices always come from you"
+        }
+      }
     },
     "pricing": {
       "headlineA": "Simple plans.",
