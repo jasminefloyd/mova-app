@@ -145,7 +145,7 @@ export function ReputationPage() {
       const reviewer = reviews.find((item) => item.id === replyId)?.display_name ?? '';
       setReplyId('');
       setReply('');
-      setNotice(result.emailed === 'sent' ? t('reviews.replyEmailed', { name: reviewer }) : t('reviews.replySaved'));
+      setNotice(result.emailed === 'sent' ? t('reviews.replyEmailed', { name: reviewer.replace(/\.$/, '') }) : t('reviews.replySaved'));
       await load();
     } catch {
       setNotice(t('reviews.saveError'));
@@ -242,7 +242,7 @@ export function ReputationPage() {
                 {replyId === review.id
                   ? <div className="mova-review-reply"><TextArea label={t('reviews.replyLabel')} value={reply} maxLength={2000} onChange={(event) => setReply(event.currentTarget.value)} />
                     {suggestLink(review.id, 'mova', setReply)}{suggestError && suggestedFor !== review.id && <p className="mova-review-suggest__error" role="alert">{suggestError}</p>}
-                    {replyEmailEnabled && <p className="mova-review-reply__note">{review.reply_emailed_at || review.artist_reply ? t('reviews.editNotEmailed') : t('reviews.willEmail', { name: review.display_name })}</p>}
+                    {replyEmailEnabled && <p className="mova-review-reply__note">{review.reply_emailed_at || review.artist_reply ? t('reviews.editNotEmailed') : t('reviews.willEmail', { name: review.display_name.replace(/\.$/, '') })}</p>}
                     <Button loading={busy} disabled={!reply.trim()} onClick={() => void saveReply()}>{t('reviews.saveReply')}</Button></div>
                   : review.artist_reply
                     ? <blockquote><strong>{t('reviews.yourReply')}</strong><p>{review.artist_reply}</p><div className="mova-review-reply-links"><button type="button" className="mova-link-button" onClick={() => startReply(review)}>{t('reviews.editReply')}</button></div></blockquote>
@@ -254,7 +254,6 @@ export function ReputationPage() {
               <blockquote className="mova-google-reply-quote"><div><strong>{googleReplyFor.display_name || t('reviews.googleReviewer')}</strong><span aria-label={t('reviews.stars', { count: googleReplyFor.rating })}>{'★'.repeat(googleReplyFor.rating)}{'☆'.repeat(5 - googleReplyFor.rating)}</span></div>{googleReplyFor.body && <p>{googleReplyFor.body}</p>}</blockquote>
               <TextArea label={t('google.reply.label')} value={googleReplyText} maxLength={4096} onChange={(event) => setGoogleReplyText(event.currentTarget.value)} />
               {suggestLink(googleReplyFor.id, 'google', setGoogleReplyText)}{suggestError && suggestedFor !== googleReplyFor.id && <p className="mova-review-suggest__error" role="alert">{suggestError}</p>}
-              <small>{googleReplyText.length}/4096</small>
               <p className="mova-google-reply-note">{t('google.reply.posts', { name: listingName ?? googleConnection?.google_account_email ?? '' })}</p>
               <Button loading={googleBusy} disabled={googleBusy || !googleReplyText.trim()} onClick={() => void postGoogleReply()}>{t('google.reply.post')}</Button>
             </div>}
