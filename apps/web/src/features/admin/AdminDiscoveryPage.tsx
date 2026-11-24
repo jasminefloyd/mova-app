@@ -1,24 +1,21 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { adminErrorText, adminRpc } from './admin-api';
 import { formatChange, formatCount, formatPercent } from './admin-format';
-import { Card, ErrorNote, Kpi, Loading, PageHead, Segmented } from './AdminPrimitives';
+import { Card, ErrorNote, Kpi, Loading, PageHead } from './AdminPrimitives';
 import type { Discovery, DiscoveryRow, GeographyRow, TrafficTotals } from './discovery-data';
 
-type Period = '24h' | '7d' | '28d' | '3mo' | 'custom';
-type DateRange = { start: string; end: string };
+import { AdminReportPeriodPicker, reportPeriodLabel, useAdminReportPeriod, type ReportPeriod } from './AdminReportPeriod';
+
 const rangeDate = new Intl.DateTimeFormat('en-US', {
   month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'UTC',
 });
 
-function useDiscovery(period: Period, range?: DateRange) {
+function useDiscovery(period: ReportPeriod) {
   return useQuery({
-    queryKey: ['admin', 'website-traffic', period, range],
-    queryFn: () => adminRpc<Discovery>('mova_admin_website_traffic', {
-      p_period: period,
-      ...(period === 'custom' && range ? { p_start: range.start, p_end: range.end } : {}),
-    }),
+    queryKey: ['admin', 'website-traffic', period],
+    queryFn: () => adminRpc<Discovery>('mova_admin_website_traffic', period),
   });
 }
 
@@ -80,10 +77,10 @@ const breakdowns: { kind: DiscoveryRow['kind']; title: string; column: string }[
   { kind: 'browser', title: 'Browsers', column: 'Browser' },
 ];
 
-export function AdminDiscoveryOverview() {
-  const traffic = useDiscovery('28d');
-  return <Card title="Discovery" aside={<Link className="link-sm" to="/admin/discovery">View discovery report</Link>}>
-    <p className="small muted">Last 28 days through now, compared with the previous 28 days.</p>
+export function AdminDiscoveryOverview({ period, search }: Pick<ReturnType<typeof useAdminReportPeriod>, 'period' | 'search'>) {
+  const traffic = useDiscovery(period);
+  return <Card title="Discovery" aside={<Link className="link-sm" to={{ pathname: '/admin/discovery', search }}>View discovery report</Link>}>
+    <p className="small muted">{reportPeriodLabel(period)}, compared with the preceding period.</p>
     {traffic.isPending && <Loading />}
     {traffic.isError && <div className="row"><ErrorNote message={adminErrorText(traffic.error)} /><button type="button" className="btn sm" onClick={() => void traffic.refetch()}>Retry traffic</button></div>}
     {traffic.data && <>
@@ -97,45 +94,14 @@ export function AdminDiscoveryOverview() {
 }
 
 export default function AdminDiscoveryPage() {
-  const [period, setPeriod] = useState<Period>('28d');
-  const [customOpen, setCustomOpen] = useState(false);
-  const [customRange, setCustomRange] = useState<DateRange>();
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [rangeError, setRangeError] = useState('');
-  const today = new Date().toISOString().slice(0, 10);
-  const traffic = useDiscovery(period, period === 'custom' ? customRange : undefined);
+  const report = useAdminReportPeriod();
+  const traffic = useDiscovery(report.period);
   const data = traffic.data;
 
-  function changePeriod(next: Period) {
-    setCustomOpen(next === 'custom');
-    setRangeError('');
-    if (next !== 'custom') setPeriod(next);
-  }
-
-  function applyCustom(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!from || !to || from > to || to > today) {
-      setRangeError('Choose a start and end date in order, ending today or earlier.');
-      return;
-    }
-    setRangeError('');
-    setCustomRange({ start: from, end: to });
-    setPeriod('custom');
-  }
   return <>
     <PageHead title="Discovery" sub="Website traffic and verified stylist signups"
-      actions={<Link className="btn sm" to="/admin">Overview</Link>} />
-    <Segmented<Period> label="Traffic period" value={customOpen ? 'custom' : period} onChange={changePeriod} options={[
-      { value: '24h', label: 'Last 24 hours' }, { value: '7d', label: '7 days' }, { value: '28d', label: '28 days' },
-      { value: '3mo', label: '3 months' }, { value: 'custom', label: 'Custom' },
-    ]} />
-    {customOpen && <form className="row toolbar-form" onSubmit={applyCustom}>
-      <label className="field"><span className="lbl">Start date (UTC)</span><input className="input" type="date" value={from} max={today} required onChange={event => setFrom(event.target.value)} /></label>
-      <label className="field"><span className="lbl">End date (UTC)</span><input className="input" type="date" value={to} max={today} required onChange={event => setTo(event.target.value)} /></label>
-      <button type="submit" className="btn sm">Apply range</button>
-      {rangeError && <ErrorNote message={rangeError} />}
-    </form>}
+      actions={<Link className="btn sm" to={{ pathname: '/admin', search: report.search }}>Overview</Link>} />
+    <AdminReportPeriodPicker {...report} />
     {traffic.isPending && <Loading />}
     {traffic.isError && <div className="row"><ErrorNote message={adminErrorText(traffic.error)} /><button type="button" className="btn sm" onClick={() => void traffic.refetch()}>Retry traffic</button></div>}
     {data && <>

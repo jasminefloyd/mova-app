@@ -1,14 +1,13 @@
-import { useState } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { adminErrorText, adminRpc, type Overview, type OverviewWindow } from './admin-api';
 import { downloadText, formatChange, formatCount, formatMoneyWhole, formatPercent, isoWeekLabel, toCsv } from './admin-format';
-import { Card, ErrorNote, Kpi, Loading, PageHead, Segmented } from './AdminPrimitives';
+import { Card, ErrorNote, Kpi, Loading, PageHead } from './AdminPrimitives';
 
 import { AdminDiscoveryOverview } from './AdminDiscoveryPage';
 import { AdminActivation, AdminSubscriptionMetrics } from './AdminGrowthMetrics';
 
-type WindowKey = '7' | '30' | '90';
+import { AdminReportPeriodPicker, reportPeriodLabel, useAdminReportPeriod } from './AdminReportPeriod';
 
 const kpis: { key: keyof OverviewWindow; label: string; money?: boolean; percentage?: boolean; note?: string }[] = [
   { key: 'active_stylists', label: 'Active stylists' },
@@ -28,10 +27,12 @@ const nudgeReason: Record<Overview['needs_nudge']['items'][number]['reason'], st
 };
 
 export default function AdminOverviewPage() {
-  const [days, setDays] = useState<WindowKey>('30');
+  const report = useAdminReportPeriod();
+  const { period } = report;
+  const periodLabel = reportPeriodLabel(period);
   const overview = useQuery({
-    queryKey: ['admin', 'overview', days],
-    queryFn: () => adminRpc<Overview>('mova_admin_overview', { p_days: Number(days) }),
+    queryKey: ['admin', 'overview', period],
+    queryFn: () => adminRpc<Overview>('mova_admin_overview_for_period', period),
   });
 
   function exportCsv() {
@@ -40,17 +41,18 @@ export default function AdminOverviewPage() {
     const rows = kpis.map(kpi => kpi.percentage
       ? [kpi.label, formatPercent(data.current.no_shows, data.current.appointments_due, 1), formatPercent(data.prior.no_shows, data.prior.appointments_due, 1)]
       : [kpi.label, data.current[kpi.key], data.prior[kpi.key]]);
-    downloadText(`mova-overview-${days}d.csv`, toCsv(['Metric', `Last ${days} days`, 'Prior period'], rows));
+    const suffix = period.p_period === 'custom' ? `${period.p_start}-to-${period.p_end}` : period.p_period;
+    downloadText(`mova-overview-${suffix}.csv`, toCsv(['Metric', periodLabel, 'Prior period'], rows));
   }
 
-  const periodWord = days === '7' ? 'week' : days === '30' ? 'month' : 'quarter';
   return (
     <>
       <PageHead
         title="Overview"
-        sub={`How Mova is doing across every stylist. Last ${days} days, compared with the ${days} days before.`}
-        actions={<><Segmented label="Period" value={days} onChange={setDays} options={[{ value: '7', label: '7 days' }, { value: '30', label: '30 days' }, { value: '90', label: '90 days' }]} /><button type="button" className="btn sm" onClick={exportCsv} disabled={!overview.data}>Export</button></>}
+        sub={`${periodLabel}, compared with the preceding period.`}
+        actions={<button type="button" className="btn sm" onClick={exportCsv} disabled={!overview.data}>Export</button>}
       />
+      <AdminReportPeriodPicker {...report} />
       <ErrorNote message={overview.isError ? adminErrorText(overview.error) : null} />
       {overview.isPending ? <Loading /> : null}
       {overview.data ? (() => {
@@ -66,8 +68,8 @@ export default function AdminOverviewPage() {
         return <>
           <section className="northstar" aria-label="North star metric">
             <div><div className="eyebrow">North star</div><div className="northstar__label">Completed appointments per active stylist</div>
-              <div className="value">{formatCount(Math.round(perStylist(o.current) * 10) / 10)}<small> / {periodWord}</small></div>
-              <div className="small"><span className={star.direction === 'down' ? 'down' : 'up'}>{star.text}</span> vs prior {days} days · {formatCount(o.current.completed)} completed · {formatCount(o.current.active_stylists)} active</div>
+              <div className="value">{formatCount(Math.round(perStylist(o.current) * 10) / 10)}</div>
+              <div className="small"><span className={star.direction === 'down' ? 'down' : 'up'}>{star.text}</span> vs prior period · {formatCount(o.current.completed)} completed · {formatCount(o.current.active_stylists)} active</div>
             </div>
             {points.length > 1 ? <svg className="northstar__trend" viewBox="0 0 400 60" preserveAspectRatio="none" role="img" aria-label="Weekly active stylists trend"><path d={`${line} L400 60 L0 60 Z`} className="area" /><path d={line} className="stroke" /></svg> : <span />}
           </section>
@@ -122,9 +124,9 @@ export default function AdminOverviewPage() {
           </div>
         </>;
       })() : null}
-      <AdminDiscoveryOverview />
+      <AdminDiscoveryOverview period={period} search={report.search} />
       <AdminActivation />
-      <AdminSubscriptionMetrics days={Number(days)} />
+      <AdminSubscriptionMetrics period={period} />
     </>
   );
 }

@@ -8,19 +8,27 @@ test('Overview reports corrected rates, activation, subscriptions, and Discovery
   const landing = { kind: 'landing', label: '/calculator', sessions: 10, visitors: 8, signups: 2, converted: 2 };
   const ad = { ...landing, kind: 'campaign', label: 'aig_pp_search / pricepilot', sessions: 14 };
   const traffic = { visitors: 8, sessions: 14, identified_sessions: 12, new_users: 6, returning_users: 2, page_views: 18, signup_clicks: 3, signups: 2, converted: 2 };
-  const periods: unknown[] = [];
+  const overviewPeriods: unknown[] = [];
+  const subscriptionPeriods: unknown[] = [];
+  const trafficPeriods: unknown[] = [];
   await mockAdminApi(page, {
     isAdmin: true, signedIn: true,
     rpc: {
-      mova_admin_overview: () => ({ current, prior: current, weekly_active: [], top_stylists: [], needs_nudge: { quiet: 0, items: [] }, language: { en_us: 0, es_us: 0 } }),
+      mova_admin_overview_for_period: body => {
+        overviewPeriods.push(body);
+        return { current, prior: current, weekly_active: [], top_stylists: [], needs_nudge: { quiet: 0, items: [] }, language: { en_us: 0, es_us: 0 } };
+      },
       mova_admin_activation: () => [{ cohort: '2026-11-01', verified: 4, published: 3, published_hours: 12, booked: 2, booked_hours: 30, completed: 1, completed_hours: 72 }],
-      mova_admin_subscription_summary: () => ({
+      mova_admin_subscription_summary_for_period: body => {
+        subscriptionPeriods.push(body);
+        return {
         plans: { free: 3, pro: 1 }, mrr_minor: 1900, paid_subscriptions: 1, active_trials: 0, expiring_trials: 0, trials_converted: 1,
         trials_resolved: 2, past_due: 0, pending_cancellations: 0, billing_events: { payment_failures: 1, cancellations: 0 },
-        deletion_requests: 0, open_deletion_requests: 0,
-      }),
+          deletion_requests: 0, open_deletion_requests: 0,
+        };
+      },
       mova_admin_website_traffic: body => {
-        periods.push(body);
+        trafficPeriods.push(body);
         return { start: '2026-10-28T15:00:00Z', through: '2026-11-24T15:00:00Z', current: traffic, prior: traffic,
           breakdown: [landing, ad, { ...ad, kind: 'device', label: 'Mobile' }, { ...ad, kind: 'country', label: 'US' }],
           geography: [
@@ -38,25 +46,41 @@ test('Overview reports corrected rates, activation, subscriptions, and Discovery
   await expect(page.locator('.kpi').filter({ hasText: 'Monthly recurring revenue' })).toContainText('$19');
   await expect(page.getByRole('heading', { name: 'Growth funnel' })).toHaveCount(0);
   await expect(page.getByText('Returning visitors', { exact: true })).toHaveCount(0);
+  const filter = page.getByRole('group', { name: 'Report period' });
+  const options = ['Last 24 hours', '7 days', '14 days', '28 days', 'Custom'];
+  await expect(filter.getByRole('button')).toHaveText(options);
+  await expect(filter.getByRole('button', { name: '28 days' })).toHaveAttribute('aria-pressed', 'true');
+  await filter.getByRole('button', { name: '14 days' }).click();
+  for (const periods of [overviewPeriods, subscriptionPeriods, trafficPeriods]) {
+    await expect.poll(() => periods).toContainEqual({ p_period: '14d' });
+  }
   await page.getByRole('link', { name: 'View discovery report' }).click();
   await expect(page.getByRole('heading', { name: 'Discovery', exact: true })).toBeVisible();
+  await expect(filter.getByRole('button')).toHaveText(options);
+  await expect(filter.getByRole('button', { name: '14 days' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByText('Returning visitors', { exact: true })).toBeVisible();
   await expect(page.getByRole('row').filter({ hasText: 'aig_pp_search / pricepilot' })).toContainText('14.3%');
   await expect(page.getByRole('rowheader', { name: 'Brooklyn, NY, USA' })).toBeVisible();
   await expect(page.getByRole('rowheader', { name: 'Canada', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Last 24 hours', exact: true }).click();
-  await expect.poll(() => periods).toContainEqual({ p_period: '24h' });
-  await page.getByRole('button', { name: '3 months', exact: true }).click();
-  await expect.poll(() => periods).toContainEqual({ p_period: '3mo' });
+  await expect.poll(() => trafficPeriods).toContainEqual({ p_period: '24h' });
   await page.getByRole('button', { name: 'Custom', exact: true }).click();
   await page.getByLabel('Start date (UTC)').fill('2026-11-01');
   await page.getByLabel('End date (UTC)').fill('2026-11-20');
   await page.getByRole('button', { name: 'Apply range' }).click();
-  await expect.poll(() => periods).toContainEqual({ p_period: 'custom', p_start: '2026-11-01', p_end: '2026-11-20' });
+  const custom = { p_period: 'custom', p_start: '2026-11-01', p_end: '2026-11-20' };
+  await expect.poll(() => trafficPeriods).toContainEqual(custom);
   await expect(page.getByRole('heading', { name: 'Google Search' })).toHaveCount(0);
   await expect(page.getByRole('row').filter({ hasText: '/calculator' }).filter({ hasText: '20.0%' }).first()).toBeVisible();
   await expect(page.locator('.kpi').filter({ hasText: 'Calculator uses' })).toContainText('8');
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole('columnheader', { name: 'Page views' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  await page.getByRole('link', { name: 'Overview', exact: true }).filter({ hasText: /^Overview$/ }).last().click();
+  await expect(filter.getByRole('button', { name: 'Custom' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByLabel('Start date (UTC)')).toHaveValue('2026-11-01');
+  await expect(page.getByLabel('End date (UTC)')).toHaveValue('2026-11-20');
+  for (const periods of [overviewPeriods, subscriptionPeriods]) {
+    await expect.poll(() => periods).toContainEqual(custom);
+  }
 });

@@ -129,7 +129,6 @@ export type OverviewWindow = {
 };
 
 export type Overview = {
-  days: number;
   current: OverviewWindow;
   prior: OverviewWindow;
   weekly_active: { week: string; stylists: number }[];
