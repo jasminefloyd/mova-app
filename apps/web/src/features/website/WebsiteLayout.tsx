@@ -7,7 +7,7 @@ import { JsonLd, SiteShellContext } from './parts';
 import { localeFromUrl, publicBaseUrl, siteGraph, type ShellData } from './seo';
 import { WebsiteFooter } from './WebsiteFooter';
 import { WebsiteNav } from './WebsiteNav';
-import { installGoogleAdsTag } from './google-ads';
+import { installGoogleTagManager } from './google-tag-manager';
 import { trackDiscoveryPage, trackDiscoverySignupClick } from './discovery-analytics';
 import './website.css';
 
@@ -27,7 +27,7 @@ let browserLocaleSynced = false;
 
 export default function WebsiteLayout() {
   const shell = useLoaderData<typeof loader>();
-  useEffect(installGoogleAdsTag, []);
+  useEffect(installGoogleTagManager, []);
   const { pathname, key } = useLocation();
   useEffect(() => trackDiscoveryPage(pathname, key), [pathname, key]);
   const onServer = typeof document === 'undefined';

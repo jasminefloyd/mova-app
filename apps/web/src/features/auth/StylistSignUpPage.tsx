@@ -7,7 +7,7 @@ import { CheckEmailPanel } from './CheckEmailPanel';
 import { sendStylistEmailCode } from './email-code';
 import { trialMarketingEnabled } from '../../lib/env';
 import { completeCalculatorSignup } from '../website/calculator-analytics';
-import { installGoogleAdsTag, trackGoogleAdsSignup } from '../website/google-ads';
+import { installGoogleTagManager, trackTagManagerSignup } from '../website/google-tag-manager';
 import { discoverySignupVisit, trackDiscoveryPage } from '../website/discovery-analytics';
 import './stylist-auth.css';
 
@@ -29,7 +29,7 @@ export default function StylistSignUpPage() {
   const [searchParams] = useSearchParams();
   const signupStartedAt = useRef<number | null>(null);
   const navigate = useNavigate();
-  useEffect(installGoogleAdsTag, []);
+  useEffect(installGoogleTagManager, []);
   const { key } = useLocation();
   useEffect(() => trackDiscoveryPage('/signup', key), [key]);
 
@@ -45,7 +45,7 @@ export default function StylistSignUpPage() {
     if (verifyError) return false;
     if (!data.session || !data.user) return false;
     if (searchParams.get('from') === 'calculator') completeCalculatorSignup(signupStartedAt.current, data.user.created_at);
-    trackGoogleAdsSignup(signupStartedAt.current, data.user);
+    trackTagManagerSignup(signupStartedAt.current, data.user);
     navigate('/auth/confirm?returnTo=%2Fonboarding%2Fprofile', { replace: true });
     return true;
   };

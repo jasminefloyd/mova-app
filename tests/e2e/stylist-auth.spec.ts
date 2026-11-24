@@ -120,7 +120,7 @@ test.describe('stylist sign-up (/signup)', () => {
   }
 
   for (const newAccount of [true, false]) {
-    test(`Google Ads counts ${newAccount ? 'a verified new signup once' : 'no conversion for a returning account'}`, async ({ page, baseURL }) => {
+    test(`Tag Manager queues ${newAccount ? 'a verified new signup once' : 'no conversion for a returning account'}`, async ({ page, baseURL }) => {
       // Serve the local build on the production origin in Chromium. All auth and Google requests are mocked.
       const origin = 'https://mova-beauty.co';
       await page.route(`${origin}/**`, async (route) => {
@@ -135,16 +135,19 @@ test.describe('stylist sign-up (/signup)', () => {
         ...session(), user: { ...user, created_at: newAccount ? new Date().toISOString() : user.created_at },
       } : { code: 'otp_expired', msg: 'Invalid email code' }));
       const commands = () => page.evaluate(() => {
-        const layer = (window as Window & { dataLayer?: IArguments[] }).dataLayer ?? [];
-        return layer.map(entry => Array.from(entry));
+        const layer = (window as Window & { dataLayer?: Array<IArguments | Record<string, unknown>> }).dataLayer ?? [];
+        return layer.map(entry => 'length' in entry ? Array.from(entry as IArguments) : entry);
       });
-      const conversions = async () => (await commands()).filter(([command, event]) => command === 'event' && event === 'conversion');
+      const conversions = async () => (await commands()).filter(entry => !Array.isArray(entry) && entry['event'] === 'mova_stylist_signup');
 
       await page.goto(origin + '/');
-      await expect(page.locator('script[src*="gtag/js?id=AW-1006543418"]')).toHaveCount(1);
+      await expect(page.locator('script[src*="gtm.js?id=GTM-KT7RSDNS"]')).toHaveCount(1);
       await page.goto(origin + '/signup');
-      await expect(page.locator('script[src*="gtag/js?id=AW-1006543418"]')).toHaveCount(1);
-      expect(await commands()).toContainEqual(['config', 'AW-1006543418', { allow_ad_personalization_signals: false }]);
+      await expect(page.locator('script[src*="gtm.js?id=GTM-KT7RSDNS"]')).toHaveCount(1);
+      await expect(page.locator('script[src*="googletagmanager.com/gtag/js"]')).toHaveCount(0);
+      const queued = await commands();
+      expect(queued).toContainEqual(['set', 'allow_ad_personalization_signals', false]);
+      expect(queued).toContainEqual(expect.objectContaining({ event: 'gtm.js', 'gtm.start': expect.any(Number) }));
       await page.getByLabel('First name').fill('Ari');
       await page.getByLabel('Last name').fill('Monroe');
       await page.getByLabel('Email', { exact: true }).fill(user.email);
@@ -160,9 +163,9 @@ test.describe('stylist sign-up (/signup)', () => {
       await code.fill('123456');
       await expect(page).toHaveURL(/\/onboarding\/profile$/);
       expect(await conversions()).toEqual(newAccount ? [
-        ['event', 'conversion', { send_to: 'AW-1006543418/ZXZkCPODpL4dELrE-t8D', value: 1.0, currency: 'USD' }],
+        { event: 'mova_stylist_signup', value: 1.0, currency: 'USD' },
       ] : []);
-      expect(await page.evaluate(id => localStorage.getItem('mova_google_ads_signup:' + id), userId))
+      expect(await page.evaluate(id => localStorage.getItem('mova_gtm_signup:' + id), userId))
         .toBe(newAccount ? '1' : null);
     });
   }
