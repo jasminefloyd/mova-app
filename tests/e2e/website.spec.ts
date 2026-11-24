@@ -42,7 +42,7 @@ test.describe('public website', () => {
     await expect(page.getByRole('link', { name: 'booth rent vs. commission calculator' })).toHaveAttribute('href', '/calculator');
   });
 
-  test('calculator computes the weekly comparison and explains bad input', async ({ page }) => {
+  test('calculator compares commission, booth and suite and explains bad input', async ({ page }) => {
     const events: Array<string | null> = [];
     await page.route('**/api/calculator-event', (route) => {
       events.push(route.request().postData());
@@ -50,20 +50,28 @@ test.describe('public website', () => {
     });
     await page.goto('/calculator');
     await expect(page).toHaveTitle('Booth Rent vs. Commission Calculator for Hairstylists | Mova');
-    await expect(page.getByRole('heading', { level: 1, name: 'Booth Rent vs. Commission Calculator for Hairstylists' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Example: a 60/40 salon commission split' })).toBeVisible();
-    await expect(page.getByText(/^At \$750 in weekly service revenue/)).toBeVisible();
-    await expect(page.getByText('Booth rental: $300 more per week')).toBeVisible();
-    await expect(page.getByText('About $15,600 a year, if every week looked like this one.')).toBeVisible();
-    await page.getByLabel('Service revenue per week ($)').fill('1000');
-    await page.getByLabel('Booth or suite rent per week ($)').fill('600');
-    await expect(page.getByText('Commission: $200 more per week')).toBeVisible();
-    await expect(page.getByText(/^At \$1,500 in weekly service revenue/)).toBeVisible();
-    await page.getByLabel('Salon\'s commission cut (%)').fill('150');
-    await expect(page.getByRole('alert')).toHaveText('Commission cut must be between 0 and 100%.');
-    await page.getByLabel('Your own expenses per week ($)').fill('');
-    await expect(page.getByRole('alert')).toHaveText('Fill in every number to see your results.');
-    await page.locator('a[href="/signup?from=calculator"]').click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Commission, booth or suite? See what you really keep.' })).toBeVisible();
+    // The board week: booth wins on cash, commission wins once the salon's perks count.
+    const results = page.locator('#results');
+    await expect(results.getByText('$41,156')).toBeVisible();
+    await expect(results.getByText('Close call. It depends on the perks.')).toBeVisible();
+    await expect(results.getByText(/Booth rental pays \$1,275 more a year in cash\. .* commission comes out \$1,605 ahead\./)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Where every dollar goes' })).toBeVisible();
+    await expect(page.getByText(/Above \$1,386 a week in services, booth pays more than commission/)).toBeVisible();
+
+    await page.getByLabel('Service revenue per week').fill('1000');
+    await expect(results.getByText('Commission keeps the most')).toBeVisible();
+
+    await page.getByRole('button', { name: /Commission costs/ }).click();
+    await page.getByLabel('Salon’s commission cut').fill('150');
+    await expect(page.getByRole('alert')).toHaveText('Percentages must be between 0 and 100.');
+    await page.getByLabel('Salon’s commission cut').fill('40');
+    await page.getByRole('button', { name: /Your income/ }).click();
+    await page.getByLabel('Service revenue per week').fill('');
+    await expect(page.getByRole('alert')).toHaveText('Fill in your weekly service revenue and hours to see results.');
+    await page.getByLabel('Service revenue per week').fill('1500');
+
+    await page.getByRole('link', { name: 'Start free for 30 days' }).click();
     await expect(page).toHaveURL(/\/signup\?from=calculator$/);
     await expect.poll(() => events).toEqual(['calculator_used', 'start_free_clicked']);
   });
