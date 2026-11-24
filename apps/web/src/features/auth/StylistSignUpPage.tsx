@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { createMovaSupabaseClient } from '../../lib/supabase';
@@ -7,6 +7,7 @@ import { CheckEmailPanel } from './CheckEmailPanel';
 import { sendStylistEmailCode } from './email-code';
 import { trialMarketingEnabled } from '../../lib/env';
 import { completeCalculatorSignup } from '../website/calculator-analytics';
+import { installGoogleAdsTag, trackGoogleAdsSignup } from '../website/google-ads';
 import './stylist-auth.css';
 
 function FeatureIcon({ children }: { children: ReactNode }) {
@@ -25,8 +26,9 @@ export default function StylistSignUpPage() {
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
   const [searchParams] = useSearchParams();
-  const calculatorSignupStartedAt = useRef<number | null>(null);
+  const signupStartedAt = useRef<number | null>(null);
   const navigate = useNavigate();
+  useEffect(installGoogleAdsTag, []);
 
   // "Start free" in the pitch scrolls down to the form and puts the cursor in First name.
   const startFree = () => {
@@ -38,15 +40,18 @@ export default function StylistSignUpPage() {
     if (!supabase) return false;
     const { data, error: verifyError } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: 'email' });
     if (verifyError) return false;
-    if (data?.session) completeCalculatorSignup(calculatorSignupStartedAt.current, data.user?.created_at);
+    if (!data.session || !data.user) return false;
+    if (searchParams.get('from') === 'calculator') completeCalculatorSignup(signupStartedAt.current, data.user.created_at);
+    trackGoogleAdsSignup(signupStartedAt.current, data.user);
     navigate('/auth/confirm?returnTo=%2Fonboarding%2Fprofile', { replace: true });
     return true;
   };
 
   const send = async () => {
     if (!supabase) return false;
-    if (searchParams.get('from') === 'calculator') calculatorSignupStartedAt.current ??= Date.now();
+    const startedAt = Date.now();
     const result = await sendStylistEmailCode(supabase, { email, create: true, firstName, lastName, locale: 'en-US' });
+    if (result.ok) signupStartedAt.current ??= startedAt;
     return result.ok;
   };
 
@@ -101,7 +106,7 @@ export default function StylistSignUpPage() {
             {[0, 1, 2, 3, 4, 5].map((index) => <span key={index} className={index === 0 ? 'is-current' : undefined} />)}
           </div>
           <span className="stylist-auth__step">{t('stylistAuth.signUp.step')}</span>
-          <CheckEmailPanel email={email.trim()} onResend={send} onVerify={verify} onChangeEmail={() => { calculatorSignupStartedAt.current = null; setSent(false); }} />
+          <CheckEmailPanel email={email.trim()} onResend={send} onVerify={verify} onChangeEmail={() => { signupStartedAt.current = null; setSent(false); }} />
         </div> : <form className="stylist-auth__form-column" onSubmit={(event) => void submit(event)}>
           <div className="stylist-auth__progress" aria-hidden="true">
             {[0, 1, 2, 3, 4, 5].map((index) => <span key={index} className={index === 0 ? 'is-current' : undefined} />)}

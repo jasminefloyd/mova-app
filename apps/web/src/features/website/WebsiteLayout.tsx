@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { Outlet, useLoaderData } from 'react-router';
 import type { LoaderFunctionArgs } from 'react-router';
@@ -7,6 +7,7 @@ import { JsonLd, SiteShellContext } from './parts';
 import { localeFromUrl, publicBaseUrl, siteGraph, type ShellData } from './seo';
 import { WebsiteFooter } from './WebsiteFooter';
 import { WebsiteNav } from './WebsiteNav';
+import { installGoogleAdsTag } from './google-ads';
 import './website.css';
 
 // Route module for the public website. Google Fonts is the only stylesheet we load from outside.
@@ -25,6 +26,7 @@ let browserLocaleSynced = false;
 
 export default function WebsiteLayout() {
   const shell = useLoaderData<typeof loader>();
+  useEffect(installGoogleAdsTag, []);
   const onServer = typeof document === 'undefined';
   // On the server each request gets its own i18n copy, so a Spanish request is rendered in Spanish
   // without changing the language for anyone else.

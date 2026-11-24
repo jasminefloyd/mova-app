@@ -17,7 +17,9 @@
 
 ## Current audit work log
 
-- 2026-11-23 admin stylist detail returned HTTP 405 because PostgREST ran the `STABLE` RPC in a read-only transaction and the function inserts a view audit record. Migration 0117 marks the existing function `VOLATILE` and reloads the PostgREST schema cache. Local PostgREST reproduced HTTP 405 / SQLSTATE 25006 before the migration and returned HTTP 200 with the expected detail and one audit record afterward. All 75 pgTAP files passed (1,363 assertions), including stylist and non-MFA access denials. `pnpm fn:check` passed. Production migration awaits approval.
+- 2026-11-23 admin stylist detail returned HTTP 405 because PostgREST ran the `STABLE` RPC in a read-only transaction and the function inserts a view audit record. Migration 0117 marks the existing function `VOLATILE` and reloads the PostgREST schema cache. Local PostgREST reproduced HTTP 405 / SQLSTATE 25006 before the migration and returned HTTP 200 with the expected detail and one audit record afterward. All 75 pgTAP files passed (1,363 assertions), including stylist and non-MFA access denials. `pnpm fn:check` passed. Applied 0117 to production with owner approval and verified the recorded version and function volatility.
+
+- 2026-11-23 Google Ads sign-up measurement loads the supplied Google tag on the production marketing and stylist sign-up pages. It records the supplied USD 1.00 conversion after a new stylist verifies their email code. Focused browser checks intercept the tag and Auth requests to avoid sending test conversions.
 
 - 2026-11-23 review replies (RV-D2) add review-specific Claude Haiku 5.5 and GPT-6 Luna model settings and support both providers’ current API parameters.
 

@@ -90,6 +90,54 @@ test.describe('stylist sign-up (/signup)', () => {
     });
   }
 
+  for (const newAccount of [true, false]) {
+    test(`Google Ads counts ${newAccount ? 'a verified new signup once' : 'no conversion for a returning account'}`, async ({ page, baseURL }) => {
+      // Serve the local build on the production origin in Chromium. All auth and Google requests are mocked.
+      const origin = 'https://mova-beauty.co';
+      await page.route(`${origin}/**`, async (route) => {
+        const url = new URL(route.request().url());
+        const response = await route.fetch({ url: new URL(url.pathname + url.search, baseURL).href });
+        return route.fulfill({ response });
+      });
+      await page.route('https://www.googletagmanager.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
+      await mockAuth(page);
+      let valid = false;
+      await page.route('**/auth/v1/verify', (route) => json(route, valid ? 200 : 403, valid ? {
+        ...session(), user: { ...user, created_at: newAccount ? new Date().toISOString() : user.created_at },
+      } : { code: 'otp_expired', msg: 'Invalid email code' }));
+      const commands = () => page.evaluate(() => {
+        const layer = (window as Window & { dataLayer?: IArguments[] }).dataLayer ?? [];
+        return layer.map(entry => Array.from(entry));
+      });
+      const conversions = async () => (await commands()).filter(([command, event]) => command === 'event' && event === 'conversion');
+
+      await page.goto(origin + '/');
+      await expect(page.locator('script[src*="gtag/js?id=AW-1006543418"]')).toHaveCount(1);
+      await page.goto(origin + '/signup');
+      await expect(page.locator('script[src*="gtag/js?id=AW-1006543418"]')).toHaveCount(1);
+      expect(await commands()).toContainEqual(['config', 'AW-1006543418', { allow_ad_personalization_signals: false }]);
+      await page.getByLabel('First name').fill('Ari');
+      await page.getByLabel('Last name').fill('Monroe');
+      await page.getByLabel('Email', { exact: true }).fill(user.email);
+      await page.getByRole('button', { name: 'Create account' }).click();
+      expect(await conversions()).toEqual([]);
+      const code = page.locator('input[autocomplete="one-time-code"]');
+      const failed = page.waitForResponse(response => response.url().includes('/auth/v1/verify') && response.status() === 403);
+      await code.fill('000000');
+      await failed;
+      expect(await conversions()).toEqual([]);
+
+      valid = true;
+      await code.fill('123456');
+      await expect(page).toHaveURL(/\/onboarding\/profile$/);
+      expect(await conversions()).toEqual(newAccount ? [
+        ['event', 'conversion', { send_to: 'AW-1006543418/ZXZkCPODpL4dELrE-t8D', value: 1.0, currency: 'USD' }],
+      ] : []);
+      expect(await page.evaluate(id => localStorage.getItem('mova_google_ads_signup:' + id), userId))
+        .toBe(newAccount ? '1' : null);
+    });
+  }
+
   test('anyone can create an account: no invite or waitlist gate', async ({ page }) => {
     await page.goto('/signup');
     await expect(page.getByRole('heading', { level: 1, name: 'Create your account' })).toBeVisible();
