@@ -16,7 +16,7 @@ const plans = [
 const includedFeatures = {
   free: ['page', 'calendar', 'unlimited', 'clientNotes', 'guestBooking', 'payments', 'bookingEmail', 'languages', 'basicReports', 'privateReviews'],
   pro: ['publicReviews', 'advancedReports', 'textAutopilot', 'textReminders', 'rebookingAssist', 'googleCalendar', 'customCover'],
-  growth: ['seatFiller', 'rebookingAutopilot', 'concierge', 'instagramConcierge', 'walletCard', 'revenueCenter', 'missedCallTextback'],
+  growth: ['seatFiller', 'rebookingAutopilot', 'aiPricePilot', 'concierge', 'instagramConcierge', 'walletCard', 'revenueCenter', 'missedCallTextback'],
 } as const;
 
 const rolloutVisibility: Readonly<Record<string, boolean>> = {
@@ -62,7 +62,6 @@ export default function PricingPage() {
           <div className="mova-site__plan-features">
             <p className="mova-site__feature-heading">{t('website.pricing.includedTitle')}</p>
             <ul>{includedFeatures[key].filter((feature) => rolloutVisibility[feature] ?? true).map((feature) => <li key={feature}>{t(`website.pricing.features.${feature}`)}</li>)}</ul>
-            {key === 'growth' && <p className="mova-site__coming-soon"><span>{t('website.pricing.comingSoon')}</span> {t('website.pricing.features.aiPricePilot')}</p>}
           </div>
           <ButtonLink to="/signup" variant={featured ? 'peach' : 'plan'}>{t(trialMarketingEnabled ? 'website.pricing.startTrial' : 'website.pricing.startFree')}</ButtonLink>
         </article>)}
