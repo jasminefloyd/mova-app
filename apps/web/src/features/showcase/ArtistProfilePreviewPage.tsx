@@ -14,7 +14,7 @@ type ServiceLocationRow = { service_id: string; location_id: string; price_minor
 type PortfolioRow = { id: string; media_path: string; alt_text: string; sort_order: number };
 
 export function ArtistProfilePreviewPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { client, businessId, loading: identityLoading } = useArtistBusiness();
   const [artist, setArtist] = useState<PublicArtist | null>(null);
@@ -97,7 +97,7 @@ export function ArtistProfilePreviewPage() {
   return <div className="mova-profile-preview">
     <ScreenHeader onBack={() => navigate(operatorUrl(businessId, 'settings'))} backLabel={t('settings.close')} />
     <HonestyBanner tone="warm">{t('showcase.previewOnly')}</HonestyBanner>
-    <PublicArtistPage initialArtist={artist} preview handleOverride={artist.profile.handle} initialLocale={i18n.resolvedLanguage === 'es-US' ? 'es-US' : 'en-US'} />
+    <PublicArtistPage initialArtist={artist} preview handleOverride={artist.profile.handle} />
   </div>;
 }
 

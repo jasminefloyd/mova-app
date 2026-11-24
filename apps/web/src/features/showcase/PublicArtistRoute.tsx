@@ -1,16 +1,15 @@
 import { useLoaderData } from 'react-router';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
+import { PUBLIC_PROFILE_LOCALE as locale } from '../../app/locale';
 import { PublicArtistPage } from './PublicArtistPage';
 import type { PublicArtist } from './PublicArtistPage';
 import { artistSchema } from './artist-schema';
 import { JsonLd } from '../website/parts';
 
-export async function loader({ params, request }: LoaderFunctionArgs) {
+export async function loader({ params }: LoaderFunctionArgs) {
   const env = typeof process !== 'undefined' ? process.env : undefined;
   const supabaseUrl = env?.SUPABASE_URL ?? env?.VITE_SUPABASE_URL;
   const anonKey = env?.SUPABASE_ANON_KEY ?? env?.VITE_SUPABASE_ANON_KEY;
-  const url = new URL(request.url);
-  const locale = url.searchParams.get('locale') === 'es-US' ? 'es-US' : 'en-US';
   if (!supabaseUrl || !anonKey || !params.handle) throw new Response('Public artist service is not configured', { status: 503 });
   const publicBaseUrl = ((env?.PUBLIC_BASE_URL) || 'https://mova-beauty.co').replace(/\/$/, '');
   const response = await fetch(`${supabaseUrl}/functions/v1/public-artist`, {
@@ -20,7 +19,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   if (!response.ok) throw new Response('Artist not found', { status: response.status });
   const envelope = await response.json() as { data?: PublicArtist };
   if (!envelope.data) throw new Response('Artist not found', { status: 404 });
-  return { artist: envelope.data, locale, publicBaseUrl };
+  return { artist: envelope.data, publicBaseUrl };
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -28,7 +27,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const artist = data.artist;
   const description = artist.profile.bio || artist.profile.specialties.join(', ');
   const canonical = `${data.publicBaseUrl}/a/${encodeURIComponent(artist.profile.handle)}`;
-  const hrefFor = (locale: string) => `${canonical}?locale=${locale}`;
   return [
     { title: `Mova Beauty | ${artist.profile.display_name}` },
     { name: 'description', content: description },
@@ -43,16 +41,13 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
         : artist.profile.photo_urls.profile?.['512'] ? [{ property: 'og:image', content: artist.profile.photo_urls.profile['512'] }] : []),
     ...(!artist.profile.search_index_enabled ? [{ name: 'robots', content: 'noindex,follow' }] : []),
     { tagName: 'link', rel: 'canonical', href: canonical },
-    { tagName: 'link', rel: 'alternate', hrefLang: 'en-US', href: hrefFor('en-US') },
-    { tagName: 'link', rel: 'alternate', hrefLang: 'es-US', href: hrefFor('es-US') },
-    { tagName: 'link', rel: 'alternate', hrefLang: 'x-default', href: hrefFor('en-US') },
   ];
 };
 
 export default function Route() {
-  const { artist, locale, publicBaseUrl } = useLoaderData<typeof loader>();
+  const { artist, publicBaseUrl } = useLoaderData<typeof loader>();
   return <>
-    <JsonLd data={artistSchema({ artist, publicBaseUrl, locale: locale === 'es-US' ? 'es-US' : 'en-US' })} />
+    <JsonLd data={artistSchema({ artist, publicBaseUrl, locale })} />
     <PublicArtistPage initialArtist={artist} />
   </>;
 }

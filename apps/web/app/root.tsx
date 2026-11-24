@@ -1,3 +1,4 @@
+import { isEnglishOnlyPublicShell } from '../src/app/locale';
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation, useMatches, useRouteError } from 'react-router';
 import { useEffect } from 'react';
 import type { LinksFunction } from 'react-router';
@@ -12,8 +13,8 @@ export const links: LinksFunction = () => [{ rel: 'stylesheet', href: stylesheet
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  const website = useMatches().some(match => match.id === 'website-shell');
-  const lang = !website && new URLSearchParams(location.search).get('locale') === 'es-US' ? 'es-US' : 'en-US';
+  const englishOnly = useMatches().some(match => isEnglishOnlyPublicShell(match.id));
+  const lang = !englishOnly && new URLSearchParams(location.search).get('locale') === 'es-US' ? 'es-US' : 'en-US';
   useEffect(() => {
     // The calculator and guide articles supply titles through route metadata.
     if (/^\/(calculator\/?|guides\/[^/]+\/?)$/.test(location.pathname)) return;

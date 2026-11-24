@@ -90,11 +90,11 @@ test('TC-COVER-16F-03 says so when free photos are not set up, and when a search
   await expect(page.getByRole('radio')).toHaveCount(0);
 });
 
-test('the public profile shows linked photo credit in the requested language', async ({ page }) => {
+test('the public profile shows the linked photo credit in English on older Spanish links', async ({ page }) => {
   await page.setViewportSize({ width: 430, height: 850 });
   await page.route('https://images.unsplash.com/**', (route) => route.abort());
   await page.goto('/a/nia-flores?locale=es-US');
-  const caption = page.getByText('Foto de Sample Photographer en Unsplash');
+  const caption = page.getByText('Photo by Sample Photographer on Unsplash');
   await expect(caption).toBeInViewport();
   await expect(caption.getByRole('link', { name: 'Sample Photographer' })).toHaveAttribute('href', 'https://unsplash.com/@sample?utm_source=mova&utm_medium=referral');
   await expect(caption.getByRole('link', { name: 'Unsplash' })).toHaveAttribute('href', 'https://unsplash.com/photos/sample?utm_source=mova&utm_medium=referral');

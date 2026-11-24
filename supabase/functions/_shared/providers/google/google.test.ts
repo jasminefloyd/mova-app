@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { FAKE_CODE, FAKE_EMAIL, FAKE_LOCATION_ID, FakeGoogleProvider, GOOGLE_BUSINESS_SCOPE, GOOGLE_CALENDAR_SCOPE, GoogleProviderError, LiveGoogleProvider, canonicalJson, desiredListing, googleProviderFromEnv, listingPatch, pendingListing, servicesMenu, usdMoney, type ServiceRow } from './index.ts';
+import { FAKE_CODE, FAKE_EMAIL, FAKE_LOCATION_ID, FakeGoogleProvider, GOOGLE_BUSINESS_SCOPE, GOOGLE_CALENDAR_SCOPE, GOOGLE_SCOPES, GoogleProviderError, LiveGoogleProvider, canonicalJson, desiredListing, googleProviderFromEnv, listingPatch, pendingListing, servicesMenu, usdMoney, type ServiceRow } from './index.ts';
 
 const env = (values: Record<string, string>) => (name: string) => values[name];
 const services: ServiceRow[] = [
@@ -59,7 +59,7 @@ describe('Google fake provider (P6)', () => {
     const token = await provider.exchangeCode({ code: FAKE_CODE, codeVerifier: 'v', redirectUri: 'x' });
     expect(token.email).toBe(FAKE_EMAIL);
     expect(token.email).toMatch(/\.invalid$/);
-    expect(token.grantedScopes).toEqual([GOOGLE_CALENDAR_SCOPE, GOOGLE_BUSINESS_SCOPE]);
+    expect(token.grantedScopes).toEqual(GOOGLE_SCOPES);
   });
   it('lists the sample calendars and records every write', async () => {
     const provider = new FakeGoogleProvider();
@@ -90,13 +90,13 @@ describe('Google provider selection and the live provider (off by default)', () 
     expect(live?.name).toBe('google');
     expect(live?.live).toBe(true);
   });
-  it('builds the consent URL with offline access, both scopes and PKCE', () => {
+  it('builds the consent URL with offline access, picker scope and PKCE', () => {
     const provider = new LiveGoogleProvider({ clientId: 'client-id', clientSecret: 'secret' });
-    const url = new URL(provider.authorizationUrl({ redirectUri: 'https://ops.example.test/cb', state: 's', codeChallenge: 'ch', scopes: [GOOGLE_CALENDAR_SCOPE, GOOGLE_BUSINESS_SCOPE] }));
+    const url = new URL(provider.authorizationUrl({ redirectUri: 'https://ops.example.test/cb', state: 's', codeChallenge: 'ch', scopes: GOOGLE_SCOPES }));
     expect(url.origin + url.pathname).toBe('https://accounts.google.com/o/oauth2/v2/auth');
     expect(url.searchParams.get('access_type')).toBe('offline');
     expect(url.searchParams.get('code_challenge_method')).toBe('S256');
-    expect(url.searchParams.get('scope')).toBe(`${GOOGLE_CALENDAR_SCOPE} ${GOOGLE_BUSINESS_SCOPE}`);
+    expect(url.searchParams.get('scope')).toBe(`${GOOGLE_CALENDAR_SCOPE} https://www.googleapis.com/auth/calendar.calendarlist.readonly ${GOOGLE_BUSINESS_SCOPE}`);
   });
   it('refuses a token exchange that returns no refresh token', async () => {
     const fetcher = vi.fn(async () => new Response(JSON.stringify({ access_token: 'a' }), { status: 200 }));

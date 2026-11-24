@@ -22,21 +22,25 @@ function renderPublicPage(path: string) {
 
 describe('public artist server rendering', () => {
   beforeAll(async () => { await i18nReady; });
-  it('TC-F04-DEP-03 renders deposit booking guidance without an online booking CTA', () => {
+  it('TC-F04-DEP-03 renders a locked action and compact deposit details', () => {
     const html = renderPublicPage('/a/nia-flores');
     expect(html).toContain('Nia Flores');
     expect(html).toContain('Color specialist');
     expect(html).toContain('Signature color');
-    expect(html).toContain('1 h 30 min · $25.00 deposit at North studio');
-    expect(html).toContain('Online booking is unavailable for this service');
+    expect(html).toContain('1 h 30 min');
+    expect(html).toContain('$25.00 deposit');
+    expect(html).toContain('North studio');
+    expect(html).toContain('aria-label="Book (online booking unavailable)"');
+    expect(html).not.toContain('Contact your stylist to book');
     expect(html).not.toContain('role="status">Loading');
     expect(html).not.toContain('Book now');
   });
 
-  it('TC-F13-V1-02 uses the requested UI locale while retaining artist-authored content', () => {
+  it('TC-F13-V1-02 renders the public profile in English for older Spanish links', () => {
     const html = renderPublicPage('/a/nia-flores?locale=es-US&tab=services');
-    expect(html).toContain('lang="es-US"');
-    expect(html).toContain('Servicios');
+    expect(html).toContain('lang="en-US"');
+    expect(html).toContain('Services');
+    expect(html).not.toContain('mova-public-locale-toggle');
     expect(html).toContain('Signature color');
   });
 });

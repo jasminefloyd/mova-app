@@ -1,7 +1,7 @@
 // Fake Google provider (P6). Sandbox and tests only: it never reaches Google, every address is labelled
 // ".invalid", and every write is recorded in `calls` so tests can assert what would have been sent.
 import { fakeReviewFixtures, normalizeGoogleReview } from './reviews.ts';
-import { GoogleProviderError, type GoogleAuthorizationInput, type GoogleCalendarEvent, type GoogleCalendarItem, type GoogleListingItem, type GoogleLocation, type GoogleProvider, type GoogleReview, type GoogleTokenResult } from './types.ts';
+import { GOOGLE_SCOPES, GoogleProviderError, type GoogleAuthorizationInput, type GoogleCalendarEvent, type GoogleCalendarItem, type GoogleListingItem, type GoogleLocation, type GoogleProvider, type GoogleReview, type GoogleTokenResult } from './types.ts';
 
 export const FAKE_CODE = 'fake-code';
 export const FAKE_REFRESH_TOKEN = 'fake-refresh-token';
@@ -28,7 +28,7 @@ export class FakeGoogleProvider implements GoogleProvider {
 
   exchangeCode(input: { code: string; codeVerifier: string; redirectUri: string }): Promise<GoogleTokenResult> {
     if (input.code !== FAKE_CODE || !input.codeVerifier) return Promise.reject(new GoogleProviderError('GOOGLE_TOKEN_EXCHANGE_FAILED'));
-    return Promise.resolve({ refreshToken: FAKE_REFRESH_TOKEN, email: FAKE_EMAIL, grantedScopes: ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/business.manage'] });
+    return Promise.resolve({ refreshToken: FAKE_REFRESH_TOKEN, email: FAKE_EMAIL, grantedScopes: [...GOOGLE_SCOPES] });
   }
 
   accessToken(refreshToken: string): Promise<string> {

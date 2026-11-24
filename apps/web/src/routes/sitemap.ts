@@ -20,11 +20,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const staticUrls = staticPaths.map((path) => `<url><loc>${esc(`${base}${path}`)}</loc></url>`);
   const profileUrls = rows.map(({ handle, updated_at }) => {
     const loc = `${base}/a/${encodeURIComponent(handle)}`;
-    return `<url><loc>${esc(loc)}</loc><lastmod>${new Date(updated_at).toISOString()}</lastmod><xhtml:link rel="alternate" hreflang="en-US" href="${esc(`${loc}?locale=en-US`)}"/><xhtml:link rel="alternate" hreflang="es-US" href="${esc(`${loc}?locale=es-US`)}"/><xhtml:link rel="alternate" hreflang="x-default" href="${esc(`${loc}?locale=en-US`)}"/></url>`;
+    return `<url><loc>${esc(loc)}</loc><lastmod>${new Date(updated_at).toISOString()}</lastmod></url>`;
   });
   const guideUrls = guides.map(({ slug, published_at }) => `<url><loc>${esc(`${base}/guides/${encodeURIComponent(slug)}`)}</loc><lastmod>${new Date(published_at).toISOString()}</lastmod></url>`);
   const urls = [...staticUrls, ...profileUrls, ...guideUrls].join('');
-  return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${urls}</urlset>`, {
+  return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`, {
     headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=300' },
   });
 }

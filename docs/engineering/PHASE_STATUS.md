@@ -17,6 +17,10 @@
 
 ## Current audit work log
 
+- 2026-11-24 Public stylist profile: each look has one booking action that opens the booking flow with every linked service selected. Availability requires one location that can host the full appointment. Deposit-only options show a locked booking button. Booking still accepts a service at its no-deposit locations. Moved Unsplash credit below the cover, removed the cover label, styled the m mark as a watermark, and grouped service duration and deposits to avoid duplicate location labels. Verified the local profile and booking flow on phone widths. Included in the November 24 public booking release.
+
+- 2026-11-24 Connect with Google: production request 7776894a-cb1c-4615-ace7-e002fbc4392d returned 503 from calendar-google-connect. Production had Places API keys and no OAuth credentials, OAuth callback secret, live provider settings or token encryption key. There were no active Google connections or saved refresh tokens at verification. The deployed consent scope includes read-only calendar-list access for the picker. Live connection remains pending Google Cloud OAuth configuration and production secrets.
+
 - 2026-11-24 English-only marketing site: removed the shared marketing footer language switch, fixed the marketing site to English, and redirected its locale URLs to the same page while preserving campaign tags and guide filters. Marketing metadata, sitemap entries and llms.txt use the English URLs. The copyright link points to Jasmine Floyd’s profile with the mova-copyright campaign. Product and booking language settings are outside this change.
 
 - 2026-11-24 W2 Features redesign: implemented the owner-provided desktop and phone layouts with jump links, a two-column Essentials grid, a three-column AI + Growth grid and the signup panel. Both grids stack on phones and hide the desktop checklists. The page retains English and Spanish, uses the existing rollout flags for availability, and shows the trial CTA only when trial marketing is enabled. Compared local Chromium screenshots at 1440 and 390 pixels against the designs. The combined release passed all 24 focused Chromium checks, lint and typecheck.
@@ -579,3 +583,28 @@ order by event;
 ```
 
 The local build, type checks, 12 unit tests, five browser cases, 22 Deno tests, and 1,285 pgTAP assertions passed. A rolled-back rehearsal passed the real guide publisher's validation and exposed the guide to the anonymous live-posts view. The owner approved the production rollout. Migration 0111 was applied and recorded as `20261123210000`. Verified the exact migration text, RLS, and service-role-only access for the calculator counters. The calculator collector runs as a Vercel server route. The guide slug is available in production and publication requires an authenticated admin session with MFA.
+
+## 2026-11-24 public booking header and profile language
+
+Public stylist profiles and their booking pages now render English interface copy, including on older Spanish links. The language selector remains available in app Settings. Updated the public shell, booking and showcase routes, profile preview, sitemap, and site metadata. The booking header gives the title the space beside the back button and truncates exceptionally long names with an ellipsis.
+
+Local lint, type checks, build, 488 unit tests, four script checks, and 15 Playwright cases passed. Browser coverage checked the full Rooted Beauty heading at 320 px and 390 px, English copy on older Spanish links, look-to-cart selection, and deposit gating. This update is local. The service editor and time-picker presentation are candidates for a follow-up design pass.
+
+## 2026-11-24 public booking service and time selection
+
+Updated the public booking route, booking styles, and locale resources for F02-AC02 and F04-AC04. The service summary lists services and shows total duration and price. A service change takes effect on Save and clears the old time before fetching fresh availability. Each location previews six time slots and keeps a selected time visible when collapsed. The bottom action appears after time selection and shows the local appointment date, time, location, and confirmation mode.
+
+Local build, type checks, lint, 488 unit tests, four script checks, and 15 Playwright cases passed. The browser fixture exercised a prefilled look, expanding and collapsing times, displaying the booking request summary, dismissing the sheet, and saving a cart change. The unit suite checked request and instant booking paths. This update is local.
+
+## 2026-11-24 quick service changes and photo-first Looks cards
+
+Updated the public booking route, public profile, styles, and locale resources. The booking summary now has a remove button on each service and a native dropdown for adding unselected services. Changes update totals and refresh availability. Removing the last service pauses availability until a service is added. Looks cards put captions and booking actions below the photos and omit the portfolio label and gradient.
+
+The local build, lint, type checks, unit suite, and 15 Playwright cases passed. Browser coverage verified caption placement, prefilled look booking, removing and re-adding services, the empty cart, and updated availability requests. The changes are local.
+
+
+## 2026-11-24 public booking and Google provider release
+
+Owner approved the production release. Production already recorded all 118 repository migrations through 0127. Supabase reported all six updated functions active with their previous JWT settings. Deployed calendar-google-connect v23, calendar-google-callback v22, calendar-sync-run v22, google-business-sync v20, google-reviews-sync v22, and review-management v27. The six Google Calendar OAuth, provider mode, and encryption secrets remain absent.
+
+The local build, lint, type checks, 488 unit tests, four static checks, 15 targeted browser cases, 23 Deno cases, and 1,472 pgTAP assertions passed.

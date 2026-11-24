@@ -3,8 +3,9 @@
 // and LiveGoogleProvider (written, OFF by default). Selected by googleProviderFromEnv in index.ts.
 
 export const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events';
+export const GOOGLE_CALENDAR_LIST_SCOPE = 'https://www.googleapis.com/auth/calendar.calendarlist.readonly';
 export const GOOGLE_BUSINESS_SCOPE = 'https://www.googleapis.com/auth/business.manage';
-export const GOOGLE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_BUSINESS_SCOPE] as const;
+export const GOOGLE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_CALENDAR_LIST_SCOPE, GOOGLE_BUSINESS_SCOPE] as const;
 
 export type GoogleCalendarItem = { id: string; summary: string; primary: boolean };
 

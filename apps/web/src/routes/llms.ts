@@ -20,7 +20,7 @@ export function llmsTxt(base: string, guides: readonly Pick<PostSummary, 'slug' 
     '',
     `> ${text('website.seo.softwareDescription')}`,
     '',
-    `Mova is for ${text('website.seo.audience').toLowerCase()} in the United States. The app and the client booking pages work in English and Spanish. ${text('website.landing.fine')}`,
+    `Mova is for ${text('website.seo.audience').toLowerCase()} in the United States. The app supports English and Spanish. Public stylist profiles and their booking pages are in English. ${text('website.landing.fine')}`,
     '',
     '## Key facts',
     '',

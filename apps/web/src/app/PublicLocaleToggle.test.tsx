@@ -50,7 +50,7 @@ function setInputValue(input: HTMLInputElement | HTMLTextAreaElement, value: str
   input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-describe('public booking locale switch', () => {
+describe('public booking', () => {
   let mounted: Array<{ host: HTMLDivElement; root: Root }> = [];
 
   beforeAll(async () => { await i18nReady; });
@@ -63,8 +63,8 @@ describe('public booking locale switch', () => {
     sessionStorage.clear();
   });
 
-  it('TC-F13-V1-02 persists the guest locale and keeps the selected service, day, and time', async () => {
-    localStorage.setItem(GUEST_LOCALE_KEY, 'en-US');
+  it('renders older Spanish links in English and preserves the saved language and booking selection', async () => {
+    localStorage.setItem(GUEST_LOCALE_KEY, 'es-US');
     const selectedSlot = { starts_at: '2026-12-01T15:00:00.000Z', ends_at: '2026-12-01T16:30:00.000Z', local_date: '2026-12-01', local_time: '10:00', utc_offset: '-05:00', time_zone: 'America/New_York', booking_mode: 'request' as const };
     const mockFetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
@@ -75,11 +75,11 @@ describe('public booking locale switch', () => {
     });
     vi.stubGlobal('fetch', mockFetch);
 
-    const view = renderBooking();
+    const view = renderBooking('?locale=es-US&service_id=svc-color&campaign=spring');
     mounted.push(view);
     await waitFor(() => view.host.querySelector('.mova-time-options button') !== null);
 
-    const service = view.host.querySelector('.mova-booking__service strong') as HTMLElement;
+    const service = view.host.querySelector('.mova-booking__service-list li') as HTMLElement;
     const dateButton = view.host.querySelector('.mova-day-options button') as HTMLButtonElement;
     const timeButton = view.host.querySelector('.mova-time-options button') as HTMLButtonElement;
     act(() => { timeButton.click(); });
@@ -87,20 +87,14 @@ describe('public booking locale switch', () => {
     expect(dateButton.getAttribute('aria-pressed')).toBe('true');
     expect(timeButton.getAttribute('aria-pressed')).toBe('true');
 
-    act(() => { (Array.from(view.host.querySelectorAll('button')).find(button => button.textContent === 'ES') as HTMLButtonElement).click(); });
-    await waitFor(() => view.host.querySelector('.mova-booking__service') !== null);
-
+    expect(view.host.querySelector('.mova-public-locale-toggle')).toBeNull();
     expect(localStorage.getItem(GUEST_LOCALE_KEY)).toBe('es-US');
-    expect(document.documentElement.lang).toBe('es-US');
-    expect(view.host.querySelector('h2')?.textContent).toBe('Elige una fecha');
+    expect(view.host.querySelector('main')?.lang).toBe('en-US');
+    expect(view.host.querySelector('.mova-day-options')?.getAttribute('aria-label')).toBe('Choose a date');
     const search = view.host.querySelector('[data-testid="current-search"]')?.textContent ?? '';
-    const params = new URLSearchParams(search);
-    expect(params.get('locale')).toBe('es-US');
-    expect(params.get('campaign')).toBe('spring');
-    expect(service.textContent).toBe('Signature color');
-    expect(view.host.querySelector('.mova-day-options button')?.getAttribute('aria-pressed')).toBe('true');
-    expect(view.host.querySelector('.mova-time-options button')?.getAttribute('aria-pressed')).toBe('true');
-    expect(mockFetch.mock.calls.filter(([url]) => String(url).includes('/public-artist')).map(([, init]) => JSON.parse(String(init?.body)).locale)).toContain('es-US');
+    expect(new URLSearchParams(search).get('campaign')).toBe('spring');
+    const artistRequests = mockFetch.mock.calls.filter(([url]) => String(url).includes('/public-artist'));
+    expect(artistRequests.map(([, init]) => JSON.parse(String(init?.body)).locale)).toEqual(['en-US']);
   });
 
   it('TC-F04-DEP-02 blocks deposit-required bookings before requesting online availability', async () => {
@@ -125,11 +119,6 @@ describe('public booking locale switch', () => {
     expect(view.host.querySelector('input[autocomplete="name"]')).toBeNull();
     expect(view.host.querySelector('.mova-day-options')).toBeNull();
     expect(view.host.querySelector('.mova-time-options')).toBeNull();
-    expect(mockFetch.mock.calls.some(([url]) => String(url).includes('/availability-search'))).toBe(false);
-    expect(mockFetch.mock.calls.some(([url]) => String(url).includes('/booking-create'))).toBe(false);
-
-    act(() => { (Array.from(view.host.querySelectorAll('button')).find(button => button.textContent === 'ES') as HTMLButtonElement).click(); });
-    await waitFor(() => view.host.querySelector('[role="alert"]')?.textContent.includes('La reserva en línea') ?? false);
     expect(mockFetch.mock.calls.some(([url]) => String(url).includes('/availability-search'))).toBe(false);
     expect(mockFetch.mock.calls.some(([url]) => String(url).includes('/booking-create'))).toBe(false);
   });
@@ -167,6 +156,7 @@ describe('public booking locale switch', () => {
     act(() => { (view.host.querySelector('[aria-label="Previous five days"]') as HTMLButtonElement).click(); });
     const slotButton = view.host.querySelector('.mova-time-options button') as HTMLButtonElement;
     act(() => { slotButton.click(); });
+    expect(view.host.querySelector('.mova-booking__sticky')?.textContent).toContain(mode === 'instant' ? 'Instant confirmation' : 'Stylist confirmation required');
     expect(view.host.querySelector('.mova-booking__mode')?.textContent).toContain(mode === 'instant' ? 'Confirmed instantly' : 'Stylist confirms');
     act(() => { (Array.from(view.host.querySelectorAll('button')).find((button) => button.textContent?.trim() === 'Continue') as HTMLButtonElement).click(); });
     expect(view.host.querySelector('input[autocomplete="name"]')).not.toBeNull();

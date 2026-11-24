@@ -4,6 +4,11 @@ export const ARTIST_LOCALE_KEY = 'mova_artist_locale';
 export const ONBOARDING_LOCALE_KEY = 'mova_onboarding_locale';
 export const CLIENT_LOCALE_KEY = 'mova_client_locale';
 export const GUEST_LOCALE_KEY = 'mova_guest_locale';
+export const PUBLIC_PROFILE_LOCALE = 'en-US';
+
+export function isEnglishOnlyPublicShell(id: string): boolean {
+  return id === 'website-shell' || id === 'public-artist-shell';
+}
 
 export function readStoredLocale(key: string): Locale {
   if (typeof window === 'undefined') return 'en-US';

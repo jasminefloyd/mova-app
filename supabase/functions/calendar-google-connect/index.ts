@@ -41,7 +41,7 @@ Deno.serve(withSystemRequestLogging('calendar-google-connect', async (request) =
     const state = randomToken(32); const verifier = randomToken(48);
     const { error } = await db.from('mova_google_oauth_states').insert({ artist_business_id: actor.businessId, state_hash: await sha256Hex(state), verifier_encrypted: await encryptProviderSecret(verifier), expires_at: new Date(Date.now() + 10 * 60_000).toISOString() });
     if (error) return respond({ code: 'GOOGLE_CONNECT_START_FAILED' }, 500);
-    // Both permissions in one sign-in. Google asks the stylist once; nothing is connected until the callback succeeds.
+    // Request Calendar and Business Profile permissions in one sign-in. The callback completes the connection.
     return respond({ authorizationUrl: provider.authorizationUrl({ redirectUri, state, codeChallenge: await s256Challenge(verifier), scopes: GOOGLE_SCOPES }) });
   }
 
