@@ -48,7 +48,12 @@ export class ClaudeReplyWriter implements ReviewReplyWriter {
     const response = await this.fetcher('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': this.apiKey, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: this.model, max_tokens: 300, temperature: 0.4, messages: [{ role: 'user', content: replyPrompt(input) }] }),
+      body: JSON.stringify({
+        model: this.model,
+        max_tokens: 300,
+        ...(this.model === 'claude-haiku-5-5' ? { thinking: { type: 'disabled' } } : { temperature: 0.4 }),
+        messages: [{ role: 'user', content: replyPrompt(input) }],
+      }),
       signal: AbortSignal.timeout(10000),
     });
     const json = await response.json().catch(() => null);
@@ -67,7 +72,13 @@ export class OpenAiReplyWriter implements ReviewReplyWriter {
     const response = await this.fetcher('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${this.apiKey}` },
-      body: JSON.stringify({ model: this.model, temperature: 0.4, max_tokens: 300, messages: [{ role: 'user', content: replyPrompt(input) }] }),
+      body: JSON.stringify({
+        model: this.model,
+        ...(this.model === 'gpt-6-luna'
+          ? { max_completion_tokens: 300, reasoning_effort: 'none' }
+          : { temperature: 0.4, max_tokens: 300 }),
+        messages: [{ role: 'user', content: replyPrompt(input) }],
+      }),
       signal: AbortSignal.timeout(10000),
     });
     const json = await response.json().catch(() => null);
@@ -105,15 +116,18 @@ const num = (value: string | undefined, fallback: number) => { const parsed = Nu
 /**
  * MOVA_REVIEW_REPLY_AI: unset or 'off' (default) = no suggestions; 'fake' = local/test writer; 'live' = Claude,
  * with OpenAI as the fallback when its key and model are set. Uses the same keys and model names as the
- * concierge (ANTHROPIC_API_KEY, MOVA_CLAUDE_MODEL, OPENAI_API_KEY, MOVA_OPENAI_MODEL). Without OpenAI, Claude
+ * concierge unless dedicated MOVA_REVIEW_REPLY_CLAUDE_MODEL and MOVA_REVIEW_REPLY_OPENAI_MODEL
+ * settings override the model IDs. Without OpenAI, Claude
  * alone; without Claude but with OpenAI, OpenAI alone. Returns null when nothing usable is configured.
  */
 export function replyWriterFromEnv(env: (name: string) => string | undefined, fetcher: typeof fetch = fetch): ReviewReplyWriter | null {
   const mode = env('MOVA_REVIEW_REPLY_AI');
   if (mode === 'fake') return new FakeReplyWriter();
   if (mode !== 'live') return null;
-  const claudeKey = env('ANTHROPIC_API_KEY'); const claudeModel = env('MOVA_CLAUDE_MODEL');
-  const openAiKey = env('OPENAI_API_KEY'); const openAiModel = env('MOVA_OPENAI_MODEL');
+  const claudeKey = env('ANTHROPIC_API_KEY');
+  const claudeModel = env('MOVA_REVIEW_REPLY_CLAUDE_MODEL') || env('MOVA_CLAUDE_MODEL');
+  const openAiKey = env('OPENAI_API_KEY');
+  const openAiModel = env('MOVA_REVIEW_REPLY_OPENAI_MODEL') || env('MOVA_OPENAI_MODEL');
   const claude = claudeKey && claudeModel ? new ClaudeReplyWriter(claudeKey, claudeModel, { inputMicrosPerToken: num(env('MOVA_CLAUDE_INPUT_MICROS_PER_TOKEN'), 3), outputMicrosPerToken: num(env('MOVA_CLAUDE_OUTPUT_MICROS_PER_TOKEN'), 15) }, fetcher) : null;
   const openAi = openAiKey && openAiModel ? new OpenAiReplyWriter(openAiKey, openAiModel, { inputMicrosPerToken: num(env('MOVA_OPENAI_INPUT_MICROS_PER_TOKEN'), 3), outputMicrosPerToken: num(env('MOVA_OPENAI_OUTPUT_MICROS_PER_TOKEN'), 15) }, fetcher) : null;
   if (claude) return new FallbackReplyWriter(claude, openAi);

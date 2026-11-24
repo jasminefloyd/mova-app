@@ -30,6 +30,26 @@ describe('review reply suggestions', () => {
     expect(result.servedBy).toBe('openai:gpt-test');
   });
 
+  it('uses review-specific model IDs and compatible request parameters', async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const fetcher: typeof fetch = async (url, init) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      return String(url).includes('anthropic') ? new Response(null, { status: 529 }) : openAiOk('Thank you, Keisha!');
+    };
+    const writer = replyWriterFromEnv(env({
+      ...keys,
+      MOVA_REVIEW_REPLY_CLAUDE_MODEL: 'claude-haiku-5-5',
+      MOVA_REVIEW_REPLY_OPENAI_MODEL: 'gpt-6-luna',
+    }), fetcher)!;
+
+    expect((await writer.suggest(input)).servedBy).toBe('openai:gpt-6-luna');
+    expect(bodies[0]).toMatchObject({ model: 'claude-haiku-5-5', max_tokens: 300, thinking: { type: 'disabled' } });
+    expect(bodies[0]).not.toHaveProperty('temperature');
+    expect(bodies[1]).toMatchObject({ model: 'gpt-6-luna', max_completion_tokens: 300, reasoning_effort: 'none' });
+    expect(bodies[1]).not.toHaveProperty('temperature');
+    expect(bodies[1]).not.toHaveProperty('max_tokens');
+  });
+
   it('RV-AI-04 fails rather than showing unusable text', async () => {
     const writer = replyWriterFromEnv(env(keys), (async (url: string) => url.includes('anthropic') ? claudeOk('Hi [name]!') : openAiOk('')) as unknown as typeof fetch)!;
     await expect(writer.suggest(input)).rejects.toThrow();
