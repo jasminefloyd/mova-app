@@ -99,14 +99,14 @@ export default function AdminDiscoveryPage() {
   const data = traffic.data;
 
   return <>
-    <PageHead title="Discovery" sub="Website traffic and verified stylist signups"
+    <PageHead title="Discovery" sub={`Website traffic and verified stylist signups · ${reportPeriodLabel(report.period)}`}
       actions={<Link className="btn sm" to={{ pathname: '/admin', search: report.search }}>Overview</Link>} />
     <AdminReportPeriodPicker {...report} />
     {traffic.isPending && <Loading />}
     {traffic.isError && <div className="row"><ErrorNote message={adminErrorText(traffic.error)} /><button type="button" className="btn sm" onClick={() => void traffic.refetch()}>Retry traffic</button></div>}
     {data && <>
       <DiscoveryKpis current={data.current} prior={data.prior} details />
-      <p className="small muted">{rangeDate.format(new Date(data.start))} to {rangeDate.format(new Date(data.through))} UTC. Signup rates are based on sessions. Visitors are counted per browser. A session in a tab ends after 30 minutes of inactivity. Returning visitors were first seen before the selected period.
+      <p className="small muted">{rangeDate.format(new Date(data.start))} to {rangeDate.format(new Date(data.through))} UTC. Signup rates are based on sessions that started in this range. Visitors are counted per browser. A session in a tab ends after 30 minutes of inactivity. Returning visitors were first seen before the selected period.
         {data.current.identified_sessions < data.current.sessions ? ` Visitor history is available for ${formatCount(data.current.identified_sessions)} of ${formatCount(data.current.sessions)} sessions.` : ''}
       </p>
       {breakdowns.map(section => <Card key={section.kind} title={section.title}>
@@ -130,7 +130,7 @@ export default function AdminDiscoveryPage() {
         }))} empty="No page views recorded in this period." />
       </Card>
       <Card title="Calculator acquisition">
-        <p className="small muted">Calendar-day totals for the UTC dates covered by this period.</p>
+        {data.calculator.partial_history && <p className="small muted">Some older calculator activity was recorded by UTC day. This range excludes those counts when it cuts through a day.</p>}
         <div className="k3">
           <Kpi label="Calculator uses" value={formatCount(data.calculator.used)} />
           <Kpi label="Start free clicks" value={formatCount(data.calculator.signup_clicks)} />

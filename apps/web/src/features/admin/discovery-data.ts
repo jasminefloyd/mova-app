@@ -30,7 +30,7 @@ export type Discovery = {
   breakdown: DiscoveryRow[];
   geography?: GeographyRow[];
   pages: { path: string; views: number; sessions: number }[];
-  calculator: { used: number; signup_clicks: number; signups: number };
+  calculator: { used: number; signup_clicks: number; signups: number; partial_history?: boolean };
 };
 export type ActivationCohort = {
   cohort: string;

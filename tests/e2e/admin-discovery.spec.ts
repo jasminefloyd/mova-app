@@ -84,3 +84,56 @@ test('Overview reports corrected rates, activation, subscriptions, and Discovery
     await expect.poll(() => periods).toContainEqual(custom);
   }
 });
+
+test('changing the Discovery range replaces every section with data for that range', async ({ page }) => {
+  const totals = { visitors: 8, sessions: 12, identified_sessions: 12, new_users: 6, returning_users: 2, page_views: 17, signup_clicks: 5, signups: 3, converted: 3 };
+  const empty = { visitors: 0, sessions: 0, identified_sessions: 0, new_users: 0, returning_users: 0, page_views: 0, signup_clicks: 0, signups: 0, converted: 0 };
+  const breakdown = ([
+    ['landing', '/signup'], ['campaign', 'aig_pp_search / pricepilot'], ['channel', 'paid search'],
+    ['source', 'google'], ['referrer', 'google.com'], ['device', 'Mobile'], ['browser', 'Safari'],
+  ] as const).map(([kind, label]) => ({ kind, label, sessions: 12, visitors: 8, signups: 3, converted: 3 }));
+
+  await mockAdminApi(page, { isAdmin: true, signedIn: true, rpc: {
+    mova_admin_website_traffic: body => {
+      const short = (body as { p_period: string }).p_period === '24h';
+      return {
+        start: short ? '2026-11-23T15:00:00Z' : '2026-10-27T15:00:00Z',
+        through: '2026-11-24T15:00:00Z',
+        current: short ? empty : totals,
+        prior: empty,
+        breakdown: short ? [] : breakdown,
+        geography: short ? [] : [{ city: 'Brooklyn', region: 'NY', country: 'US', sessions: 12, visitors: 8, signups: 3, converted: 3 }],
+        pages: short ? [] : [{ path: '/pricing', views: 17, sessions: 12 }],
+        calculator: short
+          ? { used: 0, signup_clicks: 0, signups: 0, partial_history: true }
+          : { used: 9, signup_clicks: 4, signups: 2, partial_history: false },
+      };
+    },
+  } });
+
+  await page.goto('/admin/discovery');
+  const kpi = (label: string) => page.locator('.kpi').filter({ has: page.getByText(label, { exact: true }) }).locator('.big');
+  const rows = [...breakdown.map(row => row.label), 'Brooklyn, NY, USA', '/pricing'];
+  for (const label of rows) await expect(page.getByRole('rowheader', { name: label, exact: true })).toBeVisible();
+  await expect(kpi('Sessions')).toHaveText('12');
+  await expect(kpi('Page views')).toHaveText('17');
+  await expect(kpi('Signup conversion')).toHaveText('25.0%');
+  await expect(kpi('Calculator uses')).toHaveText('9');
+
+  await page.getByRole('button', { name: 'Last 24 hours' }).click();
+  await expect(page.getByText('Website traffic and verified stylist signups · Last 24 hours')).toBeVisible();
+  for (const label of rows) await expect(page.getByRole('rowheader', { name: label, exact: true })).toHaveCount(0);
+  for (const label of ['Visitors', 'Sessions', 'Page views', 'New visitors', 'Returning visitors',
+    'Visits with a signup link click', 'Calculator uses', 'Start free clicks', 'Verified signups']) {
+    await expect(kpi(label)).toHaveText('0');
+  }
+  await expect(kpi('Signup conversion')).toHaveText('—');
+  await expect(page.getByText('No traffic recorded in this view.')).toHaveCount(7);
+  await expect(page.getByText('No locations recorded in this period.')).toBeVisible();
+  await expect(page.getByText('No page views recorded in this period.')).toBeVisible();
+  await expect(page.getByText('Some older calculator activity', { exact: false })).toBeVisible();
+
+  await page.getByRole('button', { name: '28 days' }).click();
+  await expect(kpi('Calculator uses')).toHaveText('9');
+  await expect(page.getByRole('rowheader', { name: 'Brooklyn, NY, USA' })).toBeVisible();
+});
