@@ -482,6 +482,24 @@ body {
 .mova-get-paid__collector legend { margin-bottom: var(--space-2); font-weight: 700; }
 .mova-get-paid__actions { position: fixed; z-index: 2; right: 0; bottom: 0; left: 50%; display: flex; width: min(100%, 390px); transform: translateX(-50%); border-top: 1px solid var(--line); padding: var(--space-3) var(--gutter) calc(var(--space-5) + env(safe-area-inset-bottom)); background: var(--surface-page); }
 .mova-get-paid__actions .mova-button { width: 100%; min-height: var(--btn-primary-h); }
+.mova-get-paid__actions--stack { flex-direction: column; gap: var(--space-2); }
+.mova-get-paid__actions a.mova-button { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+/* One selection mark per option: keep the dot, hide the browser radio but leave it focusable. */
+.mova-get-paid .mova-radio-card { position: relative; }
+.mova-get-paid .mova-radio-card input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
+.mova-get-paid .mova-radio-card:has(input:focus-visible) { outline: 2px solid var(--forest); outline-offset: 2px; }
+.mova-get-paid__amount { margin-top: var(--space-4); }
+.mova-get-paid__money { position: relative; display: block; }
+.mova-get-paid__money > span { position: absolute; top: 50%; left: var(--space-4); transform: translateY(-50%); color: var(--ink-primary); font-family: var(--font-display); font-size: var(--fs-display-l); font-weight: 800; pointer-events: none; }
+.mova-get-paid__money .mova-input { width: 100%; min-height: 60px; border: 2px solid var(--forest); padding-left: calc(var(--space-4) + 0.8em); font-family: var(--font-display); font-size: var(--fs-display-l); font-weight: 800; }
+.mova-get-paid__money .mova-input[readonly] { border-color: var(--line-control); background: var(--surface-alt); }
+.mova-get-paid__done { display: grid; justify-items: center; gap: var(--space-2); margin-top: var(--space-5); text-align: center; }
+.mova-get-paid__done h2 { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-m); font-weight: 800; }
+.mova-get-paid__done p { margin: 0; color: var(--ink-secondary); line-height: 1.45; }
+.mova-get-paid__done-icon { display: grid; width: 56px; height: 56px; place-items: center; border-radius: 50%; background: var(--mint); color: var(--forest); font-size: 26px; font-weight: 800; }
+.mova-get-paid__link { max-width: 100%; overflow: hidden; border: 1px solid var(--line-control); border-radius: var(--radius-l); padding: var(--space-2) var(--space-3); background: var(--surface); color: var(--ink-primary) !important; font-size: var(--fs-body-s); text-overflow: ellipsis; white-space: nowrap; }
+.mova-get-paid__qr { display: block; margin: var(--space-2) 0; }
+.mova-get-paid__expires { font-size: var(--fs-body-s); }
 .mova-service-list li { gap: var(--space-2); padding: var(--space-4); border-radius: var(--radius-xl); }
 .mova-service-list__top { display: flex; justify-content: space-between; gap: var(--space-3); }
 .mova-service-list__top > span { display: grid; min-width: 0; gap: var(--space-1); }

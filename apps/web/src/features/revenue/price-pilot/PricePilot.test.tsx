@@ -1,4 +1,4 @@
-import { act } from 'react';
+import { act, type ReactElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -33,7 +33,7 @@ const invoke = vi.fn(async (name: string, options: { body: Record<string, unknow
 const identity = { client: { functions: { invoke } }, businessId: 'biz-1', loading: false };
 vi.mock('../../settings/useArtistBusiness', () => ({ useArtistBusiness: () => identity }));
 const flush = async () => { for (let i = 0; i < 8; i += 1) await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); }); };
-const mount = (path: string, element: JSX.Element) => {
+const mount = (path: string, element: ReactElement) => {
   const host = document.createElement('div');
   act(() => createRoot(host).render(<MemoryRouter initialEntries={[path]}><PlanProvider><Routes><Route path="/BID-1/growth/price-pilot" element={element} /><Route path="/BID-1/growth/price-pilot/review" element={element} /></Routes></PlanProvider></MemoryRouter>));
   return host;
