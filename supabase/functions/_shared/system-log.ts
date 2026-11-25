@@ -13,7 +13,7 @@ export type SystemLogInput = {
 };
 
 /** Wrap an allowlisted external provider fetch without recording URLs, headers, requests or responses. */
-export function loggedProviderFetch(request: Request, provider: 'stripe' | 'google' | 'resend', fetcher: typeof fetch = fetch): typeof fetch {
+export function loggedProviderFetch(request: Request, provider: 'stripe' | 'google' | 'resend' | 'meta', fetcher: typeof fetch = fetch): typeof fetch {
   return async (input, init) => {
     const started = performance.now();
     const requestId = request.headers.get('x-request-id');

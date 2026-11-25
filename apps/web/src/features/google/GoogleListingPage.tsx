@@ -94,7 +94,7 @@ export function GoogleListingPage() {
   const waitingKeys = new Set(waiting.filter((change) => change.kind === 'service' || change.kind === 'service_new').map((change) => change.key));
 
   return <main className="mova-page mova-google-page mova-google-listing">
-    <ScreenHeader onBack={() => navigate(operatorUrl(businessId, 'settings/google'))} backLabel={t('google.back')} />
+    <ScreenHeader onBack={() => navigate(operatorUrl(businessId, 'settings/connections/google'))} backLabel={t('google.back')} />
     <h1>{t('google.listing.title')}</h1>
     {identityLoading || loading
       ? <p role="status" aria-busy="true">{t('google.loading')}</p>
@@ -102,7 +102,7 @@ export function GoogleListingPage() {
         ? <div className="mova-google-message is-error" role="alert"><p>{t('google.loadError')}</p><Button variant="secondary" onClick={() => void load()}>{t('google.retry')}</Button></div>
         : <>
           <p className="mova-google-listing__intro">{t('google.listing.intro', { name: businessName || t('google.listing.title') })}</p>
-          {!ready && <div className="mova-google-message"><p>{t('google.listing.notConnected')}</p><Button variant="secondary" onClick={() => navigate(operatorUrl(businessId, 'settings/google'))}>{t('google.account.title')}</Button></div>}
+          {!ready && <div className="mova-google-message"><p>{t('google.listing.notConnected')}</p><Button variant="secondary" onClick={() => navigate(operatorUrl(businessId, 'settings/connections/google'))}>{t('google.account.title')}</Button></div>}
           {ready && waiting.length > 0 && <div className="mova-google-message is-waiting" role="status">
             <strong>{t('google.listing.waiting', { count: waiting.length })}</strong>
             <ul>{waiting.map((change) => <li key={change.key}>{changeText(change)}</li>)}</ul>

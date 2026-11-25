@@ -36,4 +36,12 @@ describe('stylist alerts', () => {
     expect(alert.title).toBe('Coming up in 1 hour');
     expect(alert.body).toBe('Knotless braids with Maya R. at 10:00 AM · Luxe Salon');
   });
+
+  it('alerts about new Google reviews and links to the reviews screen (CN4)', () => {
+    const alert = buildAlert('google_review.created', { ...base, appointment: null, review: { rating: 4, name: 'Dana', body: 'Loved my silk press' } })!;
+    expect(alert.event).toBe('new_google_review');
+    expect(alert.title).toBe('New 4-star Google review');
+    expect(alert.body).toBe('Dana: “Loved my silk press”');
+    expect(alert.path).toBe('reports/reputation');
+  });
 });

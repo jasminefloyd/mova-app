@@ -10,19 +10,33 @@ Deno.serve(withSystemRequestLogging('payment-settings', async (request) => {
   const db = serviceClient();
   if (body.action === 'get') {
     const [settings, fee, salons] = await Promise.all([
-      db.from('mova_payment_method_settings').select('cash_enabled,other_enabled').eq('artist_business_id', actor.businessId).maybeSingle(),
+      db.from('mova_payment_method_settings').select('cash_enabled,other_enabled,deposits_enabled,pay_links_enabled').eq('artist_business_id', actor.businessId).maybeSingle(),
       // O10: the fee follows the stylist's plan (0058); falls back to the platform rate.
       db.rpc('mova_business_fee', { p_artist_business_id: actor.businessId, p_at: new Date().toISOString() }).maybeSingle<{ fee_bps: number }>(),
       db.from('mova_locations').select('name').eq('artist_business_id', actor.businessId).eq('payment_collector', 'salon').eq('is_active', true).order('name'),
     ]);
     if (settings.error || fee.error || salons.error) return respond({ code: 'PAYMENT_SETTINGS_READ_FAILED' }, 500);
     return respond({
-      ...(settings.data ?? { cash_enabled: true, other_enabled: true }),
+      ...(settings.data ?? { cash_enabled: true, other_enabled: true, deposits_enabled: true, pay_links_enabled: true }),
       // Zelle stays hidden until owner decision A-16 turns it on (migration 0027).
       zelle_available: false,
       platform_fee_bps: fee.data?.fee_bps ?? null,
       salon_locations: (salons.data ?? []).map((row: { name: string }) => row.name),
     });
+  }
+  // Connections › Stripe (CN3): "Ask for deposits" and "Pay links and pay QR". Either key may be sent alone.
+  if (body.action === 'save-card-switches') {
+    const patch: Record<string, boolean> = {};
+    for (const key of ['deposits_enabled', 'pay_links_enabled'] as const) {
+      if (body[key] === undefined) continue;
+      if (typeof body[key] !== 'boolean') return respond({ code: 'INVALID_REQUEST' }, 422);
+      patch[key] = body[key];
+    }
+    if (!Object.keys(patch).length) return respond({ code: 'INVALID_REQUEST' }, 422);
+    const { data, error } = await db.from('mova_payment_method_settings').upsert({ artist_business_id: actor.businessId, ...patch, updated_by: actor.user.id }, { onConflict: 'artist_business_id' })
+      .select('deposits_enabled,pay_links_enabled').single();
+    if (error) return respond({ code: 'PAYMENT_SETTINGS_SAVE_FAILED' }, 500);
+    return respond(data);
   }
   if (body.action !== 'save' || typeof body.cash_enabled !== 'boolean' || typeof body.other_enabled !== 'boolean') {
     return respond({ code: 'INVALID_REQUEST' }, 422);

@@ -100,6 +100,9 @@ Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
   const { data: serviceLocations, error: serviceLocationError } = await supabase.from('mova_service_locations')
     .select('service_id,location_id,price_minor_override,duration_minutes_override').eq('artist_business_id', businessId);
   if (serviceLocationError) return respond({ code: 'PUBLIC_ARTIST_UNAVAILABLE' }, 503);
+  // Connections › Stripe (CN3): a stylist who paused deposits shows no deposit on any service.
+  const { data: depositsOn, error: depositsError } = await supabase.rpc('mova_deposits_enabled', { p_artist_business_id: businessId });
+  if (depositsError) return respond({ code: 'PUBLIC_ARTIST_UNAVAILABLE' }, 503);
 
   const { data: portfolio, error: portfolioError } = await supabase
     .from('mova_portfolio_items')
@@ -122,7 +125,7 @@ Deno.serve(withSystemRequestLogging('public-artist', async (request) => {
       const override = serviceLocations?.find((item) => item.service_id === service.id && item.location_id === location.id);
       const price = override?.price_minor_override ?? service.base_price_minor;
       return { location_id: location.id, price_minor: price, duration_minutes: (override?.duration_minutes_override ?? service.duration_minutes) + service.buffer_minutes,
-        deposit_amount_minor: location.payment_collector === 'artist' ? computeDepositMinor(price, service.deposit_type, service.deposit_value) : 0 };
+        deposit_amount_minor: location.payment_collector === 'artist' && depositsOn !== false ? computeDepositMinor(price, service.deposit_type, service.deposit_value) : 0 };
     }),
   }));
 

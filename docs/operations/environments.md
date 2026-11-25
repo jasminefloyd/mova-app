@@ -77,3 +77,18 @@ Bootstrap (once, after migrations 0066 to 0071 are applied):
 3. Sign in at `/admin/signin` with that email. The first sign-in asks the user to scan an authenticator QR code and enter the six-digit code. Admin functions require this two-step session; the database checks it on every call.
 
 Admin actions are written to `mova_admin_activity`, which is append-only.
+
+## Connections › Meta (CN-D1, 2026-11-24)
+
+Meta stays off until the owner switches it on after Meta approves the app (owner decision O6). Edge Function secrets:
+
+| Secret | Value |
+|---|---|
+| `MOVA_META_CONNECT_ENABLED` | `true` to let stylists connect Meta (default off: the Meta page explains the steps and Connect is disabled) |
+| `MOVA_META_PROVIDER` | `meta` for the live Graph API, `fake` for local runs |
+| `MOVA_META_APP_ID`, `MOVA_META_APP_SECRET` | the Meta app's id and secret (the secret also verifies webhooks) |
+| `MOVA_META_REDIRECT_URI` | `https://<project>.supabase.co/functions/v1/meta-connect` (add it to the app's Valid OAuth Redirect URIs) |
+| `MOVA_META_VERIFY_TOKEN` | any long random string; enter the same one as the webhook verify token in the Meta app |
+| `MOVA_META_GRAPH_VERSION` | optional, defaults to `v23.0` |
+
+Webhook callback URL in the Meta app: `https://<project>.supabase.co/functions/v1/instagram-webhook`, subscribed to `messages` for both Instagram and Page. Concierge replies also need `MOVA_INSTAGRAM_CONCIERGE_ENABLED=true` and the Concierge switched on.

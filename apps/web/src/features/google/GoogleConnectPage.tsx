@@ -41,7 +41,7 @@ export function GoogleConnectPage() {
   ];
 
   return <main className="mova-page mova-google-page mova-google-connect">
-    <ScreenHeader onBack={() => navigate(operatorUrl(businessId, 'settings/google'))} backLabel={t('google.back')} />
+    <ScreenHeader onBack={() => navigate(operatorUrl(businessId, 'settings/connections/google'))} backLabel={t('google.back')} />
     <div className="mova-google-connect__intro">
       <h1>{t('google.connect.title')}</h1>
       <p>{t('google.connect.intro')}</p>

@@ -68,6 +68,13 @@ export function buildAlert(eventType: string, context: AlertContext, localeInput
         body: es ? `${service} con ${client} a las ${when(appointment.starts_at, appointment.time_zone, locale, 'time')}${appointment.location_name ? ` · ${appointment.location_name}` : ''}`
           : `${service} with ${client} at ${when(appointment.starts_at, appointment.time_zone, locale, 'time')}${appointment.location_name ? ` · ${appointment.location_name}` : ''}` };
     }
+    case 'new_google_review': {
+      if (!context.review) return null;
+      const stars = context.review.rating;
+      return { event, tag: `google-review-${stars}-${context.review.name}`, path: 'reports/reputation', actionLabel: es ? 'Responder' : 'Reply',
+        title: es ? `Nueva reseña de ${stars} estrellas en Google` : `New ${stars}-star Google review`,
+        body: context.review.body ? `${context.review.name}: ${quote(clip(context.review.body), locale)}` : context.review.name };
+    }
     case 'new_review': {
       if (!context.review) return null;
       const stars = context.review.rating;

@@ -179,7 +179,7 @@ export function ReputationPage() {
       : error
         ? <ErrorState title={t('reviews.error')} retryLabel={t('reviews.retry')} onRetry={() => void load()} />
         : <>
-          {!isSettings && <Link className="mova-google-reputation-link" to={operatorUrl(businessId, 'settings/google')}>
+          {!isSettings && <Link className="mova-google-reputation-link" to={operatorUrl(businessId, 'settings/connections/google')}>
             <span><i aria-hidden="true" />{googleConnection?.status === 'active' ? t('google.reply.connectedRow') : t('google.reply.notConnectedRow')}</span><span aria-hidden="true">›</span>
           </Link>}
           <Card className="mova-reputation-summary">
@@ -207,7 +207,7 @@ export function ReputationPage() {
             <p>{t('reviews.googleImportOff')}</p>
             {settings.google_review_url && <a href={settings.google_review_url} target="_blank" rel="noreferrer">{t('reviews.openGoogle')}</a>}
           </Card>}
-          {isSettings && <Link className="mova-google-reputation-link" to={operatorUrl(businessId, 'settings/google')}>
+          {isSettings && <Link className="mova-google-reputation-link" to={operatorUrl(businessId, 'settings/connections/google')}>
             <span>{googleConnection?.status === 'active' ? t('google.reply.connectedRow') : t('google.reply.notConnectedRow')}</span><span aria-hidden="true">›</span>
           </Link>}
           {googleNotice && <p role="status">{googleNotice}</p>}

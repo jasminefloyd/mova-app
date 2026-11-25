@@ -26,14 +26,14 @@ Deno.serve(withSystemRequestLogging('review-management', async (request) => {
     const googleEnabled = Deno.env.get('MOVA_GOOGLE_REVIEWS_ENABLED') === 'true' && Deno.env.get('MOVA_PUBLIC_REVIEWS_ENABLED') === 'true';
     const [{ data: reviews, error: reviewsError }, { data: settings, error: settingsError }, { data: google, error: googleError }, { data: summary, error: summaryError }] = await Promise.all([
       actor.client.from('mova_reviews').select('id,rating,tags,body,display_name,locale,moderation_status,artist_reply,artist_replied_at,reply_emailed_at,ai_reply_suggestion,created_at,appointment_id,mova_appointments(service_name_snapshot)').eq('artist_business_id', actor.businessId).order('created_at', { ascending: false }).limit(100),
-      actor.client.from('mova_review_settings').select('ask_after_visit,google_review_url').eq('artist_business_id', actor.businessId).maybeSingle(),
+      actor.client.from('mova_review_settings').select('ask_after_visit,google_review_url,google_import_enabled,google_synced_at').eq('artist_business_id', actor.businessId).maybeSingle(),
       actor.client.from('mova_google_reviews').select('id,rating,body,display_name,provider_created_at,provider_updated_at,reply_body,reply_status,reply_posted_at,ai_reply_suggestion').eq('artist_business_id', actor.businessId).order('provider_created_at', { ascending: false }).limit(100),
       db.rpc('mova_reputation_summary', { p_artist_business_id: actor.businessId, p_include_google: googleEnabled }),
     ]);
     if (reviewsError || settingsError || googleError || summaryError) return respond({ code: 'REVIEWS_READ_FAILED' }, 500);
     // No mail sender is installed in the P11 outbox pipeline. An environment
     // toggle alone must never make review requests appear deliverable.
-    return respond({ reviews: reviews ?? [], settings: settings ?? { ask_after_visit: false, google_review_url: null }, google_reviews: googleEnabled ? google ?? [] : [], summary, google_import_enabled: googleEnabled, email_delivery_enabled: false,
+    return respond({ reviews: reviews ?? [], settings: settings ?? { ask_after_visit: false, google_review_url: null, google_import_enabled: true, google_synced_at: null }, google_reviews: googleEnabled ? google ?? [] : [], summary, google_import_enabled: googleEnabled, email_delivery_enabled: false,
       reply_email_enabled: reviewReplyEmailProvider() !== null, ai_reply_available: replyWriterFromEnv(env) !== null });
   }
   if (body.action === 'save_settings') {
@@ -93,7 +93,17 @@ Deno.serve(withSystemRequestLogging('review-management', async (request) => {
     if (error) return respond({ code: error.message || 'REVIEW_REPORT_FAILED' }, 422);
     return respond({ report_id: data, queued_for_platform_review: true });
   }
+  // Connections › Google › Google reviews (CN4): the stylist's own switch for importing Google reviews and
+  // replying from Mova. Turning it off keeps the reviews already imported.
+  if (body.action === 'set_google_import') {
+    if (typeof body.enabled !== 'boolean') return respond({ code: 'REVIEW_SETTINGS_INVALID' }, 422);
+    const { error } = await db.from('mova_review_settings').upsert({ artist_business_id: actor.businessId, google_import_enabled: body.enabled, updated_at: new Date().toISOString() }, { onConflict: 'artist_business_id' });
+    if (error) return respond({ code: 'REVIEW_SETTINGS_SAVE_FAILED' }, 500);
+    return respond({ google_import_enabled: body.enabled });
+  }
   if (body.action === 'reply_google' || body.action === 'delete_google_reply') {
+    const { data: importSwitch } = await db.from('mova_review_settings').select('google_import_enabled').eq('artist_business_id', actor.businessId).maybeSingle();
+    if (importSwitch?.google_import_enabled === false) return respond({ code: 'GOOGLE_REVIEWS_TURNED_OFF' }, 409);
     // Replies to Google reviews are posted through the one Google connection. Nothing is saved as posted
     // until Google accepts it, and nothing changes at all when Google is not configured.
     if (typeof body.review_id !== 'string') return respond({ code: 'REVIEW_REPLY_INVALID' }, 422);

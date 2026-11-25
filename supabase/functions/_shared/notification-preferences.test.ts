@@ -53,7 +53,7 @@ describe('per-event notification preferences', () => {
   it('starts every event with email and push on', () => {
     const events = resolveEventPreferences(null);
     expect(Object.values(events).every((row) => row.email && row.push)).toBe(true);
-    expect(Object.keys(events)).toEqual(['booking_request', 'cancellation', 'client_message', 'appointment_reminder', 'new_review']);
+    expect(Object.keys(events)).toEqual(['booking_request', 'cancellation', 'client_message', 'appointment_reminder', 'new_review', 'new_google_review']);
   });
 
   it('keeps a legacy account-wide email opt-out until an event is turned back on', () => {
@@ -71,6 +71,7 @@ describe('per-event notification preferences', () => {
   it('maps outbox events to stylist alerts', () => {
     expect(notificationEventFor('appointment.pending_artist')).toBe('booking_request');
     expect(notificationEventFor('review.created')).toBe('new_review');
+    expect(notificationEventFor('google_review.created')).toBe('new_google_review');
     expect(notificationEventFor('appointment.confirmed')).toBeNull();
   });
 });

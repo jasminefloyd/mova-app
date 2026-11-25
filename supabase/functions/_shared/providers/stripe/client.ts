@@ -71,6 +71,41 @@ export class StripeTestClient {
     return result;
   }
 
+  /**
+   * Connections › Stripe (CN3): the next payout on its way to the stylist's bank, if any. Stripe lists
+   * pending and in-transit payouts; the one arriving first is the next payout.
+   */
+  async retrieveNextPayout(accountId: string): Promise<{ amount_minor: number; currency: string; arrival_date: string } | null> {
+    if (!/^acct_[A-Za-z0-9]+$/.test(accountId)) throw new Error('STRIPE_ACCOUNT_ID_INVALID');
+    const upcoming: Array<{ amount_minor: number; currency: string; arrival_date: string }> = [];
+    for (const status of ['pending', 'in_transit']) {
+      const response = await this.fetcher(`https://api.stripe.com/v1/payouts?limit=3&status=${status}`, {
+        headers: { Authorization: `Bearer ${this.secretKey}`, 'Stripe-Account': accountId },
+      });
+      const result = await response.json().catch(() => null) as StripeResponse | null;
+      if (!response.ok || !result) throw new Error('STRIPE_PAYOUTS_READ_FAILED');
+      for (const item of Array.isArray(result.data) ? result.data as StripeResponse[] : []) {
+        if (!Number.isSafeInteger(item.amount) || Number(item.amount) <= 0 || !Number.isSafeInteger(item.arrival_date) || typeof item.currency !== 'string') continue;
+        upcoming.push({ amount_minor: Number(item.amount), currency: item.currency.toUpperCase(), arrival_date: new Date(Number(item.arrival_date) * 1000).toISOString() });
+      }
+    }
+    upcoming.sort((a, b) => a.arrival_date.localeCompare(b.arrival_date));
+    return upcoming[0] ?? null;
+  }
+
+  /** Disconnects a Standard account from the platform (Stripe Connect OAuth deauthorize). */
+  async deauthorizeAccount(accountId: string, clientId: string) {
+    if (!/^acct_[A-Za-z0-9]+$/.test(accountId) || !/^ca_[A-Za-z0-9]+$/.test(clientId)) throw new Error('STRIPE_DEAUTHORIZE_INVALID');
+    const response = await this.fetcher('https://connect.stripe.com/oauth/deauthorize', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${this.secretKey}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ client_id: clientId, stripe_user_id: accountId }).toString(),
+    });
+    const result = await response.json().catch(() => null) as StripeResponse | null;
+    // Already disconnected on Stripe's side counts as done.
+    if (!response.ok && !(result && typeof result.error === 'string' && result.error === 'invalid_client')) throw new Error('STRIPE_DEAUTHORIZE_FAILED');
+  }
+
   /** Express accounts only: a single-use link into the Express dashboard. */
   async createExpressLoginLink(accountId: string) {
     if (!/^acct_[A-Za-z0-9]+$/.test(accountId)) throw new Error('STRIPE_ACCOUNT_ID_INVALID');

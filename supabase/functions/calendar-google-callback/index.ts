@@ -17,7 +17,7 @@ Deno.serve(withSystemRequestLogging('calendar-google-callback', async (request) 
   const { data: consumed } = await db.from('mova_google_oauth_states').update({ consumed_at: new Date().toISOString() }).eq('id', stateRow.id).is('consumed_at', null).select('id').maybeSingle();
   if (!consumed) return redirect('/auth?google=connect_error');
   const businessId = stateRow.artist_business_id as string;
-  const failed = () => redirect(`/${encodeURIComponent(businessId)}/settings/google?google=connect_error`);
+  const failed = () => redirect(`/${encodeURIComponent(businessId)}/settings/connections/google?google=connect_error`);
   try {
     const provider = googleProvider(request);
     const redirectUri = Deno.env.get('GOOGLE_OAUTH_REDIRECT_URI');
@@ -38,7 +38,7 @@ Deno.serve(withSystemRequestLogging('calendar-google-callback', async (request) 
     }, { onConflict: 'artist_business_id' });
     if (error) throw new Error('GOOGLE_CONNECTION_SAVE_FAILED');
     await db.from('mova_calendar_sync_settings').upsert({ artist_business_id: businessId, google_enabled: token.grantedScopes.includes(GOOGLE_CALENDAR_SCOPE) }, { onConflict: 'artist_business_id' });
-    return redirect(`/${encodeURIComponent(businessId)}/settings/google?google=connected`);
+    return redirect(`/${encodeURIComponent(businessId)}/settings/connections/google?google=connected`);
   } catch {
     return failed();
   }

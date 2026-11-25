@@ -1,0 +1,125 @@
+/* Connections (CN1–CN8). Tokens only; every target is at least 44px; nothing has a fixed width, so 320px does not scroll. */
+.mova-conn-page { display: flex; flex-direction: column; gap: var(--space-4); padding-bottom: var(--space-8); min-width: 0; }
+.mova-conn-page > h1, .mova-conn-head h1 { margin: 0; font: 800 var(--fs-display-xl)/1.1 var(--font-display); letter-spacing: -.4px; color: var(--forest); }
+.mova-conn-head { display: flex; flex-direction: column; gap: var(--space-1); }
+.mova-conn-lead { margin: 0; font-size: var(--fs-body-s); line-height: 1.45; color: var(--ink-muted); }
+.mova-conn-section { margin: var(--space-2) 2px calc(-1 * var(--space-1)); font-size: var(--fs-micro); font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--ink-muted); }
+.mova-conn-list { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius-2xl); background: var(--surface); overflow: hidden; }
+.mova-conn-row { display: flex; align-items: center; gap: var(--space-3); min-height: 64px; padding: var(--space-3) var(--space-4); color: var(--ink-primary); text-decoration: none; min-width: 0; }
+.mova-conn-row + .mova-conn-row { border-top: 1px solid var(--line-subtle); }
+.mova-conn-row[aria-current='page'] { background: var(--surface-alt); box-shadow: inset 3px 0 0 var(--forest); }
+.mova-conn-row__name { flex: 1; min-width: 0; font-size: var(--fs-body); color: var(--forest); overflow-wrap: anywhere; }
+.mova-conn-row > .mova-icon:last-child, .mova-conn-row > svg:last-child { flex: none; color: var(--ink-muted); }
+
+.mova-conn-logo { flex: none; width: 44px; height: 44px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); display: inline-flex; align-items: center; justify-content: center; overflow: hidden; }
+.mova-conn-logo img { display: block; object-fit: contain; }
+.mova-conn-logo--stripe { border: 0; background: #635BFF; }
+
+.mova-conn-pill { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: var(--radius-pill); font-size: var(--fs-micro); font-weight: 700; white-space: nowrap; }
+.mova-conn-pill.is-on { background: var(--mint); color: var(--forest); }
+.mova-conn-pill.is-off { background: var(--surface-alt); color: var(--ink-muted); }
+.mova-conn-pill.is-warn { background: color-mix(in srgb, var(--danger) 14%, var(--surface)); color: var(--danger); }
+.mova-conn-pill.is-wait { background: var(--surface-warm); color: var(--ink-secondary); }
+
+.mova-conn-account { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-2xl); background: var(--forest); color: var(--ivory); min-width: 0; }
+.mova-conn-account .mova-conn-logo { border-color: transparent; }
+.mova-conn-account__who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mova-conn-account__who strong { font-size: var(--fs-body); overflow-wrap: anywhere; }
+.mova-conn-account__who > span { font-size: var(--fs-caption); color: var(--mint); line-height: 1.35; }
+
+.mova-conn-card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-2xl); background: var(--surface); min-width: 0; }
+.mova-conn-card h2 { margin: 0; font: 700 var(--fs-display-s)/1.25 var(--font-display); color: var(--forest); }
+.mova-conn-card__head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); }
+.mova-conn-card__head > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mova-conn-card__head > span > span { font-size: var(--fs-body-s); color: var(--ink-muted); line-height: 1.4; }
+.mova-conn-card .mova-toggle { min-height: 48px; }
+.mova-conn-card .mova-toggle + .mova-toggle, .mova-conn-card .mova-toggle + .mova-conn-linkrow, .mova-conn-card .mova-conn-linkrow + .mova-toggle { border-top: 1px solid var(--line-subtle); padding-top: var(--space-3); }
+
+.mova-conn-uses { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: var(--fs-body-s); line-height: 1.4; color: var(--ink-primary); }
+.mova-conn-uses li { display: flex; gap: 10px; align-items: flex-start; }
+.mova-conn-uses li > :first-child { flex: none; margin-top: 1px; color: var(--botanical); }
+.mova-conn-uses a { font-weight: 700; color: var(--forest); }
+
+.mova-conn-dl { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; row-gap: 10px; column-gap: var(--space-3); font-size: var(--fs-body-s); align-items: center; }
+.mova-conn-dl dt { color: var(--ink-muted); }
+.mova-conn-dl dd { margin: 0; font-weight: 700; text-align: right; color: var(--ink-primary); overflow-wrap: anywhere; }
+
+.mova-conn-note { margin: 0; padding: 10px 12px; border-radius: var(--radius-l); background: var(--surface-page); font-size: var(--fs-caption); line-height: 1.45; color: var(--ink-secondary); }
+.mova-conn-note.is-outlined { background: var(--surface); border: 1px solid var(--line); }
+.mova-conn-note.is-warn { background: color-mix(in srgb, var(--danger) 12%, var(--surface)); color: var(--ink-primary); }
+.mova-conn-foot { margin: 0; font-size: var(--fs-caption); line-height: 1.45; color: var(--ink-muted); }
+.mova-conn-foot a { color: var(--forest); font-weight: 700; }
+.mova-conn-small { font-size: var(--fs-micro); line-height: 1.4; color: var(--ink-muted); text-align: center; }
+
+.mova-conn-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.mova-conn-tile { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; min-height: 44px; border-radius: var(--radius-l); background: var(--surface-page); color: var(--ink-primary); text-decoration: none; min-width: 0; }
+.mova-conn-tile > span { font-size: var(--fs-micro); color: var(--ink-muted); }
+.mova-conn-tile strong { display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-body-s); }
+
+.mova-conn-linkrow { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 48px; color: var(--ink-primary); text-decoration: none; }
+.mova-conn-linkrow > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mova-conn-linkrow strong { font-size: var(--fs-body); }
+.mova-conn-linkrow > span > span { font-size: var(--fs-caption); color: var(--ink-muted); line-height: 1.35; }
+.mova-conn-linkrow > :last-child { flex: none; color: var(--ink-muted); }
+.mova-conn-linkcard { flex-direction: row; align-items: center; text-decoration: none; color: var(--ink-primary); }
+.mova-conn-linkcard > span:nth-child(2) { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mova-conn-linkcard strong { font-size: var(--fs-body); color: var(--forest); }
+.mova-conn-linkcard > span:nth-child(2) > span { font-size: var(--fs-caption); color: var(--ink-muted); }
+
+.mova-conn-field { display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--fs-caption); font-weight: 600; color: var(--ink-secondary); }
+.mova-conn-field select { min-height: var(--input-h, 48px); padding-inline: var(--space-3); border-radius: var(--radius-l); border: 1px solid var(--line-control); background: var(--surface); color: var(--ink-primary); font: 600 var(--fs-body-l) var(--font-body, 'DM Sans', sans-serif); width: 100%; }
+.mova-conn-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--fs-body-s); line-height: 1.45; color: var(--ink-primary); }
+.mova-conn-feed { padding: 12px; border-radius: var(--radius-l); background: var(--surface-page); font: 500 13px ui-monospace, Menlo, monospace; color: var(--ink-primary); overflow-wrap: anywhere; }
+.mova-conn-actions { display: flex; flex-direction: column; gap: var(--space-2); }
+.mova-conn-actions > * { width: 100%; }
+.mova-conn-danger { color: var(--danger); }
+.mova-conn-full { width: 100%; }
+.mova-conn-message { margin: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-xl); background: var(--surface-warm); color: var(--ink-secondary); font-size: var(--fs-body-s); line-height: 1.45; }
+.mova-conn-message.is-error { background: color-mix(in srgb, var(--danger) 14%, var(--surface)); color: var(--danger); }
+.mova-conn-sheet { display: flex; flex-direction: column; gap: var(--space-3); }
+.mova-conn-sheet p { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--ink-secondary); }
+.mova-conn-sheet button { width: 100%; }
+
+/* CN8: on wide screens the hub stays on the left and the chosen connection opens beside it. */
+.mova-conn-split { display: block; }
+.mova-conn-split__hub { display: none; }
+@media (min-width: 1024px) {
+  .mova-conn-split { display: grid; grid-template-columns: minmax(320px, 420px) minmax(0, 1fr); gap: var(--space-8); align-items: start; }
+  .mova-conn-split__hub { display: flex; flex-direction: column; gap: var(--space-4); position: sticky; top: var(--space-4); }
+  .mova-conn-split__detail { padding: var(--space-7, 28px); border: 1px solid var(--line); border-radius: var(--radius-2xl); background: var(--surface); }
+  .mova-conn-split__detail .mova-conn-card { background: var(--surface-page); }
+  .mova-conn-split__detail .mova-screen-header { display: none; }
+}
+@media (max-width: 340px) { .mova-conn-tiles { grid-template-columns: minmax(0, 1fr); } }
+
+/* Layout details shared by the five pages. */
+.mova-conn-detail { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+.mova-conn-detail > h1 { margin: 0; font: 800 var(--fs-display-xl)/1.1 var(--font-display); letter-spacing: -.4px; color: var(--forest); }
+.mova-conn-group { display: flex; flex-direction: column; gap: var(--space-2); }
+h2.mova-conn-section { font-family: inherit; }
+.mova-conn-current > .mova-conn-row { background: var(--surface-alt); box-shadow: inset 3px 0 0 var(--forest); }
+.mova-conn-current + .mova-conn-row, .mova-conn-row + .mova-conn-current { border-top: 1px solid var(--line-subtle); }
+.mova-conn-crumbs { display: none; }
+.mova-conn-split__title { margin: 0; font: 800 var(--fs-display-xl)/1.1 var(--font-display); letter-spacing: -.4px; color: var(--forest); }
+
+/* Switches read like the design: title and hint on the left, the switch on the right. */
+.mova-conn-card > .mova-toggle { display: flex; justify-content: space-between; width: 100%; }
+.mova-conn-card > .mova-toggle > span:first-child { gap: 2px; font-size: var(--fs-body); font-weight: 700; color: var(--ink-primary); }
+.mova-conn-card > .mova-toggle > span:first-child small { font-size: var(--fs-caption); color: var(--ink-muted); line-height: 1.35; }
+.mova-conn-card__head .mova-toggle > span:first-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.mova-conn-card > .mova-toggle + .mova-toggle, .mova-conn-card > .mova-toggle + .mova-conn-linkrow, .mova-conn-card > .mova-conn-linkrow + .mova-toggle, .mova-conn-card > .mova-conn-field + .mova-conn-linkrow { border-top: 1px solid var(--line-subtle); padding-top: var(--space-3); }
+
+.mova-conn-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: var(--radius-l); background: var(--surface-alt); }
+.mova-conn-seg span { min-height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: var(--fs-body-s); font-weight: 600; color: var(--ink-secondary); }
+.mova-conn-seg .is-selected { background: var(--surface); color: var(--forest); box-shadow: 0 1px 2px rgba(24, 57, 47, .15); }
+.mova-conn-seg [aria-disabled='true'] { color: var(--ink-muted); }
+.mova-conn-fieldset { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; }
+.mova-conn-fieldset legend { padding: 0 0 4px; font-size: var(--fs-caption); font-weight: 600; color: var(--ink-secondary); }
+
+@media (min-width: 1024px) {
+  .mova-page.mova-conn-page--wide { width: min(100% - 2 * var(--gutter), 1200px); }
+  .mova-conn-crumbs { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-body-s); color: var(--ink-muted); }
+  .mova-conn-crumbs a { color: var(--ink-muted); text-decoration: none; }
+  .mova-conn-crumbs a:last-child { color: var(--forest); font-weight: 700; }
+  .mova-conn-split__detail > .mova-screen-header { display: none; }
+}

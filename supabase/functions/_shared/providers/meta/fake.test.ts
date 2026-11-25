@@ -6,7 +6,7 @@ const signed = async (body: unknown, secret = 'test-secret') => { const raw = JS
 describe('FakeInstagramProvider (task 5.5)', () => {
   it('parses a correctly signed message', async () => {
     const provider = new FakeInstagramProvider('test-secret');
-    expect(await provider.parseInbound(await signed({ page_id: 'page-1', sender_id: 'ig-77', text: 'Any openings Friday?', id: 'm-1' }))).toEqual({ pageId: 'page-1', senderId: 'ig-77', text: 'Any openings Friday?', messageId: 'm-1' });
+    expect(await provider.parseInbound(await signed({ page_id: 'page-1', sender_id: 'ig-77', text: 'Any openings Friday?', id: 'm-1' }))).toEqual({ pageId: 'page-1', senderId: 'ig-77', text: 'Any openings Friday?', messageId: 'm-1', channel: 'instagram' });
   });
   it('rejects a bad signature, a missing secret and incomplete payloads', async () => {
     expect(await new FakeInstagramProvider('test-secret').parseInbound(await signed({ page_id: 'p', sender_id: 's', text: 't', id: 'i' }, 'other'))).toBeNull();

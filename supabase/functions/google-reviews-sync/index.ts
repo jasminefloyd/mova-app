@@ -1,6 +1,7 @@
 import { withSystemRequestLogging } from '../_shared/system-log.ts';
 import { artistClient, corsHeaders, respond, serviceClient } from '../_shared/booking.ts';
-import { accessTokenFor, businessProfileReady, googleProvider, loadConnection } from '../_shared/google-connection.ts';
+import { googleProvider } from '../_shared/google-connection.ts';
+import { syncGoogleReviews } from '../_shared/google-review-sync.ts';
 import { platformSwitchEnabled } from '../_shared/platform-switch.ts';
 
 // Task 5.9 / P6: import the stylist's Google reviews through the one Google connection. Needs the platform
@@ -18,20 +19,7 @@ Deno.serve(withSystemRequestLogging('google-reviews-sync', async (request) => {
   const provider = googleProvider(request);
   if (!provider) return respond({ code: 'GOOGLE_NOT_CONFIGURED', synced: false }, 503);
   const db = serviceClient();
-  const { data: features } = await db.rpc('mova_stylist_features', { p_artist_business_id: actor.businessId });
-  if (features?.google_review_import !== true) return respond({ code: 'GOOGLE_IMPORT_TURNED_OFF', synced: false }, 409);
-  const connection = await loadConnection(db, actor.businessId).catch(() => null);
-  if (!businessProfileReady(connection)) return respond({ code: 'GOOGLE_LOCATION_NOT_SET', synced: false }, 409);
-  let reviews;
-  try { reviews = await provider.listReviews(await accessTokenFor(provider, connection), connection.business_location_id!); } catch { return respond({ code: 'GOOGLE_FETCH_FAILED', synced: false }, 502); }
-  const now = new Date().toISOString();
-  if (reviews.length) {
-    const { error } = await db.from('mova_google_reviews').upsert(reviews.map((review) => ({
-      artist_business_id: actor.businessId, provider_review_id: review.id, rating: review.rating, body: review.body, display_name: review.displayName,
-      provider_created_at: review.createdAt, provider_updated_at: review.updatedAt, synced_at: now,
-    })), { onConflict: 'artist_business_id,provider_review_id' });
-    if (error) return respond({ code: 'GOOGLE_REVIEWS_SAVE_FAILED', synced: false }, 500);
-  }
-  await db.from('mova_review_settings').update({ google_synced_at: now }).eq('artist_business_id', actor.businessId);
-  return respond({ synced: true, imported: reviews.length, provider: provider.name, live: provider.live });
+  const result = await syncGoogleReviews(db, provider, actor.businessId);
+  if (!result.synced) return respond({ code: result.code, synced: false }, result.status);
+  return respond({ synced: true, imported: result.imported, provider: provider.name, live: provider.live });
 }));

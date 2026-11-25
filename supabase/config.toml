@@ -121,6 +121,10 @@ verify_jwt = false
 [functions.calendar-google-callback]
 verify_jwt = false
 
+# Connections › Meta (CN5): Meta's sign-in redirect arrives without a Mova session; POST actions check the stylist's session.
+[functions.meta-connect]
+verify_jwt = false
+
 [functions.calendar-sync-run]
 verify_jwt = false
 

@@ -40,6 +40,7 @@ export function GetPaidPage() {
   const [otherLabel, setOtherLabel] = useState('');
   const [settings, setSettings] = useState({ cash_enabled: true, other_enabled: true });
   const [stripeReady, setStripeReady] = useState(false);
+  const [payLinksOn, setPayLinksOn] = useState(true);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
@@ -60,7 +61,7 @@ export function GetPaidPage() {
       const [{ data: paymentLocation }, { data: stripe }, { data: methods }, { data: services }] = await Promise.all([
         client.from('mova_locations').select('name,payment_collector,time_zone').eq('id', a.location_id).eq('artist_business_id', businessId).maybeSingle(),
         client.from('mova_stripe_connections').select('status,charges_enabled,account_type').eq('artist_business_id', businessId).maybeSingle(),
-        client.from('mova_payment_method_settings').select('cash_enabled,other_enabled').eq('artist_business_id', businessId).maybeSingle(),
+        client.from('mova_payment_method_settings').select('cash_enabled,other_enabled,pay_links_enabled').eq('artist_business_id', businessId).maybeSingle(),
         client.from('mova_appointment_services').select('position,service_name_snapshot').eq('appointment_id', a.id).eq('artist_business_id', businessId).order('position'),
       ]);
       setAppointment(a as Appointment);
@@ -68,7 +69,7 @@ export function GetPaidPage() {
       setCollector(paymentLocation?.payment_collector === 'salon' ? 'salon' : 'artist');
       setAmount(((a.balance_due_minor ?? 0) / 100).toFixed(2));
       setStripeReady(Boolean(stripe?.status === 'active' && stripe.charges_enabled));
-      if (methods) setSettings(methods);
+      if (methods) { setSettings({ cash_enabled: methods.cash_enabled, other_enabled: methods.other_enabled }); setPayLinksOn(methods.pay_links_enabled !== false); }
     } catch {
       setError(true);
     } finally {
@@ -186,13 +187,14 @@ export function GetPaidPage() {
       </OptionGroup></fieldset>
       {method === 'card' ? <section className="mova-get-paid__card-flow">
         <p className="mova-get-paid__status">{t('money.processedByStripe')}</p>
-        {stripeReady ? <>
+        {stripeReady && !payLinksOn ? <Card tone="warm" className="mova-get-paid__notice"><p>{t('connections.stripe.payLinksOffNotice')}</p><Button type="button" variant="secondary" onClick={() => navigate(operatorUrl(businessId, 'settings/connections/stripe'))}>{t('connections.stripe.openStripeConnection')}</Button></Card>
+        : stripeReady ? <>
           <OptionGroup label={t('money.cardDelivery')}>
             <RadioCard name="card-delivery" value="text" label={t('money.textPayLink', { name: appointment.client_name })} description={t('money.paysOnPhone')} checked={cardMode === 'text'} onChange={() => setCardMode('text')} />
             <RadioCard name="card-delivery" value="qr" label={t('money.showPayQr')} description={t('money.clientScansAtChair')} checked={cardMode === 'qr'} onChange={() => setCardMode('qr')} />
           </OptionGroup>
           <p>{t('money.cardFeeNotice', { rate: feeRate, fee: currency(Math.round(balance * feeBps / 10000)) })}</p>
-        </> : <Card tone="warm" className="mova-get-paid__notice"><p>{t('money.stripeNotConnected')}</p><Button type="button" variant="secondary" onClick={() => navigate(operatorUrl(businessId, 'settings/payments'))}>{t('money.paymentSettings')}</Button></Card>}
+        </> : <Card tone="warm" className="mova-get-paid__notice"><p>{t('money.stripeNotConnected')}</p><Button type="button" variant="secondary" onClick={() => navigate(operatorUrl(businessId, 'settings/connections/stripe'))}>{t('connections.stripe.openStripeConnection')}</Button></Card>}
         {linkError && <p className="mova-field__error" role="alert">{linkError}</p>}
       </section> : <>
         <p className="mova-get-paid__recorded-status"><IconStatus />{t('money.recordedOnly')}</p>
@@ -203,7 +205,7 @@ export function GetPaidPage() {
       {error && <p role="alert">{t('money.recordError')}</p>}
       <footer className="mova-get-paid__actions">
         {method === 'card'
-          ? <Button type="button" loading={busy} disabled={!stripeReady || balance <= 0} onClick={() => void createLink()}>{cardMode === 'text' ? t('money.sendPayLink', { amount: currency(balance) }) : t('money.showPayQr')}</Button>
+          ? <Button type="button" loading={busy} disabled={!stripeReady || !payLinksOn || balance <= 0} onClick={() => void createLink()}>{cardMode === 'text' ? t('money.sendPayLink', { amount: currency(balance) }) : t('money.showPayQr')}</Button>
           : <Button type="button" loading={busy} disabled={amountMinor <= 0 || amountMinor > balance || (method === 'other' && !otherLabel.trim())} onClick={() => void save()}>{method === 'cash' ? t('money.saveCashPayment') : t('money.savePayment', { amount: currency(amountMinor) })}</Button>}
       </footer>
     </>}

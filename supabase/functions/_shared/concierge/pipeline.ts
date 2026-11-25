@@ -6,7 +6,7 @@ import type { ConciergeModel } from '../providers/ai/types.ts';
 import { handleTurn, type OpenTime, type TurnKnowledge, type TurnResult } from './turn.ts';
 import { replies, type Locale } from './replies.ts';
 
-export type ConciergeChannelName = 'web_chat' | 'sms' | 'instagram';
+export type ConciergeChannelName = 'web_chat' | 'sms' | 'instagram' | 'messenger';
 export type Delivery = { persisted: boolean; status: 'delivered' | 'sent' | 'suppressed' | 'failed'; provider?: string; providerMessageId?: string };
 export type ConciergeChannel = {
   name: ConciergeChannelName;

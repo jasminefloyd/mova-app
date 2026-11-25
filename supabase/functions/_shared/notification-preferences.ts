@@ -50,8 +50,11 @@ export function resolveInAppNotificationPreference(
   return resolved.ok ? { ok: true, enabled: resolved.preferences.in_app } : { ok: false };
 }
 
-/** The five stylist alerts on Settings › Language & notifications, each with an email and a push switch. */
-export const NOTIFICATION_EVENTS = ['booking_request', 'cancellation', 'client_message', 'appointment_reminder', 'new_review'] as const;
+/**
+ * The stylist alerts on Settings › Language & notifications, each with an email and a push switch.
+ * new_google_review is also switched from Connections › Google › Google reviews (CN4).
+ */
+export const NOTIFICATION_EVENTS = ['booking_request', 'cancellation', 'client_message', 'appointment_reminder', 'new_review', 'new_google_review'] as const;
 export type NotificationEvent = typeof NOTIFICATION_EVENTS[number];
 export type EventChannels = { email: boolean; push: boolean };
 export type EventPreferences = Record<NotificationEvent, EventChannels>;
@@ -91,5 +94,6 @@ export function notificationEventFor(eventType: string): NotificationEvent | nul
   if (eventType === 'message.received') return 'client_message';
   if (eventType === 'appointment.stylist_reminder') return 'appointment_reminder';
   if (eventType === 'review.created') return 'new_review';
+  if (eventType === 'google_review.created') return 'new_google_review';
   return null;
 }

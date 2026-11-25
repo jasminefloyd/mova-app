@@ -8,7 +8,7 @@ import { useLocale } from '../../app/LocaleProvider';
 import { useArtistBusiness } from '../settings/useArtistBusiness';
 import { usePushDevice, type PushDeviceState } from '../../pwa/usePushDevice';
 
-export const NOTIFICATION_EVENTS = ['booking_request', 'cancellation', 'client_message', 'appointment_reminder', 'new_review'] as const;
+export const NOTIFICATION_EVENTS = ['booking_request', 'cancellation', 'client_message', 'appointment_reminder', 'new_review', 'new_google_review'] as const;
 export type NotificationEvent = typeof NOTIFICATION_EVENTS[number];
 type Channels = { email: boolean; push: boolean };
 export type EventPreferences = Record<NotificationEvent, Channels>;

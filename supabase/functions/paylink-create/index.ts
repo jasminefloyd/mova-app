@@ -20,6 +20,10 @@ Deno.serve(withSystemRequestLogging('paylink-create', async (request) => {
   if (typeof body.appointment_id !== 'string' || !['sms', 'qr'].includes(body.channel)
     || typeof idempotencyKey !== 'string' || idempotencyKey.length < 8 || idempotencyKey.length > 200) return respond({ code: 'INVALID_REQUEST' }, 422);
   const db = serviceClient();
+  // Connections › Stripe (CN3): the stylist can pause pay links and the pay QR code.
+  const { data: switches, error: switchesError } = await db.from('mova_payment_method_settings').select('pay_links_enabled').eq('artist_business_id', actor.businessId).maybeSingle();
+  if (switchesError) return respond({ code: 'PAYMENT_SETTINGS_READ_FAILED' }, 503);
+  if (switches && switches.pay_links_enabled === false) return respond({ code: 'PAY_LINKS_TURNED_OFF' }, 409);
   const { data: link, error } = await db.rpc('mova_stripe_paylink_prepare', {
     p_artist_business_id: actor.businessId, p_appointment_id: body.appointment_id, p_channel: body.channel, p_short_code: randomCode(), p_idempotency_key: idempotencyKey,
   });

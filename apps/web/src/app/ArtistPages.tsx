@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Avatar, Button, Card, EmptyState, Icon, IconButton, ListRow, ScreenHeader } from '../components';
+import { Avatar, Button, Card, EmptyState, Icon, ListRow, ScreenHeader } from '../components';
 import { HomeAppointments } from '../features/bookings/HomeAppointments';
 import { useArtistBusiness } from '../features/settings/useArtistBusiness';
 import { clearOfflineData } from '../pwa/offline-data';
 import { operatorUrl } from './operator-url';
 import { ReportsPage } from '../features/reports/ReportsPage';
 import { usePlan } from '../features/billing/PlanProvider';
-import { isLocked } from '../features/billing/plan-api';
 import '../features/billing/billing.css';
 import { FeedbackSheet } from '../features/settings/FeedbackSheet';
+import { connectedCount, loadConnectionStatuses } from '../features/connections/connections-api';
+
+const CONNECTION_TOTAL = 5;
 
 type Section = 'home' | 'calendar' | 'clients' | 'growth' | 'reports' | 'money';
 type SettingsProfile = { display_name: string; handle: string; is_published: boolean; search_index_enabled: boolean; photoUrl: string | null };
@@ -36,8 +38,7 @@ export function SettingsPage() {
   const [serviceCount, setServiceCount] = useState<number|null>(null);
   const [locationCount, setLocationCount] = useState<number|null>(null);
   const [paymentSummary, setPaymentSummary] = useState<string>('—');
-  const [calendarSummary, setCalendarSummary] = useState<string>('—');
-  const [googleSummary, setGoogleSummary] = useState<string>('—');
+  const [connectionsSummary, setConnectionsSummary] = useState<string>('—');
   const [signOutError, setSignOutError] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -50,27 +51,25 @@ export function SettingsPage() {
     : planSummary.trial?.state === 'trialing' ? t('settingsPlan.trialDays', { plan: planName('ai_growth'), count: planSummary.trial.days_left ?? 0 })
     : planSummary.trial?.state === 'ended_free' && planSummary.current_plan.plan_key === 'free' ? t('settingsPlan.trialEnded')
     : currentPlanName;
-  const lockBadge = (feature: string) => isLocked(planSummary, feature) ? <span className="mova-lock-badge"><Icon name="lock" size={12} />{t('planGate.badgePro')}</span> : null;
   const [publishError, setPublishError] = useState(false);
   useEffect(() => {
     if (!client || !businessId) return;
     let active = true;
     void (async()=>{
-      const [{data:profileData},{count:services},{count:locations},{data:paymentMethods},{data:stripe},{data:calendar}] = await Promise.all([
+      const [{data:profileData},{count:services},{count:locations},{data:paymentMethods},{data:stripe}] = await Promise.all([
         client.from('mova_artist_profiles').select('display_name,handle,is_published,search_index_enabled,profile_photo_path').eq('artist_business_id',businessId).maybeSingle(),
         client.from('mova_services').select('id',{count:'exact',head:true}).eq('artist_business_id',businessId).eq('status','active'),
         client.from('mova_locations').select('id',{count:'exact',head:true}).eq('artist_business_id',businessId).eq('is_active',true),
         client.from('mova_payment_method_settings').select('cash_enabled').eq('artist_business_id',businessId).maybeSingle(),
         client.from('mova_stripe_connections').select('status').eq('artist_business_id',businessId).maybeSingle(),
-        client.from('mova_google_connections').select('status,calendar_enabled,business_profile_enabled').eq('artist_business_id',businessId).maybeSingle(),
       ]);
       if (!active) return;
       setProfile(profileData ? { ...profileData, photoUrl: null } : null);
       setServiceCount(services??0);setLocationCount(locations??0);
       const enabled=[stripe?.status==='active'?'Stripe':null,(paymentMethods?.cash_enabled??true)?t('money.methods.cash'):null].filter(Boolean);
       setPaymentSummary(enabled.join(' · ')||t('settings.notConnected'));
-      setCalendarSummary(calendar?.status==='active'&&calendar.calendar_enabled?t('settings.connected'):t('settings.notConnected'));
-      setGoogleSummary(calendar?.status==='active'?t('settings.connected'):t('settings.notConnected'));
+      // "3 of 5 on": the same statuses the Connections hub shows.
+      void loadConnectionStatuses(client,businessId).then((statuses)=>{ if (active) setConnectionsSummary(t('connections.settingsSummary',{count:connectedCount(statuses),total:CONNECTION_TOTAL})); }).catch(()=>undefined);
       if (profileData?.profile_photo_path) {
         const { data } = await client.storage.from('mova_profile_photos').createSignedUrl(profileData.profile_photo_path, 300);
         if (active && data?.signedUrl) {
@@ -128,7 +127,6 @@ export function SettingsPage() {
         {showcaseStatus && <small>{currentPlanName ? t('settings.planAndShowcase', { plan: currentPlanName, status: showcaseStatus }) : showcaseStatus}</small>}
         {businessDisplayId && <small>{businessDisplayId.replace('-', ' ')}</small>}
       </span>
-      <IconButton className="mova-settings-profile__preview" label={t('settings.previewProfile')} icon="preview" disabled={!profile?.handle} onClick={() => navigate(operatorUrl(businessId, 'settings/profile/preview'))} />
     </Card>
     <div className="mova-settings-actions">{profile?.is_published
       ? <Button variant="secondary" disabled={!publicUrl} onClick={()=>publicUrl&&window.open(publicUrl,'_blank','noopener,noreferrer')}>{t('settings.viewMyPage')}</Button>
@@ -140,10 +138,9 @@ export function SettingsPage() {
       <ListRow title={t('settings.profilePortfolio')} trailing={<Icon name="chevron" size={18}/>} href={operatorUrl(businessId,'settings/profile')} />
       <ListRow title={t('settings.servicesPricesDeposits')} trailing={serviceCount===null?'—':String(serviceCount)} href={operatorUrl(businessId,'settings/services')} />
       <ListRow title={t('settings.locationsHours')} trailing={locationCount===null?'—':String(locationCount)} href={operatorUrl(businessId,'settings/locations')} />
+      {/* CN1: one Connections row replaces Calendar sync, Reviews & Google profile and Google · profile & calendar. */}
+      <ListRow title={t('connections.settingsRow')} trailing={connectionsSummary} href={operatorUrl(businessId,'settings/connections')} />
       <ListRow title={t('settings.paymentsPayouts')} trailing={paymentSummary} href={operatorUrl(businessId,'settings/payments')} />
-      <ListRow title={t('settings.calendarSync')} trailing={lockBadge('google_calendar_sync') ?? calendarSummary} href={operatorUrl(businessId,'settings/calendar-sync')} />
-      <ListRow title={t('settings.reviewsGoogle')} trailing={t('settings.notConnected')} href={operatorUrl(businessId,'settings/reviews')} />
-      <ListRow title={t('google.account.settingsRow')} trailing={googleSummary} href={operatorUrl(businessId,'settings/google')} />
       <ListRow title={t('settings.plan')} trailing={planTrailing} href={operatorUrl(businessId,'settings/plan')} />
       <ListRow title={t('settings.languageNotifications')} trailing={localeName} href={operatorUrl(businessId,'settings/notifications')} />
       <ListRow title={t('settings.privacyData')} href={operatorUrl(businessId,'settings/privacy')} />

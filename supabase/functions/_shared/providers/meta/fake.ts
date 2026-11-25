@@ -1,4 +1,4 @@
-import type { InstagramInbound, InstagramProvider } from './types.ts';
+import type { InstagramInbound, InstagramProvider, MetaChannel, MetaConnectProvider, MetaPage } from './types.ts';
 
 const encoder = new TextEncoder();
 const hex = (bytes: ArrayBuffer) => [...new Uint8Array(bytes)].map((value) => value.toString(16).padStart(2, '0')).join('');
@@ -35,8 +35,36 @@ export class FakeInstagramProvider implements InstagramProvider {
     if (!body) return null;
     const pick = (key: string, max: number) => typeof body[key] === 'string' && (body[key] as string).trim() && (body[key] as string).length <= max ? (body[key] as string).trim() : null;
     const pageId = pick('page_id', 64), senderId = pick('sender_id', 64), text = pick('text', 1000), messageId = pick('id', 128);
-    return pageId && senderId && text && messageId ? { pageId, senderId, text, messageId } : null;
+    const channel: MetaChannel = body.channel === 'messenger' ? 'messenger' : 'instagram';
+    return pageId && senderId && text && messageId ? { pageId, senderId, text, messageId, channel } : null;
   }
+}
+
+/**
+ * Fake connect flow (local runs and tests): the "Facebook Login" page is skipped and one sample Page with a
+ * linked Instagram account comes back. Never reaches Meta.
+ */
+export class FakeMetaConnectProvider implements MetaConnectProvider {
+  readonly name = 'fake';
+  readonly live = false;
+  readonly subscribed = new Set<string>();
+  constructor(private readonly callbackUrl: string) {}
+  authorizationUrl(state: string) {
+    const url = new URL(this.callbackUrl);
+    url.searchParams.set('code', 'fake-meta-code');
+    url.searchParams.set('state', state);
+    return url.toString();
+  }
+  exchangeCode(code: string) {
+    if (code !== 'fake-meta-code') return Promise.reject(new Error('META_CODE_INVALID'));
+    return Promise.resolve({ userToken: 'fake-user-token', scopes: ['pages_show_list', 'pages_messaging', 'instagram_manage_messages'] });
+  }
+  listPages(): Promise<MetaPage[]> {
+    return Promise.resolve([{ id: '100000000000001', name: 'Sample Hair Studio', accessToken: 'fake-page-token', instagram: { id: '178400000000001', username: 'samplehairstudio' } }]);
+  }
+  subscribePage(page: MetaPage) { this.subscribed.add(page.id); return Promise.resolve(); }
+  unsubscribePage(pageId: string) { this.subscribed.delete(pageId); return Promise.resolve(); }
+  revoke() { return Promise.resolve(); }
 }
 
 export function instagramProviderFromEnv(env: (name: string) => string | undefined): InstagramProvider | null {

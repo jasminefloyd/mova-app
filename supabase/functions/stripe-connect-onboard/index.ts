@@ -71,21 +71,40 @@ Deno.serve(withSystemRequestLogging('stripe-connect-onboard', async (request) =>
     return respond({ authorization_url: stripe.createConnectAuthorizationUrl(clientId, redirectUri, state) });
   }
   if (body.action === 'status') {
-    const { data, error } = await db.from('mova_stripe_connections').select('stripe_account_id,account_type,status,charges_enabled,payouts_enabled,details_submitted,last_checked_at')
+    const { data, error } = await db.from('mova_stripe_connections').select('stripe_account_id,account_type,status,charges_enabled,payouts_enabled,details_submitted,last_checked_at,created_at')
       .eq('artist_business_id', actor.businessId).maybeSingle();
     if (error) return respond({ code: 'STRIPE_CONNECTION_READ_FAILED' }, 500);
-    if (!data) return respond({ connected: null, payouts: null, dashboard_url: null, test_mode: true });
-    const { stripe_account_id: accountId, ...connected } = data;
+    if (!data || data.status === 'disconnected') return respond({ connected: null, payouts: null, next_payout: null, dashboard_url: null, test_mode: true });
+    const { stripe_account_id: accountId, created_at: connectedAt, ...rest } = data;
+    const connected = { ...rest, connected_at: connectedAt };
     let payouts = null;
+    let nextPayout = null;
     let dashboardUrl: string | null = 'https://dashboard.stripe.com/test/dashboard';
     if (data.status === 'active' && accountId) {
       // Task 3.2: payout bank and schedule are read from Stripe, never stored or edited in Mova.
       try { payouts = summarizePayouts(await stripe.retrieveConnectedAccount(accountId)); } catch { payouts = null; }
+      // Connections › Stripe (CN3): the next payout, read live from Stripe and never stored.
+      try { nextPayout = await stripe.retrieveNextPayout(accountId); } catch { nextPayout = null; }
       if (data.account_type === 'express') {
         try { dashboardUrl = await stripe.createExpressLoginLink(accountId); } catch { dashboardUrl = null; }
       }
     }
-    return respond({ connected, payouts, dashboard_url: dashboardUrl, test_mode: true });
+    return respond({ connected, payouts, next_payout: nextPayout, dashboard_url: dashboardUrl, test_mode: true });
+  }
+  // Connections › Stripe (CN3): disconnect. Card payments, pay links and deposits stop; recorded payments
+  // and past payouts are untouched.
+  if (body.action === 'disconnect') {
+    const { data, error } = await db.from('mova_stripe_connections').select('stripe_account_id,account_type,status').eq('artist_business_id', actor.businessId).maybeSingle();
+    if (error) return respond({ code: 'STRIPE_CONNECTION_READ_FAILED' }, 500);
+    if (!data?.stripe_account_id || data.status === 'disconnected') return respond({ disconnected: true });
+    if (data.account_type === 'standard') {
+      try { await stripe.deauthorizeAccount(data.stripe_account_id, clientId); } catch { return respond({ code: 'STRIPE_DISCONNECT_FAILED' }, 502); }
+    }
+    const { error: saveError } = await db.from('mova_stripe_connections').update({
+      status: 'disconnected', charges_enabled: false, payouts_enabled: false, updated_at: new Date().toISOString(),
+    }).eq('artist_business_id', actor.businessId);
+    if (saveError) return respond({ code: 'STRIPE_CONNECTION_SAVE_FAILED' }, 500);
+    return respond({ disconnected: true });
   }
   return respond({ code: 'INVALID_ACTION' }, 422);
 }));

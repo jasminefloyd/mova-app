@@ -35,12 +35,15 @@ async function mockConnection(page: Page) {
 test('TC-GOOGLE-CARRY-01 a carried-over calendar connection shows as connected with no reconnect', async ({ page }) => {
   await openOperatorPage(page, '/');
   await mockConnection(page);
+  // The old address forwards to Connections › Google (CN4).
   await page.goto('/BID-1/settings/google');
+  await expect(page).toHaveURL(/\/settings\/connections\/google$/);
 
-  await expect(page.getByRole('heading', { name: 'Google', exact: true })).toBeVisible();
-  await expect(page.getByText('ari.monroe@gmail.com')).toBeVisible();
-  await expect(page.getByText('Connected', { exact: false }).first()).toBeVisible();
-  await expect(page.getByRole('switch', { name: 'Sync Google Calendar' })).toBeChecked();
+  const detail = page.locator('.mova-conn-split__detail');
+  await expect(detail.getByRole('heading', { name: 'Google', exact: true, level: 1 })).toBeVisible();
+  await expect(detail.getByText('ari.monroe@gmail.com')).toBeVisible();
+  await expect(detail.getByText('Connected Oct 1 · one sign-in for everything')).toBeVisible();
+  await expect(detail.getByRole('link', { name: /Google Calendar/ })).toContainText('On');
   await expect(page.getByRole('switch', { name: 'Use Google Business Profile' })).not.toBeChecked();
   await expect(page.getByText('Turning this on needs one more Google permission. Your calendar stays connected.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Connect Google', exact: true })).toHaveCount(0);
@@ -49,7 +52,7 @@ test('TC-GOOGLE-CARRY-01 a carried-over calendar connection shows as connected w
 test('TC-GOOGLE-CARRY-02 calendar sync shows the shared Google account, the calendar choice and stop sync', async ({ page }) => {
   await openOperatorPage(page, '/');
   const actions = await mockConnection(page);
-  await page.goto('/BID-1/settings/calendar-sync');
+  await page.goto('/BID-1/settings/connections/google-calendar');
 
   await expect(page.getByText('ari.monroe@gmail.com')).toBeVisible();
   await expect(page.getByText('Same Google connection as your reviews')).toBeVisible();
@@ -58,6 +61,6 @@ test('TC-GOOGLE-CARRY-02 calendar sync shows the shared Google account, the cale
   await expect(calendar.locator('option')).toHaveCount(2);
   await page.getByRole('button', { name: 'Stop calendar sync' }).click();
   await expect(page.getByText('Calendar sync stopped.')).toBeVisible();
-  await expect(page.getByText('Your Google reviews and listing stay connected.')).toBeVisible();
+  await expect(page.getByText('Stopping calendar sync keeps your Google listing and reviews connected.', { exact: false })).toBeVisible();
   expect(actions).toContainEqual({ action: 'set-toggles', calendar_enabled: false });
 });
