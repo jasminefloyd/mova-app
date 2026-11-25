@@ -77,15 +77,15 @@ test('public guest locale persists across pages and explicit URL locale takes pr
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-US');
   await expect(page.getByRole('button', { name: 'ES', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await expect(page).toHaveURL(/\?locale=es-US$/);
-  await expect(page.getByRole('button', { name: 'Reservar con Nia' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Reservar con Nia' })).toBeVisible();
 
   await page.goto('/s/nia-flores');
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-US');
-  await expect(page.getByRole('button', { name: 'Reservar con Nia' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Reservar con Nia' })).toBeVisible();
 
   await page.goto('/s/nia-flores?locale=en-US');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
-  await expect(page.getByRole('button', { name: 'Book with Nia' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Book with Nia' })).toBeVisible();
 });
 
 test('service worker never caches auth, function or storage responses, and keeps saved table reads separate', async ({ page }) => {

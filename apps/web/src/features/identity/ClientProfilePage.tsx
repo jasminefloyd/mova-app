@@ -60,7 +60,7 @@ export function ClientProfilePage() {
         setClaimOptions(claims?.options ?? []);
       } catch { setClaimOptions([]); }
       const stylist = result.stylists.find((item) => item.handle === result.upcoming[0]?.handle) ?? result.stylists[0];
-      if (stylist) {
+      if (walletClientCardEnabled && stylist) {
         try {
           const card = await request('client-card-token', { artist_business_id: stylist.business_id }) as { url?: string } | null;
           setCardUrl(card?.url ?? '');
@@ -179,13 +179,13 @@ export function ClientProfilePage() {
   return <main className="mova-page mova-client-profile">
     <header className="mova-client-profile__brand"><span className="mova-wordmark">mova</span></header>
     <h1>{t('identity.profileTitle')}</h1>
-    {selectedStylist && <Card tone="inverse" className="mova-client-profile__card">
+    {walletClientCardEnabled && selectedStylist && <Card tone="inverse" className="mova-client-profile__card">
       <div className="mova-client-profile__card-copy"><small>{t('identity.clientCard')}</small><strong>{data.profile.display_name || t('identity.client')}</strong><span>{t('identity.withStylist', { name: selectedStylist.name })}</span><span>{nextDate ? t('identity.nextAppointment', { date: nextDate }) : t('identity.noUpcoming')}</span></div>
       <div className="mova-client-profile__card-qr" aria-label={t('identity.clientCardQr')}>
         {cardUrl ? <><QrCode value={cardUrl} label={t('identity.clientCardQr')} size={160} className="mova-client-profile__qr"/><small>{t('identity.rebookCheckIn')}</small></> : <span>{t('identity.clientCardUnavailable')}</span>}
       </div>
       <div className="mova-client-profile__card-actions"><Button type="button" variant="secondary" disabled={!cardUrl} onClick={() => void saveCardImage()}>{t('identity.saveImage')}</Button>
-        {walletClientCardEnabled && (['apple', 'google'] as const).map((platform) => <Button key={platform} type="button" variant="secondary" disabled={!cardUrl || busy} onClick={() => void addToWallet(platform)}>{t(`identity.wallet.${platform}`)}</Button>)}</div>
+        {(['apple', 'google'] as const).map((platform) => <Button key={platform} type="button" variant="secondary" disabled={!cardUrl || busy} onClick={() => void addToWallet(platform)}>{t(`identity.wallet.${platform}`)}</Button>)}</div>
     </Card>}
     {next && <section className="mova-client-profile__section"><h2>{t('identity.upcoming')}</h2><Card className="mova-client-profile__row"><strong>{next.service} · {next.artist}</strong><span>{nextDate} · {next.location}</span><span className="mova-client-profile__status">{t(`booking.status.${next.status}`, { defaultValue: next.status })}</span></Card></section>}
     {claimOptions.length > 0 && <section className="mova-client-profile__section"><h2>{t('identity.claimPastBookings')}</h2>{claimOptions.map((claim) => <Card className="mova-client-profile__claim" key={claim.appointment_id}><strong>{claim.service} · {claim.artist}</strong><span>{new Intl.DateTimeFormat(i18n.resolvedLanguage, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(claim.starts_at))} · {claim.location}</span><Button type="button" variant="secondary" disabled={busy} loading={busy} onClick={() => void claimBooking(claim.appointment_id)}>{t('identity.claimBooking')}</Button></Card>)}</section>}

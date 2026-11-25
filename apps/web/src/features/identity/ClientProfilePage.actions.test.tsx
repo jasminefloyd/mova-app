@@ -6,7 +6,7 @@ import { i18nReady } from '../../i18n';
 
 // Task 5.10: each client account action reaches customer-profile with the right action.
 const mocks = vi.hoisted(() => ({ signInWithOtp: vi.fn(), verifyOtp: vi.fn(), signOut: vi.fn(), calls: [] as Array<{ name: string; body: Record<string, unknown> }> }));
-vi.mock('../../lib/env', async (original) => ({ ...(await original<typeof import('../../lib/env')>()), clientProfilesEnabled: true, publicEnv: { VITE_SUPABASE_URL: 'https://api.mova.invalid', VITE_SUPABASE_ANON_KEY: 'anon' } }));
+vi.mock('../../lib/env', async (original) => ({ ...(await original<typeof import('../../lib/env')>()), clientProfilesEnabled: true, walletClientCardEnabled: false, publicEnv: { VITE_SUPABASE_URL: 'https://api.mova.invalid', VITE_SUPABASE_ANON_KEY: 'anon' } }));
 vi.mock('../../lib/supabase', () => ({
   createMovaSupabaseClient: () => ({ auth: { getSession: async () => ({ data: { session: { access_token: 'token' } } }), signInWithOtp: mocks.signInWithOtp, verifyOtp: mocks.verifyOtp, signOut: mocks.signOut } }),
 }));
@@ -35,6 +35,12 @@ describe('client account actions (5.10)', () => {
     await flush();
   });
   afterEach(() => { act(() => root.unmount()); host.remove(); vi.unstubAllGlobals(); });
+
+  it('keeps the client profile available without showing or issuing a client card when Wallet is off', () => {
+    expect(host.querySelector('.mova-client-profile__card')).toBeNull();
+    expect(host.textContent).toContain('My stylists');
+    expect(mocks.calls.some(call => call.name === 'client-card-token')).toBe(false);
+  });
 
   it('TC-D11-ACTION-01 updates details', async () => {
     act(() => button(host, 'Edit details').click());

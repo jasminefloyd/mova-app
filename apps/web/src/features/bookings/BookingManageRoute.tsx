@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, ClientCard, EmptyState, ErrorState, Sheet, StatusChip } from '../../components';
-import { clientProfilesEnabled, publicEnv } from '../../lib/env';
+import { clientProfilesEnabled, publicEnv, walletClientCardEnabled } from '../../lib/env';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import { QrCode } from '../identity/QrCode';
 
@@ -39,6 +39,8 @@ export function BookingManageRoute() {
       if (!response.ok || !body.data) throw new Error();
       const bookingData = body.data.booking as Booking;
       setBooking(bookingData);
+      setError(false);
+      if (!walletClientCardEnabled) return;
       const publicUrl = bookingData.artist?.handle ? `${window.location.origin}/a/${encodeURIComponent(bookingData.artist.handle)}/book` : '';
       let cardUrl = publicUrl;
       if (clientProfilesEnabled) {
@@ -51,7 +53,6 @@ export function BookingManageRoute() {
         } catch { /* Keep the public booking link as the card QR fallback. */ }
       }
       setClientCardUrl(cardUrl);
-      setError(false);
     } catch { setError(true); }
   };
   useEffect(() => { void load(); }, [token]);
@@ -175,7 +176,7 @@ export function BookingManageRoute() {
       {['pending_artist', 'pending_payment'].includes(booking.status) && <Button type="button" variant="destructive" loading={busy} onClick={() => setConfirmCancel(true)}>{t('booking.cancel')}</Button>}
       {booking.status === 'confirmed' && policyAllowsChange && <Button type="button" variant="destructive" loading={busy} onClick={() => setConfirmCancel(true)}>{t('booking.cancel')}</Button>}
     </Card>
-    <section className="mova-booking__card-section"><h2>{t('identity.keepClientCard')}</h2><ClientCard name={booking.client_name || t('identity.client')} artist={booking.artist?.display_name ?? t('identity.client')} nextAppointment={t('identity.nextAppointment', { date: new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: booking.location?.time_zone }).format(new Date(booking.starts_at)) })}><div className="mova-booking__qr">{clientCardUrl ? <><QrCode value={clientCardUrl} label={t('identity.clientCardQr')} size={180}/><small>{t('identity.rebookCheckIn')}</small></> : <small>{t('identity.clientCardUnavailable')}</small>}</div></ClientCard><button type="button" className="mova-booking__save-image" disabled={!clientCardUrl} onClick={() => void saveCardImage()}>{t('identity.saveImage')}</button></section>
+    {walletClientCardEnabled && <section className="mova-booking__card-section"><h2>{t('identity.keepClientCard')}</h2><ClientCard name={booking.client_name || t('identity.client')} artist={booking.artist?.display_name ?? t('identity.client')} nextAppointment={t('identity.nextAppointment', { date: new Intl.DateTimeFormat(i18n.resolvedLanguage, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: booking.location?.time_zone }).format(new Date(booking.starts_at)) })}><div className="mova-booking__qr">{clientCardUrl ? <><QrCode value={clientCardUrl} label={t('identity.clientCardQr')} size={180}/><small>{t('identity.rebookCheckIn')}</small></> : <small>{t('identity.clientCardUnavailable')}</small>}</div></ClientCard><button type="button" className="mova-booking__save-image" disabled={!clientCardUrl} onClick={() => void saveCardImage()}>{t('identity.saveImage')}</button></section>}
     <Sheet open={confirmCancel} title={t('booking.cancelConfirmTitle')} closeLabel={t('booking.keepAppointment')} onClose={() => setConfirmCancel(false)}>
       <p>{t('booking.cancelConfirmBody')}</p>
       <div className="mova-actions"><Button variant="secondary" type="button" onClick={() => setConfirmCancel(false)}>{t('booking.keepAppointment')}</Button><Button variant="destructive" loading={busy} type="button" onClick={() => void cancel()}>{t('booking.confirmCancel')}</Button></div>

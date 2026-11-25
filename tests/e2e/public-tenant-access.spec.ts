@@ -44,9 +44,20 @@ test('TC-RLS-TENANTCFG-ANON signed-out showcase, booking and QR use public Edge 
   await expect.poll(() => edgeCalls.filter(path => path === '/functions/v1/availability-search').length).toBeGreaterThan(0);
 
   await page.goto('/s/nia-flores');
-  await expect(page.getByRole('heading', { level: 1, name: 'Nia Flores' })).toBeVisible();
+  const scanHero = page.getByRole('region', { name: 'Nia Flores' });
+  await expect(scanHero.getByRole('heading', { level: 1, name: 'Nia Flores' })).toBeVisible();
+  await expect(scanHero.getByText(artist.locations[0].name)).toBeVisible();
+  const saveCard = page.getByRole('region', { name: 'Save Nia’s card to your phone' });
+  await expect(saveCard.getByRole('link', { name: 'Add Nia to My stylists' })).toHaveAttribute('href', /\/signin\?/);
+  await expect(page.getByText(/Apple Wallet|Google Wallet/)).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Book with Nia' })).toHaveAttribute('href', '/a/nia-flores/book');
+  await expect(page.getByRole('link', { name: 'See Nia’s looks & services' })).toHaveAttribute('href', '/a/nia-flores');
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+  }
   expect(edgeCalls).toContain('/functions/v1/public-artist');
-  expect(edgeCalls).toContain('/functions/v1/scan-landing');
+  await expect.poll(() => edgeCalls.includes('/functions/v1/scan-landing')).toBe(true);
 
   await page.goto(`/c/${'x'.repeat(43)}`);
   await expect(page.locator('main').first()).toBeVisible();

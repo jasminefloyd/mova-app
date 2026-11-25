@@ -8,6 +8,7 @@ import { HCaptcha } from '../../components/HCaptcha';
 import type { PublicArtist } from '../showcase/PublicArtistPage';
 import { createMovaSupabaseClient } from '../../lib/supabase';
 import { trackProfileEvent } from '../reports/track';
+import { readClientProfile } from '../identity/read-client-profile';
 import { PUBLIC_PROFILE_LOCALE as locale } from '../../app/locale';
 
 type Slot = { starts_at: string; ends_at: string; local_date: string; local_time: string; utc_offset: string; time_zone: string; booking_mode: 'instant'|'request' };
@@ -47,7 +48,7 @@ export function BookingRoute() {
   const [captchaToken,setCaptchaToken]=useState<string|null>(null);const [captchaReset,setCaptchaReset]=useState(0);
   const addServiceSelect = useRef<HTMLSelectElement>(null);
   const requestIdentity=useRef<{key:string;token:string}|null>(null);
-  const clientPrefillLoaded=useRef(false);
+  const [clientSession, setClientSession] = useState<'checking' | 'signed-in' | 'guest'>('checking');
   const trackedBookingStart=useRef('');
   const selectedServices=useMemo(()=>serviceIds.map(id=>artist?.services.find(entry=>entry.id===id)).filter((entry):entry is NonNullable<typeof entry>=>Boolean(entry)),[artist,serviceIds]);
   const service=selectedServices[0];
@@ -87,24 +88,32 @@ export function BookingRoute() {
     const firstBookable = profile.services.find(item => publicBookingLocations(profile.locations, [item], stripeTestModeEnabled).length > 0);
     const defaultService = firstBookable ?? profile.services[0];
     setServiceIds(current => current.length || !defaultService ? current : [defaultService.id]);}catch{setError(true);}})();},[handle,locale]);
-  useEffect(()=>{
-    if(!clientProfilesEnabled||clientPrefillLoaded.current)return;
-    let active=true;
-    void (async()=>{
-      try{
-        const client=createMovaSupabaseClient();const {data:{session}}=await client.auth.getSession();if(!active||!session)return;
-        const response=await fetch(api('customer-profile'),{method:'POST',headers:{'Content-Type':'application/json',apikey:publicEnv.VITE_SUPABASE_ANON_KEY??'',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'profile'})});
-        if(!response.ok)return;
-        const envelope=await response.json();const profile=envelope.data?.profile as {display_name?:string;email?:string|null;phone?:string|null;verified_contacts?:Array<{type:'email'|'phone';value:string}>}|undefined;
-        if(!active||!profile)return;
-        const verifiedEmail=profile.verified_contacts?.find((item)=>item.type==='email')?.value;
-        const verifiedPhone=profile.verified_contacts?.find((item)=>item.type==='phone')?.value;
-        setName((current)=>current||profile.display_name||'');setEmail((current)=>current||profile.email||verifiedEmail||'');setPhone((current)=>current||profile.phone||verifiedPhone||'');
-        clientPrefillLoaded.current=true;
-      }catch{/* Booking remains available if optional profile autofill cannot load. */}
-    })();
-    return()=>{active=false;};
-  },[]);
+  useEffect(() => {
+    if (!clientProfilesEnabled) return;
+    const controller = new AbortController();
+    async function prefillClient() {
+      let hasSession = false;
+      try {
+        const { data: { session } } = await createMovaSupabaseClient().auth.getSession();
+        if (controller.signal.aborted) return;
+        if (!session) { setClientSession('guest'); return; }
+        hasSession = true;
+        setClientSession('signed-in');
+        const profile = await readClientProfile(session.access_token, controller.signal);
+        if (controller.signal.aborted) return;
+        if (!profile) { setClientSession('guest'); return; }
+        const verifiedEmail = profile.verified_contacts?.find(contact => contact.type === 'email')?.value;
+        const verifiedPhone = profile.verified_contacts?.find(contact => contact.type === 'phone')?.value;
+        setName(current => current || profile.display_name || '');
+        setEmail(current => current || profile.email || verifiedEmail || '');
+        setPhone(current => current || profile.phone || verifiedPhone || '');
+      } catch {
+        if (!controller.signal.aborted && !hasSession) setClientSession('guest');
+      }
+    }
+    void prefillClient();
+    return () => controller.abort();
+  }, []);
   useEffect(()=>{if(artist&&trackedBookingStart.current!==handle){trackedBookingStart.current=handle;trackProfileEvent(handle,'booking_started');}},[artist,handle]);
   useEffect(()=>{
     if(!artist)return;
@@ -261,7 +270,7 @@ export function BookingRoute() {
         {slot && selectedLocation && <p>{t('booking.selectedSlotSummary', { summary: formatSlot(slot), location: selectedLocation.name })}</p>}
         <p>{depositLabel}</p>
       </Card>
-      {clientProfilesEnabled&&<Card className="mova-booking__signin"><Icon name="user" size={28}/><Link to={`/signin?artist=${encodeURIComponent(handle)}&returnTo=${encodeURIComponent(`/a/${handle}/book?${signInQuery}`)}`} onClick={signIn}><strong>{t('identity.haveProfileSignIn')}</strong><small>{t('identity.fillDetailsPrompt')}</small></Link><Icon name="chevron" size={24}/></Card>}
+      {clientProfilesEnabled&&clientSession==='guest'&&<Card className="mova-booking__signin"><Icon name="user" size={28}/><Link to={`/signin?artist=${encodeURIComponent(handle)}&returnTo=${encodeURIComponent(`/a/${handle}/book?${signInQuery}`)}`} onClick={signIn}><strong>{t('identity.haveProfileSignIn')}</strong><small>{t('identity.fillDetailsPrompt')}</small></Link><Icon name="chevron" size={24}/></Card>}
       <section className="mova-booking__details"><h2>{t('booking.yourDetails')}</h2>{slot?.booking_mode==='request'&&<><p className="mova-booking__request-honesty">{t('booking.requestNotConfirmed')}</p><label className="mova-field"><span>{t('booking.anotherTimeOptional')}</span><select value={alternateStartsAt} onChange={(event)=>setAlternateStartsAt(event.target.value)}><option value="">{t('booking.noAlternate')}</option>{alternateSlots.map((item)=><option key={item.starts_at} value={item.starts_at}>{formatSlot(item)}</option>)}</select></label><TextArea label={t('booking.noteForStylist')} value={clientNote} onChange={(event)=>setClientNote(event.currentTarget.value.slice(0,1000))}/></>}
         <TextField label={t('booking.name')} autoComplete="name" value={name} onChange={(event)=>setName(event.target.value)} required/>
         <TextField label={t('booking.email')} type="email" autoComplete="email" value={email} onChange={(event)=>{setEmail(event.target.value);updateConsentContact('email',Boolean(event.target.value));}}/>

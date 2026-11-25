@@ -608,3 +608,15 @@ The local build, lint, type checks, unit suite, and 15 Playwright cases passed. 
 Owner approved the production release. Production already recorded all 118 repository migrations through 0127. Supabase reported all six updated functions active with their previous JWT settings. Deployed calendar-google-connect v23, calendar-google-callback v22, calendar-sync-run v22, google-business-sync v20, google-reviews-sync v22, and review-management v27. The six Google Calendar OAuth, provider mode, and encryption secrets remain absent.
 
 The local build, lint, type checks, 488 unit tests, four static checks, 15 targeted browser cases, 23 Deno cases, and 1,472 pgTAP assertions passed.
+
+## 2026-11-24 client QR and booking entry
+
+Updated the F16 QR landing layout to put the stylist photo, specialties, and locations in the hero. The booking action, save panel, and combined Looks and Services link follow the Screen 30 reference. Wallet buttons are absent on the QR route because the repository has no live pass issuer. Failing to record analytics no longer blocks the client from the profile.
+
+The customer sign-in sheet omits stylist sign-in. Booking uses the persisted customer session to prefill details and suppress the sign-in invitation. A customer with an existing active profile can resume straight through the customer sign-in route. When the browser Wallet rollout flag is off, the appointment and client profile omit the client card and skip requesting a card token. The customer sign-in sheet also omits the client-card benefit.
+
+The local build, type checks, lint, 494 unit and component cases, and four static checks passed. The initial Chromium run was blocked by the automatic approval review usage limit. Before release, all 15 Chromium cases passed, including the QR landing at 320 and 390 pixels. The production ledger contains all 118 repository migrations, and this release changes only the web app and documentation.
+
+## 2026-11-24 production email sender
+
+Set the Mova Edge Function sender to `hello@mova-beauty.co` and verified Supabase accepted the update. Resend accepted the SMTP credential and sender envelope without a message being sent. After the owner approved the project-wide change, configured and verified Resend custom SMTP for the shared production Supabase Auth project. Auth uses Mova <hello@mova-beauty.co> via smtp.resend.com on port 465. The six-digit email code, expiry setting, and confirmation settings were preserved. No verification email was sent. The global Mova live-email flag was absent at verification.

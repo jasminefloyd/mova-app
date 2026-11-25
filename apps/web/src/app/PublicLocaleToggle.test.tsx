@@ -1,11 +1,14 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BookingRoute } from '../features/bookings/BookingRoute';
 import { i18nReady } from '../i18n';
 import { GUEST_LOCALE_KEY } from './locale';
 import { LocaleProvider } from './LocaleProvider';
+
+const getSession = vi.hoisted(() => vi.fn());
+vi.mock('../lib/supabase', () => ({ createMovaSupabaseClient: () => ({ auth: { getSession } }) }));
 
 const artist = {
   profile: { display_name: 'Nia Flores', handle: 'nia-flores', specialties: ['Color'], bio: 'Color specialist', preferred_locale: 'en-US', search_index_enabled: true, photo_urls: {} },
@@ -54,6 +57,7 @@ describe('public booking', () => {
   let mounted: Array<{ host: HTMLDivElement; root: Root }> = [];
 
   beforeAll(async () => { await i18nReady; });
+  beforeEach(() => getSession.mockResolvedValue({ data: { session: null } }));
   afterEach(() => {
     act(() => { mounted.forEach(({ root }) => root.unmount()); });
     mounted.forEach(({ host }) => host.remove());
@@ -95,6 +99,29 @@ describe('public booking', () => {
     expect(new URLSearchParams(search).get('campaign')).toBe('spring');
     const artistRequests = mockFetch.mock.calls.filter(([url]) => String(url).includes('/public-artist'));
     expect(artistRequests.map(([, init]) => JSON.parse(String(init?.body)).locale)).toEqual(['en-US']);
+  });
+
+  it('prefills a returning client and hides the sign-in invitation', async () => {
+    getSession.mockResolvedValue({ data: { session: { access_token: 'customer-session' } } });
+    const slot = { starts_at: '2026-12-01T15:00:00.000Z', ends_at: '2026-12-01T16:30:00.000Z', local_date: '2026-12-01', local_time: '10:00', utc_offset: '-05:00', time_zone: 'America/New_York', booking_mode: 'request' };
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes('/public-artist')) return Response.json({ data: artist });
+      if (url.includes('/availability-search')) return Response.json({ data: { days: [{ date: slot.local_date, open_count: 1 }], groups: [{ slots: [slot] }] } });
+      if (url.includes('/customer-profile')) {
+        expect(new Headers(init?.headers).get('Authorization')).toBe('Bearer customer-session');
+        return Response.json({ data: { profile: { display_name: 'Dana Client', verified_contacts: [{ type: 'email', value: 'dana@example.invalid' }] } } });
+      }
+      return Response.json({ data: {} });
+    }));
+    const view = renderBooking();
+    mounted.push(view);
+    await waitFor(() => Boolean(view.host.querySelector('.mova-time-options button')));
+    act(() => view.host.querySelector<HTMLButtonElement>('.mova-time-options button')?.click());
+    act(() => view.host.querySelector<HTMLButtonElement>('.mova-booking__sticky button')?.click());
+    expect(view.host.querySelector('.mova-booking__signin')).toBeNull();
+    expect(view.host.querySelector<HTMLInputElement>('input[autocomplete="name"]')?.value).toBe('Dana Client');
+    expect(view.host.querySelector<HTMLInputElement>('input[autocomplete="email"]')?.value).toBe('dana@example.invalid');
   });
 
   it('TC-F04-DEP-02 blocks deposit-required bookings before requesting online availability', async () => {

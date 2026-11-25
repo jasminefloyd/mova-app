@@ -3,7 +3,8 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Checkbox, TextField } from '../../components';
 import { createMovaSupabaseClient } from '../../lib/supabase';
-import { clientProfilesEnabled, publicEnv } from '../../lib/env';
+import { clientProfilesEnabled, publicEnv, walletClientCardEnabled } from '../../lib/env';
+import { readClientProfile } from './read-client-profile';
 
 export function SignInPage(){
   const{t,i18n}=useTranslation();const[params]=useSearchParams();const navigate=useNavigate();const[contact,setContact]=useState('');const[code,setCode]=useState('');const[step,setStep]=useState<'contact'|'code'>('contact');const[optIn,setOptIn]=useState(false);const[busy,setBusy]=useState(false);const[error,setError]=useState('');
@@ -14,7 +15,20 @@ export function SignInPage(){
   const guestReturn = /^\/me(?:[/?#]|$)/.test(safeReturn)
     ? artist ? `/a/${encodeURIComponent(artist)}/book` : '/'
     : safeReturn;
-  const stylistSignIn = returnTo && safeReturn === returnTo ? `/login?returnTo=${encodeURIComponent(safeReturn)}` : '/login';
+  useEffect(() => {
+    if (!clientProfilesEnabled) return;
+    const controller = new AbortController();
+    async function resumeClient() {
+      try {
+        const { data: { session } } = await createMovaSupabaseClient().auth.getSession();
+        if (!session || controller.signal.aborted) return;
+        const profile = await readClientProfile(session.access_token, controller.signal);
+        if (profile && !controller.signal.aborted) navigate(safeReturn, { replace: true });
+      } catch { /* The client can still use the code form if the profile check fails. */ }
+    }
+    void resumeClient();
+    return () => controller.abort();
+  }, [navigate, safeReturn]);
   const submit=async(event:FormEvent)=>{event.preventDefault();setBusy(true);setError('');try{
     const auth=createMovaSupabaseClient();const normalized=contact.trim();const phone=!normalized.includes('@');const digits=normalized.replace(/\D/g,'');const phoneNumber=normalized.startsWith('+')?`+${digits}`:digits.length===10?`+1${digits}`:digits.length===11&&digits.startsWith('1')?`+${digits}`:'';if(phone&&!phoneNumber)throw new Error('INVALID_CONTACT');
     if(step==='contact'){
@@ -34,7 +48,7 @@ export function SignInPage(){
       <button type="button" className="mova-client-auth__close" aria-label={t('identity.close')} onClick={()=>navigate(safeReturn,{replace:true})}>×</button>
       <h1 id="mova-client-auth-title">{t('identity.title')}</h1><p className="mova-client-auth__intro">{clientProfilesEnabled?t('identity.intro'):t('identity.disabled')}</p>
       {clientProfilesEnabled&&<>
-        <Card className="mova-client-auth__benefits"><p>✓ {t('identity.benefitSaved')}</p><p>✓ {t('identity.benefitAppointments')}</p><p>✓ {t('identity.benefitCard')}</p></Card>
+        <Card className="mova-client-auth__benefits"><p>✓ {t('identity.benefitSaved')}</p><p>✓ {t('identity.benefitAppointments')}</p>{walletClientCardEnabled && <p>✓ {t('identity.benefitCard')}</p>}</Card>
         <form onSubmit={(event)=>void submit(event)}>
           {step==='contact'?<TextField label={t('identity.contact')} type="text" autoComplete="email" value={contact} onChange={(event)=>setContact(event.target.value)} placeholder={t('identity.contactPlaceholder')} required/>:<TextField label={t('identity.code')} inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(event)=>setCode(event.target.value.replace(/\D/g,'').slice(0,6))} placeholder="••••••" required/>}
           {params.get('artist')&&step==='contact'&&<Checkbox label={t('identity.optIn')} checked={optIn} onChange={(event)=>setOptIn(event.currentTarget.checked)}/>}
@@ -44,7 +58,6 @@ export function SignInPage(){
         {step==='code'&&<button className="mova-link-button" type="button" onClick={()=>{setStep('contact');setCode('');}}>{t('identity.changeContact')}</button>}
       </>}
       <Link className="mova-client-auth__guest" to={guestReturn}>{t('identity.continueGuest')}</Link>
-      <Link className="mova-client-auth__guest" to={stylistSignIn}>{t('identity.stylistSignIn')}</Link>
       {clientProfilesEnabled&&<small className="mova-client-auth__terms">{t('identity.terms')}</small>}
     </dialog>
   </main>;
